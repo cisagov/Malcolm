@@ -23,14 +23,14 @@ Malcolm's source code and release artifacts are made up of the following:
 
 * container images for Docker/Podman/Kubernetes
     - These contain the majority of the "brains" of Malcolm, and are used as the basis of all deployment models, whether ISO-installer based, Docker/Podman based, or cloud (Kubernetes) based.
-* Desktop OS environments for [Malcolm](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig)
-    - These are ISO-installed environments that are primarily used for bare-metal or virtual machine installations. The Malcolm environment includes the container images mentioned above.
+* Desktop OS environments for [Malcolm](malcolm-hedgehog-e2e-iso-install.md#MalcolmDesktop) and Hedgehog Linux
+    - These are ISO-installed environments that are primarily used for bare-metal or virtual machine installations. They include the container images mentioned above.
 * The actual "[Malcolm source code](({{ site.github.repository_url }}))", which includes:
     - [scripts]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/scripts/) for installing and configuring Malcolm
     - "recipes" and contents used for building images
         + [container]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) images
         + [Malcolm]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso) ISO installer
-        + [Hedgehog Linux]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso) ISO installer
+        + [Hedgehog Linux]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-raspi) Raspberry Pi image
     - [documentation]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docs)
     - [configuration files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/config) storing user preferences
 
@@ -72,7 +72,7 @@ Using these official images as the base of Malcolm's Docker images relies on a t
 
 #### <a name="ISOInstalledEnvironments"></a> ISO-Installed Environments
 
-For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
+For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog.md), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
 
 Beyond building on this solid foundation, and as these environments are full-fledged operating systems, the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks are used as a basis for additional hardening that targets the following guidelines for establishing a secure configuration posture:
 
@@ -80,7 +80,7 @@ Beyond building on this solid foundation, and as these environments are full-fle
 * [DISA STIG (Security Technical Implementation Guides) for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
 * Additional recommendations from [cisecurity.org](https://www.cisecurity.org/)
 
-More details on this hardening can be found [here for Malcolm](hedgehog-hardening.md#HedgehogHardening).
+More details on this hardening can be found [here for Malcolm](hardening.md).
 
 ### <a name="SoftwarePackageRepositories"></a> Software Package Repositories
 

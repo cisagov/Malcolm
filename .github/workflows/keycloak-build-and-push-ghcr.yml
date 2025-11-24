@@ -6,6 +6,7 @@ on:
       - main
       - staging
       - pipeline-merge
+      - hedgehog-iso-refactor
     paths:
       - 'keycloak/**'
       - 'Dockerfiles/keycloak.Dockerfile'

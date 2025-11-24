@@ -106,7 +106,7 @@ You can test Docker by running `docker info`, or (assuming you have internet acc
 
 Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing the Docker Compose plugin.
 
-## Podman
+## <a name="HostSystemConfigLinuxPodman"></a>Podman
 
 Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. The same Malcolm runtime scripts (e.g., `./scripts/start`, `./scripts/stop`, etc.) are used whether using Docker or Podman. When [running Malcolm](running.md#Running) with Podman, [`podman compose`](https://docs.podman.io/en/latest/markdown/podman-compose.1.html) is used as a wrapper around an external compose provider (such as [`docker-compose`](https://docs.docker.com/compose/)), which in turn uses the Podman back end to run and orchestrate containers. It is recommended to use the `docker-compose` compose provider rather than [`podman-compose`](https://github.com/containers/podman-compose) since it is the original implementation of the Compose specification and is widely used on the supported platforms and because there are known issues with using the `podman-compose` provider to start Malcolm.
 
@@ -562,7 +562,7 @@ e774e99c3364  ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}      
 e4607af64749  ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}         /usr/share/opense...  15 minutes ago  Up 3 minutes (healthy)   9200/tcp, 9300/tcp, 9600/tcp, 9650/tcp  malcolm-opensearch-1
 48aa56016aef  ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}             /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)   8000/tcp, 8005/tcp, 8081/tcp            malcolm-arkime-live-1
 f7e7ab1c457b  ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}               /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)                                           malcolm-zeek-live-1
-32790263fd49  ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}       /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)   3310/tcp, 8440/tcp                      malcolm-file-monitor-1
+32790263fd49  ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}       /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)   3310/tcp, 8006/tcp                      malcolm-file-monitor-1
 cf7fc1c029a1  ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}       /usr/local/bin/su...  14 minutes ago  Up 3 minutes (healthy)                                           malcolm-filebeat-1
 f96db0e5bf67  ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}               /usr/local/bin/su...  13 minutes ago  Up 3 minutes (healthy)                                           malcolm-zeek-1
 42f8aab398a9  ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}       /usr/local/bin/su...  13 minutes ago  Up 3 minutes (starting)  5044/tcp, 9001/tcp, 9600/tcp            malcolm-logstash-1
@@ -580,7 +580,7 @@ malcolm-arkime-1              ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.ve
 malcolm-arkime-live-1         ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}              "/usr/local/bin/supe…"   arkime-live         15 minutes ago   Up 3 minutes
 malcolm-dashboards-1          ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}          "/usr/share/opensear…"   dashboards          10 minutes ago   Up 3 minutes   5601/tcp
 malcolm-dashboards-helper-1   ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}   "/usr/local/bin/supe…"   dashboards-helper   13 minutes ago   Up 3 minutes   28991/tcp
-malcolm-file-monitor-1        ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   file-monitor        15 minutes ago   Up 3 minutes   3310/tcp, 8440/tcp
+malcolm-file-monitor-1        ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   file-monitor        15 minutes ago   Up 3 minutes   3310/tcp, 8006/tcp
 malcolm-filebeat-1            ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   filebeat            14 minutes ago   Up 3 minutes
 malcolm-freq-1                ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}                "/usr/local/bin/supe…"   freq                17 minutes ago   Up 3 minutes   10004/tcp
 malcolm-htadmin-1             ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}             "/usr/bin/supervisor…"   htadmin             17 minutes ago   Up 3 minutes   80/tcp

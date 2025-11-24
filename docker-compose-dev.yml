@@ -315,6 +315,7 @@ services:
     - ./config/upload-common.env
     - ./config/nginx.env
     - ./config/beats-common.env
+    - ./config/netbox-common.env
     - ./config/filebeat.env
     ports:
     - 127.0.0.1:5045:5045
@@ -1352,7 +1353,7 @@ services:
       start_period: 45s
   redis:
     image: ghcr.io/idaholab/malcolm/redis:25.12.0
-    profiles: ["malcolm"]
+    profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
       options:
@@ -1371,7 +1372,6 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/netbox-common.env
     - ./config/redis.env
     command:
     - sh
@@ -1397,7 +1397,7 @@ services:
       start_period: 45s
   redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:25.12.0
-    profiles: ["malcolm"]
+    profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
       options:
@@ -1416,7 +1416,6 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/netbox-common.env
     - ./config/redis.env
     command:
     - sh

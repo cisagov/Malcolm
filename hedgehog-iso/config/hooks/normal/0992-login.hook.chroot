@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
-
-sed -i 's/^#autologin-user=.*/autologin-user=sensor/' /etc/lightdm/lightdm.conf
-sed -i 's/^#autologin-user-timeout=.*/autologin-user-timeout=0/' /etc/lightdm/lightdm.conf

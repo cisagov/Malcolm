@@ -1,4 +1,8 @@
-debinterface==3.5.0
-kubernetes==34.1.0
+certifi==2025.11.12
+click==8.3.0
+gunicorn==23.0.0
+idna==3.11
+MarkupSafe==3.0.3
+psutil==7.1.3
 python-dotenv==1.2.1
-ruamel.yaml==0.18.16
+urllib3==2.5.0

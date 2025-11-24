@@ -17,17 +17,21 @@ import os
 import platform
 import re
 import socket
+import stat
 import string
 import subprocess
 import sys
 import time
+import textwrap
 import types
 
 from base64 import b64encode, b64decode, binascii
+from dataclasses import dataclass
 from datetime import datetime
 from multiprocessing import RawValue
+from shutil import move as sh_move, which as sh_which, copyfile as sh_copyfile
 from subprocess import PIPE, Popen
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from threading import Lock
 from typing import Optional
 
@@ -271,6 +275,57 @@ def check_socket(host, port):
 
 
 ###################################################################################################
+# determine a list of available (non-virtual) adapters (Iface's)
+@dataclass
+class NetworkInterface:
+    name: str = ''
+    description: str = ''
+
+
+def get_available_adapters():
+    available_adapters = []
+    _, all_iface_list = run_subprocess("find /sys/class/net/ -mindepth 1 -maxdepth 1 -type l -printf '%P %l\\n'")
+    available_iface_list = [x.split(" ", 1)[0] for x in all_iface_list if 'virtual' not in x]
+
+    # for each adapter, determine its MAC address and link speed
+    for adapter in available_iface_list:
+        mac_address = '??:??:??:??:??:??'
+        speed = '?'
+        try:
+            with open(f"/sys/class/net/{adapter}/address", 'r') as f:
+                mac_address = f.readline().strip()
+        except Exception:
+            pass
+        try:
+            with open(f"/sys/class/net/{adapter}/speed", 'r') as f:
+                speed = f.readline().strip()
+        except Exception:
+            pass
+        description = f"{mac_address} ({speed} Mbits/sec)"
+        iface = NetworkInterface(name=adapter, description=description)
+        available_adapters.append(iface)
+
+    return available_adapters
+
+
+###################################################################################################
+# identify the specified adapter using ethtool --identify
+def identify_adapter(adapter, duration=10, background=False):
+    if background:
+        subprocess.Popen(
+            ["/sbin/ethtool", "--identify", adapter, str(duration)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return True
+    else:
+        retCode, _ = run_subprocess(
+            f"/sbin/ethtool --identify {adapter} {duration}", stdout=False, stderr=False, timeout=duration * 2
+        )
+        return retCode == 0
+
+
+###################################################################################################
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]
 
@@ -496,6 +551,301 @@ def EVP_BytesToKey(key_length: int, iv_length: int, md, salt: bytes, data: bytes
             iv = iv + md_buf2[: iv_length - len(iv)]
 
     return key, iv
+
+
+def openssl_self_signed_keygen(
+    openssl=None,
+    outdir=None,
+    existing_ca_key=None,
+    existing_ca_crt=None,
+    ca_prefix="ca",
+    server_prefix="server",
+    client_prefix="client",
+    dhparam_prefix=None,
+    dhparam_bits=2048,
+    clients=0,
+    country="US",
+    state="ID",
+    org="malcolm",
+    genrsa_bits=4096,
+    days=3650,
+    temp_dir=None,
+    debug=False,
+):
+    result = None
+
+    if not (isinstance(openssl, str) and os.path.isfile(openssl)):
+        openssl = 'openssl' if which('openssl', debug=debug) else None
+
+    ca_prefix = ca_prefix or 'nosave_ca'
+    server_prefix = server_prefix or 'nosave_server'
+    client_prefix = client_prefix or 'nosave_client'
+
+    outdir = os.path.abspath(outdir if (isinstance(outdir, str) and os.path.isdir(outdir)) else os.getcwd())
+    genrsa_bits = str(genrsa_bits)
+    dhparam_bits = str(dhparam_bits)
+    days = str(days)
+
+    if openssl:
+        with TemporaryDirectory(dir=temp_dir) as temp_cert_dir:
+            with pushd(temp_cert_dir):
+                result_files = []
+
+                # -----------------------------------------------
+                # generate new ca/server/client certificates/keys
+
+                # dhparam --------------------------
+                if dhparam_prefix:
+                    err, out = run_process(
+                        [openssl, 'dhparam', '-out', f'{dhparam_prefix}.pem', dhparam_bits],
+                        stderr=True,
+                        debug=debug,
+                    )
+                    if err == 0:
+                        result_files.append(f'{dhparam_prefix}.pem')
+                    else:
+                        raise Exception(f'Unable to generate dhparam.pem file: {out}')
+
+                # ca -------------------------------
+                if not (
+                    existing_ca_key
+                    and existing_ca_crt
+                    and all(os.path.isfile(x) for x in (existing_ca_key, existing_ca_crt))
+                ):
+                    existing_ca_key = existing_ca_crt = None
+
+                if existing_ca_key and existing_ca_crt:
+                    sh_copyfile(existing_ca_key, f'{ca_prefix}.key')
+                    sh_copyfile(existing_ca_crt, f'{ca_prefix}.crt')
+
+                else:
+                    err, out = run_process(
+                        [openssl, 'genrsa', '-out', f'{ca_prefix}.key', genrsa_bits],
+                        stderr=True,
+                        debug=debug,
+                    )
+                    if err == 0:
+                        result_files.append(f'{ca_prefix}.key')
+                    else:
+                        raise Exception(f'Unable to generate {ca_prefix}.key: {out}')
+
+                    err, out = run_process(
+                        [
+                            openssl,
+                            'req',
+                            '-x509',
+                            '-new',
+                            '-nodes',
+                            '-key',
+                            f'{ca_prefix}.key',
+                            '-sha256',
+                            '-days',
+                            days,
+                            '-subj',
+                            f'/C={country}/ST={state}/O={org}/OU=ca',
+                            '-out',
+                            f'{ca_prefix}.crt',
+                        ],
+                        stderr=True,
+                        debug=debug,
+                    )
+                    if err == 0:
+                        result_files.append(f'{ca_prefix}.crt')
+                    else:
+                        raise Exception(f'Unable to generate {ca_prefix}.crt: {out}')
+
+                conf_contents = """\
+                [req]
+                distinguished_name = req_distinguished_name
+                req_extensions = v3_req
+                prompt = no
+
+                [req_distinguished_name]
+                countryName                     = {country}
+                stateOrProvinceName             = {state}
+                organizationName                = {org}
+                organizationalUnitName          = {prefix}
+
+                [ usr_cert ]
+                basicConstraints = CA:FALSE
+                nsCertType = client, server
+                nsComment = "{prefix} Certificate"
+                subjectKeyIdentifier = hash
+                authorityKeyIdentifier = keyid,issuer:always
+                keyUsage = critical, digitalSignature, keyEncipherment, keyAgreement, nonRepudiation
+                extendedKeyUsage = serverAuth, clientAuth
+
+                [v3_req]
+                keyUsage = keyEncipherment, dataEncipherment
+                extendedKeyUsage = serverAuth, clientAuth
+                """
+                server_conf_contents = textwrap.dedent(conf_contents).format(
+                    country=country, state=state, org=org, prefix=server_prefix
+                )
+                client_conf_contents = textwrap.dedent(conf_contents).format(
+                    country=country, state=state, org=org, prefix=client_prefix
+                )
+
+                with NamedTemporaryFile(mode='w', dir=temp_cert_dir, encoding="utf-8", delete=False) as f:
+                    f.write(server_conf_contents)
+                    server_conf_path = f.name
+                with NamedTemporaryFile(mode='w', dir=temp_cert_dir, encoding="utf-8", delete=False) as f:
+                    f.write(client_conf_contents)
+                    client_conf_path = f.name
+
+                # server -------------------------------
+                err, out = run_process(
+                    [openssl, 'genrsa', '-out', f'{server_prefix}.key', genrsa_bits],
+                    stderr=True,
+                    debug=debug,
+                )
+                if err != 0:
+                    raise Exception(f'Unable to generate {server_prefix}.key: {out}')
+
+                err, out = run_process(
+                    [
+                        openssl,
+                        'req',
+                        '-sha512',
+                        '-new',
+                        '-key',
+                        f'{server_prefix}.key',
+                        '-out',
+                        f'{server_prefix}.csr',
+                        '-config',
+                        server_conf_path,
+                    ],
+                    stderr=True,
+                    debug=debug,
+                )
+                if err != 0:
+                    raise Exception(f'Unable to generate {server_prefix}.csr: {out}')
+
+                err, out = run_process(
+                    [
+                        openssl,
+                        'x509',
+                        '-days',
+                        days,
+                        '-req',
+                        '-sha512',
+                        '-in',
+                        f'{server_prefix}.csr',
+                        '-CAcreateserial',
+                        '-CA',
+                        f'{ca_prefix}.crt',
+                        '-CAkey',
+                        f'{ca_prefix}.key',
+                        '-out',
+                        f'{server_prefix}.crt',
+                        '-extensions',
+                        'v3_req',
+                        '-extfile',
+                        server_conf_path,
+                    ],
+                    stderr=True,
+                    debug=debug,
+                )
+                if err == 0:
+                    result_files.append(
+                        f'{server_prefix}.crt',
+                    )
+                else:
+                    raise Exception(f'Unable to generate {server_prefix}.crt: {out}')
+
+                sh_move(f"{server_prefix}.key", f"{server_prefix}.key.pem")
+                err, out = run_process(
+                    [
+                        openssl,
+                        'pkcs8',
+                        '-in',
+                        f'{server_prefix}.key.pem',
+                        '-topk8',
+                        '-nocrypt',
+                        '-out',
+                        f'{server_prefix}.key',
+                    ],
+                    stderr=True,
+                    debug=debug,
+                )
+                if err == 0:
+                    result_files.append(f'{server_prefix}.key')
+                else:
+                    raise Exception(f'Unable to generate {server_prefix}.key: {out}')
+
+                # client ---------------------------
+                for i in range(1, clients + 1):
+                    tmp_client_prefix = (
+                        (client_prefix + "_" + "{:0>{}}".format(i, len(str(clients)))) if clients > 1 else client_prefix
+                    )
+                    err, out = run_process(
+                        [openssl, 'genrsa', '-out', f'{tmp_client_prefix}.key', genrsa_bits],
+                        stderr=True,
+                        debug=debug,
+                    )
+                    if err == 0:
+                        result_files.append(f'{tmp_client_prefix}.key')
+                    else:
+                        raise Exception(f'Unable to generate {tmp_client_prefix}.key: {out}')
+
+                    err, out = run_process(
+                        [
+                            openssl,
+                            'req',
+                            '-sha512',
+                            '-new',
+                            '-key',
+                            f'{tmp_client_prefix}.key',
+                            '-out',
+                            f'{tmp_client_prefix}.csr',
+                            '-config',
+                            client_conf_path,
+                        ],
+                        stderr=True,
+                        debug=debug,
+                    )
+                    if err != 0:
+                        raise Exception(f'Unable to generate {tmp_client_prefix}.csr: {out}')
+
+                    err, out = run_process(
+                        [
+                            openssl,
+                            'x509',
+                            '-days',
+                            days,
+                            '-req',
+                            '-sha512',
+                            '-in',
+                            f'{tmp_client_prefix}.csr',
+                            '-CAcreateserial',
+                            '-CA',
+                            f'{ca_prefix}.crt',
+                            '-CAkey',
+                            f'{ca_prefix}.key',
+                            '-out',
+                            f'{tmp_client_prefix}.crt',
+                            '-extensions',
+                            'usr_cert',
+                            '-extfile',
+                            client_conf_path,
+                        ],
+                        stderr=True,
+                        debug=debug,
+                    )
+                    if err == 0:
+                        result_files.append(f'{tmp_client_prefix}.crt')
+                    else:
+                        raise Exception(f'Unable to generate {tmp_client_prefix}.crt: {out}')
+
+                for fname in [x for x in result_files if not x.startswith('nosave')]:
+                    if fname.endswith('.crt'):
+                        os.chmod(fname, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)  # 644
+                    elif fname.endswith('.key'):
+                        os.chmod(fname, stat.S_IRUSR | stat.S_IWUSR)  # 600
+                    sh_move(fname, os.path.join(outdir, fname))
+                result = [os.path.join(outdir, fname) for fname in result_files if not fname.startswith('nosave')]
+
+    return result
 
 
 ###################################################################################################
@@ -1088,7 +1438,6 @@ def get_main_script_path() -> Optional[str]:
     Returns None if no script path can be determined (e.g. interactive shell).
     """
     import __main__
-    import shutil
 
     # Case 1: Frozen app (PyInstaller, cx_Freeze, etc.)
     if getattr(sys, 'frozen', False):
@@ -1102,7 +1451,7 @@ def get_main_script_path() -> Optional[str]:
     argv0 = sys.argv[0]
     if argv0:
         if not os.path.isabs(argv0):
-            resolved = shutil.which(argv0)
+            resolved = sh_which(argv0)
             if resolved:
                 return os.path.abspath(resolved)
         return os.path.abspath(argv0)

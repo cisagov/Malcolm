@@ -25,6 +25,7 @@
 # runtime
 .tmp
 .configured
+.os-info
 config.*/
 /redis
 /postgres
@@ -38,6 +39,8 @@ malcolm-config_2*.yaml
 .vagrant
 .fuse_*
 .venv
+shared/bin/malcolm_constants.py
+shared/bin/malcolm_utils.py
 malcolm_*images.tar.gz
 malcolm_*images.tar.xz
 malcolm_netbox_backup_*.gz
@@ -46,13 +49,6 @@ malcolm_netbox_backup_*.gz
 *-build.log
 Gemfile.lock
 _site
-hedgehog-iso/_config.yml
-hedgehog-iso/_includes
-hedgehog-iso/_layouts
-hedgehog-iso/_site
-hedgehog-iso/docs
-hedgehog-iso/Gemfile
-hedgehog-iso/README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

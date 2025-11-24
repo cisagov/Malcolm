@@ -489,8 +489,8 @@ alias dps="docker ps"
 alias dpa="docker ps -a"
 
 # Get images
-alias di="docker images | tail -n +2"
-alias dis="docker images | tail -n +2 | cols 1 2 | sed \"s/ /:/\""
+alias di="docker images 2>/dev/null | tail -n +2"
+alias dis="docker images 2>/dev/null | tail -n +2 | awk '{print \$1}'"
 
 # Get container IP
 alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
@@ -503,12 +503,12 @@ alias dex="docker exec -i -t"
 
 # backup *all* docker images!
 function docker_backup() {
-  for IMAGE in `dis`; do export FN=$(echo "$IMAGE" | sed -e 's/[^A-Za-z0-9._-]/_/g') ; docker save "$IMAGE" | pv | pigz > "$FN.tgz"  ; done
+  for IMAGE in $(docker images 2>/dev/null | tail -n +2 | awk '{print $1}'); do export FN=$(echo "$IMAGE" | sed -e 's/[^A-Za-z0-9._-]/_/g') ; docker save "$IMAGE" | pv | pigz > "$FN.tgz"  ; done
 }
 
 # pull updates for docker images
 function dockup() {
-  di | cols 1 2 | tr ' ' ':' | xargs -r -l docker pull
+  docker images 2>/dev/null | tail -n +2 | awk '{print $1}' | xargs -r -l docker pull
 }
 
 function dxl() {

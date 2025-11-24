@@ -3,9 +3,11 @@
 unset SSH_AUTH_SOCK
 unset FORCE_PROVISION
 DOCKER_IMAGES_TGZ=""
-while getopts fd: opts; do
+IMAGE_NAME=malcolm
+while getopts fd:i: opts; do
    case ${opts} in
       d) DOCKER_IMAGES_TGZ=${OPTARG} ;;
+      i) IMAGE_NAME=${OPTARG} ;;
       f) FORCE_PROVISION=0 ;;
    esac
 done
@@ -86,10 +88,10 @@ fi
 vagrant rsync
 
 # build ISO
-vm_execute "sudo bash -c \"whoami && cd /malcolm-build/malcolm-iso && pwd && ./build.sh -d \\\"$DOCKER_IMAGES_TGZ_REMOTE\\\"\""
+vm_execute "sudo bash -c \"whoami && cd /malcolm-build/malcolm-iso && pwd && ./build.sh -i $IMAGE_NAME -d \\\"$DOCKER_IMAGES_TGZ_REMOTE\\\"\""
 
 # retrieve build artifacts from VM
-BUILD_ARTIFACTS="/malcolm-build/malcolm-iso/malcolm-*.*"
+BUILD_ARTIFACTS="/malcolm-build/malcolm-iso/"${IMAGE_NAME}"-*.*"
 eval "$(vagrant ssh-config | awk '
 /HostName/ {host=$2}
 /Port/ {port=$2}

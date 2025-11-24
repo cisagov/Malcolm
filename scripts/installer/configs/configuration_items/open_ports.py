@@ -8,7 +8,6 @@
 This module contains all configuration items related to exposing ports,
 including Logstash, OpenSearch, Filebeat, SFTP, and Syslog ports.
 """
-
 from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import OpenPortsChoices

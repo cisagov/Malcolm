@@ -1,4 +1,4 @@
-# <a name="OpenSearchIndexManagement"></a>OpenSearch index management
+# <a name="IndexManagement"></a>OpenSearch index management
 
 Malcolm releases prior to v6.2.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
 

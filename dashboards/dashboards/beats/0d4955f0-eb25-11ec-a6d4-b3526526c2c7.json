@@ -2,7 +2,7 @@
   "objects": [
     {
       "attributes": {
-        "description": "Hardware component temperature summary, including from Malcolm sensors and aggregators",
+        "description": "Hardware component temperature summary, including from Hedgehog Linux sensors and Malcolm aggregators",
         "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"

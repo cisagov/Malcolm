@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sensor Kiosk
+Comment=
+Exec=/usr/local/bin/kiosk.sh
+Icon=/usr/share/images/hedgehog/hedgehog-color-small.png
+Path=
+Terminal=false
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/kiosk-browser.desktop

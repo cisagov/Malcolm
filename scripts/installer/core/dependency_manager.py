@@ -97,14 +97,17 @@ class DependencyManager:
         def visibility_observer(_):
             """Observer function that updates item visibility."""
             try:
-                if isinstance(visibility_rule.depends_on, list):
-                    # Multi-dependency: get values for all dependencies
-                    values = [self.config.get_value(dep_key) for dep_key in visibility_rule.depends_on]
-                    visible = visibility_rule.condition(*values)
+                if callable(visibility_rule.condition):
+                    if isinstance(visibility_rule.depends_on, list):
+                        # Multi-dependency: get values for all dependencies
+                        values = [self.config.get_value(dep_key) for dep_key in visibility_rule.depends_on]
+                        visible = visibility_rule.condition(*values)
+                    else:
+                        # Single dependency
+                        value = self.config.get_value(visibility_rule.depends_on)
+                        visible = visibility_rule.condition(value)
                 else:
-                    # Single dependency
-                    value = self.config.get_value(visibility_rule.depends_on)
-                    visible = visibility_rule.condition(value)
+                    visible = bool(visibility_rule.condition)
 
                 if item.ui_parent and not self.config.is_item_visible(item.ui_parent):
                     visible = False
@@ -166,28 +169,36 @@ class DependencyManager:
                     # InstallerLogger.debug(f"{item_key} is modified, leaving alone")
                     return
 
-                dep_values = None
                 if isinstance(value_rule.depends_on, list):
                     # Multi-dependency: get values for all dependencies
                     dep_values = [self.config.get_value(dep_key) for dep_key in value_rule.depends_on]
-                    should_set = value_rule.condition(*dep_values)
                 else:
                     # Single dependency
                     dep_values = self.config.get_value(value_rule.depends_on)
-                    should_set = value_rule.condition(dep_values)
+
+                if callable(value_rule.condition):
+                    if isinstance(dep_values, list):
+                        should_set = value_rule.condition(*dep_values)
+                    else:
+                        should_set = value_rule.condition(dep_values)
+                else:
+                    should_set = bool(value_rule.condition)
 
                 if should_set:
+                    new_val = DEFAULT_VALUE_UNCHANGED
                     # Compute default value (callable defaults receive dependency values)
                     try:
                         if callable(value_rule.default_value):
-                            if isinstance(value_rule.depends_on, list):
+                            if isinstance(dep_values, list):
                                 new_val = value_rule.default_value(*dep_values)
                             else:
                                 new_val = value_rule.default_value(dep_values)
                         else:
                             new_val = value_rule.default_value
                     except Exception as e:
-                        InstallerLogger.warning(f"Default value function for {item_key} raised: {e}")
+                        InstallerLogger.error(
+                            f"Default value function for {item_key} ({value_rule.default_value=}, {value_rule.depends_on=}, {new_val=}) raised: {e}"
+                        )
                         return
 
                     if new_val is not DEFAULT_VALUE_UNCHANGED:

@@ -50,7 +50,7 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHM
 
 For Malcolm's purposes, both physical devices and virtualized hosts will be stored as described above: the `device_type` field can be used to distinguish between them.
 
-NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges. The site to associate with network traffic can be specified when [PCAP is uploaded](upload.md#Upload), when configuring [live analysis](live-analysis.md#LiveAnalysis), and when [configuring forwarding from Hedgehog Linux](malcolm-hedgehog-e2e-iso-install.md#Hedgehogfilebeat). If not otherwise specified, the value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used for these enrichment lookups.
+NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges. The site to associate with network traffic can be specified when [PCAP is uploaded](upload.md#Upload), when configuring [live analysis](live-analysis.md#LiveAnalysis), and when [configuring forwarding from Hedgehog Linux](malcolm-hedgehog-e2e-iso-install.md#HedgehogCommConfig). If not otherwise specified, the value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used for these enrichment lookups.
 
 When NetBox enrichment is attempted for a log, the value `netbox` is automatically added to its `tags` field.
 

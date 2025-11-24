@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v4.4.5
+FROM netboxcommunity/netbox:v4.4.6
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -29,7 +29,7 @@ ENV NETBOX_INITIALIZERS_VERSION "v4.4.0"
 ENV NETBOX_TOPOLOGY_VERSION "4.4.0"
 ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 
-ENV YQ_VERSION "4.48.1"
+ENV YQ_VERSION "4.48.2"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/mmguero-dev/Device-Type-Library-Import/tar.gz/develop"

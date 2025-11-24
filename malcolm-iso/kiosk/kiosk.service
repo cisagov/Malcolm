@@ -1,0 +1,18 @@
+[Unit]
+Description=Malcolm/Hedgehog Linux Kiosk
+
+[Service]
+WorkingDirectory=/opt/kiosk
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=/opt/kiosk/init.sh
+User=sensor
+Group=sensor
+PrivateTmp=no
+PrivateDevices=no
+ProtectSystem=off
+ProtectHome=off
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

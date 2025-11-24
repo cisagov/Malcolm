@@ -127,8 +127,8 @@ function PullAndTagGithubWorkflowISOImages() {
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
   echo "Pulling ISO wrapper images with $MALCOLM_CONTAINER_RUNTIME from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
-  for IMG in malcolm/{malcolm,hedgehog}; do
-    _PullAndTagGithubWorkflowBuild "$IMG"
+  for IMG in malcolm/{malcolm,hedgehog,hedgehog-raspi}; do
+    _PullAndTagGithubWorkflowBuild "$IMG" 2>/dev/null
   done
   echo "done"
 }
@@ -144,19 +144,35 @@ function _ExtractISOFromGithubWorkflowBuild() {
 
   TOOL="$1"
   DEST_DIR="${2:-"$(pwd)"}"
-  ISO_NAME="${3:-"$TOOL-$VERSION"}"
 
-  $MALCOLM_CONTAINER_RUNTIME run --rm -d --name "$TOOL"-iso-srv -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
-      ghcr.io/"$OWNER"/malcolm/"$TOOL":"$BRANCH" && \
+  if [[ "$TOOL" == "hedgehog-raspi" ]]; then
+    SRV_NAME="$TOOL-img-srv"
+    IMG_FILE_REMOTE=raspi_4_trixie.img.xz
+    LOG_FILE_REMOTE=raspi_4_trixie.log
+    IMG_NAME="${3:-"hedgehog-${VERSION}_raspi_4"}"
+    IMG_FILE_LOCAL="$IMG_NAME".img.xz
+    LOG_FILE_LOCAL="$IMG_NAME".log
+  else
+    SRV_NAME="$TOOL-iso-srv"
+    IMG_FILE_REMOTE=live.iso
+    IMG_NAME="${3:-"$TOOL-$VERSION"}"
+    LOG_FILE_REMOTE="$IMG_NAME"-build.log
+    IMG_FILE_LOCAL="$IMG_NAME".iso
+    LOG_FILE_LOCAL="$IMG_NAME"-build.log
+  fi
+
+  $MALCOLM_CONTAINER_RUNTIME run --rm -d --name "$SRV_NAME" -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
+      ghcr.io/"$OWNER"/malcolm/"$TOOL":"${BRANCH}${IMAGE_ARCH_SUFFIX}" 2>/dev/null && \
     sleep 10 && \
-    curl -sSL -o "$DEST_DIR"/"$ISO_NAME".iso http://localhost:8000/live.iso && \
-    curl -sSL -o "$DEST_DIR"/"$ISO_NAME"-build.log http://localhost:8000/"$TOOL"-"$VERSION"-build.log
-  $MALCOLM_CONTAINER_RUNTIME stop "$TOOL"-iso-srv
+    curl -sSL -o "$DEST_DIR"/"$IMG_FILE_LOCAL" http://localhost:8000/"$IMG_FILE_REMOTE" && \
+    curl -sSL -o "$DEST_DIR"/"$LOG_FILE_LOCAL" http://localhost:8000/"$LOG_FILE_REMOTE"
+  $MALCOLM_CONTAINER_RUNTIME stop "$SRV_NAME" 2>/dev/null
 }
 
 function ExtractISOsFromGithubWorkflowBuilds() {
   _ExtractISOFromGithubWorkflowBuild malcolm
   _ExtractISOFromGithubWorkflowBuild hedgehog
+  _ExtractISOFromGithubWorkflowBuild hedgehog-raspi
 }
 
 ################################################################################

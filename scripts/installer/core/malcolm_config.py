@@ -16,6 +16,22 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, Any, Callable, List, Tuple, Optional
 
+from scripts.malcolm_constants import (
+    COMPOSE_MALCOLM_EXTENSION,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+)
 from scripts.malcolm_common import (
     DEFAULT_INDEX_DIR,
     DEFAULT_INDEX_SNAPSHOT_DIR,
@@ -603,6 +619,9 @@ class MalcolmConfig(ObservableStoreMixin):
                         # exposed services
                         self._load_exposed_services_from_orchestration_file(compose_data)
 
+                        # Malcolm x- extensions in compose file (except for reachback ACL which is done in _load_exposed_services_from_orchestration_file)
+                        self._malcolm_extensions_from_orchestration_file(compose_data)
+
                         # traefik/reverse proxy stuff
                         self._load_traefik_settings_from_orchestration_file(compose_data)
 
@@ -696,6 +715,49 @@ class MalcolmConfig(ObservableStoreMixin):
                     self.apply_default(expose_key, True, ignore_errors=True)
         else:
             self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, False, ignore_errors=True)
+
+        # for hedgehog mode, we have the request reachback ACL stored in an extension
+        reachback_request_acl = deep_get(
+            compose_data,
+            [
+                COMPOSE_MALCOLM_EXTENSION,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+            ],
+            [],
+        )
+        if isinstance(reachback_request_acl, str):
+            reachback_request_acl = [reachback_request_acl]
+        elif not isinstance(reachback_request_acl, list):
+            reachback_request_acl = []
+        self.apply_default(KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL, reachback_request_acl, ignore_errors=True)
+
+    def _malcolm_extensions_from_orchestration_file(self, compose_data: Dict[Any, Any]):
+        # Malcolm x- extensions in compose file (except for reachback ACL which is done in _load_exposed_services_from_orchestration_file)
+
+        # auxiliary data forwarders
+        aux_fw_key_map = {
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE: KEY_CONFIG_ITEM_AUX_FW_AIDE,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG: KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU: KEY_CONFIG_ITEM_AUX_FW_CPU,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF: KEY_CONFIG_ITEM_AUX_FW_DF,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK: KEY_CONFIG_ITEM_AUX_FW_DISK,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG: KEY_CONFIG_ITEM_AUX_FW_KMSG,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM: KEY_CONFIG_ITEM_AUX_FW_MEM,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK: KEY_CONFIG_ITEM_AUX_FW_NETWORK,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD: KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL: KEY_CONFIG_ITEM_AUX_FW_THERMAL,
+        }
+        if (
+            aux_fw_settings := deep_get(
+                compose_data,
+                [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_AUX_FW],
+                {},
+            )
+        ) and isinstance(aux_fw_settings, dict):
+            for forwarder, enabled in aux_fw_settings.items():
+                if isinstance(enabled, bool) and (key_config_item := aux_fw_key_map.get(forwarder)):
+                    self.apply_default(key_config_item, enabled, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff

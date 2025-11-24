@@ -57,6 +57,8 @@ spec:
           - configMapRef:
               name: beats-common-env
           - configMapRef:
+              name: netbox-common-env
+          - configMapRef:
               name: filebeat-env
         livenessProbe:
           exec:

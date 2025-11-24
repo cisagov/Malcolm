@@ -1,6 +1,6 @@
 Flask==3.1.2
 gunicorn==23.0.0
-opensearch-py==3.0.0
+opensearch-py==3.1.0
 requests==2.32.5
 regex==2025.11.3
 dateparser==1.2.2

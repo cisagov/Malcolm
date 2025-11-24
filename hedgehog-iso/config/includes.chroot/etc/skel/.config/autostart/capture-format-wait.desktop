@@ -1,7 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=capture-format-wait
-Comment=Format Artifact Capture Storage
-Exec=/usr/local/bin/capture-format-wait.sh
-Terminal=false
-Type=Application

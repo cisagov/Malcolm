@@ -12,7 +12,7 @@
     - [Hunt](#ArkimeHunt)
     - [Statistics](#ArkimeStats)
     - [Settings](#ArkimeSettings)
-    - [WISE](#ArkimeWise)
+    - [WISE](#ArkimeWISE)
 
 
 ## <a name="ArkimeZeek"></a>Zeek log integration
@@ -194,4 +194,4 @@ See Arkime's documentation for additional information on leveraging the [WISE pl
 
 For more information on configuring WISE within Malcolm, see the [Arkime environment variables](malcolm-config.md#MalcolmConfigEnvVars).
 
-To leverage WISE when using a Hedgehog Linux, the sensor needs to be configured to request data from the WISE service. This can be setup during sensor configuration. See [Hedgehog Arkime Capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) for more information.
+To leverage WISE when using a Hedgehog Linux, the sensor needs to be configured to request data from the WISE service. This can be setup during sensor configuration. See [Configuring Communication Between Hedgehog and Malcolm](malcolm-hedgehog-e2e-iso-install.md#HedgehogCommConfig) for more information.

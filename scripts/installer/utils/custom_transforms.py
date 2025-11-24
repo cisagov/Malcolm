@@ -12,11 +12,13 @@ from scripts.malcolm_constants import (
 )
 from scripts.malcolm_utils import (
     true_or_false_no_quotes,
+    remove_suffix,
     DATABASE_MODE_LABELS,
     DATABASE_MODE_ENUMS,
 )
 from scripts.malcolm_common import FormatNetBoxSubnetFilter, SYSTEM_INFO
 from scripts.malcolm_constants import OrchestrationFramework
+from scripts.installer.configs.constants.constants import SERVICE_PORT_LOGSTASH, LOCAL_LOGSTASH_HOST
 from scripts.installer.configs.constants.enums import SearchEngineMode
 
 
@@ -358,6 +360,21 @@ def custom_reverse_transform_netbox_url(value: str):
         return ("remote", value)
     # Empty URL ⇒ keep existing mode (skip) and do not set netboxUrl
     return ("", "")
+
+
+def custom_transform_logstash_host(logstashHost: str, remoteMalcolmHost: str) -> str:
+    """
+    remoteMalcolmHost is a derived flag.
+    """
+    return logstashHost
+
+
+def custom_reverse_transform_logstash_host(value: str):
+    """Reverse transform for LOGSTASH_HOST.
+
+    Returns tuple (logstashHost, remoteMalcolmHost).
+    """
+    return (value, remove_suffix(value, f':{SERVICE_PORT_LOGSTASH}') if value != LOCAL_LOGSTASH_HOST else "")
 
 
 def custom_transform_opensearch_url(opensearchPrimaryMode: str, opensearchPrimaryUrl: str) -> str:

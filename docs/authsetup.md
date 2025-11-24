@@ -336,11 +336,11 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 
 ### <a name="AuthKeycloakHedgehog"></a>Known Limitation with Hedgehog Linux
 
-Due to known compatibility issues between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm’s nginx reverse proxy, and Keycloak, special authentication handling is required when using a [local OpenSearch instance](opensearch-instances.md#OpenSearchInstance) exposed to external hosts as well as Malcolm's instance of Arkime's [WISE service](arkime.md#ArkimeWise).
+Due to known compatibility issues between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm’s nginx reverse proxy, and Keycloak, special authentication handling is required when using a [local OpenSearch instance](opensearch-instances.md#OpenSearchInstance) exposed to external hosts as well as Malcolm's instance of Arkime's [WISE service](arkime.md#ArkimeWISE).
 
 For the WISE service, and if Malcolm is using a local OpenSearch service (typically accessible via port 9200/tcp), [HTTP basic](#AuthBasicAccountManagement) authentication must be enabled for those endpoints — even when Keycloak is selected as Malcolm’s primary authentication method.
 
-When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) on Hedgehog Linux, use the local Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
+When specifying the remote Malcolm aggregator credentials on Hedgehog Linux (e.g., *Store username/password for OpenSearch/Elasticsearch instance?* in `auth_setup`), use the Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
 
 * The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://<malcolm-host>/auth).
 * These basic credentials apply *only* to Malcolm’s OpenSearch API and Arkime WISE endpoints.
@@ -415,7 +415,7 @@ With role-based access control enabled, realm roles must exist that correspond t
 
 #### <a name="AuthKeycloakReqGroupsRoles"></a>System-wide required user groups and realm roles
 
-As a simpler alternative to [role-based access control](#AuthRBAC), Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
+As a simpler alternative to [role-based access control](#AuthKeycloakRBAC), Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
 
 #### <a name="AuthKeycloakGroupsAndRolesConfig"></a>Configuring Keycloak to pass groups and roles to Malcolm
 

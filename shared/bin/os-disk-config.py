@@ -11,6 +11,7 @@
 # Run the script with --help for options
 ###################################################################################################
 
+import distro
 import os
 import json
 import re
@@ -29,8 +30,6 @@ from malcolm_constants import (
     MALCOLM_DB_DIR,
     MALCOLM_LOGS_DIR,
     MALCOLM_PCAP_DIR,
-    OS_MODE_HEDGEHOG,
-    OS_MODE_MALCOLM,
 )
 from malcolm_utils import (
     LoadFileIfJson,
@@ -58,9 +57,19 @@ CRYPT_KEYFILE_PERMS = 'crypt_keyfile_perms'
 OTHER_FILE_PERMS = 'other_file_perms'
 CRYPT_DEV_PREFIX = 'crypt_dev_prefix'
 
+###################################################################################################
+# Operating system mode constants
+OS_MODE_HEDGEHOG = "hedgehog"
+OS_MODE_MALCOLM = "malcolm"
+OS_MODE_MALCOLM_HEDGEHOG = "malcolm-hedgehog"
+
+ETC_INSTALLER_AGGREGATOR = "aggregator"
+ETC_INSTALLER_SENSOR = "sensor"
+
 OS_PARAMS = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_HEDGEHOG] = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_MALCOLM] = defaultdict(lambda: None)
+OS_PARAMS[OS_MODE_MALCOLM_HEDGEHOG] = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_HEDGEHOG].update(
     {
         MINIMUM_DEVICE_BYTES: 100 * 1024 * 1024 * 1024,  # 100GiB
@@ -94,6 +103,12 @@ OS_PARAMS[OS_MODE_MALCOLM].update(
         CRYPT_KEYFILE_PERMS: 0o600,
         OTHER_FILE_PERMS: 0o600,
         CRYPT_DEV_PREFIX: 'malcolm_vault_',
+    }
+)
+OS_PARAMS[OS_MODE_MALCOLM_HEDGEHOG].update(
+    {
+        **OS_PARAMS[OS_MODE_MALCOLM],
+        MOUNT_DIRS: [d for d in OS_PARAMS[OS_MODE_MALCOLM][MOUNT_DIRS] if d != MALCOLM_DB_DIR],
     }
 )
 
@@ -139,6 +154,35 @@ def CreateMapperDeviceName(device):
 
 
 ###################################################################################################
+def DetermineOSPlatform():
+    os_release_info = {}
+    installer_id = None
+
+    try:
+        os_release_info = distro.os_release_info()
+    except Exception:
+        pass
+
+    if not os_release_info:
+        if os.path.isfile('/etc/os-release'):
+            with open("/etc/os-release", 'r') as f:
+                for line in f:
+                    try:
+                        k, v = line.rstrip().split("=", 1)
+                        os_release_info[k.lower()] = v.strip('"')
+                    except Exception:
+                        pass
+
+    if os.path.isfile('/etc/installer'):
+        with open("/etc/installer", 'r') as f:
+            installer_id = f.readline().strip()
+
+    variant = os_release_info.get('variant_id')
+
+    if (variant == OS_MODE_HEDGEHOG) and (installer_id == ETC_INSTALLER_AGGREGATOR):
+        return OS_MODE_MALCOLM_HEDGEHOG
+    else:
+        return variant
 
 
 ###################################################################################################
@@ -219,10 +263,11 @@ def main():
         '-m',
         '--mode',
         dest='osMode',
-        required=True,
+        required=False,
+        default=None,
         metavar='<string>',
         type=str,
-        help=f'Script mode: {OS_MODE_HEDGEHOG} or {OS_MODE_MALCOLM}',
+        help=f'Script mode: {OS_MODE_HEDGEHOG}, {OS_MODE_MALCOLM} or {OS_MODE_MALCOLM_HEDGEHOG} (default: autodetect)',
     )
     parser.add_argument(
         '-i',
@@ -283,7 +328,10 @@ def main():
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")
 
-    if args.osMode in (OS_MODE_HEDGEHOG, OS_MODE_MALCOLM):
+    if not args.osMode:
+        args.osMode = DetermineOSPlatform()
+
+    if args.osMode in (OS_MODE_HEDGEHOG, OS_MODE_MALCOLM, OS_MODE_MALCOLM_HEDGEHOG):
         osMode = args.osMode
     else:
         parser.print_help()
@@ -715,7 +763,9 @@ def main():
                             else:
                                 print(line)
 
-                elif (osMode == OS_MODE_MALCOLM) and os.path.isdir(os.path.join(ownerHome, 'Malcolm')):
+                elif (osMode in (OS_MODE_MALCOLM, OS_MODE_MALCOLM_HEDGEHOG)) and os.path.isdir(
+                    os.path.join(ownerHome, 'Malcolm')
+                ):
                     # write .os-disk-config-defaults to be picked up by install.py
                     configFilePath = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os-disk-config-defaults')
                     createdUserDirsFull = None

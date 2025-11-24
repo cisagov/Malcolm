@@ -2,7 +2,7 @@
   "objects": [
     {
       "attributes": {
-        "description": "AIDE file/directory integrity report for Malcolm sensors and aggregators",
+        "description": "AIDE file/directory integrity report for Hedgehog Linux sensors and Malcolm aggregators",
         "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
@@ -10,7 +10,7 @@
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "panelsJSON": "[{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":36,\"i\":\"2d47d63b-c1e9-4b00-a21f-28c553cd7548\"},\"panelIndex\":\"2d47d63b-c1e9-4b00-a21f-28c553cd7548\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":14,\"h\":8,\"i\":\"1b520d1b-b30e-4216-8c83-3eff88564503\"},\"panelIndex\":\"1b520d1b-b30e-4216-8c83-3eff88564503\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":22,\"y\":0,\"w\":26,\"h\":15,\"i\":\"1a09a091-d27c-48df-a145-5a33ecc33ffb\"},\"panelIndex\":\"1a09a091-d27c-48df-a145-5a33ecc33ffb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":8,\"w\":14,\"h\":28,\"i\":\"4c570390-7394-4129-b637-81e58e3fa066\"},\"panelIndex\":\"4c570390-7394-4129-b637-81e58e3fa066\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":22,\"y\":15,\"w\":26,\"h\":21,\"i\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\"},\"panelIndex\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":36,\"w\":48,\"h\":22,\"i\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\"},\"panelIndex\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"}]",
         "timeRestore": false,
-        "title": "Malcolm Sensor File/Directory Integrity",
+        "title": "Malcolm System File/Directory Integrity",
         "version": 1
       },
       "id": "903f42c0-f634-11ec-828d-2fb7a4a26e1f",
@@ -85,10 +85,10 @@
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "title": "Malcolm Sensor File Integrity - Host Chooser",
+        "title": "Malcolm System File Integrity - Host Chooser",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor File Integrity - Host Chooser\",\"type\":\"input_control_vis\",\"aggs\":[],\"params\":{\"controls\":[{\"id\":\"1656345860825\",\"fieldName\":\"host.name\",\"parent\":\"\",\"label\":\"Host\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false}}"
+        "visState": "{\"title\":\"Malcolm System File Integrity - Host Chooser\",\"type\":\"input_control_vis\",\"aggs\":[],\"params\":{\"controls\":[{\"id\":\"1656345860825\",\"fieldName\":\"host.name\",\"parent\":\"\",\"label\":\"Host\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false}}"
       },
       "id": "e9be4000-f632-11ec-828d-2fb7a4a26e1f",
       "migrationVersion": {
@@ -115,10 +115,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor File/Directory Integrity - Host Check Summary",
+        "title": "Malcolm System File/Directory Integrity - Host Check Summary",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"desc\"}}}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor File/Directory Integrity - Host Check Summary\",\"type\":\"table\",\"aggs\":[{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.changed\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Changes\"},\"schema\":\"metric\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.removed\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Removals\"},\"schema\":\"metric\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.added\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Additions\"},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.total\",\"aggregate\":\"max\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Files/Directories Checked\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"Last Reported\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":5,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Malcolm System File/Directory Integrity - Host Check Summary\",\"type\":\"table\",\"aggs\":[{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.changed\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Changes\"},\"schema\":\"metric\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.removed\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Removals\"},\"schema\":\"metric\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.added\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Additions\"},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.total\",\"aggregate\":\"max\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Files/Directories Checked\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"Last Reported\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":5,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "50e28ff0-f64e-11ec-bc92-999adcbc4e7d",
       "migrationVersion": {
@@ -145,10 +145,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor File/Directory Integrity - Event Type",
+        "title": "Malcolm System File/Directory Integrity - Event Type",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor File/Directory Integrity - Event Type\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Event\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File/Directory Event\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
+        "visState": "{\"title\":\"Malcolm System File/Directory Integrity - Event Type\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Event\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File/Directory Event\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
       },
       "id": "b44fb3d0-f633-11ec-828d-2fb7a4a26e1f",
       "migrationVersion": {
@@ -175,10 +175,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor File/Directory Integrity - Path",
+        "title": "Malcolm System File/Directory Integrity - Path",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}}}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor File/Directory Integrity - Path\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"min\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"First Reported\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.path\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Path\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"Last Reported\"},\"schema\":\"metric\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Malcolm System File/Directory Integrity - Path\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"min\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"First Reported\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.path\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Path\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"Last Reported\"},\"schema\":\"metric\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "7381c720-f634-11ec-828d-2fb7a4a26e1f",
       "migrationVersion": {

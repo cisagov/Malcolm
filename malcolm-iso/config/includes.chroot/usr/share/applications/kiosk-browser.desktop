@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sensor Kiosk
+Comment=Monitor the status of the network sensor
+Exec=/usr/local/bin/kiosk.sh
+Terminal=false
+X-MultipleArgs=false
+Icon=/usr/share/images/hedgehog/hedgehog-color-small.png
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true
+Path=

@@ -24,7 +24,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
     KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-    KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_SSL_VERIFY,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
@@ -32,16 +31,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY,
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
     KEY_CONFIG_ITEM_OS_MEMORY,
+    KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST,
     KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
-)
-
-CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH = ConfigItem(
-    key=KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
-    label="Local OpenSearch Instance",
-    default_value=True,
-    validator=lambda x: isinstance(x, bool),
-    question="Should Malcolm maintain its own OpenSearch instance?",
-    widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE = ConfigItem(
@@ -52,6 +43,16 @@ CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE = ConfigItem(
     validator=lambda x: x in DATABASE_MODE_ENUMS.keys(),
     question="Select primary Malcolm document store",
     widget_type=WidgetType.SELECT,
+)
+
+CONFIG_ITEM_REMOTE_MALCOLM_HOST = ConfigItem(
+    key=KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST,
+    label="Remote Malcolm Hostname or IP",
+    default_value="",
+    accept_blank=True,
+    validator=lambda x: isinstance(x, str),
+    question='Hostname or IP address of remote "parent" Malcolm instance (without protocol or port number)',
+    widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_OS_MEMORY = ConfigItem(

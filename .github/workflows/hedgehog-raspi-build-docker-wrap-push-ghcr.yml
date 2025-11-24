@@ -6,8 +6,9 @@ on:
       - main
       - staging
       - pipeline-merge
+      - hedgehog-iso-refactor
     paths:
-      - 'hedgehog-iso/**'
+      - 'malcolm-iso/**'
       - 'hedgehog-raspi/**'
       - 'shared/bin/*'
       - '!shared/bin/pcap_processor.py'

@@ -57,8 +57,6 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
-          - configMapRef:
-              name: netbox-common-env
           - secretRef:
               name: redis-env
         livenessProbe:

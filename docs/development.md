@@ -17,7 +17,6 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `file-monitor` - code and configuration for the `file-monitor` container that can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container that serves a web browser-based upload form for uploading PCAP files and Zeek logs, and serves an SFTP share as an alternate upload
 * `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
-* `hedgehog-iso` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) ISO
 * `hedgehog-raspi` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) [Raspberry Pi image](hedgehog-raspi-build.md#HedgehogRaspiBuild)
 * `htadmin` - configuration for the `htadmin` user account management container
 * `logstash` - code and configuration for the `logstash` container that parses Zeek logs and forwards them to the `opensearch` container
