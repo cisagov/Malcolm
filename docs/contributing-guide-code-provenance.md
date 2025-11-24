@@ -30,7 +30,7 @@ Malcolm's source code and release artifacts are made up of the following:
     - "recipes" and contents used for building images
         + [container]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) images
         + [Malcolm]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso) ISO installer
-        + [Hedgehog Linux]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso) ISO installer
+        + [Hedgehog Linux]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-raspi) Raspberry Pi image
     - [documentation]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docs)
     - [configuration files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/config) storing user preferences
 

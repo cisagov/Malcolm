@@ -48,13 +48,6 @@ malcolm_netbox_backup_*.gz
 *-build.log
 Gemfile.lock
 _site
-hedgehog-iso/_config.yml
-hedgehog-iso/_includes
-hedgehog-iso/_layouts
-hedgehog-iso/_site
-hedgehog-iso/docs
-hedgehog-iso/Gemfile
-hedgehog-iso/README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
