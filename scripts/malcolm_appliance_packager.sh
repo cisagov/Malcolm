@@ -31,7 +31,7 @@ SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 MALCOLM_CONTAINER_RUNTIME="${MALCOLM_CONTAINER_RUNTIME:-docker}"
 
-CURRENT_REV_SHA="$(git rev-parse --short --verify HEAD)"
+CURRENT_REV_SHA="$(git rev-parse --short --verify HEAD 2>/dev/null || true)"
 if [ -z "$CURRENT_REV_SHA" ]; then
   CURRENT_REV_TAG="$(date +%Y.%m.%d_%H:%M:%S)"
 else
@@ -41,7 +41,7 @@ else
     CURRENT_REV_DATE="$(git log -1 --format="%at" | xargs -I{} date -d @{} +%Y%m%d_%H%M%S)"
   fi
   if [ -z "$CURRENT_REV_DATE" ]; then
-    CURRENT_REV_TAG="$(date +%Y.%m.%d_%H:%M:%S)"
+    CURRENT_REV_DATE="$(date +%Y.%m.%d_%H:%M:%S)"
   fi
   CURRENT_REV_TAG="${CURRENT_REV_DATE}_${CURRENT_REV_SHA}"
 fi
