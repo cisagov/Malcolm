@@ -58,6 +58,7 @@ build_htpdate() {
     htpdate_vers="$(curl -sqI $htpdate_url/releases/latest | awk -F '/' '/^location/ {print substr($NF,2,length($NF)-2)}')"
     htpdate_release=1
 
+    apt-get update
     apt-get install $BUILD_DEPS $BUILD_DEPS_KEEP -y --no-install-suggests
 
     mkdir -p "${WORK_DIR}"/htpdate && cd "$_"
@@ -195,7 +196,8 @@ install_files() {
     pushd "$SENSOR_HOME" >/dev/null 2>&1
     mkdir -p Malcolm .malcolm-install
     pushd .malcolm-install >/dev/null 2>&1
-    echo 'N' | bash "$MALCOLM_SRC/scripts/malcolm_appliance_packager.sh"
+    echo 'N' | bash "$MALCOLM_SRC/scripts/malcolm_appliance_packager.sh" >/dev/null 2>&1
+    ls malcolm_*.tar.gz
     tar xzf malcolm_*.tar.gz -C "$SENSOR_HOME"/Malcolm --strip-components 2
     popd >/dev/null 2>&1
     rm -rf .malcolm-install
@@ -224,14 +226,17 @@ install_files() {
     # Prepare Fluentbit and Beats repo GPG keys
     local apt_lists='/etc/apt/sources.list.d'
     local apt_keys='/etc/apt/keyrings'
-    # TODO: docker key?
     local fluentbit_key="${apt_keys}/fluentbit.gpg"
+    local docker_key="${apt_keys}/docker.gpg"
 
     gpg --dearmor --batch --yes -o "$fluentbit_key" "${apt_keys}/fluentbit.key.chroot"
+    gpg --dearmor --batch --yes -o "$docker_key" "${apt_keys}/docker.key.chroot"
 
     rm "${apt_keys}/fluentbit.key.chroot"
+    rm "${apt_keys}/docker.key.chroot"
 
     sed -i -e "s|deb |deb [signed-by=${fluentbit_key}] |" "${apt_lists}/fluentbit.list"
+    sed -i -e "s|deb |deb [signed-by=${docker_key}] |" "${apt_lists}/docker.list"
 
     # Prepare debs directory for other packages
     mkdir -p "${DEBS_DIR}"
@@ -267,7 +272,7 @@ install_hooks() {
       echo -n "python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
       while read LINE; do
         echo -n -e " \\\\\n  $LINE" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
-      done <"$SENSOR_DIR/requirements-$REQTYPE.txt"
+      done <"/opt/requirements.txt"
       echo "" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
       chmod +x ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
     fi
@@ -293,10 +298,10 @@ mount -t tmpfs /run /run
 [[ -f "$SHARED_DIR/environment.chroot" ]] && \
   . "$SHARED_DIR/environment.chroot"
 
+build_htpdate
 create_user
 install_files
 install_deps
-build_interface
 
 # Remove GUI related files if not building RPI with a DE
 # See comment above about BUILD_GUI usage
@@ -305,7 +310,6 @@ if [[ $BUILD_GUI -eq 0 ]]; then
 fi
 
 install_hooks
-build_htpdate
 clean_up
 
 exit 0
