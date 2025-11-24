@@ -1,4 +1,4 @@
 [submodule "strelka"]
 	path = strelka
 	url = https://github.com/mmguero-dev/strelka
-	branch = malcolm-integration
+	branch = malcolm-integration-real
