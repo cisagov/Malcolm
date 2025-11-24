@@ -207,6 +207,12 @@ CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS = ConfigItem(
     widget_type=WidgetType.NUMBER,
 )
 
+# CONFIG_ITEM_PRUNE_PCAP and CONFIG_ITEM_PRUNE_LOGS *only* apply
+#   to ISO-installed environment and will not be visible otherwise.
+#   These are for system-level prunes *external* to the Malcolm
+#   containers, which may not be running to take care of the
+#   pruning in the Hedgehog run profile mode.
+
 CONFIG_ITEM_PRUNE_PCAP = ConfigItem(
     key=KEY_CONFIG_ITEM_PRUNE_PCAP,
     label="Prune Oldest PCAP",
