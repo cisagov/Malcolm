@@ -91,6 +91,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             key_name: str,
             label: str,
             profile: str,
+            blank_ok: bool = False,
             valid_example: str = '',
         ):
             if _is_non_empty_str(conn_value):
@@ -105,7 +106,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
                         key_name,
                         f"{profile} run profile requires {local_conn} for its local {label} connection",
                     )
-            else:
+            elif not blank_ok:
                 add_issue(
                     conn_value,
                     f"{label} connection cannot be blank ({local_conn if profile == PROFILE_MALCOLM else valid_example})",
@@ -144,6 +145,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             KEY_CONFIG_ITEM_LOGSTASH_HOST,
             "Logstash",
             profile,
+            profile == PROFILE_HEDGEHOG,
             "host:port",
         )
 
@@ -153,6 +155,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             KEY_CONFIG_ITEM_ARKIME_WISE_URL,
             "Arkime WISE",
             profile,
+            profile == PROFILE_HEDGEHOG,
             "https://host/wise/",
         )
 
