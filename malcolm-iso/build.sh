@@ -288,6 +288,7 @@ PYCODE
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon24.png ./config/includes.chroot/usr/share/icons/hicolor/24x24/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon16.png ./config/includes.chroot/usr/share/icons/hicolor/16x16/malcolm.png
   if [[ "$IMAGE_NAME" == "hedgehog" ]]; then
+    sed -i 's@https://localhost/@http://localhost:5000/@' ./config/includes.chroot/etc/skel/.config/xfce4/panel/launcher-16/16343116651.desktop
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/hedgehog-wallpaper.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
     ln -s -f -r ./config/includes.chroot/usr/share/applications/kiosk-browser.desktop \
