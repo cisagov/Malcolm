@@ -507,7 +507,7 @@ def malcolm_iso_services_op(start):
             filebeatDest = logstashDest[: -len(logstashDestSuffix)] + filebeatDestSuffix
 
     # start/stop services
-    for service_type, service_map in ext_service_map.keys():
+    for service_type, service_map in ext_service_map.items():
         if (
             SYSTEM_INFO["malcolm_iso_install"]
             and dockerComposeYaml
