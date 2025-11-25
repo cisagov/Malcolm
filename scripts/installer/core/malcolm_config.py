@@ -31,6 +31,9 @@ from scripts.malcolm_constants import (
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
 )
 from scripts.malcolm_common import (
     DEFAULT_INDEX_DIR,
@@ -734,30 +737,37 @@ class MalcolmConfig(ObservableStoreMixin):
 
     def _malcolm_extensions_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # Malcolm x- extensions in compose file (except for reachback ACL which is done in _load_exposed_services_from_orchestration_file)
-
-        # auxiliary data forwarders
-        aux_fw_key_map = {
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE: KEY_CONFIG_ITEM_AUX_FW_AIDE,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG: KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU: KEY_CONFIG_ITEM_AUX_FW_CPU,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF: KEY_CONFIG_ITEM_AUX_FW_DF,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK: KEY_CONFIG_ITEM_AUX_FW_DISK,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG: KEY_CONFIG_ITEM_AUX_FW_KMSG,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM: KEY_CONFIG_ITEM_AUX_FW_MEM,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK: KEY_CONFIG_ITEM_AUX_FW_NETWORK,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD: KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
-            COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL: KEY_CONFIG_ITEM_AUX_FW_THERMAL,
+        ext_map = {
+            # forwarders
+            COMPOSE_MALCOLM_EXTENSION_AUX_FW: {
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE: KEY_CONFIG_ITEM_AUX_FW_AIDE,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG: KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU: KEY_CONFIG_ITEM_AUX_FW_CPU,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF: KEY_CONFIG_ITEM_AUX_FW_DF,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK: KEY_CONFIG_ITEM_AUX_FW_DISK,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG: KEY_CONFIG_ITEM_AUX_FW_KMSG,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM: KEY_CONFIG_ITEM_AUX_FW_MEM,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK: KEY_CONFIG_ITEM_AUX_FW_NETWORK,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD: KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL: KEY_CONFIG_ITEM_AUX_FW_THERMAL,
+            },
+            # prune operations external to containers
+            COMPOSE_MALCOLM_EXTENSION_PRUNE: {
+                COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP: KEY_CONFIG_ITEM_PRUNE_PCAP,
+                COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS: KEY_CONFIG_ITEM_PRUNE_LOGS,
+            },
         }
-        if (
-            aux_fw_settings := deep_get(
-                compose_data,
-                [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_AUX_FW],
-                {},
-            )
-        ) and isinstance(aux_fw_settings, dict):
-            for forwarder, enabled in aux_fw_settings.items():
-                if isinstance(enabled, bool) and (key_config_item := aux_fw_key_map.get(forwarder)):
-                    self.apply_default(key_config_item, enabled, ignore_errors=True)
+        for ext_key, ext_key_map in ext_map.items():
+            if (
+                ext_settings := deep_get(
+                    compose_data,
+                    [COMPOSE_MALCOLM_EXTENSION, ext_key],
+                    {},
+                )
+            ) and isinstance(ext_settings, dict):
+                for forwarder, enabled in ext_settings.items():
+                    if isinstance(enabled, bool) and (key_config_item := ext_key_map.get(forwarder)):
+                        self.apply_default(key_config_item, enabled, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff

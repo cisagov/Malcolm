@@ -7,7 +7,7 @@ umask 0022
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit $BUILD_ERROR_CODE
+   exit 1
 fi
 
 IMAGE_NAME=hedgehog
@@ -25,26 +25,15 @@ PROC_CNT=$(nproc)
 ARCH="$(dpkg --print-architecture)"
 export DEBIAN_FRONTEND=noninteractive
 
-# Used to build RPI without graphical features
-# Changing to 1 is mostly unimplemented
-BUILD_GUI=0
-
 RUN_PATH="(pwd)"
 DEBS_DIR="${HOME}/debs"
 DEPS_DIR='/opt/deps'
 SHARED_DIR='/opt/buildshared'
+MALCOLM_SRC='/opt/Malcolm'
 WORK_DIR="$(mktemp -d -p "$HOME" -t hedgehog-XXXXXX)"
 
-# Build time dependencies for arkime, htpdate, capa, and yara
-BUILD_DEPS='automake checkinstall libjansson-dev libmagic-dev libnl-genl-3-dev libtool '
-BUILD_DEPS+='meson ninja-build python3-dev re2c ruby ruby-dev ruby-rubygems '
-
-# Build dependencies we're leaving in place after installation (for building new Zeek plugins in the wild, mostly)
-BUILD_DEPS_KEEP='build-essential ccache cmake flex gcc g++ git libfl-dev libgoogle-perftools-dev '
-BUILD_DEPS_KEEP+='libgoogle-perftools4 libkrb5-3 libkrb5-dev libmaxminddb-dev libpcap-dev libssl-dev libtcmalloc-minimal4 '
-BUILD_DEPS_KEEP+='make patch pkg-config python3-git python3-pip python3-semantic-version python3-setuptools swig wget zlib1g-dev '
-
-BUILD_ERROR_CODE=1
+# Build time dependencies for htpdate
+BUILD_DEPS='build-essential libssl-dev checkinstall'
 
 ################################
 ######### Functions ############
@@ -53,12 +42,12 @@ BUILD_ERROR_CODE=1
 build_htpdate() {
 
     # Htpdate in Debian repos doesn't compile https functionality
-
     htpdate_url='https://github.com/twekkel/htpdate'
     htpdate_vers="$(curl -sqI $htpdate_url/releases/latest | awk -F '/' '/^location/ {print substr($NF,2,length($NF)-2)}')"
     htpdate_release=1
 
-    apt-get install $BUILD_DEPS $BUILD_DEPS_KEEP -y --no-install-suggests
+    apt-get update
+    apt-get install $BUILD_DEPS -y --no-install-suggests
 
     mkdir -p "${WORK_DIR}"/htpdate && cd "$_"
     curl -sSL "$htpdate_url/tarball/v$htpdate_vers" | tar xzf - --strip-components=1
@@ -94,6 +83,7 @@ clean_up() {
     # Remove extra installation files
     rm -rf $WORK_DIR \
            $SHARED_DIR \
+           $MALCOLM_SRC \
 		   /opt/deps \
 		   /opt/hooks \
 		   /opt/patches \
@@ -121,14 +111,6 @@ clean_up() {
     umount -A -f /dev/pts /run /dev /proc /sys
 }
 
-clean_up_gui_files() {
-    rm -rf /etc/skel/.config/autostart \
-           /etc/skel/.config/xfce4 \
-           /etc/skel/.local/share/xfce4 \
-           /etc/skel/.config/gtk-3.0 \
-           /etc/skel/.config/*dconf*
-}
-
 create_user() {
 
     # Set defaults but it is STRONGLY recommended that these be changed before deploying Sensor
@@ -147,11 +129,8 @@ install_deps() {
 
     local deps=''
 
-    if [ $BUILD_GUI -eq 0 ]; then
-        rm -f "${DEPS_DIR}/"{desktopmanager,live,virtualguest}.list.chroot
-        rm -f "${DEPS_DIR}/grub.list.binary"
-    fi
-
+    rm -f "${DEPS_DIR}/"{desktopmanager,live,virtualguest}.list.chroot
+    rm -f "${DEPS_DIR}/grub.list.binary"
     for file in "${DEPS_DIR}/"*.chroot; do
         sed -i '$a\' "$file"
         deps+=$(tr '\n' ' ' < "$file")
@@ -177,8 +156,6 @@ install_deps() {
 
 install_files() {
 
-    MALCOLM_SRC=/opt/Malcolm
-
     cp -r "$MALCOLM_SRC/malcolm-iso/config/requirements.txt" "/opt/requirements.txt"
     cp -r "$MALCOLM_SRC/shared/bin/"* "/usr/local/bin"
     cp "$MALCOLM_SRC/scripts/malcolm_utils.py" "/usr/local/bin/"
@@ -195,12 +172,12 @@ install_files() {
     pushd "$SENSOR_HOME" >/dev/null 2>&1
     mkdir -p Malcolm .malcolm-install
     pushd .malcolm-install >/dev/null 2>&1
-    echo 'N' | bash "$MALCOLM_SRC/scripts/malcolm_appliance_packager.sh"
+    echo 'N' | bash "$MALCOLM_SRC/scripts/malcolm_appliance_packager.sh" >/dev/null 2>&1
+    ls malcolm_*.tar.gz
     tar xzf malcolm_*.tar.gz -C "$SENSOR_HOME"/Malcolm --strip-components 2
     popd >/dev/null 2>&1
     rm -rf .malcolm-install
     popd >/dev/null 2>&1
-    rm -rf "$MALCOLM_SRC"
 
     # Setup OS information
     sensor_ver_file="$SENSOR_HOME/Malcolm/.os-info"
@@ -212,7 +189,7 @@ install_files() {
 
     echo "BUILD_ID=\"$(date +\'%Y-%m-%d\')-${IMAGE_VERSION}\""   > "$sensor_ver_file"
     echo "VARIANT=\"Hedgehog Linux (Minihog Sensor) v${IMAGE_VERSION}\"" >> "$sensor_ver_file"
-    echo "VARIANT_ID=\"hedgehog-minihog-sensor\"" >> "$sensor_ver_file"
+    echo "VARIANT_ID=\"hedgehog\"" >> "$sensor_ver_file"
     echo "ID_LIKE=\"debian\"" >> "$sensor_ver_file"
     echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\"" >> "$sensor_ver_file"
     echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\"" >> "$sensor_ver_file"
@@ -224,14 +201,17 @@ install_files() {
     # Prepare Fluentbit and Beats repo GPG keys
     local apt_lists='/etc/apt/sources.list.d'
     local apt_keys='/etc/apt/keyrings'
-    # TODO: docker key?
     local fluentbit_key="${apt_keys}/fluentbit.gpg"
+    local docker_key="${apt_keys}/docker.gpg"
 
     gpg --dearmor --batch --yes -o "$fluentbit_key" "${apt_keys}/fluentbit.key.chroot"
+    gpg --dearmor --batch --yes -o "$docker_key" "${apt_keys}/docker.key.chroot"
 
     rm "${apt_keys}/fluentbit.key.chroot"
+    rm "${apt_keys}/docker.key.chroot"
 
     sed -i -e "s|deb |deb [signed-by=${fluentbit_key}] |" "${apt_lists}/fluentbit.list"
+    sed -i -e "s|deb |deb [signed-by=${docker_key}] |" "${apt_lists}/docker.list"
 
     # Prepare debs directory for other packages
     mkdir -p "${DEBS_DIR}"
@@ -251,10 +231,8 @@ install_hooks() {
 
     local hooks_dir='/opt/hooks'
 
-    if [[ $BUILD_GUI -eq 0 ]]; then
-        rm -f "${hooks_dir}"/*login.hook.chroot
-        rm -f "${hooks_dir}"/*stig-scripts.hook.chroot
-    fi
+    rm -f "${hooks_dir}"/*login.hook.chroot
+    rm -f "${hooks_dir}"/*stig-scripts.hook.chroot
 
     # create hooks for installing Python packages
     HOOK_COUNTER=168
@@ -267,7 +245,7 @@ install_hooks() {
       echo -n "python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
       while read LINE; do
         echo -n -e " \\\\\n  $LINE" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
-      done <"$SENSOR_DIR/requirements-$REQTYPE.txt"
+      done <"/opt/requirements.txt"
       echo "" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
       chmod +x ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
     fi
@@ -293,19 +271,11 @@ mount -t tmpfs /run /run
 [[ -f "$SHARED_DIR/environment.chroot" ]] && \
   . "$SHARED_DIR/environment.chroot"
 
+build_htpdate
 create_user
 install_files
 install_deps
-build_interface
-
-# Remove GUI related files if not building RPI with a DE
-# See comment above about BUILD_GUI usage
-if [[ $BUILD_GUI -eq 0 ]]; then
-    clean_up_gui_files
-fi
-
 install_hooks
-build_htpdate
 clean_up
 
 exit 0

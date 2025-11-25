@@ -12,21 +12,7 @@ from enum import Enum
 from typing import Tuple, List, Optional
 
 from scripts.malcolm_constants import (
-    DATABASE_MODE_ENUMS,
-    DatabaseMode,
-    DEFAULT_INDEX_DIR,
-    DEFAULT_INDEX_SNAPSHOT_DIR,
-    DEFAULT_PCAP_DIR,
-    DEFAULT_SURICATA_LOG_DIR,
-    DEFAULT_ZEEK_LOG_DIR,
-    PROFILE_HEDGEHOG,
-    PROFILE_MALCOLM,
-    ImageArchitecture,
-    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
-    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
     COMPOSE_MALCOLM_EXTENSION,
-    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
-    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
@@ -38,6 +24,23 @@ from scripts.malcolm_constants import (
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP,
+    DATABASE_MODE_ENUMS,
+    DatabaseMode,
+    DEFAULT_INDEX_DIR,
+    DEFAULT_INDEX_SNAPSHOT_DIR,
+    DEFAULT_PCAP_DIR,
+    DEFAULT_SURICATA_LOG_DIR,
+    DEFAULT_ZEEK_LOG_DIR,
+    ImageArchitecture,
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
+    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
 )
 from scripts.malcolm_common import (
     BuildBoundPathReplacers,
@@ -45,7 +48,7 @@ from scripts.malcolm_common import (
     LoadYaml,
     RemapBoundPaths,
 )
-from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
+from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir
 
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_AUX_FW_AIDE,
@@ -75,6 +78,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+    KEY_CONFIG_ITEM_PRUNE_LOGS,
+    KEY_CONFIG_ITEM_PRUNE_PCAP,
     KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
@@ -459,35 +464,44 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
 
 
 def _apply_malcolm_extensions(data: dict, malcolm_config):
-    aux_fw_key_map = {
-        KEY_CONFIG_ITEM_AUX_FW_AIDE: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
-        KEY_CONFIG_ITEM_AUX_FW_AUDITLOG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
-        KEY_CONFIG_ITEM_AUX_FW_CPU: COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
-        KEY_CONFIG_ITEM_AUX_FW_DF: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
-        KEY_CONFIG_ITEM_AUX_FW_DISK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
-        KEY_CONFIG_ITEM_AUX_FW_KMSG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
-        KEY_CONFIG_ITEM_AUX_FW_MEM: COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
-        KEY_CONFIG_ITEM_AUX_FW_NETWORK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
-        KEY_CONFIG_ITEM_AUX_FW_SYSTEMD: COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
-        KEY_CONFIG_ITEM_AUX_FW_THERMAL: COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+    ext_map = {
+        # forwarders
+        COMPOSE_MALCOLM_EXTENSION_AUX_FW: {
+            KEY_CONFIG_ITEM_AUX_FW_AIDE: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+            KEY_CONFIG_ITEM_AUX_FW_AUDITLOG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+            KEY_CONFIG_ITEM_AUX_FW_CPU: COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+            KEY_CONFIG_ITEM_AUX_FW_DF: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+            KEY_CONFIG_ITEM_AUX_FW_DISK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+            KEY_CONFIG_ITEM_AUX_FW_KMSG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+            KEY_CONFIG_ITEM_AUX_FW_MEM: COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+            KEY_CONFIG_ITEM_AUX_FW_NETWORK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+            KEY_CONFIG_ITEM_AUX_FW_SYSTEMD: COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+            KEY_CONFIG_ITEM_AUX_FW_THERMAL: COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+        },
+        # prune operations external to containers
+        COMPOSE_MALCOLM_EXTENSION_PRUNE: {
+            KEY_CONFIG_ITEM_PRUNE_PCAP: COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP,
+            KEY_CONFIG_ITEM_PRUNE_LOGS: COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
+        },
     }
-    aux_fw_values = {}
-    for key in aux_fw_key_map.keys():
-        aux_fw_values[key] = bool(malcolm_config.get_value(key) or False)
+    for ext_key, ext_key_map in ext_map.items():
+        ext_values = {}
+        for key in ext_key_map.keys():
+            ext_values[key] = bool(malcolm_config.get_value(key) or False)
 
-    if deep_get(data, [COMPOSE_MALCOLM_EXTENSION], []):
-        data[COMPOSE_MALCOLM_EXTENSION].pop(COMPOSE_MALCOLM_EXTENSION_AUX_FW, None)
+        if deep_get(data, [COMPOSE_MALCOLM_EXTENSION], []):
+            data[COMPOSE_MALCOLM_EXTENSION].pop(ext_key, None)
 
-    for key, value in aux_fw_values.items():
-        deep_set(
-            data,
-            [
-                COMPOSE_MALCOLM_EXTENSION,
-                COMPOSE_MALCOLM_EXTENSION_AUX_FW,
-                aux_fw_key_map[key],
-            ],
-            value,
-        )
+        for key, value in ext_values.items():
+            deep_set(
+                data,
+                [
+                    COMPOSE_MALCOLM_EXTENSION,
+                    ext_key,
+                    ext_key_map[key],
+                ],
+                value,
+            )
 
 
 def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, dump_yaml) -> bool:

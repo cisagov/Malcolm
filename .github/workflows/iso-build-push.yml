@@ -155,7 +155,7 @@ jobs:
           TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
         with:
           scan-type: 'fs'
-          scan-ref: './${{ inputs.profile }}-iso'
+          scan-ref: './malcolm-iso'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'

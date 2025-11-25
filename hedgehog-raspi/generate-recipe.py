@@ -72,13 +72,14 @@ hostname = 'Hedgehog-rpi-%s' % version
 extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
     '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{deps,hooks}\'',
-    'cp -r "%s/" "${ROOT?}/opt/Malcolm/"' % MALCOLM_DIR,
+    '/bin/bash -x -c \'pushd "%s/" ; git ls-files --exclude-standard | rsync -R --files-from=- ./ "${ROOT?}/opt/Malcolm/"; popd\''
+    % (MALCOLM_DIR),
 ]
 
 extra_chroot_shell_cmds.extend(
     [
         'chmod 755 /root/sensor_install.sh',
-        '/root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
+        'bash -x /root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
     ]
 )
 

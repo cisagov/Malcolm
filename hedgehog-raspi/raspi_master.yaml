@@ -77,8 +77,10 @@ steps:
       - clamav-daemon
       - clamav-freshclam
       - iw
+      - git
       - gpg
       - parted
+      - rsync
       - ssh
       - wpasupplicant
       - systemd-timesyncd

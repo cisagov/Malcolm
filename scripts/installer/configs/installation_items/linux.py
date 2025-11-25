@@ -11,9 +11,6 @@ This module contains all configuration items related to the installation process
 that are specific to Linux platforms, including Docker installation methods
 and Linux-specific system configuration options.
 """
-
-from typing import Any, Tuple
-
 from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,

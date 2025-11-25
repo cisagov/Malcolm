@@ -90,7 +90,9 @@ COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM = "mem"
 COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK = "network"
 COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD = "systemd"
 COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL = "thermal"
-
+COMPOSE_MALCOLM_EXTENSION_PRUNE = "prune"
+COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP = "pcap"
+COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS = "logs"
 
 ###################################################################################################
 # Directory path constants for volume mapping

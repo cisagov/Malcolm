@@ -1,2 +1,2 @@
-deb [arch=amd64] https://download.docker.com/linux/debian trixie stable
+deb https://download.docker.com/linux/debian trixie stable
 
