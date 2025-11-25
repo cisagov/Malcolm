@@ -130,7 +130,7 @@ class ConfigItem:
 
 
 class ListOfStringsConfigItem(ConfigItem):
-    """Custom ConfigItem that converts comma-separated strings to lists for extra tags"""
+    """Custom ConfigItem that converts comma-separated strings to lists of strings"""
 
     def set_value(self, value: Any) -> Tuple[bool, str]:
         """Set and validate a new value, with automatic string-to-list conversion."""

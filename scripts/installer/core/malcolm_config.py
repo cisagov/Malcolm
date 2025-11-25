@@ -309,7 +309,7 @@ class MalcolmConfig(ObservableStoreMixin):
                 result = item.validator(value)
                 valid, error = result if isinstance(result, tuple) else (bool(result), "")
                 if not valid:
-                    InstallerLogger.warning(f'Failed to set default for "{key}": "{error}"')
+                    InstallerLogger.warning(f'Failed to set default "{value}" for "{key}": "{error}"')
                     return
 
             # If value unchanged, avoid notifying to prevent observer loops
@@ -717,7 +717,7 @@ class MalcolmConfig(ObservableStoreMixin):
                 for expose_key in [k for v in exposed_services.values() for k, flag in v.items() if flag]:
                     self.apply_default(expose_key, True, ignore_errors=True)
         else:
-            self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, False, ignore_errors=True)
+            self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.NO, ignore_errors=True)
 
         # for hedgehog mode, we have the request reachback ACL stored in an extension
         reachback_request_acl = deep_get(
