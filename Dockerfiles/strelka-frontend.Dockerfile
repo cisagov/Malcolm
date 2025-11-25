@@ -31,6 +31,7 @@ RUN apk update --no-cache && \
       addgroup ${PUSER} tty
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+ADD --chmod=755 strelka/*.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 
@@ -38,7 +39,8 @@ ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
-            "-s", "strelka_frontend"]
+            "-s", "strelka_frontend", \
+            "strelka/strelka-expand-redis-config.sh" ]
 
 CMD ["strelka-frontend", "-locallog=true", "-kafkalog=false" ]
 

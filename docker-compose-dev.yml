@@ -923,10 +923,6 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-frontend
     restart: 'no'
-    command:
-    - strelka-frontend
-    - -locallog=true
-    - -kafkalog=false
     depends_on:
     - redis-cache
     networks:
@@ -934,8 +930,6 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    #ports:
-    #- 57314:57314
     volumes:
     - type: bind
       bind:
@@ -961,8 +955,6 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-manager
     restart: 'no'
-    command:
-    - strelka-manager
     depends_on:
     - redis-cache
     networks:
