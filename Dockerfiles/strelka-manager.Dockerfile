@@ -21,9 +21,14 @@ USER root
 
 ENV TERM xterm
 
+ENV YQ_VERSION "4.49.2"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash jq psmisc rsync shadow tini && \
+    apk --no-cache add bash curl jq psmisc rsync shadow tini && \
+    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
+      chmod 755 /usr/local/bin/yq && \
     addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty
@@ -33,12 +38,12 @@ ADD --chmod=755 strelka/*.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 
-ENTRYPOINT ["/usr/bin/tini", \
+ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "strelka_manager", \
-            "strelka/strelka-expand-redis-config.sh" ]
+            "/usr/local/bin/strelka-expand-redis-config.sh" ]
 
 CMD ["strelka-manager"]
 

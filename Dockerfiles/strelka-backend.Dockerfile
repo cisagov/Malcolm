@@ -22,15 +22,21 @@ USER root
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
+ENV YQ_VERSION "4.49.2"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
+      curl \
       jq \
       procps \
       psmisc \
       rsync \
       tini && \
     usermod -a -G tty ${PUSER} && \
+    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
+      chmod 755 /usr/local/bin/yq && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -45,7 +51,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "strelka_backend", \
-            "strelka/strelka-expand-redis-config.sh" ]
+            "/usr/local/bin/strelka-expand-redis-config.sh" ]
 
 CMD ["/home/strelka/.pyenv/bin/pyenv", "exec", "strelka-backend"]
 

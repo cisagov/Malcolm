@@ -12,10 +12,10 @@ for FILE in "${FILES[@]}"; do
   if [[ -f "$FILE" ]]; then
     yq -i '
       .coordinator.addr = strenv(REDIS_CACHE_HOST) + ":" + strenv(REDIS_CACHE_PORT) |
-      .coordinator.db = strenv(REDIS_STRELKA_COORDINATOR_CACHE_DATABASE) |
+      .coordinator.db = (strenv(REDIS_STRELKA_COORDINATOR_CACHE_DATABASE) | tonumber) |
       .coordinator.password = strenv(REDIS_PASSWORD) |
       .gatekeeper.addr = strenv(REDIS_CACHE_HOST) + ":" + strenv(REDIS_CACHE_PORT) |
-      .gatekeeper.db = strenv(REDIS_STRELKA_GATEKEEPER_CACHE_DATABASE) |
+      .gatekeeper.db = (strenv(REDIS_STRELKA_GATEKEEPER_CACHE_DATABASE) | tonumber) |
       .gatekeeper.password = strenv(REDIS_PASSWORD)
     ' "$FILE"
   fi

@@ -10,8 +10,7 @@ python-magic==0.4.27
 redis==6.4.0
 ruamel.yaml==0.18.14
 setuptools==80.9.0
-supervisor==4.2.5
+supervisor==4.3.0
 watchdog==6.0.0
-
 Cython
 ./python-statfs
