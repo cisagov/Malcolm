@@ -772,8 +772,16 @@ services:
   strelka-backend:
     image: ghcr.io/idaholab/malcolm/strelka-backend:25.12.0
     profiles: ["malcolm", "hedgehog"]
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
+    restart: "no"
+    stdin_open: false
+    tty: true
     hostname: strelka-backend
-    restart: 'no'
     depends_on:
     - redis-cache
     networks:
@@ -796,20 +804,25 @@ services:
       source: ./filescan/strelka-configs/python/backend/
       target: /etc/strelka/configmap
       read_only: true
-    #- type: bind
-    #  bind:
-    #    create_host_path: false
-    #  source: ./strelka/plugins/
-    #  target: /strelka/plugins/
-    #  read_only: true
-    logging:
-      driver: local
-    # FIXME: healthcheck?
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   strelka-frontend:
     image: ghcr.io/idaholab/malcolm/strelka-frontend:25.12.0
     profiles: ["malcolm", "hedgehog"]
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
+    restart: "no"
+    stdin_open: false
+    tty: true
     hostname: strelka-frontend
-    restart: 'no'
     depends_on:
     - redis-cache
     networks:
@@ -832,14 +845,25 @@ services:
       target: /etc/strelka/configmap
       read_only: true
     - strelka-logs:/var/log/strelka/
-    logging:
-      driver: local
-    # FIXME: healthcheck?
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   strelka-manager:
     image: ghcr.io/idaholab/malcolm/strelka-manager:25.12.0
     profiles: ["malcolm", "hedgehog"]
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
+    restart: "no"
+    stdin_open: false
+    tty: true
     hostname: strelka-manager
-    restart: 'no'
     depends_on:
     - redis-cache
     networks:
@@ -861,35 +885,12 @@ services:
       source: ./filescan/strelka-configs/go/manager/
       target: /etc/strelka/configmap
       read_only: true
-    logging:
-      driver: local
-    # FIXME: healthcheck?
-  #strelka-clamav:
-  #  build:
-  #    context: .
-  #    dockerfile: Dockerfiles/strelka-clamav.Dockerfile
-  #  image: ghcr.io/idaholab/malcolm/strelka-clamav:25.12.0
-  #  profiles: ["malcolm", "hedgehog"]
-  #  restart: 'no'
-  #  hostname: strelka-clamav
-  #  networks:
-  #  - default
-  # env_file:
-  # - ./config/process.env
-  # - ./config/ssl.env
-  #  ports:
-  #  - 3301:3301
-  #  volumes:
-  #  - type: bind
-  #    bind:
-  #      create_host_path: false
-  #    source: ./nginx/ca-trust
-  #    target: /var/local/ca-trust
-  #    read_only: true
-  #  - strelka-clamav:/var/lib/clamav/
-  #  logging:
-  #    driver: local
-  #  # FIXME: healthcheck?
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   pcap-capture:
     image: ghcr.io/idaholab/malcolm/pcap-capture:25.12.0
     profiles: ["malcolm", "hedgehog"]

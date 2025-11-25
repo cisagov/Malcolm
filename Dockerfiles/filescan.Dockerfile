@@ -179,6 +179,7 @@ COPY --chmod=644 \
     filescan/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 \
     filescan/filescan-config.yml /filescan/filescan-config.yml
+ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
 
 ################################################################################
 
