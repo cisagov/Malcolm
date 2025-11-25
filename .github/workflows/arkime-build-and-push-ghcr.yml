@@ -6,7 +6,6 @@ on:
       - main
       - staging
       - pipeline-merge
-      - hedgehog-iso-refactor
     paths:
       - 'arkime/**'
       - 'Dockerfiles/arkime.Dockerfile'

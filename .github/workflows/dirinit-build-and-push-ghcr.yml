@@ -6,7 +6,6 @@ on:
       - main
       - staging
       - pipeline-merge
-      - hedgehog-iso-refactor
     paths:
       - 'Dockerfiles/dirinit.Dockerfile'
       - 'shared/bin/docker-uid-gid-setup.sh'
