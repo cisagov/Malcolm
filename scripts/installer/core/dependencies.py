@@ -227,10 +227,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[
                 KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
                 KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+                KEY_CONFIG_ITEM_PRUNE_PCAP,
+                KEY_CONFIG_ITEM_PRUNE_LOGS,
             ],
             condition=True,
-            default_value=lambda arkime_manage_pcap, clean_old_indices: (
-                bool(arkime_manage_pcap) or bool(clean_old_indices)
+            default_value=lambda arkime_manage_pcap, clean_old_indices, hedgehog_iso_prune_pcap, hedgehog_iso_prune_logs: (
+                bool(arkime_manage_pcap)
+                or bool(clean_old_indices)
+                or (
+                    SYSTEM_INFO["malcolm_iso_install"]
+                    and (bool(hedgehog_iso_prune_logs) or bool(hedgehog_iso_prune_pcap))
+                )
             ),
         ),
     ),
@@ -1296,6 +1303,20 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda cleanup: bool(cleanup),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
         )
+    ),
+    KEY_CONFIG_ITEM_PRUNE_PCAP: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda cleanup: SYSTEM_INFO["malcolm_iso_install"] and bool(cleanup),
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+        ),
+    ),
+    KEY_CONFIG_ITEM_PRUNE_LOGS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda cleanup: SYSTEM_INFO["malcolm_iso_install"] and bool(cleanup),
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+        ),
     ),
     # -------------------------------------------------------------------------
     # STORAGE LOCATION DEPENDENCIES

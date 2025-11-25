@@ -9,8 +9,6 @@ Live traffic capture configuration items for Malcolm installer.
 This module contains all configuration items related to live traffic capture settings,
 including network interface configuration, capture filters, and capture methods.
 """
-from typing import Any, Tuple
-
 from scripts.malcolm_constants import WidgetType
 from scripts.malcolm_utils import get_hostname_without_domain
 
@@ -113,6 +111,7 @@ CONFIG_ITEM_ARKIME_WISE_URL = ConfigItem(
     key=KEY_CONFIG_ITEM_ARKIME_WISE_URL,
     label="Arkime WISE URL",
     default_value=None,
+    accept_blank=True,
     validator=lambda x: isinstance(x, str),
     question="Specify the URL for Arkime's WISE plugin",
     widget_type=WidgetType.CHECKBOX,

@@ -32,9 +32,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
-    KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
-    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_LIVE_ZEEK,
@@ -45,18 +43,14 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
-    KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_PCAP_IFACE,
     KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_PCAP_TCPDUMP,
-    KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
     KEY_CONFIG_ITEM_TRAEFIK_HOST,
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
     KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
     KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
-    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
-    KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
 )
 from scripts.installer.configs.constants.enums import (
     SearchEngineMode,
@@ -91,6 +85,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             key_name: str,
             label: str,
             profile: str,
+            blank_ok: bool = False,
             valid_example: str = '',
         ):
             if _is_non_empty_str(conn_value):
@@ -105,7 +100,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
                         key_name,
                         f"{profile} run profile requires {local_conn} for its local {label} connection",
                     )
-            else:
+            elif not blank_ok:
                 add_issue(
                     conn_value,
                     f"{label} connection cannot be blank ({local_conn if profile == PROFILE_MALCOLM else valid_example})",
@@ -144,6 +139,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             KEY_CONFIG_ITEM_LOGSTASH_HOST,
             "Logstash",
             profile,
+            profile == PROFILE_HEDGEHOG,
             "host:port",
         )
 
@@ -153,6 +149,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             KEY_CONFIG_ITEM_ARKIME_WISE_URL,
             "Arkime WISE",
             profile,
+            profile == PROFILE_HEDGEHOG,
             "https://host/wise/",
         )
 

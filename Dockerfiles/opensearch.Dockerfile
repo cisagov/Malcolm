@@ -32,7 +32,7 @@ ENV TERM xterm
 ENV TINI_VERSION v0.19.0
 ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION "4.48.2"
+ENV YQ_VERSION "4.49.2"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true

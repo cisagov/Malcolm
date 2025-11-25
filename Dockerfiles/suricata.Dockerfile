@@ -37,7 +37,7 @@ ENV SUPERCRONIC_VERSION "0.2.39"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.48.2"
+ENV YQ_VERSION "4.49.2"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV SURICATA_VERSION_PATTERN "1:7.0.*"
