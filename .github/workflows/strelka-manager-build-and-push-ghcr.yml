@@ -8,7 +8,6 @@ on:
       - pipeline-merge
       - hedgehog-iso-refactor
     paths:
-      - 'strelka/**'
       - 'Dockerfiles/strelka-manager.Dockerfile'
       - 'container-health-scripts/strelka-manager.sh'
       - 'shared/bin/docker-uid-gid-setup.sh'
