@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'freq-server/**'
       - 'Dockerfiles/freq.Dockerfile'

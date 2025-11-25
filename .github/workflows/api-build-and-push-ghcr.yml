@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'api/**'
       - 'Dockerfiles/api.Dockerfile'

@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'malcolm-iso/**'
       - 'hedgehog-raspi/**'

@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'opensearch-config/**'
       - 'Dockerfiles/opensearch.Dockerfile'
