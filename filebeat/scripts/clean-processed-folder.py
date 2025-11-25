@@ -38,7 +38,7 @@ suricata_dir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/"
 if (os.getenv('MALCOLM_PROFILE') == 'hedgehog') and not os.getenv('LOGSTASH_HOST'):
     clean_log_seconds = 0
     clean_zip_seconds = 0
-else
+else:
     clean_log_seconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
     clean_zip_seconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
 
