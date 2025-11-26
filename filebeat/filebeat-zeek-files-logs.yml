@@ -56,6 +56,10 @@ processors:
       when:
         regexp:
           log.file.path: "/json_streaming_"
+  - drop_event:
+      when:
+        not:
+          has_fields: ["file.extracted"]
 
 #================================ Outputs ======================================
 
