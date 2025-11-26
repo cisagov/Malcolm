@@ -16,7 +16,7 @@ watcher:
       redis:
         host: ${REDIS_HOST}
         port: ${REDIS_PORT}
-        db: ${REDIS_LOGSTASH_ZEEK_DATABASE}
+        db: ${REDIS_ZEEK_FILES_DATABASE}
         password: ${REDIS_PASSWORD}
     - type: directory
       path: /filescan/data/files
