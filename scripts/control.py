@@ -1283,6 +1283,7 @@ def stop(wipe=False):
                     BoundPath("filescan", "/filescan/data/files", True, None, None),
                     BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
                     BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
+                    BoundPath("redis", "/data", True, None, None),
                     BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
                     BoundPath(
                         "upload",

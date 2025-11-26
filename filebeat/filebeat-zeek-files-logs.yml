@@ -41,13 +41,21 @@ filebeat.inputs:
 #=============================== Processors ===================================
 
 processors:
-  - when:
-      regexp:
-        log.file.path: "/json_streaming_"
-    replace:
-      field: "log.file.path"
-      pattern: "(?<=/)(json_streaming_)([^/]+$)"
-      replacement: "$2"
+  - decode_json_fields:
+      fields: [ "message" ]
+      process_array: true
+      target: "file"
+  - drop_fields:
+      fields: [ "message" ]
+      ignore_missing: true
+  - replace:
+      fields:
+        - field: "log.file.path"
+          pattern: "/json_streaming_([^/]+)$"
+          replacement: "/$1"
+      when:
+        regexp:
+          log.file.path: "/json_streaming_"
 
 #================================ Outputs ======================================
 
