@@ -3,6 +3,8 @@ FROM python:3.13.5-bookworm
 # TODO:
 # - extracted files server
 # - size-based file pruning
+# - filescan logs going where other logs go (other drives, etc.)
+# - preservation policy
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
