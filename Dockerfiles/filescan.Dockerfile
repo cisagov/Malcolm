@@ -1,5 +1,8 @@
-#FROM debian:12-slim
 FROM python:3.13.5-bookworm
+
+# TODO:
+# - extracted files server
+# - size-based file pruning
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
