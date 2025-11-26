@@ -314,6 +314,7 @@ services:
     - ./config/opensearch.env
     - ./config/upload-common.env
     - ./config/nginx.env
+    - ./config/redis.env
     - ./config/beats-common.env
     - ./config/netbox-common.env
     - ./config/filebeat.env
@@ -578,7 +579,6 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/upload-common.env
-    - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
     - ./config/zeek-offline.env
@@ -656,7 +656,6 @@ services:
     - ./config/ssl.env
     - ./config/upload-common.env
     - ./config/pcap-capture.env
-    - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
     - ./config/zeek-live.env

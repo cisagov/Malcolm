@@ -9,7 +9,9 @@ global extractor_max_size = (getenv("EXTRACTED_FILE_MAX_BYTES") == "") ? extract
 redef FileExtract::prefix = (getenv("ZEEK_EXTRACTOR_PATH") == "") ? "./extract_files/" : getenv("ZEEK_EXTRACTOR_PATH");
 
 @if (extractor_extract_mode != extractor_extract_none)
-  @load ./files-to-redis.js
+  @load json-streaming-logs
+  redef JSONStreaming::enabled_logs = set("files");
+  redef JSONStreaming::enable_log_rotation = F;
 @endif
 
 event file_sniff(f: fa_file, meta: fa_metadata) {

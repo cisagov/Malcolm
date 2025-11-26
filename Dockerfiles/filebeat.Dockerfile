@@ -134,6 +134,7 @@ ADD --chmod=644 filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-n
 ADD --chmod=644 filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
 ADD --chmod=644 filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/filebeat-syslog-udp.yml
 ADD --chmod=644 filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
+ADD --chmod=644 filebeat/filebeat-zeek-files-logs.yml /usr/share/filebeat-zeek-files-logs/filebeat-zeek-files-logs.yml
 ADD filebeat/scripts /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
@@ -141,7 +142,7 @@ ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=644 filebeat/supervisord.conf /etc/supervisord.conf
 
-RUN for INPUT in logs nginx tcp syslog-tcp syslog-udp; do \
+RUN for INPUT in logs zeek-files-logs nginx tcp syslog-tcp syslog-udp; do \
       mkdir -p /usr/share/filebeat-$INPUT/data; \
       chown -R root:${PGROUP} /usr/share/filebeat-$INPUT; \
       cp -a /usr/share/filebeat/module /usr/share/filebeat-$INPUT/module; \

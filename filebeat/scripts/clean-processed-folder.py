@@ -21,9 +21,10 @@ from malcolm_utils import LoadFileIfJson, deep_get, set_logging, get_verbosity_e
 
 lock_filename = os.path.join(gettempdir(), f'{os.path.basename(__file__)}.lock')
 
-filebeat_registry_filename = os.getenv(
-    'FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json"
-)
+filebeat_registry_filenames = [
+    os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json"),
+    os.getenv('FILEBEAT_REDIS_REGISTRY_FILE', "/usr/share/filebeat-zeek-files-logs/data/registry/filebeat/log.json"),
+]
 
 zeek_dir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
 zeek_live_dir = os.path.join(zeek_dir, "live/logs/")
@@ -139,23 +140,26 @@ def list_files_in_dir(base_dir: str) -> List[str]:
     return [os.path.join(root, f) for root, _, files in os.walk(base_dir) for f in files]
 
 
-def load_filebeat_registry(registry_path: str) -> List[Tuple[int, int]]:
-    """Load the filebeat registry file and extract (device, inode) tuples."""
-    if not os.path.isfile(registry_path):
-        return []
-    try:
-        with open(registry_path) as f:
-            fb_reg = LoadFileIfJson(f, attemptLines=True)
-    except Exception as e:
-        logging.error(f"Failed to load filebeat registry: {e}")
-        return []
-
+def load_filebeat_registries(registry_paths: List[str]) -> List[Tuple[int, int]]:
+    """Load the filebeat registry file(s) and extract (device, inode) tuples."""
     fb_files = []
-    for entry in fb_reg:
-        device = deep_get(entry, ['v', 'FileStateOS', 'device'])
-        inode = deep_get(entry, ['v', 'FileStateOS', 'inode'])
-        if device is not None and inode is not None:
-            fb_files.append((int(device), int(inode)))
+
+    for registry_path in registry_paths:
+        if not os.path.isfile(registry_path):
+            continue
+        try:
+            with open(registry_path) as f:
+                fb_reg = LoadFileIfJson(f, attemptLines=True)
+        except Exception as e:
+            logging.error(f"Failed to load filebeat registry: {e}")
+            continue
+
+        for entry in fb_reg:
+            device = deep_get(entry, ['v', 'FileStateOS', 'device'])
+            inode = deep_get(entry, ['v', 'FileStateOS', 'inode'])
+            if device is not None and inode is not None:
+                fb_files.append((int(device), int(inode)))
+
     return fb_files
 
 
@@ -219,7 +223,7 @@ def prune_files() -> None:
     if (clean_log_seconds <= 0) and (clean_zip_seconds <= 0):
         return
 
-    fb_files = load_filebeat_registry(filebeat_registry_filename)
+    fb_files = load_filebeat_registries(filebeat_registry_filenames)
 
     # look for regular Zeek files in the processed/ directory
     zeek_found = list_files_in_dir(zeek_processed_dir)

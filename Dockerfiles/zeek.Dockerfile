@@ -163,10 +163,11 @@ ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD --chmod=644 zeek/supervisord.conf /etc/supervisord.conf
-ADD --chmod=644 zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
-ADD --chmod=644 zeek/config/*.js ${ZEEK_DIR}/share/zeek/site/
-ADD --chmod=644 zeek/config/*.json ${ZEEK_DIR}/share/zeek/site/
 ADD --chmod=644 zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
+ADD --chmod=644 zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
+# If we ever use ZeekJS again, see commit 15ee1e0 for what that would have looked like
+# ADD --chmod=644 zeek/config/*.js ${ZEEK_DIR}/share/zeek/site/
+# ADD --chmod=644 zeek/config/*.json ${ZEEK_DIR}/share/zeek/site/
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \

@@ -1,0 +1,49 @@
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+
+name: "${PCAP_NODE_NAME:malcolm}"
+
+logging.metrics.enabled: false
+
+#================================ Inputs =======================================
+
+#-------------------------- JSON-formatted files.log ---------------------------
+filebeat.inputs:
+- type: log
+  paths:
+    - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/json_streaming_files.log
+  symlinks: true
+  fields_under_root: true
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
+- type: log
+  paths:
+    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/spool/logger-*/json_streaming_files.log
+  symlinks: true
+  fields_under_root: true
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: false
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
+#================================ Outputs ======================================
+
+#-------------------------- Redis Output (for filescan) ------------------------
+output.redis:
+  hosts: ["${REDIS_CACHE_HOST:redis-cache}:${REDIS_CACHE_PORT:6379}"]
+  password: "${REDIS_PASSWORD}"
+  db: ${REDIS_FILESCAN_CACHE_DATABASE:3}
+  key: "zeek_notify"
+  datatype: "list"
