@@ -173,7 +173,6 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [PCAP processors](contributing-pcap.md#PCAP)
     - [Logstash](contributing-logstash.md#Logstash)
     - [OpenSearch Dashboards](contributing-dashboards.md#dashboards)
-    - [Carved file scanners](contributing-file-scanners.md#Scanners)
     - [Style](contributing-style.md#Style)
     - [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners)
     - [Preparing a Malcolm Release](contributing-release-prep.md)

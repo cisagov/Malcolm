@@ -205,8 +205,6 @@ ghcr.io/idaholab/malcolm/dashboards             {{ site.malcolm.version }}      
 ghcr.io/romeogdetlevjr/malcolm/dashboards       main          xxxxxxxxxxxx   13 minutes ago   1.55GB
 ghcr.io/idaholab/malcolm/suricata               {{ site.malcolm.version }}       xxxxxxxxxxxx   14 minutes ago   339MB
 ghcr.io/romeogdetlevjr/malcolm/suricata         main          xxxxxxxxxxxx   14 minutes ago   339MB
-ghcr.io/idaholab/malcolm/file-monitor           {{ site.malcolm.version }}       xxxxxxxxxxxx   15 minutes ago   712MB
-ghcr.io/romeogdetlevjr/malcolm/file-monitor     main          xxxxxxxxxxxx   15 minutes ago   712MB
 ghcr.io/idaholab/malcolm/redis                  {{ site.malcolm.version }}       xxxxxxxxxxxx   15 minutes ago   55.4MB
 ghcr.io/romeogdetlevjr/malcolm/redis            main          xxxxxxxxxxxx   15 minutes ago   55.4MB
 ghcr.io/idaholab/malcolm/nginx-proxy            {{ site.malcolm.version }}       xxxxxxxxxxxx   16 minutes ago   160MB

@@ -331,7 +331,6 @@ malcolm-arkime-1              ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.ve
 malcolm-arkime-live-1         ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}-arm64              "/usr/bin/tini -- /u…"   arkime-live         7 minutes ago   Up 7 minutes (healthy)
 malcolm-dashboards-1          ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}-arm64          "/usr/bin/tini -- /u…"   dashboards          7 minutes ago   Up 7 minutes (healthy)   5601/tcp
 malcolm-dashboards-helper-1   ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}-arm64   "/usr/bin/tini -- /u…"   dashboards-helper   7 minutes ago   Up 7 minutes (healthy)   28991/tcp
-malcolm-file-monitor-1        ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}-arm64        "/usr/bin/tini -- /u…"   file-monitor        7 minutes ago   Up 7 minutes (healthy)   3310/tcp, 8006/tcp
 malcolm-filebeat-1            ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}-arm64        "/usr/bin/tini -- /u…"   filebeat            7 minutes ago   Up 7 minutes (healthy)
 malcolm-freq-1                ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}-arm64                "/usr/bin/tini -- /u…"   freq                7 minutes ago   Up 7 minutes (healthy)   10004/tcp
 malcolm-htadmin-1             ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}-arm64             "/usr/bin/tini -- /u…"   htadmin             7 minutes ago   Up 7 minutes (healthy)   80/tcp
@@ -739,7 +738,6 @@ arkime-deployment-8564cfd96f-krmpf              1/1     Running   0          36m
 arkime-live-deployment-7c55bbd8d4-mngpg         1/1     Running   0          36m
 dashboards-deployment-5bb86dc65-kp6ll           1/1     Running   0          36m
 dashboards-helper-deployment-74644df874-tr68h   1/1     Running   0          36m
-file-monitor-deployment-7579589ff7-8blpp        1/1     Running   0          36m
 filebeat-deployment-6cf57d56dd-d4hnb            1/1     Running   0          36m
 freq-deployment-6b8cfb6f65-b5h86                1/1     Running   0          36m
 htadmin-deployment-5b74cff59f-c8z5p             1/1     Running   0          36m

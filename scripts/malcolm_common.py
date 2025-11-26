@@ -53,7 +53,6 @@ from scripts.malcolm_constants import (
     DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
-    FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH,
     FILEBEAT_SURICATA_LOG_CONTAINER_PATH,
     FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
     ImageArchitecture,
@@ -324,10 +323,7 @@ def BuildBoundPathReplacers(
         BoundPathReplacer("arkime-live", PCAP_DATA_CONTAINER_PATH, pcap_dir),
         BoundPathReplacer("filebeat", FILEBEAT_SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
         BoundPathReplacer("filebeat", FILEBEAT_ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
-        BoundPathReplacer(
-            "file-monitor", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')
-        ),
-        BoundPathReplacer("file-monitor", FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH, os.path.join(zeek_log_dir, 'current')),
+        BoundPathReplacer("filescan", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
         BoundPathReplacer("opensearch", OPENSEARCH_DATA_CONTAINER_PATH, index_dir),
         BoundPathReplacer("opensearch", OPENSEARCH_BACKUP_CONTAINER_PATH, index_snapshot_dir),
         BoundPathReplacer("pcap-capture", PCAP_CAPTURE_CONTAINER_PATH, os.path.join(pcap_dir, 'upload')),

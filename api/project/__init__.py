@@ -199,10 +199,12 @@ netboxToken = app.config["NETBOX_TOKEN"]
 opensearchUrl = app.config["OPENSEARCH_URL"]
 pcapMonitorHost = app.config["PCAP_MONITOR_HOST"]
 pcapTopicPort = app.config["PCAP_TOPIC_PORT"]
-zeekExtractedFileLoggerHost = app.config["ZEEK_EXTRACTED_FILE_LOGGER_HOST"]
-zeekExtractedFileLoggerTopicPort = app.config["ZEEK_EXTRACTED_FILE_LOGGER_TOPIC_PORT"]
-zeekExtractedFileMonitorHost = app.config["ZEEK_EXTRACTED_FILE_MONITOR_HOST"]
-zeekExtractedFileTopicPort = app.config["ZEEK_EXTRACTED_FILE_TOPIC_PORT"]
+
+# TODO: filescan/strelka
+# zeekExtractedFileLoggerHost = app.config["ZEEK_EXTRACTED_FILE_LOGGER_HOST"]
+# zeekExtractedFileLoggerTopicPort = app.config["ZEEK_EXTRACTED_FILE_LOGGER_TOPIC_PORT"]
+# zeekExtractedFileMonitorHost = app.config["ZEEK_EXTRACTED_FILE_MONITOR_HOST"]
+# zeekExtractedFileTopicPort = app.config["ZEEK_EXTRACTED_FILE_TOPIC_PORT"]
 
 opensearchLocal = (databaseMode == DatabaseMode.OpenSearchLocal) or (opensearchUrl == 'https://opensearch:9200')
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
@@ -1103,6 +1105,7 @@ def ready():
         true or false, the ready status of OpenSearch (or Elasticsearch)
     pcap_monitor
         true or false, the ready status of the PCAP monitoring process
+    # TODO: strelka/filescan
     zeek_extracted_file_logger
         true or false, the ready status of the Zeek extracted file results logging process
     zeek_extracted_file_monitor
@@ -1146,14 +1149,15 @@ def ready():
         ),
         "opensearch": (lambda: dict(databaseClient.cluster.health()), {}),
         "pcap_monitor": (lambda: malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort), False),
-        "zeek_extracted_file_monitor": (
-            lambda: malcolm_utils.check_socket(zeekExtractedFileMonitorHost, zeekExtractedFileTopicPort),
-            False,
-        ),
-        "zeek_extracted_file_logger": (
-            lambda: malcolm_utils.check_socket(zeekExtractedFileLoggerHost, zeekExtractedFileLoggerTopicPort),
-            False,
-        ),
+        # TODO: strelka/filescan
+        # "zeek_extracted_file_monitor": (
+        #     lambda: malcolm_utils.check_socket(zeekExtractedFileMonitorHost, zeekExtractedFileTopicPort),
+        #     False,
+        # ),
+        # "zeek_extracted_file_logger": (
+        #     lambda: malcolm_utils.check_socket(zeekExtractedFileLoggerHost, zeekExtractedFileLoggerTopicPort),
+        #     False,
+        # ),
     }
 
     results = {name: safe_check(name, func, default) for name, (func, default) in checks.items()}
@@ -1184,8 +1188,9 @@ def ready():
         netbox=isinstance(results["netbox"], dict) and bool(results["netbox"].get("core")),
         opensearch=malcolm_utils.deep_get(results["opensearch"], ["status"], "red") != "red",
         pcap_monitor=results["pcap_monitor"],
-        zeek_extracted_file_logger=results["zeek_extracted_file_logger"],
-        zeek_extracted_file_monitor=results["zeek_extracted_file_monitor"],
+        # TODO: strelka/filescan
+        # zeek_extracted_file_logger=results["zeek_extracted_file_logger"],
+        # zeek_extracted_file_monitor=results["zeek_extracted_file_monitor"],
     )
 
 

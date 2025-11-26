@@ -562,7 +562,6 @@ e774e99c3364  ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}      
 e4607af64749  ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}         /usr/share/opense...  15 minutes ago  Up 3 minutes (healthy)   9200/tcp, 9300/tcp, 9600/tcp, 9650/tcp  malcolm-opensearch-1
 48aa56016aef  ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}             /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)   8000/tcp, 8005/tcp, 8081/tcp            malcolm-arkime-live-1
 f7e7ab1c457b  ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}               /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)                                           malcolm-zeek-live-1
-32790263fd49  ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}       /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)   3310/tcp, 8006/tcp                      malcolm-file-monitor-1
 cf7fc1c029a1  ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}       /usr/local/bin/su...  14 minutes ago  Up 3 minutes (healthy)                                           malcolm-filebeat-1
 f96db0e5bf67  ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}               /usr/local/bin/su...  13 minutes ago  Up 3 minutes (healthy)                                           malcolm-zeek-1
 42f8aab398a9  ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}       /usr/local/bin/su...  13 minutes ago  Up 3 minutes (starting)  5044/tcp, 9001/tcp, 9600/tcp            malcolm-logstash-1

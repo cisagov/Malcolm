@@ -23,11 +23,12 @@ dashboards-helper:
       requests:
         cpu: "0.5"
         memory: "512Mi"
-file-monitor:
-    resources:
-      requests:
-        cpu: "2"
-        memory: "4Gi"
+# TODO: strelka/filescan
+# file-monitor:
+#     resources:
+#       requests:
+#         cpu: "2"
+#         memory: "4Gi"
 filebeat:
     resources:
       requests:

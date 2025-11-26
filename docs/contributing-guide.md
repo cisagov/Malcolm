@@ -24,7 +24,6 @@ It is recommended before reviewing this guide to read the documentation on [cust
 * [OpenSearch Dashboards](contributing-dashboards.md#dashboards)
     + [Adding new visualizations and dashboards](contributing-dashboards.md#DashboardsNewViz)
     + [OpenSearch Dashboards plugins](contributing-dashboards.md#DashboardsPlugins)
-* [Carved file scanners](contributing-file-scanners.md#Scanners)
 * [Style](contributing-style.md#Style)
 * [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners)
 * [Preparing a Malcolm Release](contributing-release-prep.md)

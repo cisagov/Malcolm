@@ -272,7 +272,6 @@ agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     |
 
 Pod Name                                       | State   | Pod IP     | Pod Kind   | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts        | Container Image              |
 api-deployment-6f4686cf59-bn286                | Running | 10.42.2.14 | ReplicaSet | agent1      | 0.11m     | 59.62Mi      | api-container:0                | api:{{ site.malcolm.version }}               |
-file-monitor-deployment-855646bd75-vk7st       | Running | 10.42.2.16 | ReplicaSet | agent1      | 8.47m     | 1.46Gi       | file-monitor-container:0       | file-monitor:{{ site.malcolm.version }}      |
 zeek-live-deployment-64b69d4b6f-947vr          | Running | 10.42.2.17 | ReplicaSet | agent1      | 0.02m     | 12.44Mi      | zeek-live-container:0          | zeek:{{ site.malcolm.version }}              |
 dashboards-helper-deployment-69dc54f6b6-ln4sq  | Running | 10.42.2.15 | ReplicaSet | agent1      | 10.77m    | 38.43Mi      | dashboards-helper-container:0  | dashboards-helper:{{ site.malcolm.version }} |
 upload-deployment-586568844b-4jnk9             | Running | 10.42.2.18 | ReplicaSet | agent1      | 0.15m     | 29.78Mi      | upload-container:0             | file-upload:{{ site.malcolm.version }}       |
@@ -580,7 +579,6 @@ suricata-live-deployment-6494c77759-rpt48      | Running | 10.42.1.8  | ReplicaS
 netbox-deployment-cdcff4977-7ns2q              | Running | 10.42.1.7  | ReplicaSet | agent1      | 830.47m   | 530.7Mi      | netbox-container:0             | netbox:{{ site.malcolm.version }}            |
 zeek-offline-deployment-844f4865bd-7x68b       | Running | 10.42.1.9  | ReplicaSet | agent1      | 1.44m     | 43.66Mi      | zeek-offline-container:0       | zeek:{{ site.malcolm.version }}              |
 filebeat-deployment-6ff8bc444f-pdgzj           | Running | 10.42.1.11 | ReplicaSet | agent1      | 0.78m     | 75.25Mi      | filebeat-container:0           | filebeat-oss:{{ site.malcolm.version }}      |
-file-monitor-deployment-855646bd75-nbngq       | Running | 10.42.1.4  | ReplicaSet | agent1      | 1.69m     | 1.46Gi       | file-monitor-container:0       | file-monitor:{{ site.malcolm.version }}      |
 upload-deployment-586568844b-9s7f5             | Running | 10.42.1.13 | ReplicaSet | agent1      | 0.14m     | 29.62Mi      | upload-container:0             | file-upload:{{ site.malcolm.version }}       |
 logstash-deployment-6fbc9fdcd5-2hhx8           | Running | 10.42.1.5  | ReplicaSet | agent1      | 3236.29m  | 357.36Mi     | logstash-container:0           | logstash-oss:{{ site.malcolm.version }}      |
 ```

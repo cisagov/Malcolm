@@ -285,7 +285,6 @@ user@host:~/Malcolm$ docker compose --profile malcolm pull
  ✔ arkime Pulled
  ✔ dashboards Pulled
  ✔ dashboards-helper Pulled
- ✔ file-monitor Pulled
  ✔ filebeat Pulled
  ✔ freq Pulled
  ✔ htadmin Pulled
@@ -308,7 +307,6 @@ ghcr.io/idaholab/malcolm/api                 {{ site.malcolm.version }}   ed92d0
 ghcr.io/idaholab/malcolm/arkime              {{ site.malcolm.version }}   8c6bc6d79e1b   4 weeks ago   835MB
 ghcr.io/idaholab/malcolm/dashboards          {{ site.malcolm.version }}   a35265cbde35   4 weeks ago   1.55GB
 ghcr.io/idaholab/malcolm/dashboards-helper   {{ site.malcolm.version }}   7ca0c53c745f   4 weeks ago   253MB
-ghcr.io/idaholab/malcolm/file-monitor        {{ site.malcolm.version }}   daef959d2db4   5 weeks ago   723MB
 ghcr.io/idaholab/malcolm/file-upload         {{ site.malcolm.version }}   40468de667cf   5 weeks ago   250MB
 ghcr.io/idaholab/malcolm/filebeat-oss        {{ site.malcolm.version }}   6e08f4a8621e   4 weeks ago   433MB
 ghcr.io/idaholab/malcolm/freq                {{ site.malcolm.version }}   7a64594a7c6b   5 weeks ago   155MB
@@ -339,7 +337,6 @@ malcolm-api-1                  "/usr/local/bin/dock…"   api                  r
 malcolm-arkime-1               "/usr/local/bin/dock…"   arkime               running (starting)   …
 malcolm-dashboards-1           "/usr/local/bin/dock…"   dashboards           running (starting)   …
 malcolm-dashboards-helper-1    "/usr/local/bin/dock…"   dashboards-helper    running (starting)   …
-malcolm-file-monitor-1         "/usr/local/bin/dock…"   file-monitor         running (starting)   …
 malcolm-filebeat-1             "/usr/local/bin/dock…"   filebeat             running (starting)   …
 malcolm-freq-1                 "/usr/local/bin/dock…"   freq                 running (starting)   …
 malcolm-htadmin-1              "/usr/local/bin/dock…"   htadmin              running (starting)   …

@@ -98,7 +98,6 @@ COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS = "logs"
 # Directory path constants for volume mapping
 
 # Container paths (inside containers) used for volume mappings
-FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH = "/zeek/logs"
 FILEBEAT_SURICATA_LOG_CONTAINER_PATH = "/suricata"
 FILEBEAT_ZEEK_LOG_CONTAINER_PATH = "/zeek"
 OPENSEARCH_BACKUP_CONTAINER_PATH = "/opt/opensearch/backup"

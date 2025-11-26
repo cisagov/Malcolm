@@ -98,6 +98,8 @@ docker compose exec zeek-live supervisorctl restart live-zeek
 
 ## <a name="YARA"></a>YARA
 
+# TODO!!! UPDATE THIS FOR PIPELINE
+
 [Custom rules](https://yara.readthedocs.io/en/stable/writingrules.html) files for [YARA](https://github.com/VirusTotal/yara) (with either the `*.yara` or `*.yar` file extension) may be placed in the `./yara/rules/` subdirectory in the Malcolm installation directory.
 
 New rules files will take effect by either restarting Malcolm (specifically the `file-monitor` container) or when the automatic rule update runs (if automatic rule updates are enabled). This can also be done manually without restarting Malcolm by running the following commands from the Malcolm installation directory:

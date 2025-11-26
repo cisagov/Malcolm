@@ -14,7 +14,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `Dockerfiles` - a directory containing build instructions for Malcolm's images
 * `docs` - a directory containing instructions and documentation
 * `filebeat` - code and configuration for the `filebeat` container that ingests Zeek logs and forwards them to the `logstash` container
-* `file-monitor` - code and configuration for the `file-monitor` container that can scan files extracted by Zeek
+* `filescan` - code and configuration for the `filescan` container that can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container that serves a web browser-based upload form for uploading PCAP files and Zeek logs, and serves an SFTP share as an alternate upload
 * `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
 * `hedgehog-raspi` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) [Raspberry Pi image](hedgehog-raspi-build.md#HedgehogRaspiBuild)
@@ -32,6 +32,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `redis` - an initially empty directory where the Redis database runtime files will reside
 * `scripts` - control scripts for starting, stopping, restarting, etc., Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
+* `strelka` - code for the `strelka-` containers used in by `filescan` for file scanning
 * `suricata` - code and configuration for the `suricata` container that handles PCAP processing using Suricata
 * `suricata-logs` - an initially empty directory for Suricata logs to be uploaded, processed, and stored
 * `yara` - a directory for custom user-provided YARA rules
@@ -59,7 +60,10 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/arkime` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/dashboards-helper` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/dashboards` (based on `opensearchproject/opensearch-dashboards`)
-* `ghcr.io/idaholab/malcolm/file-monitor` (based on `debian:13-slim`)
+* `ghcr.io/idaholab/malcolm/filescan` (based on `python:3`)
+* `ghcr.io/idaholab/malcolm/strelka-backend` (based on `ghcr.io/idaholab/strelka/strelka-backend:malcolm`)
+* `ghcr.io/idaholab/malcolm/strelka-manager` (based on `ghcr.io/idaholab/strelka/strelka-manager:malcolm`)
+* `ghcr.io/idaholab/malcolm/strelka-frontend` (based on `ghcr.io/idaholab/strelka/strelka-frontend:malcolm`)
 * `ghcr.io/idaholab/malcolm/file-upload` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `ghcr.io/idaholab/malcolm/freq` (based on `debian:13-slim`)

@@ -75,7 +75,7 @@ exclude:
   - docs/slides
   - docs/stix
   - docs/web
-  - file-monitor
+  - filescan
   - file-upload
   - filebeat
   - freq-server
@@ -93,6 +93,7 @@ exclude:
   - pcap-monitor
   - scripts
   - shared
+  - strelka
   - suricata
   - suricata-logs
   - yara

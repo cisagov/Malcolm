@@ -345,30 +345,6 @@ services:
         source: ./suricata/include-configs
         target: /opt/suricata/include-configs
         read_only: true
-  file-monitor:
-    volumes:
-      - type: bind
-        bind:
-          create_host_path: false
-        source: ./nginx/ca-trust
-        target: /var/local/ca-trust
-        read_only: true
-      - type: bind
-        bind:
-          create_host_path: false
-        source: ./zeek-logs/extract_files
-        target: /zeek/extract_files
-      - type: bind
-        bind:
-          create_host_path: false
-        source: ./zeek-logs/current
-        target: /zeek/logs
-      - type: bind
-        bind:
-          create_host_path: false
-        source: ./yara/rules
-        target: /yara-rules/custom
-        read_only: true
   pcap-capture:
     volumes:
       - type: bind
