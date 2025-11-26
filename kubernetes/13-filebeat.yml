@@ -54,6 +54,8 @@ spec:
               name: upload-common-env
           - configMapRef:
               name: nginx-env
+          - secretRef:
+              name: redis-env
           - configMapRef:
               name: beats-common-env
           - configMapRef:
