@@ -578,6 +578,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/upload-common.env
+    - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
     - ./config/zeek-offline.env
@@ -609,18 +610,18 @@ services:
       bind:
         create_host_path: false
       source: ./zeek/intel
-      target: /opt/zeek/share/zeek/site/intel
+      target: /usr/local/zeek/share/zeek/site/intel
     - type: bind
       bind:
         create_host_path: false
       source: ./zeek/custom
-      target: /opt/zeek/share/zeek/site/custom
+      target: /usr/local/zeek/share/zeek/site/custom
       read_only: true
     - type: bind
       bind:
         create_host_path: false
       source: ./zeek/config/local.zeek
-      target: /opt/zeek/share/zeek/site/local.zeek
+      target: /usr/local/zeek/share/zeek/site/local.zeek
       read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
@@ -655,6 +656,7 @@ services:
     - ./config/ssl.env
     - ./config/upload-common.env
     - ./config/pcap-capture.env
+    - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
     - ./config/zeek-live.env
@@ -679,18 +681,18 @@ services:
       bind:
         create_host_path: false
       source: ./zeek/intel
-      target: /opt/zeek/share/zeek/site/intel
+      target: /usr/local/zeek/share/zeek/site/intel
     - type: bind
       bind:
         create_host_path: false
       source: ./zeek/custom
-      target: /opt/zeek/share/zeek/site/custom
+      target: /usr/local/zeek/share/zeek/site/custom
       read_only: true
     - type: bind
       bind:
         create_host_path: false
       source: ./zeek/config/local.zeek
-      target: /opt/zeek/share/zeek/site/local.zeek
+      target: /usr/local/zeek/share/zeek/site/local.zeek
       read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]

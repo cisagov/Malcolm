@@ -7,7 +7,7 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
-ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
+ZEEK_DIR=${ZEEK_DIR:-/usr/local/zeek}
 
 #
 # get_latest_github_tagged_release

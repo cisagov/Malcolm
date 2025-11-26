@@ -30,5 +30,3 @@ jobs:
       dockerfile: ./Dockerfiles/zeek.Dockerfile
       extra_build_args: |
         BUILD_JOBS=2
-    secrets:
-      zeek_deb_alternate_download_url: ${{ secrets.ZEEK_DEB_ALTERNATE_DOWNLOAD_URL }}

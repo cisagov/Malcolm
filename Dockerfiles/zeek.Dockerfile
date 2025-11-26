@@ -1,4 +1,4 @@
-FROM debian:13-slim
+FROM zeek/zeek:8.0.4
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -33,20 +33,14 @@ ENV PUSER_RLIMIT_UNLOCK true
 USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
-# for download and install
-ARG ZEEK_VERSION=8.0.4-0
-ENV ZEEK_VERSION $ZEEK_VERSION
-ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
-
 # put Zeek and Spicy in PATH
-ENV ZEEK_DIR "/opt/zeek"
+ENV ZEEK_DIR "/usr/local/zeek"
 ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 
 # for build
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
-ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_iana_lookup_generator.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
@@ -87,6 +81,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       libfl-dev \
       libfl2 \
       libgoogle-perftools4 \
+      libhiredis-dev \
+      libhiredis1.1.0 \
       libkrb5-3 \
       libmaxminddb-dev \
       libmaxminddb0 \
@@ -125,11 +121,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       xxd \
       zlib1g-dev && \
     python3 -m pip install --break-system-packages --no-cache-dir -r /usr/local/src/requirements.txt && \
-    mkdir -p /tmp/zeek-packages && \
-      bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
-      dpkg -i /tmp/zeek-packages/*.deb && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
+    cd "${ZEEK_DIR}"/share/zeek/site && \
+      /usr/share/nodejs/corepack/shims/npm install redis && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
@@ -169,6 +164,8 @@ ADD --chmod=755 shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD --chmod=644 zeek/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
+ADD --chmod=644 zeek/config/*.js ${ZEEK_DIR}/share/zeek/site/
+ADD --chmod=644 zeek/config/*.json ${ZEEK_DIR}/share/zeek/site/
 ADD --chmod=644 zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
@@ -218,8 +215,8 @@ ARG ZEEK_INTEL_FEED_SINCE=
 ARG ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION=false
 ARG ZEEK_EXTRACTOR_MODE=none
 ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
-ARG ZEEK_INTEL_PATH=/opt/zeek/share/zeek/site/intel
-ARG ZEEK_CUSTOM_PATH=/opt/zeek/share/zeek/site/custom
+ARG ZEEK_INTEL_PATH=/usr/local/zeek/share/zeek/site/intel
+ARG ZEEK_CUSTOM_PATH=/usr/local/zeek/share/zeek/site/custom
 ARG ZEEK_UPLOAD_DIRECTORY=/zeek/upload
 ARG PCAP_PROCESSED_DIRECTORY=/pcap/processed
 ARG PCAP_PIPELINE_VERBOSITY=""

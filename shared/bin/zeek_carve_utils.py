@@ -238,7 +238,7 @@ class ExtractedFileNameParts:
 
 
 ###################################################################################################
-# filespec to various fields as per the extractor zeek script (/opt/zeek/share/zeek/site/extractor.zeek)
+# filespec to various fields as per the extractor zeek script (/usr/local/zeek/share/zeek/site/extractor.zeek)
 #   source-fuid-uid-time.ext
 #   eg.
 #       SSL-FTnzwn4hEPJi7BfzRk-CsRaviydrGyYROuX3-20190402105425.crt

@@ -254,12 +254,12 @@ services:
         bind:
           create_host_path: false
         source: ./zeek/intel
-        target: /opt/zeek/share/zeek/site/intel
+        target: /usr/local/zeek/share/zeek/site/intel
       - type: bind
         bind:
           create_host_path: false
         source: ./zeek/custom
-        target: /opt/zeek/share/zeek/site/custom
+        target: /usr/local/zeek/share/zeek/site/custom
         read_only: true
   zeek-live:
     volumes:
@@ -283,12 +283,12 @@ services:
         bind:
           create_host_path: false
         source: ./zeek/intel
-        target: /opt/zeek/share/zeek/site/intel
+        target: /usr/local/zeek/share/zeek/site/intel
       - type: bind
         bind:
           create_host_path: false
         source: ./zeek/custom
-        target: /opt/zeek/share/zeek/site/custom
+        target: /usr/local/zeek/share/zeek/site/custom
         read_only: true
   suricata:
     volumes:

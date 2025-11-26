@@ -4,7 +4,7 @@
 #   exit code of Zeek.
 #
 # -v            turns on verbose execution
-# -p            specify a sample PCAP (if unspecified, uses smallest PCAP under the /opt/zeek directory)
+# -p            specify a sample PCAP (if unspecified, uses smallest PCAP under the /usr/local/zeek directory)
 # -z            the Zeek policy (defaults to "local")
 #
 # Any additional arguments besides the above are passed as-is to Zeek.
@@ -13,7 +13,7 @@
 
 set -uo pipefail
 
-ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
+ZEEK_DIR=${ZEEK_DIR:-/usr/local/zeek}
 ZEEK_POLICY=local
 DUMMY_PCAP=
 VERBOSE=0

@@ -8,6 +8,10 @@ global extractor_extract_mode = (getenv("ZEEK_EXTRACTOR_MODE") == "") ? extracto
 global extractor_max_size = (getenv("EXTRACTED_FILE_MAX_BYTES") == "") ? extractor_max_size_default : to_count(getenv("EXTRACTED_FILE_MAX_BYTES"));
 redef FileExtract::prefix = (getenv("ZEEK_EXTRACTOR_PATH") == "") ? "./extract_files/" : getenv("ZEEK_EXTRACTOR_PATH");
 
+@if (extractor_extract_mode != extractor_extract_none)
+  @load ./files-to-redis.js
+@endif
+
 event file_sniff(f: fa_file, meta: fa_metadata) {
 
       # extract all files OR

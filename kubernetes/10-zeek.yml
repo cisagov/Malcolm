@@ -57,11 +57,11 @@ spec:
           - mountPath: "/zeek/upload"
             name: zeek-offline-zeek-volume
             subPath: "upload"
-          - mountPath: "/opt/zeek/share/zeek/site/custom/configmap"
+          - mountPath: "/usr/local/zeek/share/zeek/site/custom/configmap"
             name: zeek-offline-custom-volume
-          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed/configmap"
+          - mountPath: "/usr/local/zeek/share/zeek/site/intel-preseed/configmap"
             name: zeek-offline-intel-preseed-volume
-          - mountPath: "/opt/zeek/share/zeek/site/intel"
+          - mountPath: "/usr/local/zeek/share/zeek/site/intel"
             name: zeek-offline-intel-volume
             subPath: "zeek/intel"
       initContainers:

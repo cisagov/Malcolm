@@ -123,19 +123,15 @@ RUN set -e ; \
 
 ################################################################################
 
-COPY --chmod=755 \
-    filescan/docker-entrypoint.sh \
-    /docker-entrypoint.sh
-COPY --chmod=755 \
-    shared/bin/docker-uid-gid-setup.sh \
-    shared/bin/service_check_passthrough.sh \
-    /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+ADD --chmod=755 filescan/docker-entrypoint.sh /docker-entrypoint.sh
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
 # originally also copied: shared/bin/prune_files.sh
 
 RUN mkdir -p /install-filescan
-COPY --chmod=644 \
-    filescan/python-filescan \
-    /install-filescan/
+COPY --chmod=644 filescan/python-filescan /install-filescan/
 RUN cd /install-filescan && \
     python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt && \
     make && \

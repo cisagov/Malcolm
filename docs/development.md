@@ -74,7 +74,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/postgresql` (based on `postgres:16-alpine`)
 * `ghcr.io/idaholab/malcolm/redis` (based on `redis:7-alpine`)
 * `ghcr.io/idaholab/malcolm/suricata` (based on `debian:13-slim`)
-* `ghcr.io/idaholab/malcolm/zeek` (based on `debian:13-slim`)
+* `ghcr.io/idaholab/malcolm/zeek` (based on `zeek/zeek`)
 
 Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if you have forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you will need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 

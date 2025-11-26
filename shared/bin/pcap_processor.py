@@ -73,7 +73,7 @@ SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata
 SURICATA_AUTOSURICATA_TAG = 'AUTOSURICATA'
 SURICATA_FAILURES_FORCE_RECONNECT = 5
 
-ZEEK_PATH = "/opt/zeek/bin/zeek-offline"
+ZEEK_PATH = "/usr/local/zeek/bin/zeek-offline"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
 ZEEK_EXTRACTOR_MODE_MAPPED = 'mapped'
 ZEEK_EXTRACTOR_MODE_NONE = 'none'

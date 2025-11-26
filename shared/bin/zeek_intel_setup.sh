@@ -13,7 +13,7 @@ ENCODING="utf-8"
 
 SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
 SCRIPT_FILESPEC_ESCAPED="$(printf '%s\n' "${SCRIPT_FILESPEC}" | sed -e 's/[\/&]/\\&/g')"
-ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
+ZEEK_DIR=${ZEEK_DIR:-"/usr/local/zeek"}
 ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 ZEEK_INTEL_FEED_SINCE=${ZEEK_INTEL_FEED_SINCE:-""}
 ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION=${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION:-false}
@@ -50,7 +50,7 @@ if mkdir -- "$LOCK_DIR" 2>/dev/null; then
         mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX "${INTEL_DIR}"/Mandiant "${INTEL_DIR}"/Google || true
     fi
 
-    # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
+    # create directive to @load every subdirectory in /usr/local/zeek/share/zeek/site/intel
     if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
         pushd "${INTEL_DIR}" >/dev/null 2>&1
 

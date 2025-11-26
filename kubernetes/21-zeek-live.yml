@@ -65,11 +65,11 @@ spec:
           - mountPath: "/zeek/live"
             name: zeek-live-zeek-volume
             subPath: "live"
-          - mountPath: "/opt/zeek/share/zeek/site/custom/configmap"
+          - mountPath: "/usr/local/zeek/share/zeek/site/custom/configmap"
             name: zeek-live-custom-volume
-          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed/configmap"
+          - mountPath: "/usr/local/zeek/share/zeek/site/intel-preseed/configmap"
             name: zeek-live-intel-preseed-volume
-          - mountPath: "/opt/zeek/share/zeek/site/intel"
+          - mountPath: "/usr/local/zeek/share/zeek/site/intel"
             name: zeek-live-intel-volume
             subPath: "zeek/intel"
       initContainers:

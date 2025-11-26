@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
+ZEEK_DIR=${ZEEK_DIR:-"/usr/local/zeek"}
 
 # ensure capabilities for capture
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek 2>/dev/null || true

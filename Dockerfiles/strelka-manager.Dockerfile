@@ -1,4 +1,4 @@
-FROM ghcr.io/mmguero-dev/strelka/manager:malcolm
+FROM ghcr.io/idaholab/strelka/manager:malcolm
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
