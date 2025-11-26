@@ -1,12 +1,20 @@
-FROM python:3.13.5-bookworm
+FROM python:3.13-slim-trixie
 
 # TODO:
 # - extracted files server
 # - size-based file pruning
 # - filescan logs going where other logs go (other drives, etc.)
 # - preservation policy
+# - required config files for distribution (build.sh, appliance packager, etc.)
+# - determine `expose` ports, possibly integrate into health check
+# - VOLUME for this dockerimage?
+# - do we really need zeek/suricata in the strelka images?
+# - custom rules (yara, etc.)
+# - clamav
+# - capa
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -29,20 +37,22 @@ USER root
 
 ################################################################################
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-################################################################################
-
 ARG STRELKA_HOST=strelka-frontend
 ARG STRELKA_PORT=57314
 ARG FILESCAN_HEALTH_PORT=8001
 
-ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
+ARG EXTRACTED_FILE_HTTP_SERVER_ENABLE=false
+ARG EXTRACTED_FILE_HTTP_SERVER_ZIP=true
+ARG EXTRACTED_FILE_HTTP_SERVER_KEY=infected
+ARG EXTRACTED_FILE_HTTP_SERVER_RECURSIVE=true
+ARG EXTRACTED_FILE_HTTP_SERVER_PORT=8006
 
 ################################################################################
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ENV SUPERCRONIC_VERSION "0.2.39"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
@@ -55,106 +65,77 @@ ENV STRELKA_HOST $STRELKA_HOST
 ENV STRELKA_PORT $STRELKA_PORT
 ENV FILESCAN_HEALTH_PORT $FILESCAN_HEALTH_PORT
 
-ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
+ENV ZEEK_EXTRACTOR_PATH "/zeek/extract_files"
+ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR "/opt/assets"
+ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
+ENV EXTRACTED_FILE_HTTP_SERVER_ZIP $EXTRACTED_FILE_HTTP_SERVER_ZIP
+ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
+ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
+ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ################################################################################
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 filescan/docker-entrypoint.sh /docker-entrypoint.sh
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/prune_files.sh /usr/local/bin/prune_files.sh
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=644 filescan/filescan-config.yml /filescan/filescan-config.yml
+ADD --chmod=644 filescan/supervisord.conf /etc/supervisord.conf
+ADD filescan/python-filescan/ /install-filescan/
 
-# add our user/group very first, since it isn't likely to change (and if it
-# does, we ought to redo a lot of steps)
 RUN set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
-    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} ; \
-    usermod -a -G tty ${PUSER}
-
-################################################################################
-
-# fix our package lists, upgrade, and install a few minimal dependencies
-RUN set -e ; \
-    sed -i /etc/apt/sources.list.d/debian.sources \
-      -e 's/main$/main contrib non-free/' ; \
+        useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} ; \
+        usermod -a -G tty ${PUSER} ; \
+    # fix our package lists, upgrade, and install a few minimal dependencies
+    sed -i /etc/apt/sources.list.d/debian.sources -e 's/main$/main contrib non-free/' ; \
     apt-get update -q ; \
-    apt-get upgrade -y -q \
-      --no-install-recommends ; \
-    apt-get install -y -q \
-      --no-install-recommends \
+    apt-get upgrade -y -q --no-install-recommends ; \
+    apt-get install -y -q --no-install-recommends \
+      automake \
+      build-essential \
+      bash \
       bc \
       ca-certificates \
       curl \
-      rsync \
-      tini \
-      unzip
-
-################################################################################
-
-# add supercronic early on because it's also unlikely to change
-RUN set -e ; \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
-    chmod +x /usr/local/bin/supercronic
-
-# Download and install YQ
-RUN set -e ; \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
-    chmod 755 /usr/local/bin/yq
-
-################################################################################
-
-# install the rest of our build/run dependencies
-RUN set -e ; \
-    apt-get update -q ; \
-    apt-get install -y -q \
-      --no-install-recommends \
-      automake \
-      bash \
       gcc \
+      g++ \
       git \
       inotify-tools \
       jq \
-      libjansson4 \
       libjansson-dev \
-      libmagic1 \
+      libjansson4 \
       libmagic-dev \
-      libssl3 \
+      libmagic1 \
       libssl-dev \
+      libssl3 \
       libtool \
       make \
       pkg-config \
       psmisc \
-      python3 \
-      python3-dev \
-      python3-pip \
-      python3-venv \
       rsync \
-      webfs
-
-################################################################################
-
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD --chmod=755 filescan/docker-entrypoint.sh /docker-entrypoint.sh
-ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
-# originally also copied: shared/bin/prune_files.sh
-
-RUN mkdir -p /install-filescan
-COPY --chmod=644 filescan/python-filescan /install-filescan/
-RUN cd /install-filescan && \
-    python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt && \
-    make && \
-    python3 -m pip install --break-system-packages --no-cache-dir .
-RUN rm -rf /install-filescan
-
-################################################################################
-
-# clean up our build dependencies
-RUN set -e ; \
-    apt-get remove -y -q \
-      --allow-downgrades \
-      --allow-remove-essential \
-      --allow-change-held-packages \
-      --purge \
+      tini \
+      unzip \
+      webfs ; \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
+        chmod +x /usr/local/bin/supercronic ; \
+    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
+        chmod 755 /usr/local/bin/yq ; \
+    mkdir -p /filescan /filescan/data/files /filescan/data/logs ; \
+    cd /install-filescan ; \
+        python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt ; \
+        make ; \
+        python3 -m pip install --break-system-packages --no-cache-dir . ; \
+    cd /filescan ; \
+        find /filescan -type d -exec chmod 755 "{}" \; ; \
+        find /filescan -type f -exec chmod 644 "{}" \; ; \
+        chown -R $PUSER:$PGROUP /filescan/data ; \
+    apt-get remove -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge \
       automake \
       build-essential \
       gcc \
+      g++ \
       gcc-12 \
       libc6-dev \
       libgcc-12-dev \
@@ -162,27 +143,14 @@ RUN set -e ; \
       libmagic-dev \
       libssl-dev \
       libtool \
-      make \
-      python3-dev \
-      python3-venv ; \
-    apt-get autoremove -y -q \
-      --allow-downgrades \
-      --allow-remove-essential \
-      --allow-change-held-packages ; \
-    apt-get clean ; \
-    rm -rf /var/lib/apt/lists/* /tmp/*
+      make ; \
+    apt-get autoremove -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages ; \
+        apt-get clean -y -q ; \
+        rm -rf /install-filescan /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /usr/lib/x86_64-linux-gnu/*.a
 
 ################################################################################
 
-# copy the most-likely-to-change files last
-RUN mkdir -p /filescan /filescan/data/files /filescan/data/logs
-COPY --chmod=644 \
-    filescan/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 \
-    filescan/filescan-config.yml /filescan/filescan-config.yml
-ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
-
-################################################################################
+VOLUME ["/filescan/data"]
 
 WORKDIR /filescan
 
