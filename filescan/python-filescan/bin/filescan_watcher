@@ -393,7 +393,9 @@ async def handle_zeek_event(
     key: str,
     record: dict,
 ) -> None:
-    path, real = remap_path(config, Path(get_single(record, 'file.path')))
+    # https://docs.zeek.org/en/master/logs/files.html
+    # https://docs.zeek.org/en/lts/scripts/base/frameworks/files/main.zeek.html#type-Files::Info
+    path, real = remap_path(config, Path(get_single(record, 'extracted')))
     await handle_file_event(
         config=config,
         conn=output,
@@ -402,9 +404,9 @@ async def handle_zeek_event(
             {
                 'path': path,
                 'local_path': real,
-                'size': get_single(record, 'file.size'),
-                'sha256': get_single(record, 'file.hash.sha256'),
-                'mime_type': get_single(record, 'file.mime_type'),
+                'size': get_single(record, 'extracted_size'),
+                'sha256': get_single(record, 'sha256'),
+                'mime_type': get_single(record, 'mime_type'),
             }
         ),
         metadata={

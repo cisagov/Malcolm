@@ -135,6 +135,10 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load intel
 @load custom
 
+# these are defaults that will be overridden in extractor.zeek
+redef JSONStreaming::enable_log_rotation = F;
+redef JSONStreaming::enabled_logs = set("_disabled_");
+
 event zeek_init() &priority=-5 {
 
   if (local_nets_str != "") {
