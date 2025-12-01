@@ -115,7 +115,6 @@ $ ls -lh
 total 4.0G
 drwxrwxr-x 10 user user  156 Oct 29 17:22 installer
 -rwxrwxr-x  1 user user  44K Oct 29 17:22 install.py
--rwxrwxr-x  1 user user 236K Oct 29 17:22 legacy_install.py
 -rw-rw-r--  1 user user  460 Oct 29 17:22 malcolm_20251029_140727_d22a504f.README.txt
 -rw-rw-r--  1 user user 270K Oct 29 17:22 malcolm_20251029_140727_d22a504f.tar.gz
 -rw-rw-r--  1 user user   4G Oct 29 17:22 malcolm_20251029_140727_d22a504f_images.tar.xz

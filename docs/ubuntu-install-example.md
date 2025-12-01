@@ -30,7 +30,6 @@ Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
   creating: installer/
   …
  inflating: install.py              
- inflating: legacy_install.py       
  inflating: malcolm_20251029_140727_d22a504f.README.txt  
  inflating: malcolm_20251029_140727_d22a504f.tar.gz  
  inflating: malcolm_common.py       
