@@ -105,6 +105,7 @@ export LIVE_CAPTURE_TCPDUMP=false
 export LIVE_CAPTURE_NETSNIFF=true
 export LIVE_CAPTURE_ZEEK=true
 export LIVE_CAPTURE_SURICATA=true
+export EXTRA_TAGS=
 
 # auth configuration variables
 export AUTH_METHOD=basic

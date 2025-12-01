@@ -79,6 +79,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.exposeLogstash = ${LOGSTASH_EXPOSE:-false}
     | .configuration.exposeOpenSearch = ${OPENSEARCH_EXPOSE:-false}
     | .configuration.exposeSFTP = ${SFTP_EXPOSE:-false}
+    | .configuration.extraTags = "${EXTRA_TAGS:-}"
     | .configuration.extractedFileMaxPercentThreshold = ${EXTRACTED_FILE_TOTAL_DISK_USAGE_PERCENT_THRESHOLD:-100}
     | .configuration.extractedFileMaxSizeThreshold = "${EXTRACTED_FILE_MAX_SIZE_THRESHOLD:-1T}"
     | .configuration.filebeatTcpDefaults = ${FILEBEAT_TCP_EXPOSE:-false}
