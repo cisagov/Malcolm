@@ -78,8 +78,6 @@ For environments where high-performance capture is desired, some manual tuning o
 
 ### <a name="LiveAnalysisTuningZeek"></a>Zeek
 
-# TODO: update for convergence of ISOs
-
 Zeek's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars) that can be added or modified in [`zeek-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/zeek-live.env.example).
 
 Malcolm uses [Zeek's support](https://github.com/zeek/zeek-af_packet-plugin) for [AF_Packet sockets](https://man7.org/linux/man-pages/man7/packet.7.html) for packet capture. Review Zeek's documentation on [cluster setup](https://docs.zeek.org/en/master/cluster-setup.html#af-packet) to better understand the parameters discussed below.
