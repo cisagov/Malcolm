@@ -420,20 +420,20 @@ scanners:
           - 'application/msonenote'
           - 'onenote_file'
       priority: 5
-  'ScanPcap':
-    - positive:
-        flavors:
-          - 'pcap_file'
-          - 'pcapng_file'
-      priority: 5
-      options:
-        scanner_timeout: 120
-        zeek_conn: True
-        zeek_conn_limit: 100
-        zeek_proto: True
-        suricata_config: "/etc/strelka/suricata/suricata.yaml"
-        suricata_rules: "/etc/strelka/suricata/suricata.rules"
-        suricata_alert_dedupe: True
+#  'ScanPcap':
+#    - positive:
+#        flavors:
+#          - 'pcap_file'
+#          - 'pcapng_file'
+#      priority: 5
+#      options:
+#        scanner_timeout: 120
+#        zeek_conn: True
+#        zeek_conn_limit: 100
+#        zeek_proto: True
+#        suricata_config: "/etc/strelka/suricata/suricata.yaml"
+#        suricata_rules: "/etc/strelka/suricata/suricata.rules"
+#        suricata_alert_dedupe: True
   'ScanPdf':
     - positive:
         flavors:

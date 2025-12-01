@@ -133,9 +133,11 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load intel
 @load custom
 
-# these are defaults that will be overridden in extractor.zeek
+# These are defaults that will be overridden in extractor.zeek.
+#   Note that "PacketFilter::LOG" is just my hacky way of "disabling" th3
+#   plugin altogether, as it's a tiny log that's going to get ignored anyway.
 redef JSONStreaming::enable_log_rotation = F;
-redef JSONStreaming::enabled_logs = set("_disabled_");
+redef JSONStreaming::enabled_logs = set(PacketFilter::LOG);
 
 event zeek_init() &priority=-5 {
 

@@ -1,18 +1,5 @@
 FROM python:3.13-slim-trixie
 
-# TODO:
-# - extracted files server
-# - size-based file pruning
-# - filescan logs going where other logs go (other drives, etc.)
-# - preservation policy
-# - required config files for distribution (build.sh, appliance packager, etc.)
-# - determine `expose` ports, possibly integrate into health check
-# - VOLUME for this dockerimage?
-# - do we really need zeek/suricata in the strelka images?
-# - custom rules (yara, etc.)
-# - clamav
-# - capa
-
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 LABEL maintainer="malcolm@inl.gov"
