@@ -118,6 +118,8 @@ _STRING_VARS = [
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_RETENTION_TIME,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS,
     KEY_ENV_ARKIME_LIVE_NODE_HOST,
+    KEY_ENV_ARKIME_LIVE_COMP_TYPE,
+    KEY_ENV_ARKIME_LIVE_COMP_LEVEL,
     KEY_ENV_ARKIME_WISE_URL,
     KEY_ENV_CONTAINER_RUNTIME_KEY,
     KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT,
@@ -446,6 +448,12 @@ class EnvMapper:
             ]
             self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_NODE_HOST].config_items = [
                 KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_COMP_TYPE].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_COMP_LEVEL].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_LEVEL
             ]
             self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].config_items = [
                 KEY_CONFIG_ITEM_AUTO_ARKIME,

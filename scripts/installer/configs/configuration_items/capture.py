@@ -10,6 +10,7 @@ This module contains all configuration items related to live traffic capture set
 including network interface configuration, capture filters, and capture methods.
 """
 from scripts.malcolm_constants import WidgetType
+from scripts.installer.configs.constants.enums import ArkimePCAPCompression
 from scripts.malcolm_utils import get_hostname_without_domain
 
 from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
@@ -21,6 +22,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_EXTRA_TAGS,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST,
+    KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE,
+    KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_LEVEL,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_LIVE_ZEEK,
     KEY_CONFIG_ITEM_PCAP_FILTER,
@@ -87,6 +90,25 @@ CONFIG_ITEM_LIVE_ARKIME_NODE_HOST = ConfigItem(
     validator=lambda x: isinstance(x, str),
     question="Node hostname or IP address to associate with live network traffic observed by Arkime capture",
     widget_type=WidgetType.TEXT,
+)
+
+CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE = ConfigItem(
+    key=KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE,
+    label="PCAP Compression",
+    default_value=ArkimePCAPCompression.NONE.value,
+    choices=[x.value for x in ArkimePCAPCompression],
+    validator=lambda x: isinstance(x, str) and x in [v.value for v in ArkimePCAPCompression],
+    question="Select compression method for Arkime-captured PCAP",
+    widget_type=WidgetType.SELECT,
+)
+
+CONFIG_ITEM_LIVE_ARKIME_COMP_LEVEL = ConfigItem(
+    key=KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_LEVEL,
+    label="PCAP Compression Level",
+    default_value=0,
+    validator=lambda x: isinstance(x, int),
+    question="Compression level for the Arkime PCAP compression method",
+    widget_type=WidgetType.NUMBER,
 )
 
 CONFIG_ITEM_ARKIME_EXPOSE_WISE = ConfigItem(
