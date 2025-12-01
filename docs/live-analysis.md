@@ -80,9 +80,9 @@ For environments where high-performance capture is desired, some manual tuning o
 
 # TODO: update for convergence of ISOs
 
-Zeek's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars). These environment variables are the same for both [Hedgehog Linux](#Hedgehog) and Malcolm's own monitoring [of local network interfaces](#LocalPCAP), and should be added to or modified in [`zeek-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/zeek-live.env.example).
+Zeek's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars) that can be added or modified in [`zeek-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/zeek-live.env.example).
 
-Malcolm and Hedgehog Linux use [Zeek's support](https://github.com/zeek/zeek-af_packet-plugin) for [AF_Packet sockets](https://man7.org/linux/man-pages/man7/packet.7.html) for packet capture. Review Zeek's documentation on [cluster setup](https://docs.zeek.org/en/master/cluster-setup.html#af-packet) to better understand the parameters discussed below.
+Malcolm uses [Zeek's support](https://github.com/zeek/zeek-af_packet-plugin) for [AF_Packet sockets](https://man7.org/linux/man-pages/man7/packet.7.html) for packet capture. Review Zeek's documentation on [cluster setup](https://docs.zeek.org/en/master/cluster-setup.html#af-packet) to better understand the parameters discussed below.
 
 The relevant environment variables related to tuning Zeek for live packet capture are:
 
@@ -104,7 +104,7 @@ The relevant environment variables related to tuning Zeek for live packet captur
 
 Arkime's `capture` process is controlled by [settings](https://arkime.com/settings) in its `config.ini` file. Arkime's documentation on [High Performance Settings](https://arkime.com/settings#high-performance-settings) outlines the settings that most influence performance and resource utilization.
 
-Malcolm's default values for Arkime's live traffic capture are mostly already configured for high-performance traffic capture. Some other parameters that influence Arkime's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars) for both [Hedgehog Linux](#Hedgehog) and Malcolm's own monitoring [of local network interfaces](#LocalPCAP).
+Malcolm's default values for Arkime's live traffic capture are mostly already configured for high-performance traffic capture. Some other parameters that influence Arkime's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars) that can be modified in [`arkime-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/arkime-live.env.example).
 
 On Hedgehog Linux (and other Malcolm installations running the ["Hedgehog" run profile](#Profiles)), when using [a remote OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance), or in a [Kubernetes-based deployment](kubernetes.md#Kubernetes), users may choose to have Arkime's `capture` tool monitor live traffic on the network interface without using an intermediate PCAP file so that the `arkime-live` container will use [its environment variables]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/arkime-live.env.example) in its [entrypoint]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/interface/sensor_ctl/supervisor.init/arkime/scripts/docker_entrypoint.sh) to populate [`config.ini`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/arkime/etc/config.ini).
 
@@ -128,7 +128,7 @@ Aside from the settings mentioned above, to quote the Arkime documentation, ofte
 
 ### <a name="LiveAnalysisTuningSuricata"></a>Suricata
 
-Suricata's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars). These environment variables are the same for both [Hedgehog Linux](#Hedgehog) and Malcolm's own monitoring [of local network interfaces](#LocalPCAP), and should be added to or modified in [`suricata-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/suricata-live.env.example).
+Suricata's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars) that can be added or modified in [`suricata-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/suricata-live.env.example).
 
 Upon starting, Malcolm's [`suricata_config_populate.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/shared/bin/suricata_config_populate.py) script generates the `suricata.yaml` configuration file (see (see [`suricata.yaml.in`](https://github.com/OISF/suricata/blob/master/suricata.yaml.in) and the [Suricata documentation](https://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html)). The `suricata_config_populate.py` script can use **many** environment variables when generating `suricata.yaml`. See the `DEFAULT_VARS` array in the script for a full list. Note that the environment variables must be prefixed with `SURICATA_` when defined in `suricata-live.env`.
 
