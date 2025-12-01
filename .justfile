@@ -151,6 +151,8 @@ _base_config +CAPTURE_FLAG:
     | .configuration.pcapNetSniff = ${CAPTURE_NETSNIFF}
     | .configuration.pcapTcpDump = ${CAPTURE_TCPDUMP}
     | .configuration.liveArkime = ${CAPTURE_ARKIME}
+    | .configuration.liveArkimeCompressionType = "${LIVE_CAPTURE_ARKIME_COMPRESSION:-none}"
+    | .configuration.liveArkimeCompressionLevel = ${LIVE_CAPTURE_ARKIME_COMPRESSION_LEVEL:-0}
     | .configuration.liveArkimeNodeHost = "${CAPTURE_ARKIME_NODE_HOST}"
     | .configuration.liveZeek = ${CAPTURE_ZEEK}
     | .configuration.liveSuricata = ${CAPTURE_SURICATA}

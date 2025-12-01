@@ -1,5 +1,5 @@
 # .envrc and .justfile can be used by direnv (https://github.com/direnv/direnv) and
-#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/legacy_install.py
+#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/install.py
 #   and ./scripts/auth_setup. This will all likely be made obsolete when cisagov/Malcolm#395
 #   is complete. This hasn't been exhaustively tested, so it's recommended more for
 #   development convenience than it is for production use.
@@ -99,6 +99,8 @@ export LIVE_CAPTURE_IFACE_TWEAK=true
 export LIVE_CAPTURE_STATS=true
 export LIVE_CAPTURE_ARKIME_NODE_HOST=
 export LIVE_CAPTURE_ARKIME=false
+export LIVE_CAPTURE_ARKIME_COMPRESSION=none
+export LIVE_CAPTURE_ARKIME_COMPRESSION_LEVEL=0
 export LIVE_CAPTURE_TCPDUMP=false
 export LIVE_CAPTURE_NETSNIFF=true
 export LIVE_CAPTURE_ZEEK=true

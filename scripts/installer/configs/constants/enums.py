@@ -142,3 +142,10 @@ class FilePreservationMode(Enum):
     QUARANTINED = "quarantined"
     ALL = "all"
     NONE = "none"
+
+
+# Arkime compression types
+class ArkimePCAPCompression(Enum):
+    NONE = "none"
+    GZIP = "gzip"
+    ZSTD = "zstd"

@@ -51,7 +51,7 @@ spec:
       #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:25.11.1
+        image: ghcr.io/idaholab/malcolm/logstash-oss:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -114,7 +114,7 @@ spec:
             subPath: "logstash"
       initContainers:
       - name: logstash-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.11.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true

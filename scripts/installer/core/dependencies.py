@@ -29,6 +29,7 @@ from scripts.installer.configs.constants.constants import (
 )
 
 from scripts.installer.configs.constants.enums import (
+    ArkimePCAPCompression,
     FilebeatLogFormat,
     FilebeatFieldNames,
     FileExtractionMode,
@@ -783,6 +784,22 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_LIVE_ARKIME,
             condition=lambda live_arkime: bool(live_arkime),
             ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME,
+        )
+    ),
+    KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_LIVE_ARKIME,
+            condition=lambda live_arkime: bool(live_arkime),
+            ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME,
+        )
+    ),
+    KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_LEVEL: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_LIVE_ARKIME, KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE],
+            condition=lambda live_arkime, comp_type: (
+                bool(live_arkime) and (comp_type != ArkimePCAPCompression.NONE.value)
+            ),
+            ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE,
         )
     ),
     KEY_CONFIG_ITEM_ARKIME_EXPOSE_WISE: DependencySpec(

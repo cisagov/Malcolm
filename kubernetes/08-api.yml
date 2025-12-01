@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:25.11.1
+        image: ghcr.io/idaholab/malcolm/api:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true

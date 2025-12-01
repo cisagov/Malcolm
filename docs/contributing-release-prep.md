@@ -134,7 +134,6 @@ $ ls -l
 total 749,568
 drwxrwxr-x 10 romeogdetlevjr romeogdetlevjr     156 Oct 29 14:15 installer
 -rwxrwxr-x  1 romeogdetlevjr romeogdetlevjr  44,201 Oct 29 14:15 install.py
--rwxrwxr-x  1 romeogdetlevjr romeogdetlevjr 241,524 Oct 29 14:15 legacy_install.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr     460 Oct 29 14:15 malcolm_20251029_140727_d22a504f.README.txt
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr 275,657 Oct 29 14:15 malcolm_20251029_140727_d22a504f.tar.gz
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  75,769 Oct 29 14:15 malcolm_common.py
