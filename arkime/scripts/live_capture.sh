@@ -78,8 +78,8 @@ done
 if [ -z "${ARKIME_WISE_SERVICE_URL+x}" ]; then
     # variable does not exist
     WISE_URL="http://arkime:8081"
-elif [ -z "${ARKIME_WISE_SERVICE_URL}" ]; then
-    # variable exists but is empty
+elif [ -z "${ARKIME_WISE_SERVICE_URL}" ] || [ "${ARKIME_WISE_SERVICE_URL,,}" == "disabled" ]; then
+    # variable exists but is empty, or is explicitly disabled
     WISE_URL=
 else
     WISE_URL="${ARKIME_WISE_SERVICE_URL}"
