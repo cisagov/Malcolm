@@ -72,6 +72,7 @@ def _is_non_empty_str(value) -> bool:
 def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
     profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
     primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
+    arkime_live = malcolm_config.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME)
 
     if isinstance(profile, str) and isinstance(primary_mode, str):
         lshost = malcolm_config.get_value(KEY_CONFIG_ITEM_LOGSTASH_HOST)
@@ -148,8 +149,8 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             LOCAL_ARKIME_WISE_URL,
             KEY_CONFIG_ITEM_ARKIME_WISE_URL,
             "Arkime WISE",
-            profile,
-            profile == PROFILE_HEDGEHOG,
+            profile if (not arkime_live) else PROFILE_HEDGEHOG,
+            arkime_live or (profile == PROFILE_HEDGEHOG),
             "https://host/wise/",
         )
 

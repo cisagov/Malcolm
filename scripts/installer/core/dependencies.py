@@ -830,19 +830,23 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     ),
     KEY_CONFIG_ITEM_ARKIME_WISE_URL: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_AUTO_ARKIME],
-            condition=lambda profile, _auto_arkime: profile != PROFILE_MALCOLM,
+            depends_on=[
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
+            ],
+            condition=lambda profile, live_arkime: (profile != PROFILE_MALCOLM) or bool(live_arkime),
             ui_parent=KEY_CONFIG_ITEM_AUTO_ARKIME,
         ),
         value=ValueRule(
             depends_on=[
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
                 KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
             ],
             condition=True,
-            default_value=lambda profile, malcolm_host: (
+            default_value=lambda profile, malcolm_host, live_arkime: (
                 LOCAL_ARKIME_WISE_URL
-                if (profile == PROFILE_MALCOLM)
+                if ((profile == PROFILE_MALCOLM) and (not live_arkime))
                 else (f"https://{malcolm_host}/wise/" if malcolm_host else DEFAULT_VALUE_UNCHANGED)
             ),
             only_if_unmodified=False,
