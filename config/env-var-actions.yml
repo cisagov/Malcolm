@@ -20,6 +20,12 @@ copied_environment_variables:
     auth_common:
       NGINX_AUTH_MODE:
         NGINX_BASIC_AUTH
+  logstash:
+    logstash:
+      LOGSTASH_NETBOX_ENRICHMENT_DATASETS:
+        LOGSTASH_NETBOX_ENRICHMENT_DATASETS:
+          ? "suricata.alert,zeek.conn,zeek.dhcp,zeek.dns,zeek.known_hosts,zeek.known_services,zeek.ntlm,zeek.notice,zeek.signatures,zeek.software,zeek.weird"
+          : "suricata.alert,zeek.conn,zeek.dce_rpc,zeek.dhcp,zeek.dns,zeek.known_hosts,zeek.known_routers,zeek.known_services,zeek.login,zeek.ntlm,zeek.notice,zeek.rdp,zeek.rfb,zeek.signatures,zeek.smb_cmd,zeek.smb_files,zeek.smb_mapping,zeek.software,zeek.ssh,zeek.weird"
   netbox:
     netbox:
       REMOTE_AUTH_HEADER:
