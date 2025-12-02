@@ -42,8 +42,17 @@ while getopts 'vwt:l:' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
-OPENSEARCH_URL=${OPENSEARCH_URL:-"https://opensearch:9200"}
+
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
+if [[ -z "$OPENSEARCH_URL" ]]; then
+  if [[ "$OPENSEARCH_PRIMARY" == "opensearch-local" ]]; then
+    OPENSEARCH_URL="https://opensearch:9200"
+  else
+    echo "No URL specified for $OPENSEARCH_PRIMARY, going to sleep" >&2
+    sleep infinity
+    exit 1
+  fi
+fi
 MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
 ARKIME_NETWORK_INDEX_PATTERN=${ARKIME_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}

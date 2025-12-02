@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v25.11.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v25.12.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -114,9 +114,9 @@ function InstallPythonPackages {
         python3-requests+security
 
     $SUDO_CMD /usr/bin/python3 -m pip install $USERFLAG -U \
-        dateparser==1.2.1 \
-        kubernetes==32.0.1 \
-        python-dotenv==1.1.0 \
+        dateparser==1.2.2 \
+        kubernetes==34.1.0 \
+        python-dotenv==1.2.1 \
         pythondialog==3.5.3
 }
 
@@ -192,6 +192,9 @@ vm.dirty_background_ratio=40
 
 # maximum % of dirty system memory before committing everything
 vm.dirty_ratio=80
+
+# virtual memory accounting mode: always overcommit, never check
+vm.overcommit_memory=1
 EOT
     fi # sysctl check
 

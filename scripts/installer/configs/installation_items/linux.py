@@ -11,10 +11,7 @@ This module contains all configuration items related to the installation process
 that are specific to Linux platforms, including Docker installation methods
 and Linux-specific system configuration options.
 """
-
-from typing import Any, Tuple
-
-from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
     KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
@@ -56,51 +53,13 @@ CONFIG_ITEM_DOCKER_COMPOSE_INSTALL_METHOD = ConfigItem(
     },
 )
 
-
-class DockerUsersConfigItem(ConfigItem):
-    """Custom ConfigItem that converts comma-separated strings to lists for Docker users."""
-
-    def set_value(self, value: Any) -> Tuple[bool, str]:
-        """Set and validate a new value, with automatic string-to-list conversion."""
-        # Convert string input to list if needed
-        if isinstance(value, str):
-            if value.strip():
-                converted_value = [s.strip() for s in value.split(",") if s.strip()]
-            else:
-                converted_value = []
-        else:
-            converted_value = value
-
-        # Now validate the converted value
-        if self.validator:
-            result = self.validator(converted_value)
-            if isinstance(result, tuple):
-                valid, error = result
-            else:
-                valid = result
-                error = "Invalid value" if not valid else ""
-
-            if not valid:
-                return False, error
-
-        # Store the converted value
-        self.is_modified = True
-        self.value = converted_value
-        return True, ""
-
-
-def _validate_docker_users_list(x):
-    """Validate that input is a list of strings."""
-    return isinstance(x, list) and all(isinstance(user, str) for user in x)
-
-
 # Docker installation questions (exactly matching original installer prompts)
-CONFIG_ITEM_DOCKER_EXTRA_USERS = DockerUsersConfigItem(
+CONFIG_ITEM_DOCKER_EXTRA_USERS = ListOfStringsConfigItem(
     key=KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
     label='Docker Users',
     default_value=GetNonRootMalcolmUserNames(),
     accept_blank=True,
-    validator=_validate_docker_users_list,
+    validator=lambda x: isinstance(x, list) and all(isinstance(user, str) for user in x),
     widget_type=WidgetType.TEXT,
     question="Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",
     metadata={

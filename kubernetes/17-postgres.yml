@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:25.11.0
+        image: ghcr.io/idaholab/malcolm/postgresql:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -52,9 +52,6 @@ spec:
               name: netbox-common-env
           - secretRef:
               name: postgres-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "postgres.malcolm.local"
         livenessProbe:
           exec:
             command:
@@ -72,7 +69,7 @@ spec:
             subPath: postgres
       initContainers:
       - name: postgres-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.11.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true

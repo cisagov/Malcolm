@@ -56,8 +56,13 @@ _base_config +CAPTURE_FLAG:
 
   tee "${JQ_FILE}" >/dev/null <<EOF
     .configuration.runtimeBin = "${MALCOLM_CONTAINER_RUNTIME:-docker}"
+    | .configuration.processUserId = ${PUID:-$(id -u)}
+    | .configuration.processGroupId = ${PGID:-$(id -g)}
     | .configuration.arkimeFreeSpaceG = "${DELETE_PCAP_THRESHOLD:-1%}"
     | .configuration.arkimeManagePCAP = ${DELETE_OLD_PCAP:-false}
+    | .configuration.arkimeExposeWise = ${ARKIME_EXPOSE_WISE_GUI:-false}
+    | .configuration.arkimeAllowWiseConfig = ${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}
+    | .configuration.arkimeWiseUrl = "${ARKIME_WISE_SERVICE_URL:-http://arkime:8081}"
     | .configuration.autoArkime = ${AUTO_ARKIME:-true}
     | .configuration.autoFreq = ${AUTO_FREQ:-true}
     | .configuration.autoOui = ${AUTO_OUI:-true}
@@ -74,6 +79,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.exposeLogstash = ${LOGSTASH_EXPOSE:-false}
     | .configuration.exposeOpenSearch = ${OPENSEARCH_EXPOSE:-false}
     | .configuration.exposeSFTP = ${SFTP_EXPOSE:-false}
+    | .configuration.extraTags = "${EXTRA_TAGS:-}"
     | .configuration.extractedFileMaxPercentThreshold = ${EXTRACTED_FILE_TOTAL_DISK_USAGE_PERCENT_THRESHOLD:-100}
     | .configuration.extractedFileMaxSizeThreshold = "${EXTRACTED_FILE_MAX_SIZE_THRESHOLD:-1T}"
     | .configuration.filebeatTcpDefaults = ${FILEBEAT_TCP_EXPOSE:-false}
@@ -146,6 +152,8 @@ _base_config +CAPTURE_FLAG:
     | .configuration.pcapNetSniff = ${CAPTURE_NETSNIFF}
     | .configuration.pcapTcpDump = ${CAPTURE_TCPDUMP}
     | .configuration.liveArkime = ${CAPTURE_ARKIME}
+    | .configuration.liveArkimeCompressionType = "${LIVE_CAPTURE_ARKIME_COMPRESSION:-none}"
+    | .configuration.liveArkimeCompressionLevel = ${LIVE_CAPTURE_ARKIME_COMPRESSION_LEVEL:-0}
     | .configuration.liveArkimeNodeHost = "${CAPTURE_ARKIME_NODE_HOST}"
     | .configuration.liveZeek = ${CAPTURE_ZEEK}
     | .configuration.liveSuricata = ${CAPTURE_SURICATA}
@@ -159,8 +167,6 @@ _base_config +CAPTURE_FLAG:
     --import-malcolm-config-file "${SETTINGS_FILE}" \
     --extra \
           "arkime-offline.env:ARKIME_AUTO_ANALYZE_PCAP_THREADS=${ARKIME_AUTO_ANALYZE_PCAP_THREADS:-2}" \
-          "arkime.env:ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}" \
-          "arkime.env:ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI:-false}" \
           "arkime.env:ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-daily}" \
           "arkime.env:ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}" \
           "filebeat.env:FILEBEAT_PREPARE_PROCESS_COUNT=${FILEBEAT_PREPARE_PROCESS_COUNT:-2}" \

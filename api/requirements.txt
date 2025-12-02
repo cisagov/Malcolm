@@ -1,9 +1,9 @@
-Flask==2.3.2
+Flask==3.1.2
 gunicorn==23.0.0
-opensearch-py==3.0.0
-requests==2.32.4
-regex==2022.3.2
-dateparser==1.2.1
-elasticsearch==8.18.0
+opensearch-py==3.1.0
+requests==2.32.5
+regex==2025.11.3
+dateparser==1.2.2
+elasticsearch==8.19.2
 elasticsearch-dsl==8.18.0
-psutil==7.0.0
+psutil==7.1.3

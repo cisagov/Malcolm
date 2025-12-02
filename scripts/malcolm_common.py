@@ -13,10 +13,15 @@ import math
 import platform
 import re
 import site
+import ssl
 import string
 import sys
 import time
 import types
+
+from base64 import b64encode
+from http.client import HTTPSConnection, HTTPConnection
+from urllib.parse import urlparse
 
 # Dynamically create a module named "scripts" which points to this directory
 if "scripts" not in sys.modules:
@@ -67,6 +72,8 @@ from scripts.malcolm_constants import (
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_MAC,
     PLATFORM_WINDOWS,
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
     PUID_DEFAULT,
     SettingsFileFormat,
     SURICATA_LOG_CONTAINER_PATH,
@@ -150,6 +157,7 @@ ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
+MalcolmISOOsInfoFile = os.path.join(MalcolmPath, '.os-info')
 
 # Utility helpers for referring to the root of the Malcolm repository from
 # other helper scripts.
@@ -283,6 +291,25 @@ def LocalPathForContainerBindMount(
                             local_path = volSplit[0]
                         break
     return local_path
+
+
+def GetExposedPorts(docker_compose_contents, exclude_ports=None):
+    exclude_ports = exclude_ports or set()
+    host_ports = set()
+
+    for svc in docker_compose_contents.get("services", {}).values():
+        for port_str in svc.get("ports", []):
+            parts = port_str.split(":")
+            if len(parts) == 3:
+                ip, host_port, _ = parts
+                if ip in ("", "0.0.0.0") and host_port not in exclude_ports:
+                    host_ports.add(host_port)
+            elif len(parts) == 2:
+                host_port, _ = parts
+                if host_port not in exclude_ports:
+                    host_ports.add(host_port)
+
+    return sorted(host_ports, key=int)
 
 
 def BuildBoundPathReplacers(
@@ -685,6 +712,120 @@ def AskForString(
         ).strip()
         if (len(reply) == 0) and (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
             reply = default
+
+    else:
+        raise RuntimeError("No user interfaces available")
+
+    if clearScreen is True:
+        ClearScreen()
+
+    return reply
+
+
+def AskForStrings(
+    prompt,
+    labels,
+    defaults=None,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+    extraLabel=None,
+    visibleInputLength=40,
+    maxInputLength=1024,
+    maxFormHeight=15,
+):
+    global Dialog
+    global MainDialog
+
+    if (defaults is not None) and (
+        (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
+    ):
+        reply = defaults
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        # Compute label alignment
+        label_width = max(len(label) for label in labels) if labels else 0
+        label_col = 1
+        field_col = label_col + label_width + 2  # 2 spaces between label and field
+
+        # Define field sizing
+        field_length = visibleInputLength
+        input_length = maxInputLength
+
+        # Build the form elements
+        elements = [
+            (
+                # label text
+                label,
+                # label position (row, col)
+                i + 1,
+                label_col,
+                # default value or ""
+                (
+                    defaults[i]
+                    if (
+                        defaults
+                        and (defaults[i] is not None)
+                        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
+                    )
+                    else ""
+                ),
+                # field position (row, col)
+                i + 1,
+                field_col,
+                # field length (visible width)
+                visibleInputLength,
+                # input length (max chars)
+                maxInputLength,
+            )
+            for i, label in enumerate(labels)
+        ]
+
+        # Compute dialog width and height dynamically
+        width = field_col + field_length + 5  # padding at the end for borders and breathing room
+        height = len(elements) + 6  # room for prompt and spacing
+        form_height = len(elements)  # show all fields at once (or tweak if too tall)
+
+        kwargs = {
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": height,
+            "width": width,
+            "form_height": min(form_height, maxFormHeight),
+        }
+
+        code, reply = MainDialog.form(prompt, elements, **kwargs)
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise DialogCanceledException(prompt)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(prompt)
+        else:
+            reply = [x.strip() for x in reply]
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+        print(f"\n{prompt}")
+
+        reply = []
+        for i, label in enumerate(labels):
+            default = (
+                defaults[i]
+                if (
+                    defaults
+                    and (defaults[i] is not None)
+                    and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
+                )
+                else None
+            )
+            value = str(input(f"\n{label}{f' ({default})' if default  else ''}: ")).strip()
+            if (
+                (len(value) == 0)
+                and (default is not None)
+                and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+            ):
+                reply.append(default)
+            else:
+                reply.append(value)
 
     else:
         raise RuntimeError("No user interfaces available")
@@ -1320,23 +1461,28 @@ def AuthFileCheck(fileName, allowEmpty=False):
         return False
 
 
-def MalcolmAuthFilesExist(configDir=None):
+def MalcolmAuthFilesExist(configDir=None, run_profile=PROFILE_MALCOLM):
     configDirToCheck = (
         configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     )
     return (
-        AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
-        and AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
-        and AuthFileCheck(
-            os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
+        (
+            (run_profile == PROFILE_HEDGEHOG)
+            or (
+                AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
+                and AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
+                and AuthFileCheck(
+                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
+                )
+                and AuthFileCheck(
+                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
+                )
+                and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
+                and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
+                and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
+            )
         )
-        and AuthFileCheck(
-            os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
-        )
-        and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
         and AuthFileCheck(os.path.join(configDirToCheck, 'redis.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
         and AuthFileCheck(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 
@@ -1454,6 +1600,59 @@ def DownloadToFile(url, local_filename, debug=False):
 
 
 ###################################################################################################
+# test a connection to an HTTP/HTTPS server
+def test_http_connection(
+    protocol=None,
+    host=None,
+    port=None,
+    uri=None,
+    url=None,
+    username=None,
+    password=None,
+    ssl_verify="full",
+    user_agent="malcolm",
+):
+    status = 400
+    message = "Connection error"
+
+    # If URL is provided, parse it and override host/port/protocol/uri
+    if url:
+        parsed = urlparse(url)
+        protocol = parsed.scheme
+        host = parsed.hostname
+        port = parsed.port
+        uri = parsed.path.lstrip("/")
+        if port is None:
+            port = 443 if protocol == "https" else 80
+
+    # Set up the connection
+    c = None
+    if protocol.lower() == "https":
+        if (isinstance(ssl_verify, bool) and ssl_verify) or (
+            isinstance(ssl_verify, str) and (ssl_verify.lower() == "full")
+        ):
+            c = HTTPSConnection(host, port=port)
+        else:
+            c = HTTPSConnection(host, port=port, context=ssl._create_unverified_context())
+    elif protocol.lower() == "http":
+        c = HTTPConnection(host, port=port)
+
+    if c:
+        try:
+            headers = {'User-agent': user_agent}
+            if username and password:
+                headers['Authorization'] = 'Basic %s' % b64encode(f"{username}:{password}".encode()).decode("ascii")
+            c.request('GET', f'/{str(uri)}', headers=headers)
+            res = c.getresponse()
+            status = res.status
+            message = res.reason
+        except Exception as e:
+            message = f"Error: {e}"
+
+    return status, message
+
+
+###################################################################################################
 # process log line from containers' output
 
 URL_USER_PASS_REGEX = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
@@ -1503,6 +1702,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Fork\s+CoW\s+for\s+RDB
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
+  | GET\s+/wise/+stats
   | i:\s+pcap:\s+read\s+\d+\s+file
   | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
   | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
@@ -1510,19 +1710,21 @@ LOG_IGNORE_REGEX = re.compile(
   | Info:\s+unix-socket:
   | kube-probe/
   | loaded\s+config\s+'/etc/netbox/config/
-  | LOG:\s+checkpoint\s+(complete|starting)
+  | LOG:\s+checkpoint\s+(complete|starting)\
+  | No\s+active\s+configuration\s+revision\s+found\s+-\s+falling\s+back\s+to\s+most\s+recent
   | Notice:\s+pcap:\s+read\s+(\d+)\s+file
   | opensearch.*has\s+insecure\s+file\s+permissions
-  | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
+  | (POST|PUT)\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
-  | POST\s+/wise/get.+\b200\b
+  | POST\s+/wise/+get.+\b200\b
   | POST\s+HTTP/[\d\.].+\b200\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
   | retry\.go.+(send\s+unwait|done$)
   | running\s+full\s+sweep
+  | running\s+without\s+any\s+HTTP\s+authentication\s+checking
   | saved_objects
   | scheduling\s+job\s*id.+opendistro-ism
   | SSL/TLS\s+verifications\s+disabled
@@ -2046,6 +2248,24 @@ def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str], Opti
     return distro, codename, ubuntu_codename, release
 
 
+def IsMalcolmISOInstalled():
+    result = False
+    if os.path.isfile(MalcolmISOOsInfoFile):
+        os_info = {}
+        with open(MalcolmISOOsInfoFile, 'r') as f:
+            for line in f:
+                try:
+                    k, v = line.rstrip().split("=", 1)
+                    os_info[k.lower()] = v.strip('"')
+                except Exception:
+                    pass
+        result = (os_info.get('variant_id', '').lower() in (PROFILE_HEDGEHOG, PROFILE_MALCOLM)) and any(
+            os_info.get('variant', '').lower().startswith(p) for p in (PROFILE_HEDGEHOG, PROFILE_MALCOLM)
+        )
+
+    return result
+
+
 _rec_puid_pgid = GetUidGidFromEnv()
 if (int(_rec_puid_pgid['PUID']) == 0) or (int(_rec_puid_pgid['PGID']) == 0):
     _rec_puid_pgid = GetNonRootUidGid(
@@ -2074,6 +2294,7 @@ SYSTEM_INFO: dict[str, object] = {
 SYSTEM_INFO["suggested_os_memory"] = suggest_os_memory(SYSTEM_INFO["total_mem_gb"])
 SYSTEM_INFO["suggested_ls_memory"] = suggest_ls_memory(SYSTEM_INFO["total_mem_gb"])
 SYSTEM_INFO["suggested_ls_workers"] = suggest_ls_workers(SYSTEM_INFO["cpu_cores"])
+SYSTEM_INFO["malcolm_iso_install"] = IsMalcolmISOInstalled()
 
 __all__ = [
     "SYSTEM_INFO",

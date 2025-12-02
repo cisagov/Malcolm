@@ -1,4 +1,4 @@
-beautifulsoup4==4.13.3
-dateparser==1.2.1
+beautifulsoup4==4.14.2
+dateparser==1.2.2
 github3.py==4.0.1
-mmguero==2.0.0
+mmguero==2.0.3

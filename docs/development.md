@@ -17,7 +17,6 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `file-monitor` - code and configuration for the `file-monitor` container that can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container that serves a web browser-based upload form for uploading PCAP files and Zeek logs, and serves an SFTP share as an alternate upload
 * `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
-* `hedgehog-iso` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) ISO
 * `hedgehog-raspi` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) [Raspberry Pi image](hedgehog-raspi-build.md#HedgehogRaspiBuild)
 * `htadmin` - configuration for the `htadmin` user account management container
 * `logstash` - code and configuration for the `logstash` container that parses Zeek logs and forwards them to the `opensearch` container
@@ -116,7 +115,6 @@ $ ls -lh
 total 4.0G
 drwxrwxr-x 10 user user  156 Oct 29 17:22 installer
 -rwxrwxr-x  1 user user  44K Oct 29 17:22 install.py
--rwxrwxr-x  1 user user 236K Oct 29 17:22 legacy_install.py
 -rw-rw-r--  1 user user  460 Oct 29 17:22 malcolm_20251029_140727_d22a504f.README.txt
 -rw-rw-r--  1 user user 270K Oct 29 17:22 malcolm_20251029_140727_d22a504f.tar.gz
 -rw-rw-r--  1 user user   4G Oct 29 17:22 malcolm_20251029_140727_d22a504f_images.tar.xz

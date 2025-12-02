@@ -94,7 +94,7 @@ function InitializeSensorNetworking() {
   unset NEED_NETWORKING_RESTART
 
   # /etc/network/interfaces.d/sensor will manage network interfaces, not /etc/network/interfaces
-  # interfaces are configured by the system admin via configure-interfaces.py.
+  # interfaces are configured by the system admin via system-quickstart.py.
   NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
   if [ $NET_IFACES_LINES -gt 4 ] ; then
     echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces
@@ -155,6 +155,10 @@ function FixPermissions() {
       echo "$USER_TO_FIX" >> /etc/at.allow
     fi
     chmod 644 /etc/cron.allow /etc/at.allow
+    if [[ -d /etc/NetworkManager/system-connections ]]; then
+      chmod 755 /etc/NetworkManager/system-connections 2>/dev/null || true
+      find /etc/NetworkManager/system-connections -type f -name "*.nmconnection" -exec chmod 600 "{}" \;
+    fi
     loginctl enable-linger "$USER_TO_FIX" 2>/dev/null || true
   fi
 }

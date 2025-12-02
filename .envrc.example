@@ -1,5 +1,5 @@
 # .envrc and .justfile can be used by direnv (https://github.com/direnv/direnv) and
-#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/legacy_install.py
+#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/install.py
 #   and ./scripts/auth_setup. This will all likely be made obsolete when cisagov/Malcolm#395
 #   is complete. This hasn't been exhaustively tested, so it's recommended more for
 #   development convenience than it is for production use.
@@ -12,6 +12,8 @@ export MALCOLM_URL=
 # main configuration variables
 export VERBOSE=
 export MALCOLM_PROFILE=malcolm
+export PUID=$(id -u)
+export PGID=$(id -g)
 export NODE_NAME=malcolm
 export DARK_MODE=true
 export HTTPS=true
@@ -59,6 +61,9 @@ export INDEX_MANAGEMENT_REPLICAS=0
 export INDEX_MANAGEMENT_WEEKS_OF_HISTORY=13
 export INDEX_MANAGEMENT_SEGMENTS=1
 export AUTO_ARKIME=true
+export ARKIME_EXPOSE_WISE_GUI=true
+export ARKIME_ALLOW_WISE_GUI_CONFIG=false
+export ARKIME_WISE_SERVICE_URL=http://arkime:8081
 export AUTO_SURICATA=true
 export SURICATA_RULE_UPDATE=false
 export AUTO_ZEEK=true
@@ -94,10 +99,13 @@ export LIVE_CAPTURE_IFACE_TWEAK=true
 export LIVE_CAPTURE_STATS=true
 export LIVE_CAPTURE_ARKIME_NODE_HOST=
 export LIVE_CAPTURE_ARKIME=false
+export LIVE_CAPTURE_ARKIME_COMPRESSION=none
+export LIVE_CAPTURE_ARKIME_COMPRESSION_LEVEL=0
 export LIVE_CAPTURE_TCPDUMP=false
 export LIVE_CAPTURE_NETSNIFF=true
 export LIVE_CAPTURE_ZEEK=true
 export LIVE_CAPTURE_SURICATA=true
+export EXTRA_TAGS=
 
 # auth configuration variables
 export AUTH_METHOD=basic
@@ -126,8 +134,6 @@ export NETBOX_TOKEN=
 export ARKIME_AUTO_ANALYZE_PCAP_THREADS=2
 export ARKIME_ROTATE_INDEX=daily
 export ARKIME_SPI_DATA_MAX_INDICES=7
-export ARKIME_EXPOSE_WISE_GUI=true
-export ARKIME_ALLOW_WISE_GUI_CONFIG=true
 export CAPA_MAX_REQUESTS=2
 export CLAMD_MAX_REQUESTS=4
 export CSRF_TRUSTED_ORIGINS=https://*

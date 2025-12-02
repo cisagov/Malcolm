@@ -1,14 +1,16 @@
 {
   /**
+    Version: 2.0
     Authors:
       Mackenzie Zappe (mackenzie.zappe@inl.gov)
       Shelby Hiens
       Nicholas Donovan
+      Jessica Rooney
     References:
       https://vega.github.io/vega/docs/
       https://vega.github.io/vega/examples/tree-layout/
     Commit:
-      Corresponds to 7a530b4 in SMILE-Analytics/trees
+      Corresponds to a0b643c in SMILE-Analytics/trees/release
   **/
   ##  Set up Vega specification definitions
   ##  Pay attention to Vega additions after V5
@@ -20,10 +22,10 @@
     "contains": "padding"
   },
   "padding": {
-    "left": 5,
-    "top": 5,
-    "right": 5,
-    "bottom": -100
+    "left": {"expr": "width/100"},
+    "top": {"expr": "height/100"},
+    "right": {"expr": "width/100"},
+    "bottom": -150
   },
   ##  --------------------------------------------------------------------------------------------------------------------------
   ##  SECTION 0: Config --------------------------------------------------------------------------------------------------------
@@ -31,10 +33,20 @@
   ##  - arguments set in Config WILL be overwritten if redefined later in specification
   "config": {
     "signals": [
+      {
+        "name": "width",
+        "init": "containerSize()[0]",
+        "on": [ {"events": "window:resize", "update": "windowSize()[0]*0.6"} ]
+      },
+      {
+        "name": "height",
+        "init": "containerSize()[1]",
+        "on": [ {"events": "window:resize", "update": "windowSize()[1]*0.6"} ]
+      },
       // Adjust font scale based on display size
       {
         "name": "fontScale",
-        "update": "clamp(min(width / 1920, height / 1080), 0.5, 1.3)"
+        "update": "clamp(min(width / 1920, height / 1080), 0.3, 1.3)"
       },
       {
         "name": "paddingScale",
@@ -119,6 +131,259 @@
     //        }
     //      ],
     //    },
+
+    // Dynamic resizing signals based off window size
+    {
+      "name": "width",
+      //"value": "width",
+      "on": [ {"events": "window:resize", "update": "windowSize()[0]*0.6"} ]
+    },
+    {
+      "name": "height",
+      //"value": "height",
+      "on": [ {"events": "window:resize", "update": "windowSize()[1]*0.6"} ]
+    },
+    // Zoom-related signals
+    // Sets the custom domain range (x-axis) that is informed by autosize
+    {
+      "name": "xrange",
+      "update": "[0, width]" // width is automatically defined based on autosize at top of scheme
+    },
+    {
+    // Sets the custom range range (y-axis) that is informed by autosize
+      "name": "yrange",
+      "update": "[height, 0]" // height is automatically defined based on autosize at top of scheme
+    },
+    {
+    // determines extent of domain -  Updated by 'xdom' signal
+      "name": "xext",
+      "update": "[0, width]"
+    },
+    {
+    // determines extent of range -  Updated by 'ydom' signal
+      "name": "yext",
+      "update": "[height, 0]"
+    },
+    // Signal used to capture whether the user is pressing down and dragging at a certain spot in the visual
+    {
+      "name": "down",
+      "value": null,
+      "on": [
+        {
+          "events": "mouseup,touchend",
+          "update": "null"
+        },
+        {
+          "events": "mousedown, touchstart",
+          "update": "xy()"
+        },
+        {
+          "events": "symbol:mousedown, symbol:touchstart",
+          "update": "null"
+        }
+      ]
+    },
+    // determines the x-position of the current cursor position as moved by the user
+    {
+      "name": "xcur",
+      "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "xdom"
+        }
+      ]
+    },
+    // determines the y-position of the current cursor position as moved by the user
+    {
+      "name": "ycur",
+      "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "ydom"
+        }
+      ]
+    },
+    // calculates position of where the mouse wants the center of the visual to be
+    {
+      "name": "delta",
+      "value": [0, 0],
+      "on": [
+        {
+          "events": [
+            {
+              "source": "window",
+              "type": "mousemove",
+              "consume": true,
+              "between": [
+                {
+                  "type": "mousedown"
+                },
+                {
+                  "source": "window",
+                  "type": "mouseup"
+                }
+              ]
+            },
+            {
+              "type": "touchmove",
+              "consume": true,
+              "filter": "event.touches.length === 1"
+            }
+          ],
+          "update": "down ? [down[0]-x(), y()-down[1]] : [0,0]"
+        }
+      ]
+    },
+    {
+      "name": "anchor",
+      "value": [0, 0],
+      "on": [
+        {
+          "events": "wheel",
+          "update": "[invert('xscale', x()), invert('yscale', y())]"
+        },
+        {
+          "events": {
+            "type": "touchstart",
+            "filter": "event.touches.length===2"
+          },
+          "update": "[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]"
+        }
+      ]
+    },
+    // if the user moves the mouse wheel/zooms on trackpad, do calculations to determine visual positions
+    {
+      "name": "zoom",
+      "value": 1,
+      "on": [
+        {
+          "events": "wheel!",
+          "force": true,
+          "update": "pow(1.001, event.deltaY * pow(16, event.deltaMode))"
+        },
+        {
+          "events": {
+            "signal": "dist2"
+          },
+          "force": true,
+          "update": "dist1 / dist2"
+        },
+        {
+          "events": [
+            {
+              "source": "view",
+              "type": "dblclick"
+            }
+          ],
+          "update": "1"
+        }
+      ]
+    },
+    {
+      "name": "dist1",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "touchstart",
+            "filter": "event.touches.length===2"
+          },
+          "update": "pinchDistance(event)"
+        },
+        {
+          "events": {
+            "signal": "dist2"
+          },
+          "update": "dist2"
+        }
+      ]
+    },
+    {
+      "name": "dist2",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "touchmove",
+            "consume": true,
+            "filter": "event.touches.length===2"
+          },
+          "update": "pinchDistance(event)"
+        }
+      ]
+    },
+    //recalculate xext based on user mouse behavior
+    {
+      "name": "xdom",
+      "update": "xext",
+      "on": [
+        {
+          "events": {
+            "signal": "delta"
+          },
+          "update": "[xcur[0] + span(xcur) * delta[0] / width, xcur[1] + span(xcur) * delta[0] / width]"
+        },
+        {
+          "events": {
+            "signal": "zoom"
+          },
+          "update": "[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]"
+        },
+        {
+          "events": [
+            {
+              "source": "view",
+              "type": "dblclick"
+            }
+          ],
+          "update": "xrange"
+        }
+      ]
+    },
+    //recalculate yext based on user mouse behavior
+    {
+      "name": "ydom",
+      "update": "yext",
+      "on": [
+        {
+          "events": {
+            "signal": "delta"
+          },
+          "update": "[ycur[0] + span(ycur) * delta[1] / height, ycur[1] + span(ycur) * delta[1] / height]"
+        },
+        {
+          "events": {
+            "signal": "zoom"
+          },
+          "update": "[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]"
+        },
+        {
+          "events": [
+            {
+              "source": "view",
+              "type": "dblclick"
+            }
+          ],
+          "update": "yrange"
+        }
+      ]
+    },
+    {
+      "name": "cx",
+      "update": "width / 2",
+      "on": [
+        {
+          "events": "[symbol:mousedown, window:mouseup] > window:mousemove",
+          "update": "cx==width/2?cx+0.001:width/2"
+        }
+      ]
+    },
+    {
+      "name": "cy",
+      "update": "height / 2"
+    },
     // Takes User Input to define the initial root
     {
       "name": "userInputRoot",
@@ -316,7 +581,7 @@
           },
         ]
       },
-      //Get the data at nodeEnrich index from the device_array
+      // Get the data at nodeEnrich index from the device_array
       {
         "name": "device_data",
         "value": "{'ip': null}", //declare initial as null to avoid startup error
@@ -339,7 +604,7 @@
         "on":[
           {
             "events": "@node:mouseover",
-            "update": "device_data.device ? device_data.device.role[0] : null",
+            "update": "device_data.device ? toString(pluck(device_data.device, 'role')) : null",
             "force": "true"
           },
         ]
@@ -350,20 +615,29 @@
         "on":[
           {
             "events": "@node:mouseover",
-            "update": "device_data.device ? device_data.device.name[0] : null",
+            "update": "device_data.device ? toString(pluck(device_data.device, 'name')) : null",
             "force": "true"
           },
         ]
       },
+      // {
+      //   "name": "device_host_name",
+      //   "on":[
+      //     {
+      //       "events": "@node:mouseover",
+      //       "update": "datum.device_array[2].host_name ? pluck(datum.device_array[2], 'host_name') : null",
+      //       "force": "true"
+      //     },
+      //   ]
+      // },
       {
         "name": "device_mac",
         "on":[
           {
             "events": "@node:mouseover",
-            "update": "device_data.mac ? device_data.mac[0] : null ",
+            "update": "device_data ? pluck(device_data, 'mac')[0] : null ",
             "force": "true"
           },
-
         ]
       },
       {
@@ -371,18 +645,28 @@
         "on":[
           {
             "events": "@node:mouseover",
-            "update": "device_data.oui ? device_data.oui : null",
+            "update": "device_data ? pluck(device_data, 'oui') : null",
             "force": true,
           }
         ]
-      }
+      },
+      {
+        "name": "device_as",
+        "on":[
+          {
+            "events": "@node:mouseover",
+            "update": "device_data ? pluck(device_data, 'as') : null",
+            "force": true,
+          }
+        ]
+      },
       // Format the node hover data so tooltip is populated
       {
         "name": "device_info",
         "on":[
           {
             "events": "@node:mouseover",
-            "update": "{'IP': device_data.ip, 'MAC': device_mac, 'OUI': device_oui, 'As': device_data.as, 'Netbox Name': netbox_name,  'Netbox Role': netbox_role }",
+            "update": "{'IP': device_data.ip, 'MAC': device_mac, 'OUI': device_oui, 'As': device_as, 'Netbox Name': netbox_name, 'Netbox Role': netbox_role }",
             "force": "true"
           },
           {
@@ -510,7 +794,6 @@
                       "field": "timestamp"
                     }
                   },
-
               ]
             }
           },
@@ -538,6 +821,7 @@
                           "protocol",
                           "totDataBytes",
                           "timestamp",
+                          // "host"
                         ]
                       }
                     }
@@ -626,6 +910,11 @@
           "expr": "datum.aggregated_objs[0].source.segment ? pluck(datum.aggregated_objs[0].source.segment, toString('name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
           "as": "src_segment"
         },
+        // {
+        //   "type":"formula",
+        //   "expr": "datum.aggregated_objs[0].host ? pluck(datum.aggregated_objs[0].host, 'name') : null",
+        //   "as": "host_name"
+        // },
       ]
     },
     {
@@ -673,11 +962,11 @@
         },
         {
           "trigger": "clear || initialRoot",
-          "insert": "nonexistentIPWarning !== false ? {'src': null, 'dst': initialRoot, 'id': initialRoot, 'depth': 0, 'enrichment': initialRootData, 'identifier': initialConnection2, 'parentIdentifier': null, 'testSplit': null, 'testCat': null} : null"    // If IP exists in table then insert the initial node, otherwise do not insert
+          "insert": "(nonexistentIPWarning !== false) && (userInputRoot !== '') ? {'src': null, 'dst': initialRoot, 'id': initialRoot, 'depth': 0, 'enrichment': initialRootData, 'identifier': initialConnection2, 'parentIdentifier': null, 'testSplit': null, 'testCat': null} : null"    // If IP exists in table then insert the initial node, otherwise do not insert
         },
         {
           "trigger": "step",
-          "insert": "data('next')"
+          "insert": "(nonexistentIPWarning !== false) && (userInputRoot !== '') ? data('next') : null"
         },
       ],
       "transform":[
@@ -717,6 +1006,11 @@
           "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'source.segment')) : datum.src_segment", // hardcoded to first index of objects because segment is enriched from netbox not network traffic
           "as": "src_segment"
         },
+        // {
+        //   "type": "formula",
+        //   "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'host.name')) : datum.host_name", // hardcoded to first index of objects because device is enriched from netbox not network traffic
+        //   "as": "host_name"
+        // },
       ]
     },
     // Tracks what nodes to search next
@@ -893,7 +1187,7 @@
           "method": "tidy",
           "size": [
             {
-              "signal": "height - 100"
+              "signal": "height - 150"
             },
             {
               "signal": "width - 220"
@@ -910,7 +1204,7 @@
         // Creates device_array to determine which device info to show on node hover
         {
           "type": "formula",
-          "expr": "[pluck(datum.enrichment, 'dst_device')[0], pluck(datum.enrichment, 'src_device')[0]]",
+          "expr": "[pluck(datum.enrichment[0], 'dst_device'), pluck(datum.enrichment[0], 'src_device'), datum.enrichment[0]]",
           "as": "device_array"
         },
         {
@@ -1002,6 +1296,30 @@
         "domain": ["0 bytes transferred", "> 0 bytes transferred"],
         "range": [[5,2], null]
       },
+      {
+      //  Scale to determine x visual bounds after user attempts to zoom or drag mouse
+      // used to scale the x value for marks
+        "name": "xscale",
+        "zero": false,
+        "domain": {
+          "signal": "xdom"
+        },
+        "range": {
+          "signal": "xrange"
+        }
+      },
+      {
+      //  Scale to determine y visual bounds after user attempts to zoom or drag mouse
+      // used to scale the y value for marks
+        "name": "yscale",
+        "zero": false,
+        "domain": {
+          "signal": "ydom"
+        },
+        "range": {
+          "signal": "yrange"
+        }
+      },
     ],
 
     ## --------------------------------------------------------------------------------------------------------------------------
@@ -1021,7 +1339,7 @@
               "value": 400
             },
             "height": {
-              "signal": "height - 100"
+              "signal": "height-100"
             },
             "width": {
               "signal": "width"
@@ -1073,36 +1391,33 @@
                   "signal": "{'Time': toString(datum.target.date_obj),'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'dst_segment')), 'Byte Avg': datum.byteAvg}",
                 }
               }
-            }
+            },
+            "transform":[
+              // redefine the source/target x/y positions after mouse moves so the links know where to be drawn
+              {
+              "type": "linkpath",
+              "orient": "horizontal",
+              "shape": "diagonal",
+              "sourceX": {"expr": "scale('xscale', datum.datum.source.x)"},
+              "sourceY": {"expr": "scale('yscale', datum.datum.source.y)"},
+              "targetX": {"expr": "scale('xscale', datum.datum.target.x)"},
+              "targetY": {"expr": "scale('yscale', datum.datum.target.y)"}
+              },
+            ]
           },
           {
-            "type": "rect",
-            "name": "enrichmentBox",
-            "encode": {
-              "enter": {
-                "x": {"value": -400},
-                "y": {"value": 10},
-                "stroke": {"value": "black"},
-                "strokeWidth": {"value": 3},
-                "fill": {"value": "black"},
-              "width": {"value": 350},
-                "height": {"value": 130},
-              }
-            }
-          },
-          {
-          "type": "text",     // title for enrichment box
+          "type": "text",     // ip title for enrichment box
           "from": {"data": "links"},
             "encode": {
               "enter": {
                 // "align": {"value": "left"},
                 "baseline": {"value": "top"},
-                "fill": {"value": "white"},
+                // "fill": {"value": "white"}, //JCR, changes color of IPs addrs in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
                 "opacity": {"value": 0},
               },
               "update": {
                 "x": {"value": -395},
-                "y": {"value":20},
+                "y": {"value": 20},
                 "text": {"signal": "enrichmentSrc + ' - ' + enrichmentDst"},
                 "font": {"value": "Arial"},
                 "fontStyle": {"value": "bold"},
@@ -1117,7 +1432,7 @@
               "enter": {
                 // "align": {"value": "left"},
                 "baseline": {"value": "top"},
-                "fill": {"value": "white"},
+                // "fill": {"value": "white"}, //JCR, changes color of onn state, bytes, protocols label in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
                 "opacity": {"value": 0},
               },
               "update": {
@@ -1137,7 +1452,7 @@
               "enter": {
                 // "align": {"value": "left"},
                 "baseline": {"value": "top"},
-                "fill": {"value": "white"}
+                "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
               },
               "update": {
                 "x": {"value": -395},
@@ -1154,10 +1469,10 @@
               "encode": {
                 "enter": {
                   "baseline": {"value": "top"},
-                  "fill": {"value": "white"},
+                  "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
                 },
                 "update": {
-                  "x": {"value": -300},
+                  "x": {"value": -303},
                   "y": {"value": 60},
                   "text": {"signal": "byte_data"},
                   "font": {"value": "Arial"},
@@ -1171,10 +1486,10 @@
             "encode": {
               "enter": {
                 "baseline": {"value": "top"},
-                "fill": {"value": "white"},
+                "fill": {"value": "#159d8d"}, // JCR, changed to match Malcolm color scheme
               },
               "update": {
-                "x": {"signal": "isArray(tooltip3) ? -205 : -395"},
+                "x": {"signal": "isArray(tooltip3) ? -208 : -395"},
                 "y": {"signal": "isArray(tooltip3) ? 60 : 75"},
                 "text": {"signal": "isArray(tooltip3) ? tooltip3 : 'Hover over link for link enrichment.' "}, // checks if link enrichments is populated, if not display user instructions
                 "font": {"value": "Arial"},
@@ -1189,17 +1504,16 @@
             "encode": {
                 "enter": {
                   "baseline": {"value": "center"},
-                  "fill": {"value": "black"},
+                  "orient": "bottom"
+                  // "fill": {"value": "#172430"}, // JCR, if color isn't hardcoded them the color changes based on Malcolm theme
                 },
                 "update": {
-                  // "x": {"value": -400},
                   "x": {"value": -400},
-                  // "y": {"value": 1400},
-                  "y": { "signal": "legend_height + 1000" },
-                  "text": {"value": "IP address not found."},
+                  "y": {"signal": "height-200"},
+                  "text": {"value": "IP address not found. Try adjusting the time range."},
                   "font": {"value": "Arial"},
                   "fontStyle": {"value": "bold"},
-                  "fontSize": {"value": 20},
+                  "fontSize": {"signal": "titleFontSize"},
                   "opacity": {"signal": "nonexistentIPWarning === true ? 0 : 1" } // if IP exists in table then do not show error, otherwise show the error
                 }
               }
@@ -1256,12 +1570,8 @@
                     "signal": "0"
                   }
                 ],
-                "x": {
-                  "field": "x"
-                },
-                "y": {
-                  "field": "y"
-                },
+                "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
+                "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
                 // Make collapsed nodes darker
                 "fill": [
                   {
@@ -1301,12 +1611,8 @@
                 }
               },
               "update": {
-                "x": {
-                  "field": "x"
-                },
-                "y": {
-                  "field": "y"
-                },
+                "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
+                "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
                 // Collapsed or parents have labels on left
                 "dx": [
                   {
@@ -1342,22 +1648,21 @@
       {
         "title": "Average Bytes",
         "orient": "none",
-        "titleColor": { "value": "#fff" },
-        "labelColor": { "value": "#fff" },
-        "fillColor": { "value": "#000" },
-        "padding": { "value": 10 }
-
+        "titleColor": { "value": "#159d8d" },
+        "labelColor": { "value": "#159d8d" },
+        // "fillColor": { "value": "#172430" }, // JCR, left empty for auto theme color
+        "padding": { "value": 5 },
         "strokeDash": "dash_scale",
         "symbolType": "stroke",
         "symbolStrokeWidth": 3,
         "symbolSize": 400,
         "legendX": 0,
-        "legendY": { "signal": "legend_height + 130" },
+        "legendY": { "signal": "legend_height + 150" },
 
         "encode": {
           "symbols": {
             "update": {
-              "stroke": { "value": "#aaa" },
+              // "stroke": { "value": "#dfe5ef" },
               "fillOpacity": { "value": 0 }
             }
           },

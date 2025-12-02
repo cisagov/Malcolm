@@ -5,17 +5,22 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'
-      - 'shared/bin/*'
-      - '!shared/bin/common-init.sh'
-      - '!shared/bin/tx-rx-secure.sh'
-      - '!shared/bin/os-disk-config.py'
-      - '!shared/bin/preseed_late_user_config.sh'
-      - '!shared/bin/configure-interfaces.py'
-      - '!shared/bin/suricata*'
-      - '!shared/bin/zeek*.sh'
+      - 'container-health-scripts/file-monitor.sh'
+      - 'scripts/malcolm_constants.py'
+      - 'scripts/malcolm_utils.py'
+      - 'shared/bin/capa-build.sh'
+      - 'shared/bin/docker-uid-gid-setup.sh'
+      - 'shared/bin/extracted_files_http_server.py'
+      - 'shared/bin/prune_files.sh'
+      - 'shared/bin/service_check_passthrough.sh'
+      - 'shared/bin/watch_common.py'
+      - 'shared/bin/web-ui-asset-download.sh'
+      - 'shared/bin/yara_rules_setup.sh'
+      - 'shared/bin/zeek_carve*.py'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:

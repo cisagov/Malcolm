@@ -64,6 +64,9 @@ if ( [[ -z "$THRESHOLD_PCT" ]] || [[ ! "$THRESHOLD_PCT" =~ $INT_RE ]] || ! (( "$
   exit 1
 fi
 
+[[ -z "$THRESHOLD_PCT" ]] && THRESHOLD_PCT=0
+[[ -z "$MAXSIZE_GB" ]] && MAXSIZE_GB=0
+
 while true ; do
 
   # check initial disk capacity

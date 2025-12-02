@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:25.11.0
+        image: ghcr.io/idaholab/malcolm/api:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -72,9 +72,6 @@ spec:
               name: netbox-secret-env
           - configMapRef:
               name: opensearch-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "api.malcolm.local"
         livenessProbe:
           exec:
             command:

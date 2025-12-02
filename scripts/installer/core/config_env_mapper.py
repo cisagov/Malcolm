@@ -9,6 +9,10 @@
 Includes reverse import from existing env files and lookup helpers.
 """
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
@@ -51,39 +55,58 @@ def _default_string_reverse_transform(value: str):
     return value
 
 
+def _default_list_of_strings_transform(value: Any) -> List[str]:
+    if value is None:
+        result = []
+    elif isinstance(value, str):
+        result = [value]
+    elif isinstance(value, Iterable):
+        result = [str(v) for v in value]
+    else:
+        result = [str(value)]
+
+    return ",".join([true_or_false_no_quotes(x).strip() for x in result])
+
+
+def _default_list_of_strings_reverse_transform(value: str) -> List[str]:
+    return [s.strip() for s in value.split(",") if s.strip()] if value.strip() else []
+
+
 # 1. Boolean transform logic (single config item only)
 _BOOLEAN_VARS = [
-    KEY_ENV_ARKIME_MANAGE_PCAP_FILES,
+    KEY_ENV_ARKIME_ALLOW_WISE_CONFIG,
+    KEY_ENV_ARKIME_AUTO_ANALYZE_PCAP_FILES,
+    KEY_ENV_ARKIME_EXPOSE_WISE,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_ENABLED,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_HOT_WARM_ENABLED,
-    KEY_ENV_OPENSEARCH_DASHBOARDS_DARKMODE,
-    KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT,
+    KEY_ENV_ARKIME_MANAGE_PCAP_FILES,
     KEY_ENV_FILEBEAT_TCP_LISTEN,
-    KEY_ENV_LOGSTASH_REVERSE_DNS,
-    KEY_ENV_LOGSTASH_OUI_LOOKUP,
     KEY_ENV_FREQ_LOOKUP,
-    KEY_ENV_NETBOX_ENRICHMENT,
+    KEY_ENV_LOGSTASH_OUI_LOOKUP,
+    KEY_ENV_LOGSTASH_REVERSE_DNS,
     KEY_ENV_NETBOX_AUTO_CREATE_PREFIX,
     KEY_ENV_NETBOX_AUTO_POPULATE,
-    KEY_ENV_NGINX_SSL,
+    KEY_ENV_NETBOX_ENRICHMENT,
     KEY_ENV_NGINX_RESOLVER_IPV4,
     KEY_ENV_NGINX_RESOLVER_IPV6,
-    KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION,
+    KEY_ENV_NGINX_SSL,
+    KEY_ENV_OPENSEARCH_DASHBOARDS_DARKMODE,
+    KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT,
     KEY_ENV_OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION,
+    KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_PCAP_IFACE_TWEAK,
-    KEY_ENV_SURICATA_UPDATE_RULES,
-    KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE,
-    KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP,
-    KEY_ENV_ZEEK_FILE_ENABLE_YARA,
-    KEY_ENV_ZEEK_FILE_ENABLE_CAPA,
-    KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV,
-    KEY_ENV_ZEEK_FILE_UPDATE_RULES,
-    KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP,
-    KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES,
+    KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES,
     KEY_ENV_SURICATA_STATS_ENABLED,
     KEY_ENV_SURICATA_STATS_EVE_ENABLED,
-    KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES,
-    KEY_ENV_ARKIME_AUTO_ANALYZE_PCAP_FILES,
+    KEY_ENV_SURICATA_UPDATE_RULES,
+    KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES,
+    KEY_ENV_ZEEK_FILE_ENABLE_CAPA,
+    KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV,
+    KEY_ENV_ZEEK_FILE_ENABLE_YARA,
+    KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE,
+    KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP,
+    KEY_ENV_ZEEK_FILE_UPDATE_RULES,
+    KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP,
 ]
 
 # 2. String transform logic
@@ -95,6 +118,9 @@ _STRING_VARS = [
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_RETENTION_TIME,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS,
     KEY_ENV_ARKIME_LIVE_NODE_HOST,
+    KEY_ENV_ARKIME_LIVE_COMP_TYPE,
+    KEY_ENV_ARKIME_LIVE_COMP_LEVEL,
+    KEY_ENV_ARKIME_WISE_URL,
     KEY_ENV_CONTAINER_RUNTIME_KEY,
     KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT,
     KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT,
@@ -130,8 +156,13 @@ _STRING_VARS = [
     KEY_ENV_ZEEK_VTOT_API2_KEY,
 ]
 
+# 3. List-of-strings transform logic
+_LIST_OF_STRING_VARS = [
+    KEY_ENV_EXTRA_TAGS,
+]
 
-# 3. Custom transform logic
+
+# 4. Custom transform logic
 @dataclass(frozen=True)
 class TransformHook:
     forward: Callable
@@ -159,6 +190,10 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
     KEY_ENV_NETBOX_AUTO_POPULATE_SUBNET_FILTER: TransformHook(
         forward=custom_transform_netbox_auto_populate_subnet_filter,
         reverse=custom_reverse_transform_netbox_auto_populate_subnet_filter,
+    ),
+    KEY_ENV_LOGSTASH_HOST: TransformHook(
+        forward=custom_transform_logstash_host,
+        reverse=custom_reverse_transform_logstash_host,
     ),
     KEY_ENV_OPENSEARCH_PRIMARY: TransformHook(
         forward=custom_transform_opensearch_primary,
@@ -366,6 +401,9 @@ class EnvMapper:
 
                                     if map_key_constant_value in _CUSTOM_VARS:
                                         self._handle_custom_transform(env_var_instance, map_key_constant_value)
+                                    elif map_key_constant_value in _LIST_OF_STRING_VARS:
+                                        env_var_instance.transform = _default_list_of_strings_transform
+                                        env_var_instance.reverse_transform = _default_list_of_strings_reverse_transform
                                     elif map_key_constant_value in _STRING_VARS:
                                         env_var_instance.transform = _default_string_transform
                                         env_var_instance.reverse_transform = _default_string_reverse_transform
@@ -411,6 +449,12 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_NODE_HOST].config_items = [
                 KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST
             ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_COMP_TYPE].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_TYPE
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_COMP_LEVEL].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ARKIME_COMP_LEVEL
+            ]
             self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].config_items = [
                 KEY_CONFIG_ITEM_AUTO_ARKIME,
                 KEY_CONFIG_ITEM_LIVE_ARKIME,
@@ -444,7 +488,11 @@ class EnvMapper:
             ]
 
             # Logstash
-            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].config_items = [KEY_CONFIG_ITEM_LOGSTASH_HOST]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].config_items = [
+                KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST,
+            ]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].derived_items = [KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST]
             self.env_var_by_map_key[KEY_ENV_LOGSTASH_PIPELINE_WORKERS].config_items = [KEY_CONFIG_ITEM_LS_WORKERS]
             self.env_var_by_map_key[KEY_ENV_LOGSTASH_REVERSE_DNS].config_items = [KEY_CONFIG_ITEM_REVERSE_DNS]
             self.env_var_by_map_key[KEY_ENV_LOGSTASH_OUI_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_OUI]
@@ -568,9 +616,16 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_PCAP_IFACE].config_items = [KEY_CONFIG_ITEM_PCAP_IFACE]
             self.env_var_by_map_key[KEY_ENV_PCAP_FILTER].config_items = [KEY_CONFIG_ITEM_PCAP_FILTER]
             self.env_var_by_map_key[KEY_ENV_PCAP_NODE_NAME].config_items = [KEY_CONFIG_ITEM_PCAP_NODE_NAME]
+            self.env_var_by_map_key[KEY_ENV_EXTRA_TAGS].config_items = [KEY_CONFIG_ITEM_EXTRA_TAGS]
             self.env_var_by_map_key[KEY_ENV_PCAP_PIPELINE_POLLING].config_items = [
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
             ]
+
+            self.env_var_by_map_key[KEY_ENV_ARKIME_EXPOSE_WISE].config_items = [KEY_CONFIG_ITEM_ARKIME_EXPOSE_WISE]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_ALLOW_WISE_CONFIG].config_items = [
+                KEY_CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_WISE_URL].config_items = [KEY_CONFIG_ITEM_ARKIME_WISE_URL]
 
             # Malcolm
             self.env_var_by_map_key[KEY_ENV_PGID].config_items = [KEY_CONFIG_ITEM_PROCESS_GROUP_ID]

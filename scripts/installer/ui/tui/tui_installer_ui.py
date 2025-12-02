@@ -156,9 +156,6 @@ class TUIInstallerUI(InstallerUI):
             summary_items.insert(0, ("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
         summary_items.insert(0, ("Configuration Only", "Yes" if install_context.config_only else "No"))
 
-        # Clear screen and display the summary using TUI formatting
-        ClearScreen()
-
         # Build the entire summary as one cohesive display
         summary_lines = []
         summary_lines.append("=" * 60)
@@ -171,20 +168,31 @@ class TUIInstallerUI(InstallerUI):
 
         summary_lines.append("=" * 60)
 
-        # Display the entire summary as one block
-        print("\n".join(summary_lines))
+        while True:
+            # Clear screen and display the summary using TUI formatting
+            ClearScreen()
 
-        # Get user confirmation
-        prompt = (
-            "Proceed with dry-run using the above configuration?"
-            if is_dry_run
-            else "Proceed with Malcolm installation using the above configuration?"
-        )
-        return self.ask_yes_no(
-            prompt,
-            default=False,
-            force_interaction=True,
-        )
+            # Display the entire summary as one block
+            print("\n".join(summary_lines))
+
+            # Get user confirmation
+            prompt = (
+                "Proceed with dry-run using the above configuration?"
+                if is_dry_run
+                else f"Proceed {'' if install_context.config_only else 'with Malcolm installation '}using the above configuration?"
+            )
+            proceed_response = self.ask_yes_no(prompt, default=False, force_interaction=True)
+            if (not proceed_response) and (not is_dry_run):
+                if self.ask_yes_no(
+                    "The above changes to configuration will be discarded, are you sure?",
+                    default=False,
+                    force_interaction=True,
+                ):
+                    break
+            else:
+                break
+
+        return proceed_response
 
     def run_configuration_menu(
         self,

@@ -14,7 +14,7 @@
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
-* [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#KubernetesEKS)
+* [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#AWSEKSAuto)
 
 This document assumes good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
 
@@ -25,7 +25,7 @@ This document assumes good working knowledge of Kubernetes (K8s). The comprehens
 There exist a variety of ingress controllers for Kubernetes suitable for different Kubernetes providers and environments. A few sample manifests for ingress controllers can be found in Malcolm's [`kubernetes`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/) directory, prefixed with `99-ingress-…`:
 
 * [`kubernetes/99-ingress-nginx.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml.example) - an example ingress manifest for Malcolm using the [Ingress-NGINX controller for Kubernetes](https://github.com/kubernetes/ingress-nginx). The Ingress-NGINX controller has been used internally on self-hosted Kubernetes clusters during Malcolm's development and testing.
-* [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). Users likely will prefer to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#KubernetesEKS).
+* [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). Users likely will prefer to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#AWSEKSAuto).
 
 Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` files to `99-ingress.yml` as a starting point to define the ingress or define a custom manifest file and save it as `99-ingress.yml`.
 
@@ -33,7 +33,7 @@ Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` file
 
 Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml) uses the [Ingress-NGINX controller for Kubernetes](https://github.com/kubernetes/ingress-nginx). A few Malcolm features require some customization when installing and configuring the Ingress-NGINX controller. As well as being listed below, see [kubernetes/vagrant/deploy_ingress_nginx.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) for an example of how to configure and apply the Ingress-NGINX controller for Kubernetes.
 
-* To [forward](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) logs from a remote instance of [Hedgehog Linux](hedgehog.md):
+* To forward logs from a remote instance of [Hedgehog Linux](hedgehog.md):
     - See ["Exposing TCP and UDP services"](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) in the Ingress-NGINX documentation.
     - Configure the controller to start up with the `--tcp-services-configmap=ingress-nginx/tcp-services` flag:
         ```
@@ -350,10 +350,10 @@ Select an item number to configure, or an action:
 ├── 4. Run Profile (current: malcolm)
 │   ├── 5. Dark Mode for Dashboards (current: Yes)
 │   ├── 6. Forward Logs to Remote Secondary Store (current: No)
-│   ├── 7. Local OpenSearch Instance (current: Yes)
-│   ├── 8. Logstash Memory (current: 6g)
-│   ├── 9. Logstash Workers (current: 6)
-│   └── 10. OpenSearch Memory (current: 31g)
+│   ├── 7. Logstash Memory (current: 6g)
+│   ├── 8. Logstash Workers (current: 6)
+│   ├── 9. OpenSearch Memory (current: 31g)
+│   └── 10. Primary Document Store (current: opensearch-local)
 ├── 11. Require HTTPS Connections (current: Yes)
 ├── 12. IPv4 for nginx Resolver Directive (current: Yes)
 ├── 13. IPv6 for nginx Resolver Directive (current: No)
@@ -613,7 +613,7 @@ Deploying Malcolm with Kubernetes is a new (and still somewhat experimental) fea
 
 ## <a name="FutureLiveCap"></a> Live Traffic Analysis
 
-For now, network traffic artifacts for analysis are provided to a Malcolm deployment on Kubernetes via [forwarding](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) from a remote instance of [Hedgehog Linux](hedgehog.md) or via PCAP [upload](upload.md#Upload). [Future work](https://github.com/idaholab/Malcolm/issues/175) is needed to design and implement monitoring of network traffic in the cloud.
+For now, network traffic artifacts for analysis are provided to a Malcolm deployment on Kubernetes via forwarding from a remote instance of [Hedgehog Linux](hedgehog.md) or via PCAP [upload](upload.md#Upload). [Future work](https://github.com/idaholab/Malcolm/issues/175) is needed to design and implement monitoring of network traffic in the cloud.
 
 ## <a name="FutureScaleOut"></a> Horizontal Scaling
 

@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: upload-container
-        image: ghcr.io/idaholab/malcolm/file-upload:25.11.0
+        image: ghcr.io/idaholab/malcolm/file-upload:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -58,9 +58,6 @@ spec:
               name: upload-common-env
           - secretRef:
               name: auth-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "upload.malcolm.local"
         livenessProbe:
           exec:
             command:
@@ -78,7 +75,7 @@ spec:
             subPath: "upload"
       initContainers:
       - name: upload-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.11.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true

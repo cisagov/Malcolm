@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: keycloak-container
-        image: ghcr.io/idaholab/malcolm/keycloak:25.11.0
+        image: ghcr.io/idaholab/malcolm/keycloak:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -63,9 +63,6 @@ spec:
               name: postgres-env
           - secretRef:
               name: keycloak-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "keycloak.malcolm.local"
         livenessProbe:
           exec:
             command:

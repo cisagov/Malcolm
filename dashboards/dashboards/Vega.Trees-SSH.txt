@@ -1,0 +1,1741 @@
+{
+  /**
+    Version 1.0
+    Authors:
+      Mackenzie Zappe (mackenzie.zappe@inl.gov)
+      Shelby Hiens
+      Nicholas Donovan
+    References:
+      https://vega.github.io/vega/docs/
+      https://vega.github.io/vega/examples/tree-layout/
+    Commit:
+      Corresponds to abd046f in SMILE-Analytics/trees-ssh/release
+  **/
+  ##  Set up Vega specification definitions
+  ##  Pay attention to Vega additions after V5
+  // ## todo stop on broadcasts
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  // Make room for binds under the graph
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
+  },
+  "padding": {
+    "left": {"expr": "width/100"},
+    "top": {"expr": "height/100"},
+    "right": {"expr": "width/100"},
+    "bottom": -150
+  },
+  ##  --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 0: Config --------------------------------------------------------------------------------------------------------
+  ##  Define Specification constants like multiple legend positioning
+  ##  - arguments set in Config WILL be overwritten if redefined later in specification
+  "config": {
+    "signals": [
+      {
+        "name": "width",
+        "init": "containerSize()[0]",
+        "on": [ {"events": "window:resize", "update": "windowSize()[0]*0.6"} ]
+      },
+      {
+        "name": "height",
+        "init": "containerSize()[1]",
+        "on": [ {"events": "window:resize", "update": "windowSize()[1]*0.6"} ]
+      },
+      // Adjust font scale based on display size
+      {
+        "name": "fontScale",
+        "update": "clamp(min(width / 1920, height / 1080), 0.3, 1.3)"
+      },
+      {
+        "name": "paddingScale",
+        "update": "clamp(min(width / 1920, height / 1080), 0.5, 2)"
+      },
+      {
+        "name": "labelFontSize",
+        "init": "16 * fontScale"
+      },
+      {
+        "name": "titleFontSize",
+        "init": "20 * fontScale"
+      },
+      // Warn if data truncated
+      {
+        "name": "maxDataSize",
+        "value": 10000
+      },
+      {
+        "name": "dataMaxed",
+        "update": "length(data('table')) >= maxDataSize"
+      },
+      {
+        "name": "maxedWarning", // Warning to display to user if number of documents being processed exceeds 10k per Vega limitation
+        "update": "dataMaxed ? warn('Maximum data response reached. Data may be truncated. Try adjusting timeframe.') : null"
+      },
+      {
+        "name": "labelOffset",
+        "value": 15
+      }
+    ],
+    "axis": {
+      "titleFontSize": {
+        "signal": "titleFontSize"
+      },
+      "titlePadding": {
+        "signal": "25 * paddingScale"
+      },
+      "labelFontSize": {
+        "signal": "labelFontSize * .9"
+      },
+      "tickWidth": 3
+    },
+    "title": {
+      "fontSize": {
+        "signal": "titleFontSize * 1.2"
+      }
+    },
+    "legend": {
+      "titleFontSize": {
+        "signal": "titleFontSize * 0.9"
+      },
+      "labelFontSize": {
+        "signal": "labelFontSize"
+      },
+      "padding": {
+        "signal": "10 * paddingScale"
+      }
+    },
+    "text": {
+      "fontSize": {
+        "signal": "labelFontSize * 0.9"
+      },
+      "baseline": "middle"
+    },
+    "rule": {
+      "strokeWidth": 0.2,
+      "stroke": "firebrick"
+    }
+  },
+  ##  ---------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 1: Signals --------------------------------------------------------------------------------------------------------
+  ##  - Define dynamic variables (Signals) that can be updated at any point during the specification
+  "signals": [
+    //    logs into console run `VEGA_DEBUG.view.logLevel(3)` in console first
+    //    {
+    //      "name": "logger",
+    //      "on": [
+    //        {
+    //          "events": {"signal":  "clear"},
+    //          "update": "info(clear)"
+    //        }
+    //      ],
+    //    },
+
+    // Dynamic resizing signals based off window size
+    {
+      "name": "width",
+      //"value": "width",
+      "on": [ {"events": "window:resize", "update": "windowSize()[0]*0.6"} ]
+    },
+    {
+      "name": "height",
+      //"value": "height",
+      "on": [ {"events": "window:resize", "update": "windowSize()[1]*0.6"} ]
+    },
+    // Zoom-related signals
+    // Sets the custom domain range (x-axis) that is informed by autosize
+    {
+      "name": "xrange",
+      "update": "[0, width]" // width is automatically defined based on autosize at top of scheme
+    },
+    {
+    // Sets the custom range range (y-axis) that is informed by autosize
+      "name": "yrange",
+      "update": "[height, 0]" // height is automatically defined based on autosize at top of scheme
+    },
+    {
+    // determines extent of domain -  Updated by 'xdom' signal
+      "name": "xext",
+      "update": "[0, width]"
+    },
+    {
+    // determines extent of range -  Updated by 'ydom' signal
+      "name": "yext",
+      "update": "[height, 0]"
+    },
+    // Signal used to capture whether the user is pressing down and dragging at a certain spot in the visual
+    {
+      "name": "down",
+      "value": null,
+      "on": [
+        {
+          "events": "mouseup,touchend",
+          "update": "null"
+        },
+        {
+          "events": "mousedown, touchstart",
+          "update": "xy()"
+        },
+        {
+          "events": "symbol:mousedown, symbol:touchstart",
+          "update": "null"
+        }
+      ]
+    },
+    // determines the x-position of the current cursor position as moved by the user
+    {
+      "name": "xcur",
+      "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "xdom"
+        }
+      ]
+    },
+    // determines the y-position of the current cursor position as moved by the user
+    {
+      "name": "ycur",
+      "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "ydom"
+        }
+      ]
+    },
+    // calculates position of where the mouse wants the center of the visual to be
+    {
+      "name": "delta",
+      "value": [0, 0],
+      "on": [
+        {
+          "events": [
+            {
+              "source": "window",
+              "type": "mousemove",
+              "consume": true,
+              "between": [
+                {
+                  "type": "mousedown"
+                },
+                {
+                  "source": "window",
+                  "type": "mouseup"
+                }
+              ]
+            },
+            {
+              "type": "touchmove",
+              "consume": true,
+              "filter": "event.touches.length === 1"
+            }
+          ],
+          "update": "down ? [down[0]-x(), y()-down[1]] : [0,0]"
+        }
+      ]
+    },
+    {
+      "name": "anchor",
+      "value": [0, 0],
+      "on": [
+        {
+          "events": "wheel",
+          "update": "[invert('xscale', x()), invert('yscale', y())]"
+        },
+        {
+          "events": {
+            "type": "touchstart",
+            "filter": "event.touches.length===2"
+          },
+          "update": "[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]"
+        }
+      ]
+    },
+    // if the user moves the mouse wheel/zooms on trackpad, do calculations to determine visual positions
+    {
+      "name": "zoom",
+      "value": 1,
+      "on": [
+        {
+          "events": "wheel!",
+          "force": true,
+          "update": "pow(1.001, event.deltaY * pow(16, event.deltaMode))"
+        },
+        {
+          "events": {
+            "signal": "dist2"
+          },
+          "force": true,
+          "update": "dist1 / dist2"
+        },
+        {
+          "events": [
+            {
+              "source": "view",
+              "type": "dblclick"
+            }
+          ],
+          "update": "1"
+        }
+      ]
+    },
+    {
+      "name": "dist1",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "touchstart",
+            "filter": "event.touches.length===2"
+          },
+          "update": "pinchDistance(event)"
+        },
+        {
+          "events": {
+            "signal": "dist2"
+          },
+          "update": "dist2"
+        }
+      ]
+    },
+    {
+      "name": "dist2",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "touchmove",
+            "consume": true,
+            "filter": "event.touches.length===2"
+          },
+          "update": "pinchDistance(event)"
+        }
+      ]
+    },
+    //recalculate xext based on user mouse behavior
+    {
+      "name": "xdom",
+      "update": "xext",
+      "on": [
+        {
+          "events": {
+            "signal": "delta"
+          },
+          "update": "[xcur[0] + span(xcur) * delta[0] / width, xcur[1] + span(xcur) * delta[0] / width]"
+        },
+        {
+          "events": {
+            "signal": "zoom"
+          },
+          "update": "[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]"
+        },
+        {
+          "events": [
+            {
+              "source": "view",
+              "type": "dblclick"
+            }
+          ],
+          "update": "xrange"
+        }
+      ]
+    },
+    //recalculate yext based on user mouse behavior
+    {
+      "name": "ydom",
+      "update": "yext",
+      "on": [
+        {
+          "events": {
+            "signal": "delta"
+          },
+          "update": "[ycur[0] + span(ycur) * delta[1] / height, ycur[1] + span(ycur) * delta[1] / height]"
+        },
+        {
+          "events": {
+            "signal": "zoom"
+          },
+          "update": "[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]"
+        },
+        {
+          "events": [
+            {
+              "source": "view",
+              "type": "dblclick"
+            }
+          ],
+          "update": "yrange"
+        }
+      ]
+    },
+    {
+      "name": "cx",
+      "update": "width / 2",
+      "on": [
+        {
+          "events": "[symbol:mousedown, window:mouseup] > window:mousemove",
+          "update": "cx==width/2?cx+0.001:width/2"
+        }
+      ]
+    },
+    {
+      "name": "cy",
+      "update": "height / 2"
+    },
+    // Takes User Input to define the initial root
+    {
+      "name": "userInputRoot",
+      "init": "''",
+      "bind": {
+        "input": "search",
+        "placeholder": "  x.x.x.x ", // place holder to show syntax to user - spaces used to center placeholder in bind box
+        "name": "Root IP",
+        "debounce": 1200
+      }
+    },
+    // Finds the index of the root src IP
+    {
+      "name": "rootIndex",
+      "update": "indexof(pluck(data('table'), 'src'), userInputRoot) "
+    },
+    // Pulls the src information based on the rootIndex and stores it as intitialRoot
+    {
+      "name": "initialRoot",
+      "update": "pluck(data('table'), 'src')[rootIndex]",
+    },
+    // pulls enrichment data for the intialRoot based on rootIndex
+    {
+      "name": "initialRootData",
+      "update": "pluck(data('table'), 'aggregated_objs')[rootIndex]",
+    },
+    // checks if the searched IP exists in table or if the search bar is empty to determine whether to show the error
+    {
+      "name": "nonexistentIPWarning",
+      "update": "(rootIndex !== -1) || (userInputRoot === '') ? true : false"
+    },
+    {
+      "name": "initialConnection2",
+      "update": "null + '+' + userInputRoot"
+    },
+    {
+      "name": "treeDepth",
+      "update": "data('completeTree') && data('completeTree').root ? data('completeTree').root.height : -1"
+    },
+    // Allow the depth of the tree to be chosen
+    {
+      "name": "n",
+      "init": 3,
+      "bind": {
+        "input": "range",
+        "min": 1,
+        "max": 15,
+        "step": 1,
+        "name": "Tree Height",
+        "debounce": 300
+      }
+    },
+    // time filter toggle
+    {
+      "name": "timeFilter",
+      "init": "'Off'",
+      "bind": {
+        "input": "radio",
+        "options": ["On", "Off"],
+        "name": "Time Filter",
+        "debounce": 300
+      }
+    },
+    {
+      "name": "On",
+      "init": "",
+      "debounce": 300
+    },
+    {
+      "name": "Off",
+      "update": "",
+      "debounce": 300
+    },
+    // change scale for nodeColor
+    {
+      "name": "nodeColor",
+      "init": "'set1'",
+      "bind": {
+        "input": "select",
+        "options": ["observable10", "dark2", "paired", "set1"],
+        "name": "Node Color",
+        "debounce": 1200
+      }
+    },
+    // Save n history as [previous, current]
+    {
+      "name": "nHist",
+      "value": [
+        3
+      ],
+      "on": [
+        {
+          "events": {
+            "signal": "n"
+          },
+          "update": "slice(split(join(nHist)+','+n, ','), -2)"
+        }
+      ]
+    },
+    // Save previous n
+    {
+      "name": "nPrev",
+      "update": "toNumber(nHist.length > 1 ? nHist[nHist.length-2] : nHist[0])"
+    },
+    // When n shrinks we need to clear the graph and rebuild the tree
+    {
+      "name": "clear",
+      "init": "false",
+      "on": [
+        {
+          "events": {
+            "signal": "n"
+          },
+          "update": "n <= nPrev",
+          "force": true
+        },
+        {
+          "events": {
+            "signal": "timeFilter"
+          },
+          "update": "timeFilter",
+          "force": true
+        },
+        {
+          "events": {
+            "signal": "userInputRoot"
+          },
+          "update": "nonexistentIPWarning",
+          "force": true
+        },
+      ]
+    },
+    // A counter that triggers the BF iteration
+    {
+      "name": "step",
+      "value": 0,
+      "on": [
+        {
+          // check the `update` condition every 50 ms
+          "events": {
+            "type": "timer",
+            "throttle": 50
+          },
+          "update": "data('next') && length(data('next')) ? step + 1 : step"
+        }
+      ]
+    },
+    // Signals for collapsing a clicked node
+    {
+      "name": "clicked",
+      "value": null,
+      "on": [
+        {
+          "events": "@node:click",
+          "update": "{'identifier': datum.identifier}",
+          "force": "true"
+        },
+        {
+          "events": "@nodeLabel:click",
+          "update": "{'identifier': datum.identifier}",
+          "force": "true"
+        }
+      ]
+    },
+    {
+      "name": "clearCollapsed",
+      "value": false,
+      "on": [
+        {
+          "events": "dblclick[!event.item]",
+          "update": "true",
+          "force": true
+        }
+      ]
+    },
+    {
+      "name": "count_num_connections",
+      //"value": 0,
+      //"init": "data(datum.proto)"
+    },
+    //Return the index of the device_array where the ip matches the current node's dst field
+    {
+      "name": "nodeEnrich",
+      "value": {},
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "indexof(pluck(datum.device_array, 'ip'), split(datum.identifier,'+')[1])",
+          "force": "true",
+        },
+        {
+          "events": "@node:mouseout",
+          "update": "{}",
+          "debounce": 1000,
+        },
+      ]
+    },
+    // Get the data at nodeEnrich index from the device_array
+    {
+      "name": "device_data",
+      "value": "{'ip': null}", //declare initial as null to avoid startup error
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "datum.device_array[nodeEnrich]",
+          "force": "true"
+        },
+        {
+          "events": "@node:mouseout",
+          "update": "{}",
+          //"debounce": 1000,
+        },
+      ]
+    },
+    // Determine if netbox enrichment exists for a node and then pull the role value as a string
+    {
+      "name": "netbox_role",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "device_data.device ? toString(pluck(device_data.device, 'role')) : null",
+          "force": "true"
+        },
+      ]
+    },
+    // Determine if netbox enrichment exists for a node and then pull the name value as a string
+    {
+      "name": "netbox_name",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "device_data.device ? toString(pluck(device_data.device, 'name')) : null",
+          "force": "true"
+        },
+      ]
+    },
+    // {
+    //   "name": "device_host_name",
+    //   "on":[
+    //     {
+    //       "events": "@node:mouseover",
+    //       "update": "datum.device_array[2].host_name ? pluck(datum.device_array[2], 'host_name') : null",
+    //       "force": "true"
+    //     },
+    //   ]
+    // },
+    {
+      "name": "device_mac",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "device_data ? pluck(device_data, 'mac') : null ",
+          "force": "true"
+        },
+      ]
+    },
+    {
+      "name": "device_oui",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "device_data ? pluck(device_data, 'oui') : null",
+          "force": true,
+        }
+      ]
+    },
+    {
+      "name": "device_as",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "device_data ? pluck(device_data, 'as') : null",
+          "force": true,
+        }
+      ]
+    },
+    {
+      "name": "device_ssh_version",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "datum.device_array[2].ssh_version ? datum.device_array[2].ssh_version : null",
+          "force": "true"
+        },
+
+      ]
+    },
+    // Format the node hover data so tooltip is populated
+    {
+      "name": "device_info",
+      "on":[
+        {
+          "events": "@node:mouseover",
+          "update": "{'IP': device_data.ip, 'MAC': device_mac, 'OUI': device_oui, 'As': device_as, 'SSH Version': device_ssh_version, 'Netbox Name': netbox_name, 'Netbox Role': netbox_role}",
+          "force": "true"
+        },
+        {
+          "events": "@node:mouseout",
+          "update": "{}",
+          //"debounce": 1000,
+        },
+      ]
+    },
+    {
+      "name": "color",
+      "on":[
+        {
+          "events":"@node:mouseover",
+          "update":"rgb(rgb(scale('color', datum.depth)).r * 0.7, rgb(scale('color', datum.depth)).g * 0.7, rgb(scale('color', datum.depth)).b * 0.7)"
+        }
+      ]
+    },
+    {
+      "name": "tooltip2",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "pluck(datum.target.enrichment, 'conn_state')" },
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "tooltip3",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "pluck(datum.target.enrichment, 'protocolArr')" },
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "tooltip4",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "pluck(datum.target.enrichment, 'direction')" },
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "byte_data",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "pluck(datum.target.enrichment, 'bytesArr')" },
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "enrichmentSrc",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "pluck(datum.target.enrichment, 'src')"},
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "enrichmentDst",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "pluck(datum.target.enrichment, 'dst')"},
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "bytes_extent",
+      "update": "{'min': pluck(data('bytesExtent'), 'byteMin')[0], 'max': pluck(data('bytesExtent'), 'byteMax')[0]}"
+    },
+    {
+      "name": "time_extent",
+      "update": "{'min': pluck(data('timeExtent'), 'timeMin'), 'max': pluck(data('timeExtent'), 'timeMax')}"
+    },
+    {
+      "name": "connection_time",
+      "value": {},
+      "on": [
+        {"events": "path:mouseover", "update": "datum.target.date_obj"},
+        {"events": "path:mouseout", "update": "{}"}
+      ]
+    },
+    {
+      "name": "legend_height", "value": 28
+    },
+  ],
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 2: DATA --------------------------------------------------------------------------------------------------------
+  ##  Define datasets and data normalization to be worked with in schema
+  "data": [
+    {
+      // 'Raw' data that is being pulled using opensearch dsl and aggregations capability
+      // https://docs.opensearch.org/latest/query-dsl/
+      // https://docs.opensearch.org/latest/aggregations/bucket/index/
+
+
+      "name": "table",
+      "url": {
+        "index": "arkime_sessions3-*",
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "match":{
+                    "event.dataset":"ssh",
+                  }
+                }
+                "%dashboard_context-must_clause%"
+              ],
+              "must_not": [
+                "%dashboard_context-must_not_clause%"
+              ],
+              "filter": [
+                "%dashboard_context-filter_clause%",
+                {
+                  "range": {
+                    "@timestamp": {
+                      "%timefilter%": true
+                    }
+                  }
+                },
+                {
+                  "exists": {
+                    "field": "event.id"
+                  }
+                },
+                {
+                  "exists": {
+                    "field": "timestamp"
+                  }
+                },
+              ]
+            }
+          },
+          // assign all relevant destination ips to each unique source
+          "aggs": {
+          ##  Define parameters for
+            "connections": {
+              "composite": {
+                "size": 10000,
+                "sources": [
+                  {"src": { "terms": {"field": "source.ip"} } },
+                  {"dst": {"terms": {"field": "destination.ip"}} },
+                  // {"conn_state": {"terms": {"field": "protocol"}}}
+                ]
+              },
+                "aggs": {
+                  "metadata": {
+                    "top_hits": {
+                      "size": 1,
+                      "_source": {
+                        "includes": [
+                          "source",
+                          "destination",
+                          // "protocol",
+                          "event.result",
+                          "zeek.ssh.auth_attempts",
+                          "zeek.ssh.direction",
+                          "ssh.version",
+                          "host",
+                          "timestamp",
+                          "event.id"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          "size": 0
+          // this applies to hits, not aggregations, faster and reduces data size
+      },
+      "format": {
+        "property": "aggregations.connections.buckets"
+      },
+      "transform": [
+        // surfaced aggregated objs, src and dst device, protocols, segment names, conn states in the metadata (prettification)
+        {
+          "type": "formula",
+          "expr": "datum.metadata.hits.hits[0]._source.protocol ? datum.metadata.hits.hits[0]._source.protocol : null",
+          "as": "proto"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.metadata.hits.hits[0]._id ? datum.metadata.hits.hits[0]._id : null",
+          "as": "log_id"
+        },
+        {
+          "type": "project",
+          "fields": ["key.src", "key.dst", "metadata.hits.hits[0]._source.source", "metadata.hits.hits[0]._source.destination", "proto", "metadata.hits.hits[0]._source.event.result", "metadata.hits.hits[0]._source.zeek.ssh.auth_attempts", "metadata.hits.hits[0]._source.zeek.ssh.direction", "metadata.hits.hits[0]._source.ssh.version", "metadata.hits.hits[0]._source.host", "metadata.hits.hits[0]._source.timestamp", "metadata.hits.hits[0]._source.event.id"],
+          "as": ["src", "dst", "source", "destination", "protocol", "conn_state", "total_bytes", "direction", "ssh_version", "host", "time", "event_id"]
+        },
+        {
+          "type":"formula",
+          "expr": "toString(datum.protocol)",
+          "as": "proto_string"
+        },
+        {
+          "type": "aggregate",
+          "groupby": ["src", "dst"],
+          "fields":["proto", "total_bytes"],
+          "ops":["values", "mean"],
+          "as": ["aggregated_objs", "byteAvg"]
+        },
+        {
+          "type":"formula",
+          "expr": "length(datum.aggregated_objs)",
+          "as": "num_connections"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'conn_state') : null",
+          "as": "conn_state"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'proto_string') : null",
+          "as": "protocolArr"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'total_bytes') : null",
+          "as": "bytesArr"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'time')[0] : null",
+          "as": "timestamp"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'destination')[0] : null", //hardcoded to first index of objects because device is enriched from netbox not network traffic
+          "as": "dst_device"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'source')[0] : null", //hardcoded to first index of objects because device is enriched from netbox not network traffic
+          "as": "src_device"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs[0].destination.segment ? pluck(datum.aggregated_objs[0].destination.segment, toString('name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "dst_segment"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs[0].source.segment ? pluck(datum.aggregated_objs[0].source.segment, toString('name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "src_segment"
+        },
+        // {
+        //   "type":"formula",
+        //   "expr": "datum.aggregated_objs[0].host ? pluck(datum.aggregated_objs[0].host, 'name') : null",
+        //   "as": "host_name"
+        // },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs[0].destination.geo ? pluck(datum.aggregated_objs[0].destination.geo, toString('country_name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "dst_country"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs[0].source.geo ? pluck(datum.aggregated_objs[0].source.geo, toString('country_name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "src_country"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs[0].ssh_version ? pluck(datum.aggregated_objs[0], 'ssh_version[1]') : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "ssh_version"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, 'direction') : null",
+          "as": "direction"
+        },
+        {
+          "type":"formula",
+          "expr": "datum.aggregated_objs ? pluck(datum.aggregated_objs, toString('event_id')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "event_id"
+        },
+      ]
+    },
+    {
+      "name": "collapsyNodes",
+      "on": [
+        {
+          "trigger": "clearCollapsed || initialRoot",
+          "remove": true
+        },
+        {
+          "trigger": "clicked",
+          "toggle": "clicked"
+        }
+      ]
+    },
+    // Acts as the queue for the Breadth first traversal
+    {
+      "name": "queue",
+      "on": [
+        {
+          "trigger": "clear || initialRoot",
+          "remove": true
+        },
+        {
+          "trigger": "clear || initialRoot",
+          "insert": "{'id': initialRoot, 'depth': 0, 'identifier': initialConnection2, 'testCat': null}"
+        },
+        {
+          "trigger": "step",
+          "remove": true
+        },
+        {
+          "trigger": "step",
+          "insert": "data('next')"
+        }
+      ]
+    }
+    // Tracks all visited nodes
+    {
+      "name": "visited",
+      "on": [
+        {
+          "trigger": "clear || initialRoot",
+          "remove": true
+        },
+        {
+          "trigger": "clear || initialRoot",
+          "insert": "(nonexistentIPWarning !== false) && (userInputRoot !== '') ? {'src': null, 'dst': initialRoot, 'id': initialRoot, 'depth': 0, 'enrichment': initialRootData, 'identifier': initialConnection2, 'parentIdentifier': null, 'testSplit': null, 'testCat': null} : null"    // If IP exists in table then insert the initial node, otherwise do not insert
+        },
+        {
+          "trigger": "step",
+          "insert": "(nonexistentIPWarning !== false) && (userInputRoot !== '') ? data('next') : null"
+        },
+      ],
+      "transform":[
+        // RootNode enrichment flattening - does not change enrichment transforms that are handled in table dataset
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) ? length(datum.enrichment) : 0",
+          "as": "enrich_len"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'proto_string') : datum.protocolArr",
+          "as": "protocolArr"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'conn_state') : datum.conn_state",
+          "as": "conn_state"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'destination')[0] : datum.dst_device", // hardcoded to first index of objects because device is enriched from netbox not network traffic
+          "as": "dst_device"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'source')[0] : datum.src_device", // hardcoded to first index of objects because device is enriched from netbox not network traffic
+          "as": "src_device"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'destination.segment')) : datum.dst_segment", // hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "dst_segment"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'source.segment')) : datum.src_segment", // hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "src_segment"
+        },
+        // {
+        //   "type": "formula",
+        //   "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'host.name')) : datum.host_name", // hardcoded to first index of objects because device is enriched from netbox not network traffic
+        //   "as": "host_name"
+        // },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'destination.geo')) : datum.dst_country", // hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "dst_country"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'source.geo')) : datum.src_country", // hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "src_country"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'ssh_version[0]')) : datum.ssh_version", // hardcoded to first index of objects because segment is enriched from netbox not network traffic
+          "as": "ssh_version"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'direction') : datum.direction",
+          "as": "direction"
+        },
+      ]
+    },
+    // Tracks what nodes to search next
+    {
+      "name": "next",
+      "source": "table",
+      "transform": [
+        // Stop if we reach n
+        {
+          "type": "filter",
+          "expr": "treeDepth < n"
+        },
+        // unique identifier for strat
+        {
+          "type": "formula",
+          "expr": "datum.src + '+' + datum.dst",
+          "as": "identifier"
+        },
+        {
+          "type": "formula",
+          "expr": " datum.src === pluck(data('visited'), 'dst')[indexof(pluck(data('visited'), 'dst'), datum.src)] ? pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'dst'), datum.src)] : null",
+          "as": "parentIdentifier"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.src + '+' + datum.dst",
+          "as": "testCat"
+        },
+        {
+          "type": "formula",
+          "expr": "split(datum.testCat,'+')[0]",
+          "as": "testSplit"
+        },
+        {
+          "type": "lookup",
+          "from": "queue",
+          "key": "identifier",
+          "fields": [
+            "parentIdentifier"
+          ],
+          "values": [
+            "depth"
+          ],
+          "as": [
+            "parentDepth"
+          ]
+        },
+        // Keep valid ids in the queue
+        {
+          "type": "filter",
+          "expr": "isValid(datum.parentDepth)"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.dst",
+          "as": "id"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.parentDepth + 1",
+          "as": "depth"
+        },
+        // Grab the parent node timestamp and insert into current node metadata
+        {
+          "type": "formula",
+          "expr": "(datum.src === pluck(data('visited'), 'dst')[indexof(pluck(data('visited'), 'dst'), datum.src)]) && (datum.parentIdentifier === pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'identifier'), datum.parentIdentifier)]) ? pluck(data('visited'), 'timestamp')[indexof(pluck(data('visited'), 'dst'), datum.src)] : null",
+          "as": "parentTime"
+        },
+        // time filter - filter out past timestamps (nodes)
+        {
+          "type": "filter",
+          "expr": "timeFilter === 'On' && datum.depth > 1 ? datum.timestamp > datum.parentTime : 'Off'",
+        },
+      ]
+    },
+      // defines IP nodes and organizes data in tree data structure
+    {
+      "name": "completeTree",
+      "source": [
+        "visited"
+      ],
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": [
+            "parentIdentifier",
+            "identifier",
+          ],
+          "fields": ["protocolArr"], // passes down enrichment data
+          "ops": ["values"],
+          "as": ["enrichment"]
+        },
+        {
+          "type": "stratify",
+          "key": "identifier",
+          "parentKey": "parentIdentifier"
+        },
+        {
+          "type": "tree",
+          "method": "tidy",
+          "size": [
+            {
+              "signal": "height"
+            },
+            {
+              "signal": "width"
+            }
+          ],
+          "separation": true,
+          "as": [
+            "y",
+            "x",
+            "depth",
+            "children"
+          ]
+        },
+      ]
+    },
+    {
+      "name": "ancestors",
+      "source": "completeTree",
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "treeAncestors('completeTree', datum.identifier)",
+          "as": "ancestors"
+        },
+        {
+          "type": "flatten",
+          "fields": [
+            "ancestors"
+          ],
+          "as": [
+            "ancestor"
+          ]
+        },
+        {
+          "type": "filter",
+          "expr": "datum.ancestor.identifier !== datum.identifier"
+        },
+        {
+          "type": "filter",
+          "expr": "indata('collapsyNodes', 'identifier', datum.ancestor.identifier)"
+        }
+      ]
+    },
+    {
+      "name": "collapsed",
+      "source": "ancestors",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": [
+            "identifier"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "visibleTree",
+      "source": "completeTree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "!indata('collapsed', 'identifier', datum.identifier)"
+        },
+        {
+          "type": "stratify",
+          "key": "identifier",
+          "parentKey": "parentIdentifier"
+        },
+        {
+          "type": "tree",
+          "method": "tidy",
+          "size": [
+            {
+              "signal": "height - 150"
+            },
+            {
+              "signal": "width - 220"
+            }
+          ],
+          "separation": true,
+          "as": [
+            "y",
+            "x",
+            "depth",
+            "children"
+          ]
+        },
+        // Creates device_array to determine which device info to show on node hover
+        {
+          "type": "formula",
+          "expr": "[pluck(datum.enrichment, 'dst_device')[0], pluck(datum.enrichment, 'src_device')[0], datum.enrichment[0]]",
+          "as": "device_array"
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.enrichment, 'byteAvg')[0]",    // must be pluck and NOT datum.byteAvg
+          "as": "byteAvg"
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.enrichment, 'timestamp')[0]", // grabs timestamp field value from enrichment object
+          "as": "ts"
+        },
+        // converts timestamp into a Date object for humanreadable version of timestamp field
+        {
+          "type": "formula",
+          "expr": "datetime(year(datum.ts), month(datum.ts), date(datum.ts), hours(datum.ts), minutes(datum.ts), seconds(datum.ts), milliseconds(datum.ts))",
+          "as": "date_obj"
+        },
+
+      ]
+    },
+    {
+      "name": "bytesExtent",
+      "source": "visibleTree",
+      "transform":[
+        {
+          "type": "aggregate",
+          "fields": ["byteAvg", "byteAvg"],
+          "ops":["min", "max"],
+          "as": ["byteMin", "byteMax"]
+        },
+      ]
+    },
+    {
+      "name": "timeExtent",
+      "source": "visited",
+      "transform":[
+        {
+          "type": "aggregate",
+          "fields": ["timestamp", "timestamp"],
+          "ops":["min", "max"],
+          "as": ["timeMin", "timeMax"]
+        },
+      ]
+    },
+    // Calculate paths between nodes
+    {
+      "name": "links",
+      "source": "visibleTree",
+      "transform": [
+        {
+          "type": "treelinks"
+        },
+        {
+          "type": "linkpath",
+          "orient": "horizontal",
+          "shape": "diagonal"
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.target.enrichment, 'byteAvg')[0]",
+          "as": "byteAvg"
+        },
+        {
+          "type": "formula",
+          "expr": "isValid((datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min)) ? (datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min) : 1 ", //evaluates whether the normal number is valid, defaults to 1
+          "as": "byteAvg_normal"
+        },
+      ]
+    },
+  ],
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 3: Scales -------------------------------------------------------------------------------------------------------
+  ##  Maps data values to either categorical data or numerical data to change the way the data presents visually
+  "scales": [
+    // Assign a color for each layer
+    {
+      "name": "color",
+      "type": "linear",
+      "range": {
+        "scheme": {"signal": "nodeColor"} // built in color scheme from Vega // observable10  set1 tableu1
+      },
+      "domain": [0,15], // hardcoded to fix infinite depth error
+      "zero": true
+    },
+    {
+      "name": "dash_scale",
+      "type": "ordinal",
+      "domain": ["0 auth attempts made", "> 0 auth attempts made"],
+      "range": [[5,2], null]
+    },
+    {
+    //  Scale to determine x visual bounds after user attempts to zoom or drag mouse
+    // used to scale the x value for marks
+      "name": "xscale",
+      "zero": false,
+      "domain": {
+        "signal": "xdom"
+      },
+      "range": {
+        "signal": "xrange"
+      }
+    },
+    {
+    //  Scale to determine y visual bounds after user attempts to zoom or drag mouse
+      // used to scale the y value for marks
+      "name": "yscale",
+      "zero": false,
+      "domain": {
+        "signal": "ydom"
+      },
+      "range": {
+        "signal": "yrange"
+      }
+    },
+  ],
+
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 5: Marks --------------------------------------------------------------------------------------------------------
+  ##  Determines how the data visually appears in the visualization
+  "marks": [
+    {
+      // Render the tree inside a group to allow us to manipulate the entire position
+      //Group mark made to standardize positioning of marks in visualization
+      "type": "group",
+      "type": "group",
+      "name": "treeGroup",
+      "encode": {
+        "enter": {
+          // Offset to make first IP visible
+          "x": {
+            "value": 400
+          },
+          "height": {
+            "signal": "height-100"
+          },
+          "width": {
+            "signal": "width"
+          }
+        }
+      },
+      "title": {
+        "text": "SSH Connections Tree Hierarchy",
+        "orient": "top",
+        "align": "center"
+      },
+      "marks": [
+        // Draw the paths
+        {
+          "type": "path",
+          "name": "nodePath",
+          "zindex": 0,
+          "from": {
+            "data": "links",
+          },
+          "encode": {
+            "update": {
+              "path": {
+                "field": "path"
+              },
+              "stroke": {
+                "value": "#7777"
+              },
+              "strokeDash":[
+                {
+                "test":"datum.byteAvg == 0",
+                "value": [10,5]
+                },
+                {
+                  "signal": "null"
+                }
+              ],
+              "strokeWidth": {"signal": "5 + (datum.byteAvg_normal * (20-5))"}
+            },
+            "hover": {
+              "cursor": {
+                "value": "pointer"
+              },
+              // Changes the link color on hover
+              "stroke": {
+                "value": "#aaa"
+              },
+              "tooltip": {
+                "signal": "{ 'Time': toString(datum.target.date_obj), 'Auth Attempt Avg': datum.byteAvg, 'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'dst_segment')), 'Src Country': toString(pluck(datum.target.enrichment, 'src_country')), 'Dst Country': toString(pluck(datum.target.enrichment, 'dst_country')), 'Event ID': toString(pluck(datum.target.enrichment, 'event_id')) }",
+              }
+            }
+          },
+          "transform":[
+              // redefine the source/target x/y positions after mouse moves so the links know where to be drawn
+              {
+              "type": "linkpath",
+              "orient": "horizontal",
+              "shape": "diagonal",
+              "sourceX": {"expr": "scale('xscale', datum.datum.source.x)"},
+              "sourceY": {"expr": "scale('yscale', datum.datum.source.y)"},
+              "targetX": {"expr": "scale('xscale', datum.datum.target.x)"},
+              "targetY": {"expr": "scale('yscale', datum.datum.target.y)"}
+              },
+            ]
+        },
+        {
+        "type": "text",     // ip title for enrichment box
+        "from": {"data": "links"},
+          "encode": {
+            "enter": {
+              // "align": {"value": "left"},
+              "baseline": {"value": "top"},
+              // "fill": {"value": "white"}, //JCR, changes color of IPs addrs in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
+              "opacity": {"value": 0},
+            },
+            "update": {
+              "x": {"value": -395},
+              "y": {"value": 20},
+              "text": {"signal": "enrichmentSrc + ' - ' + enrichmentDst"},
+              "font": {"value": "Arial"},
+              "fontStyle": {"value": "bold"},
+              "fontSize": {"value": 16},
+              "opacity": {"signal": "isArray(enrichmentSrc) ? 1 : 0" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1
+            },
+          }
+        },
+        {
+        "type": "text",     // header for conn state, auth attempts, direction
+          "encode": {
+            "enter": {
+              // "align": {"value": "left"},
+              "baseline": {"value": "top"},
+              // "fill": {"value": "white"}, //JCR, changes color of onn state, bytes, protocols label in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
+              "opacity": {"value": 0},
+            },
+            "update": {
+              "x": {"value": -395},
+              "y": {"value": 40},
+              "text": {"value": "Authentication    Auth Attempts    Direction"},
+              "font": {"value": "Arial"},
+              "fontStyle": {"value": "bold"},
+              "fontSize": {"value": 15},
+              "opacity": {"signal": "isArray(tooltip4) ? 1 : 0" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1
+            },
+          }
+        },
+        {
+        "type": "text",     // conn state text in enrichment box
+          "encode": {
+            "enter": {
+              // "align": {"value": "left"},
+              "baseline": {"value": "top"},
+              "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
+            },
+            "update": {
+              "x": {"value": -395},
+              "y": {"value": 60},
+              "text": {"signal": "isArray(tooltip2) ? tooltip2 : 'Hover over node for node enrichment.' "}, // checks if node enrichments is populated, if not display user instructions
+              "font": {"value": "Arial"},
+              "fontSize": {"value": 15},
+              "opacity": 1,
+            }
+          }
+        },
+        {
+          "type": "text",     // auth attempts text in enrichment box
+            "encode": {
+              "enter": {
+                "baseline": {"value": "top"},
+                "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
+              },
+              "update": {
+                "x": {"value": -274},
+                "y": {"value": 60},
+                "text": {"signal": "byte_data"},
+                "font": {"value": "Arial"},
+                "fontSize": {"value": 15},
+                "opacity": {"signal": "isArray(byte_data) ? 1 : 0" } // checks if byte_data is an array - if Array then text is an byte value and won't be [object Object] when opacity == 1
+              }
+            }
+        },
+        {
+        "type": "text",     // direction text in enrichment box
+          "encode": {
+            "enter": {
+              "baseline": {"value": "top"},
+              "fill": {"value": "#159d8d"}, // JCR, changed to match Malcolm color scheme
+            },
+            "update": {
+              "x": {"signal": "isArray(tooltip4) ? -153 : -395"},
+              "y": {"signal": "isArray(tooltip4) ? 60 : 75"},
+              "text": {"signal": "isArray(tooltip4) ? tooltip4 : 'Hover over link for link enrichment.' "}, // checks if link enrichments is populated, if not display user instructions
+              "font": {"value": "Arial"},
+              "fontSize": {"value": 15},
+              "opacity": 1,
+            }
+          }
+        },
+        {
+          "type": "text",     // nonexistent IP warning text
+          "zindex": 0,
+          "encode": {
+              "enter": {
+                "baseline": {"value": "center"},
+                "orient": "bottom"
+                // "fill": {"value": "#172430"}, // JCR, if color isn't hardcoded them the color changes based on Malcolm theme
+              },
+              "update": {
+                "x": {"value": -400},
+                "y": {"signal": "height-200"},
+                "text": {"value": "IP address not found. Try adjusting the time range."},
+                "font": {"value": "Arial"},
+                "fontStyle": {"value": "bold"},
+                "fontSize": {"signal": "titleFontSize"},
+                "opacity": {"signal": "nonexistentIPWarning === true ? 0 : 1" } // if IP exists in table then do not show error, otherwise show the error
+              }
+            }
+        },
+        // Draw the nodes
+        {
+          "type": "symbol",
+          "name": "node",
+          "zindex": 10,
+          "from": {
+            "data": "visibleTree"
+          },
+          "encode": {
+            "enter": {
+              "size": {
+                "value": 300
+              },
+              "stroke": {
+                "value": "black"
+              },
+            },
+            "hover": {
+              "cursor": {
+                "value": "pointer"
+              },
+            },
+            "update": {
+              // Make collapsed nodes larger
+              "size": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
+                  "signal": "300 * 1.5"
+                },
+                {
+                  "signal": "300"
+                }
+              ],
+              // Stroke collapsed nodes
+              "strokeDash": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
+                  "signal": "[5,3]"
+                },
+                {
+                  "signal": "null"
+                }
+              ],
+              "strokeWidth": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
+                  "signal": "4"
+                },
+                {
+                  "signal": "0"
+                }
+              ],
+              "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
+              "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
+              // Make collapsed nodes darker
+              "fill": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)", // || device_data.ip == datum.dst",
+                  "signal": "rgb(rgb(scale('color', datum.depth)).r * 0.7, rgb(scale('color', datum.depth)).g * 0.7, rgb(scale('color', datum.depth)).b * 0.7)"
+                },
+                {
+                  "scale": "color",
+                  "field": "depth"
+                }
+              ],
+              // tooltip must be declared in update instead of hover to prevent ip collisions
+              "tooltip": {
+                "signal": "device_info",
+              },
+            },
+
+          }
+        },
+        {
+          // IP address labels for the nodes
+          "type": "text",
+          "name": "nodeLabel",
+          "zindex": 10,
+          "from": {
+            "data": "visibleTree"
+          },
+          "encode": {
+            "enter": {
+              "text": {
+                "signal": "split(datum.identifier,'+')[1]"
+              },
+              "fontSize": {"value": 15},
+              "font": {"value": "Arial"},
+              "baseline": {
+                "value": "middle"
+              }
+            },
+            "update": {
+              "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
+              "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
+              // Collapsed or parents have labels on left
+              "dx": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier) || datum.children",
+                  "signal": "-1 * labelOffset"
+                },
+                {
+                  "signal": "labelOffset"
+                }
+              ],
+              "align": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier) || datum.children",
+                  "signal": "'right'"
+                },
+                {
+                  "signal": "'left'"
+                }
+              ],
+              "opacity": 1
+            },
+            "hover": {
+              "cursor": {
+                "value": "pointer"
+              }
+            }
+          }
+        }
+     ]
+    }
+  ],
+  "legends": [
+    {
+      "title": "Average Auth Attempts",
+      "orient": "none",
+      "titleColor": { "value": "#159d8d" },
+      "labelColor": { "value": "#159d8d" },
+      // "fillColor": { "value": "#172430" }, // JCR, left empty for auto theme color
+      "padding": { "value": 5 },
+      "strokeDash": "dash_scale",
+      "symbolType": "stroke",
+      "symbolStrokeWidth": 3,
+      "symbolSize": 400,
+      "legendX": 0,
+      "legendY": { "signal": "legend_height + 150" },
+
+      "encode": {
+        "symbols": {
+          "update": {
+            // "stroke": { "value": "#dfe5ef" },
+            "fillOpacity": { "value": 0 }
+          }
+        },
+        "title": {
+          "update": {
+            "fontSize": { "value": 14 }
+          }
+        },
+        "labels": { "update": { "fontSize": { "value": 14 } } }
+      }
+    }
+  ]
+}

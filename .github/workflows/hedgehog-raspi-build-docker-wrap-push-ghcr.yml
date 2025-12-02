@@ -5,8 +5,9 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
-      - 'hedgehog-iso/**'
+      - 'malcolm-iso/**'
       - 'hedgehog-raspi/**'
       - 'shared/bin/*'
       - '!shared/bin/pcap_processor.py'

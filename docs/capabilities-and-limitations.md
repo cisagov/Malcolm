@@ -75,9 +75,9 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
     - For the most part, Malcolm can run with a "set it and forget it" mindset should keep itself running without much hands-on maintenance.
     - Automatic updates of threat intelligence feeds and rules for file scanning engines can be scheduled to run automatically in the background.
     - Automatic [alerting](alerting.md#Alerting) and [reporting](reporting.md#Reporting) capabilities are available.
-    - Limitation: Malcolm does not yet have a well-defined plan for [automated upgrades](malcolm-upgrade.md#UpgradePlan): it's a pretty manual process, especially for the [Hedgehog Linux sensors](hedgehog-upgrade.md#HedgehogUpgradePlan).
+    - Limitation: Malcolm does not yet have a well-defined plan for [automated upgrades](malcolm-upgrade.md#UpgradePlan): it's a pretty manual process.
 * Cloud deployment capabilities
-    - Malcolm can be cloud-deployed with [Kubernetes](kubernetes.md#Kubernetes) either on-prem, on [Amazon AWS with Elastic Kubernetes Service](aws.md#KubernetesEKS), or ostensibly on any other Kubernetes-based platform.
+    - Malcolm can be cloud-deployed with [Kubernetes](kubernetes.md#Kubernetes) either on-prem, on [Amazon AWS with Elastic Kubernetes Service](aws.md#AWSEKSAuto), or ostensibly on any other Kubernetes-based platform.
     - As Hedgehog Linux is a dedicated OS for traffic capture, it is not used directly capture in cloud deployments. Instead, for cloud deployments, traffic can be collected in a few ways:
         + Capture in physical network environments can be done normally with Hedgehog Linux and forwarded to a Malcolm instance in the cloud.
         + Malcolm can run in "standalone" mode to do capture of a virtual or physical [interface available](live-analysis.md#LocalPCAP) to nodes the Kubernetes cluster, or run in the capture-only [Hedgehog run profile](live-analysis.md#Profiles).

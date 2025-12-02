@@ -11,6 +11,7 @@ including container runtime, profiles, and UI preferences.
 
 import os
 
+
 from scripts.malcolm_constants import (
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
@@ -18,14 +19,27 @@ from scripts.malcolm_constants import (
     WidgetType,
 )
 from scripts.malcolm_common import SYSTEM_INFO
+from scripts.malcolm_utils import isipaddress
 
 from scripts.installer.configs.constants.enums import ContainerRuntime
-from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE,
     KEY_CONFIG_ITEM_IMAGE_ARCH,
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
+    # these ones are ONLY visible/used in the "Malcolm ISO Installed" environment
+    KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
+    KEY_CONFIG_ITEM_AUX_FW_AIDE,
+    KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
+    KEY_CONFIG_ITEM_AUX_FW_CPU,
+    KEY_CONFIG_ITEM_AUX_FW_DF,
+    KEY_CONFIG_ITEM_AUX_FW_DISK,
+    KEY_CONFIG_ITEM_AUX_FW_KMSG,
+    KEY_CONFIG_ITEM_AUX_FW_MEM,
+    KEY_CONFIG_ITEM_AUX_FW_NETWORK,
+    KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
+    KEY_CONFIG_ITEM_AUX_FW_THERMAL,
 )
 
 CONFIG_ITEM_RUNTIME_BIN = ConfigItem(
@@ -67,6 +81,106 @@ CONFIG_ITEM_IMAGE_ARCH = ConfigItem(
     validator=lambda x: isinstance(x, str) and x in [v.value for v in ImageArchitecture],
     question="Select architecture for container images (amd64 or arm64)",
     widget_type=WidgetType.SELECT,
+)
+
+CONFIG_ITEM_REACHBACK_REQUEST_ACL = ListOfStringsConfigItem(
+    key=KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
+    label="Malcolm Reachback ACL",
+    default_value=[],
+    accept_blank=True,
+    validator=lambda x: (isinstance(x, list) and all(isinstance(addr, str) and isipaddress(addr) for addr in x)),
+    question="Comma-separated list of IP addresses for ACL for artifact reachback from Malcolm",
+    widget_type=WidgetType.TEXT,
+)
+
+CONFIG_ITEM_AUX_FW_AIDE = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_AIDE,
+    label="Forward AIDE Results",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward AIDE file system integrity check results?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_AUDITLOG = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
+    label="Forward Audit Log",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward audit logs?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_CPU = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_CPU,
+    label="Forward CPU Utilization",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward CPU utilization statistics?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_DF = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_DF,
+    label="Forward Disk Utilization",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward disk utilization statistics?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_DISK = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_DISK,
+    label="Forward Disk Operation Statistics",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward disk operation statistics?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_KMSG = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_KMSG,
+    label="Forward Kernel Messages",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward kernel messages?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_MEM = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_MEM,
+    label="Forward Memory Utilization",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward memory utilization statistics?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_NETWORK = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_NETWORK,
+    label="Forward Network Activity",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward network activity statistics?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_SYSTEMD = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
+    label="Forward Systemd Journal Logs",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward systemd journal logs?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_AUX_FW_THERMAL = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUX_FW_THERMAL,
+    label="Forward Thermal Readings",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Forward thermal readings?",
+    widget_type=WidgetType.CHECKBOX,
 )
 
 

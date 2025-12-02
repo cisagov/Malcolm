@@ -16,9 +16,12 @@
 **/.direnv
 **/.opensearch*.curlrc
 .configured
+.os-info
 .trigger_workflow_build
 .tmp
 config.*
+malcolm-config_2*.json
+malcolm-config_2*.yaml
 docker-compose*yml
 Dockerfiles
 Gemfile.lock
@@ -29,11 +32,12 @@ arkime-raw
 arkime/wiseini
 kubernetes
 malcolm-iso
-hedgehog-iso
 hedgehog-raspi
 nginx/nginx_ldap*.conf
 pcap
 _site
+shared/bin/malcolm_constants.py
+shared/bin/malcolm_utils.py
 scripts
 !scripts/malcolm_common.py
 !scripts/malcolm_constants.py

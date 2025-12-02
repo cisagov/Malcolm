@@ -5,15 +5,12 @@ import unittest
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_FREQ_LOOKUP,
-    KEY_ENV_PCAP_PIPELINE_POLLING,
     KEY_ENV_ARKIME_MANAGE_PCAP_FILES,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_AUTO_FREQ,
-    KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
     KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
 )
-from scripts.malcolm_constants import OrchestrationFramework
 
 
 class TestEnvFileImportExisting(unittest.TestCase):

@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.11.0
+        image: ghcr.io/idaholab/malcolm/arkime:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -65,9 +65,6 @@ spec:
               name: arkime-offline-env
           - secretRef:
               name: arkime-secret-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "arkime.malcolm.local"
         livenessProbe:
           exec:
             command:
@@ -93,7 +90,7 @@ spec:
             subPath: "arkime/wiseini"  
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.11.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true

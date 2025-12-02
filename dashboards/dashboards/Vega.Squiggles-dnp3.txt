@@ -1,0 +1,1431 @@
+{
+  /**  /**
+    Version 1.0
+    Authors:
+      Nicholas Donovan
+      
+      Sara Hudson
+    Thanks to:
+      Sebastian Vera
+      Mackenzie Zappe
+      Melanie Pierce
+      Jessica Rooney
+    References:
+      https://vega.github.io/vega/docs/
+      https://vega.github.io/vega/examples/overview-plus-detail/
+      https://vega.github.io/vega/examples/interactive-legend/
+      https://vega.github.io/vega/examples/table-scrollbar/
+    Commit:
+      Corresponds to 8ca1225 in SMILE-Analytics/squiggles/release
+
+    To Do
+      Allow drag from main graph
+      Allow IP Selection text filter box thing (on hold until I can set a signal bind position)
+  **/
+
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  ##  --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 0: Config --------------------------------------------------------------------------------------------------------
+  ##  Define Specification constants like multiple instruction positioning
+  ##  - arguments set in Config WILL be overwritten if redefined later in specification
+  "config": {
+    "signals": [
+      {
+        "name": "fontScale",
+        "update": "clamp(min(width / 1920, height / 1080), 0.7, 1.2)"
+      },
+      {
+        "name": "paddingScale",
+        "update": "clamp(min(width / 1920, height / 1080), 0.5, 2)"
+      },
+      {
+        "name": "labelFontSize",
+        "init": "16 * fontScale"
+      },
+      {
+        "name": "titleFontSize",
+        "init": "18 * fontScale"
+      },
+      {
+        "name": "upperHeight",
+        "update": "height * 0.6"
+      },
+      {
+        "name": "lowerHeight",
+        "update": "height * 0.1"
+      },
+      {
+        "name": "graphWidth",
+        "update": "width * 0.80"
+      },
+      {
+        "name": "overviewGraphY",
+        "update": "upperHeight + (200 * paddingScale)"
+      },
+      {
+        "name": "ipSelectX",
+        "init": "graphWidth + (40 * paddingScale)"
+      },
+      {
+        "name": "interpolate",
+        "value": "linear"
+      }
+    ],
+    "axis": {
+      "titleFontSize": {
+        "signal": "titleFontSize"
+      },
+      "titlePadding": {
+        "signal": "25 * paddingScale"
+      },
+      "labelFontSize": {
+        "signal": "labelFontSize"
+      },
+      "labelFontWeight": "bold",
+      "tickWidth": 3
+    },
+    "title": {
+      "fontSize": {
+        "signal": "titleFontSize"
+      }
+    },
+    "legend": {
+      "orient": "top-left",
+      "titleFontSize": {
+        "signal": "titleFontSize * 0.9"
+      },
+      "labelFontSize": {
+        "signal": "labelFontSize"
+      },
+      "symbolSize": 128,
+      "symbolStrokeWidth": 2,
+      "padding": {
+        "signal": "10 * paddingScale"
+      }
+    },
+    "text": {
+      "fontSize": {
+        "signal": "labelFontSize * 0.9"
+      },
+      "baseline": "middle"
+    },
+    "rule": {
+      "strokeWidth": 0.2,
+      "stroke": "firebrick"
+    },
+    "rect": {
+      "fill": "darkgrey"
+    }
+  },
+  ##  ---------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 1: Signals --------------------------------------------------------------------------------------------------------
+  ##  - Define dynamic variables (Signals) that can be updated at any point during the specification
+  "signals": [
+    /** For main and overview graphs **/
+    {
+      "name": "xDetailZoom"
+    },
+    // updated in overview marks group
+    {
+      "name": "yDetailZoom"
+    },
+    // updated in overview marks group
+
+    // Holds the identification for a hovered dot tooltip
+    {
+      "name": "hoveredTimestamp",
+      "value": [
+        null,
+        null
+      ],
+      "on": [
+        {
+          "events": "@infoDot:mouseover",
+          "update": "[datum.addr, datum.timestamp]"
+        },
+        {
+          "events": "@infoDot:mouseout",
+          "update": "[null, null]"
+        }
+      ]
+    },
+    /** Legend **/
+    // Clear the legend when clicking but not interacting with another event
+    {
+      "name": "clear",
+      "value": true,
+      "on": [
+        {
+          "events": "pointerup[!event.item]",
+          "update": "true",
+          "force": true
+        }
+      ]
+    },
+    // Allow multi-select while holding shift
+    {
+      "name": "shift",
+      "value": false,
+      "on": [
+        {
+          "events": "@legendSymbol:pointerdown, @legendSymbol:pointerup || @legendLabel:pointerdown, @legendLabel:pointerup",
+          "update": "event.shiftKey",
+          "force": true
+        }
+      ]
+    },
+    // Add clicked items to selected data set
+    {
+      "name": "clicked",
+      "value": null,
+      "on": [
+        {
+          "events": "@legendSymbol:pointerdown, @legendSymbol:pointerup || @legendLabel:pointerdown, @legendLabel:pointerup",
+          "update": "{value: datum.value}",
+          "force": true
+        },
+        {
+          "events": "@detailLine:pointerdown, @detailLine.pointerup",
+          "update": "{value: datum.addr}",
+          "force": true
+        }
+      ]
+    },
+    /** Selection Tables **/
+    {
+      "name": "ips",
+      "update": "length(data('destIps')) ? pluck(data('destIps'), 'destIp') : warn('No IP addresses found.')"
+    },
+    {
+      "name": "rowHeight",
+      "value": 30
+    },
+    {
+      "name": "minIps",
+      "value": 10
+    },
+    /** IP Selection **/
+    {
+      "name": "ipsToDisplay",
+      "update": "min(minIps, length(data('destIps')))"
+    },
+    {
+      "name": "ipsScrollAreaHeight",
+      "update": "rowHeight * ipsToDisplay"
+    },
+    {
+      "name": "ipsScrollPositionMax",
+      "update": "length(data('destIps')) - ipsToDisplay + 1"
+    },
+    {
+      "name": "ipsScrollBarHeight",
+      "init": "clamp((rowHeight * ipsToDisplay) * ipsToDisplay / length(data('destIps')), 30, 600)"
+    },
+    // IP that was selected in the table
+    {
+      "name": "selectedIp",
+      "init": "ips[0]",
+      "on": [
+        {
+          "events": "@destIps-rect-cell:pointerdown, @destIps-rect-cell:pointerup || @destIps-text-content:pointerdown, @destIps-text-content:pointerup",
+          "update": "datum.destIp"
+        }
+      ]
+    },
+    {
+      "name": "ipsScrollbarMouseDragY",
+      "init": "0",
+      "on": [
+        {
+          "events": "[@rect-scrollbar:pointerdown, window:pointerup] > window:pointermove",
+          "update": "clamp(y(), 1, ipsScrollAreaHeight)"
+        }
+      ]
+    },
+    {
+      "name": "ipsScrollPosition",
+      "value": 1,
+      "on": [
+        {
+          "events": [
+            {
+              "markname": "destIps-rect-cell",
+              "type": "wheel",
+              "consume": true
+            },
+            {
+              "markname": "destIps-text-content",
+              "type": "wheel",
+              "consume": true
+            }
+          ],
+          "update": "clamp(round(ipsScrollPosition + event.deltaY / abs(event.deltaY) * pow(1.0001, event.deltaY * pow(16, event.deltaMode)), 0), 1, ipsScrollPositionMax)"
+        },
+        {
+          "events": "[@rect-scrollbar:pointerdown, window:pointerup] > window:pointermove",
+          "update": "clamp(round(invert('ipsScaleScrollBarY', ipsScrollbarMouseDragY), 0), 1, ipsScrollPositionMax)"
+        }
+      ]
+    },
+
+    {
+      "name": "potentialDate",
+      "value": null,
+      "update": "timeParse(pluck(data('ipData'), 'value')[0], '%-m/%-d/%Y')"
+      // pluck(data('destIps'), 'destIp')
+    },
+    {
+      "name": "isDate",
+      "value": false,
+      "update": "potentialDate == null ? false : true"
+    },
+    {
+      "name": "markDataset_signal",
+      "update": "data('markDataset') ? pluck(data('markDataset'), 'dataset') : ['']"
+    },
+    {
+      "name": "markNames",
+      "value": {
+        "bacnet_property": "BACnet - Analog/Binary IO"
+      }
+    },
+    {
+      "name": "markDatasetName",
+      "update": "length(markDataset_signal) > 1 ? markDataset_signal : markNames[markDataset_signal[0]] ? markNames[markDataset_signal[0]] : markDataset_signal"
+    }
+  ],
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 2: DATA --------------------------------------------------------------------------------------------------------
+  ##  Define datasets and data normalization to be worked with in schema
+  "data": [
+    {
+      "name": "dnp3Raw",
+      "url": {
+        "index": "arkime_sessions3-*",
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "match": {
+                    "event.dataset": "dnp3_control"
+                  }
+                }
+                "%dashboard_context-must_clause%"
+              ],
+              "must_not": [
+                "%dashboard_context-must_not_clause%"
+              ],
+              "filter": [
+                "%dashboard_context-filter_clause%",
+                {
+                  "range": {
+                    "@timestamp": {
+                          "%timefilter%": true
+                      }
+                    }
+                  },
+                {
+                  "exists": {
+                    "field": "event.action"
+                  }
+                },
+                {
+                  "terms":{
+                  "zeek.dnp3_control.function_code": [
+                    "SELECT",
+                    "OPERATE",
+                    "DIRECT_OPERATE",
+                    "DIRECT_OPERATE_NR"
+                  ]
+                  }
+                }
+              ],
+            }
+          },
+          "size": 10000,
+          "sort": [
+            {
+              "timestamp": {
+                "order": "asc"
+              }
+            }
+          ],
+          //These are the fields we retrieve
+          "_source": [
+            "event.dataset",
+            "event.id",
+            "event.action",
+            "timestamp",
+            "destination.ip",
+            "destination.port",
+            "zeek.dnp3_control.execute_count",
+            "zeek.dnp3_control.index_number",
+            "zeek.dnp3_control.on_time",
+            "zeek.dnp3_control.off_time",
+         ]
+        }
+      },
+      "format": {
+        "property": "hits.hits"
+      },
+      //Save the needed fieldnames as something more usable and remove the rest of the data
+      "transform": [
+        {
+          "type": "project",
+          "fields": [
+            "_source.event.dataset",
+            "_source.event.id",
+            "_source.event.action"
+            "_source.timestamp",
+            "_source.destination.ip",
+            "_source.destination.port",
+            "_source.zeek.dnp3_control.execute_count",
+            "_source.zeek.dnp3_control.index_number",
+            "_source.zeek.dnp3_control.on_time",
+            "_source.zeek.dnp3_control.off_time",
+          ],
+          "as": [
+            "dataset",
+            "id",
+            "pduService"
+            "timestamp",
+            "destIp",
+            "destPort",
+            "execute_count",
+            "instanceNumber",
+            "on_time",
+            "off_time",
+
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "datum.on_time - datum.off_time",
+          "as": "value"       // duration
+        }
+      ]
+
+    },
+    {
+      "name": "ipData",
+      "source": "dnp3Raw",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.destIp === selectedIp"
+        }
+      ]
+    },
+    {
+      "name": "dnp3Data",
+      "source": "ipData",
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "toNumber(datum.instanceNumber)",
+          "as": "instanceNumber"
+        },
+        {
+          "type": "formula",
+          "expr": "isDate ? time(potentialDate) : datum.value",
+          "as": "value"
+        },
+        // Save only required fields and trash the rest
+        {
+          "type": "project",
+          "fields": [
+            "dataset",
+            "id",
+            "timestamp",
+            "destIp",
+            "destPort",
+            "pduService",
+            "execute_count",
+            "instanceNumber",
+            "value",
+          ]
+        }
+      ]
+    },
+    {
+      "name": "markData",
+      "source": [
+        "dnp3Data",
+      ],
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "datum.pduService[0]",
+          "as": "func"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.instanceNumber",
+          "as": "addr"
+        },
+        {
+          "type": "project",
+          "fields": [
+            "dataset",
+            "id",
+            "timestamp",
+            "destIp",
+            "destPort",
+            "func",
+            "execute_count",
+            "addr",
+            "value",
+          ]
+        }
+      ]
+    },
+    // Group unique IPs
+    {
+      "name": "destIps",
+      "source": [
+        "dnp3Raw"
+      ],
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": [
+            "destIp"
+          ]
+        },
+        {
+          "type": "collect",
+          "sort": {
+            "field": "destIp"
+          }
+        }
+      ]
+    },
+    // Hack for the table, filters only the position in the table
+    {
+      "name": "ipSlice",
+      "source": "destIps",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "(indexof(ips, datum.destIp) + 1 >= ipsScrollPosition) && (indexof(ips, datum.destIp) + 1 < (ipsScrollPosition + ipsToDisplay))"
+        }
+      ]
+    },
+    // Holds selected legend items
+    {
+      "name": "selected",
+      "on": [
+        {
+          "trigger": "clear",
+          "remove": true
+        },
+        {
+          "trigger": "!shift",
+          "remove": true
+        },
+        {
+          "trigger": "!shift && clicked",
+          "insert": "clicked"
+        },
+        {
+          "trigger": "shift && clicked",
+          "toggle": "clicked"
+        }
+      ]
+    },
+    {
+      "name": "markDataset",
+      "source": "markData",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": ["dataset"],
+        }
+      ]
+    }
+  ],
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 3: Scales -------------------------------------------------------------------------------------------------------
+  ##  Maps data values to either categorical data or numerical data to change the way the data presents visually
+   
+  "scales": [
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "data": "markData",
+        "field": "addr",
+        "sort": true
+      },
+      "range": {
+        "scheme": "category20"
+      }
+    },
+    {
+      "name": "nodeSize",
+      "type": "linear",
+      "domain": {
+        "data": "dnp3Raw",
+        "field": "execute_count"
+      },
+      "range": [100,300],
+      "zero": true
+    },
+    {
+      "name": "nodeShape",
+      "type": "ordinal",
+      "domain": ["OPERATE:unknown-f:unknown-3", "OPERATE", "OPERATE:Pulse On", "OPERATE:Pulse On:Trip", "OPERATE:Pulse Off:Close", "OPERATE:Latch On", "RESPONSE:Latch On", "RESPONSE:Pulse On:Trip", "RESPONSE:Pulse Off:Close", "SELECT:Latch On", "SELECT:Pulse On:Trip", "SELECT:Pulse Off:Close", "DIRECT_OPERATE:Latch On", "DIRECT_OPERATE_NR:Latch On", "DIRECT_OPERATE:Pulse Off"],
+      "range": ["cross", "square", "square", "square", "square", "square", "triangle", "triangle", "triangle", "triangle-down", "triangle-down", "triangle-down", "diamond", "diamond", "diamond"]
+    },
+    {
+      "name": "ipsScaleScrollBarY",
+      "type": "linear",
+      "domain": [
+        1,
+        {
+          "signal": "ipsScrollPositionMax"
+        }
+      ],
+      "range": [
+        0,
+        {
+          "signal": "rowHeight * ipsToDisplay - ipsScrollBarHeight - 1"
+        }
+      ]
+    },
+  ],
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 5: Marks --------------------------------------------------------------------------------------------------------
+  ##  Determines how the data visually appears in the visualization
+  /****** START MAIN GRAPH MARKS ******/
+  "marks": [
+    {
+      "type": "group",
+      "name": "detail",
+      "encode": {
+        "enter": {
+          "height": {
+            "signal": "upperHeight"
+          },
+          "width": {
+            "signal": "graphWidth"
+          }
+        }
+      },
+      "title": {
+        "text": {
+          "signal": "'Detailed Graph: ' + markDatasetName"
+        },
+        "orient": "top",
+        "align": "center"
+      },
+      "scales": [
+        {
+          "name": "xScale",
+          "type": "time",
+          "domain": {
+            "data": "markData",
+            "field": "timestamp"
+          },
+          "domainRaw": {
+            "signal": "xDetailZoom"
+          },
+          "range": [
+            0,
+            {
+              "signal": "graphWidth"
+            }
+          ],
+          "nice": true
+        },
+        {
+          "name": "yScale",
+          "type": "symlog",
+          "domain": {
+            "data": "markData",
+            "field": "value"
+          },
+          "domainRaw": {
+            "signal": "yDetailZoom"
+          },
+          "range": [
+            {
+              "signal": "upperHeight - 10"
+            },
+            10
+          ],
+          "nice": true
+        }
+      ],
+      "axes": [
+        {
+          "scale": "xScale",
+          "title": "Date & Time",
+          "orient": "bottom",
+          "format": "%m-%d-%Y %H:%M:%S",
+          "formatType": "time",
+          "labelAngle": -30,
+          "labelPadding": {
+            "signal": "50 * paddingScale"
+          },
+          "labelFontSize": {
+            "signal": "labelFontSize * 0.95"
+          },
+          "grid": true
+        },
+        {
+          "scale": "yScale",
+          "title": "Values",
+          "orient": "left",
+          // "labelSeparation": 100
+          "labelOverlap": true
+        }
+      ],
+      "legends": [
+        {
+          "title": "PLC Address",
+          "stroke": "color",
+          "fill": "color",
+          "encode": {
+            "symbols": {
+              "name": "legendSymbol",
+              "interactive": true,
+              "update": {
+                "opacity": [
+                  {
+                    "test": "!length(data('selected')) || indata('selected', 'value', datum.value)",
+                    "value": 0.7
+                  },
+                  {
+                    "value": 0.15
+                  }
+                ],
+                "cursor": {
+                  "value": "pointer"
+                }
+              }
+            },
+            "labels": {
+              "name": "legendLabel",
+              "interactive": true,
+              "update": {
+                "opacity": [
+                  {
+                    "test": "!length(data('selected')) || indata('selected', 'value', datum.value)",
+                    "value": 1
+                  },
+                  {
+                    "value": 0.25
+                  }
+                ],
+                "text": {
+                  "signal": "'Address ' + datum.label"
+                },
+                "cursor": {
+                  "value": "pointer"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "marks": [
+        {
+          "type": "group",
+          "clip": true,
+          "encode": {
+            "enter": {
+              "height": {
+                "field": {
+                  "group": "height"
+                }
+              },
+              "width": {
+                "field": {
+                  "group": "width"
+                }
+              }
+            }
+          },
+          "from": {
+            // Separate data points by addr for graphing
+            "facet": {
+              "name": "series",
+              "data": "markData",
+              "groupby": "addr"
+            }
+          },
+          "marks": [
+            {
+              "type": "line",
+              "name": "detailLine",
+              "from": {
+                "data": "series"
+              },
+              "interactive": true,
+              "encode": {
+                "update": {
+                  "x": {
+                    "scale": "xScale",
+                    "field": "timestamp"
+                  },
+                  "y": {
+                    "scale": "yScale",
+                    "field": "value"
+                  },
+                  "interpolate": {
+                    "signal": "interpolate"
+                  },
+                  "opacity": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "value": 1
+                    },
+                    {
+                      "value": 0.05
+                    }
+                  ],
+                  "stroke": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "scale": "color",
+                      "field": "addr"
+                    },
+                    {
+                      "value": "#ccc"
+                    }
+                  ],
+                  "cursor": {
+                    "value": "pointer"
+                  }
+                }
+              }
+            },
+            {
+              // TODO different symbol for registers vs coils
+              "type": "symbol",
+              "name": "infoDot",
+              "from": {
+                "data": "series"
+              },
+              "encode": {
+                "update": {
+                  "x": {
+                    "scale": "xScale",
+                    "field": "timestamp"
+                  },
+                  "y": {
+                    "scale": "yScale",
+                    "field": "value"
+                  },
+                  "interpolate": {
+                    "signal": "interpolate"
+                  },
+                  "tooltip": {
+                    "signal": "{ 'Dataset': datum.dataset, 'PLC IP:Port': datum.destIp + ':' + datum.destPort, 'Address': datum.addr, 'Function': datum.func, 'Execute Count': datum.execute_count, 'Duration (ms)': datum.value,  'Date/Time': timeFormat(datum.timestamp, '%b %d, %Y') + ' ' + timeFormat(datum.timestamp, '%H:%M:%S:%L %Z'), 'Event ID': join(datum.id) }"
+                  },
+                  "opacity": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "value": 1
+                    },
+                    {
+                      "value": 0.25
+                    }
+                  ],
+                  "fill": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "signal": "(datum.addr === hoveredTimestamp[0] && datum.timestamp === hoveredTimestamp[1]) ? 'orange' : scale('color', datum.addr)"
+                    }
+                  ],
+                  "size": [ 
+                    {
+                      "test": "datum.execute_count === '0'",
+                      "value": [50]
+                    },
+                    {
+                      "scale": "nodeSize", "field": "execute_count"
+                    } 
+                  ],
+                  "shape": {"scale": "nodeShape", "field": "func"}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    /****** START OVERVIEW GRAPH ******/
+    {
+      "type": "group",
+      "name": "overview",
+      "encode": {
+        "enter": {
+          "y": {
+            "signal": "overviewGraphY"
+          },
+          "height": {
+            "signal": "lowerHeight"
+          },
+          "width": {
+            "signal": "graphWidth"
+          },
+          "fill": {
+            "value": "transparent"
+          },
+          "cursor": {
+            "value": "crosshair"
+          }
+        }
+      },
+      "title": {
+        "text": "Overview Selection Graph",
+        "orient": "bottom",
+        "align": "center"
+      },
+      "signals": [
+        // Holds click-drag coordinates
+        {
+          "name": "brush",
+          "value": [
+            0,
+            0
+          ],
+          "on": [
+            {
+              "events": "@overview:pointerdown",
+              "update": "[[x(), x()], [y('overview'), y('overview')]]"
+            },
+            {
+              "events": "[@overview:pointerdown, window:pointerup] > @overview:pointermove!",
+              "update": "[[brush[0][0], clamp(x(), 0, graphWidth)], [brush[1][0], clamp(y('overview'), -5, lowerHeight + 10)]]"
+              // + 5 allows the selection to go slightly lower than the minimum value
+            },
+            {
+              "events": {
+                "signal": "delta"
+              },
+              "update": "[clampRange([anchor[0][0] + delta[0], anchor[0][1] + delta[0]], 0, graphWidth), clampRange([anchor[1][0] + delta[1], anchor[1][1] + delta[1]], 0, lowerHeight + 5)]"
+            }
+          ]
+        },
+        {
+          "name": "anchor",
+          "value": null,
+          "on": [
+            {
+              "events": "@brushRect:pointerdown",
+              "update": "slice(brush)"
+            }
+          ]
+        },
+        {
+          "name": "down",
+          "value": [
+            0,
+            0
+          ],
+          "on": [
+            {
+              "events": "@brushRect:pointerdown",
+              "update": "[x(), y('overview')]"
+            }
+          ]
+        },
+        {
+          "name": "delta",
+          "value": [
+            0,
+            0
+          ],
+          "on": [
+            {
+              "events": "[@brushRect:pointerdown, window:pointerup] > @brushRect:pointermove!",
+              "update": "[x() - down[0],  y('overview') - down[1]]"
+            }
+          ]
+        },
+        // Calculates and pushes X scale outward
+        {
+          "name": "xDetailZoom",
+          "push": "outer",
+          "on": [
+            {
+              "events": {
+                "signal": "brush"
+              },
+              "update": "(span(brush[0]) ? invert('xOverview', brush[0]) : null)"
+            }
+          ]
+        },
+        // Calculates and pushes Y scale outward
+        {
+          "name": "yDetailZoom",
+          "push": "outer",
+          "on": [
+            {
+              "events": {
+                "signal": "brush"
+              },
+              "update": "(span(brush[1]) ? reverse(invert('yOverview', brush[1])) : null)"
+            }
+          ]
+        }
+      ],
+      "scales": [
+        {
+          "name": "xOverview",
+          "type": "time",
+          "range": [
+            0,
+            {
+              "signal": "graphWidth"
+            }
+          ],
+          "nice": true,
+          "domain": {
+            "data": "markData",
+            "field": "timestamp"
+          }
+        },
+        {
+          "name": "yOverview",
+          "type": "symlog",
+          "range": [
+            {
+              "signal": "lowerHeight"
+            },
+            10
+          ],
+          "nice": true,
+          "domain": {
+            "data": "markData",
+            "field": "value"
+          }
+        }
+      ],
+      "axes": [
+        {
+          "scale": "xOverview",
+          "orient": "bottom",
+          "labels": false
+        },
+        {
+          "scale": "yOverview",
+          "orient": "left",
+          "labels": false
+        }
+      ],
+      "marks": [
+        {
+          "type": "group",
+          "from": {
+            "facet": {
+              "name": "series",
+              "data": "markData",
+              "groupby": "addr"
+            }
+          },
+          "marks": [
+            {
+              "type": "line",
+              "interactive": false,
+              "from": {
+                "data": "series"
+              },
+              "encode": {
+                "enter": {
+                  "x": {
+                    "scale": "xOverview",
+                    "field": "timestamp"
+                  },
+                  "y": {
+                    "scale": "yOverview",
+                    "field": "value"
+                  },
+                  "interpolate": {
+                    "signal": "interpolate"
+                  }
+                },
+                "update": {
+                  "opacity": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "value": 1
+                    },
+                    {
+                      "value": 0.25
+                    }
+                  ],
+                  "stroke": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "scale": "color",
+                      "field": "addr"
+                    },
+                    {
+                      "value": "#ccc"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "symbol",
+              "name": "infoDot",
+              "from": {
+                "data": "series"
+              },
+              "interactive": false,
+              "encode": {
+                "enter": {
+                  "x": {
+                    "scale": "xOverview",
+                    "field": "timestamp"
+                  },
+                  "y": {
+                    "scale": "yOverview",
+                    "field": "value"
+                  },
+                  "interpolate": {
+                    "signal": "interpolate"
+                  }
+                },
+                "update": {
+                  "opacity": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "value": 1
+                    },
+                    {
+                      "value": 0.25
+                    }
+                  ],
+                  "fill": [
+                    {
+                      "test": "!length(data('selected')) || indata('selected', 'value', datum.addr)",
+                      "signal": "(datum.addr === hoveredTimestamp[0] && datum.timestamp === hoveredTimestamp[1]) ? 'orange' : scale('color', datum.addr)"
+                    }
+                  ],
+                  "size": [ 
+                    {
+                      "test": "datum.execute_count === '0'",
+                      "value": [50]
+                    },
+                    {
+                      "scale": "nodeSize", "field": "execute_count"
+                    } 
+                  ],
+                  "shape": {"scale": "nodeShape", "field": "func"}
+                }
+              }
+            },
+            // Shows the selected points
+            {
+              "type": "rect",
+              "name": "brushRect",
+              "encode": {
+                "enter": {
+                  "fill": {
+                    "value": "#333"
+                  },
+                  "fillOpacity": {
+                    "value": 0.2
+                  }
+                },
+                "update": {
+                  "x": {
+                    "signal": "brush[0][0]"
+                  },
+                  "x2": {
+                    "signal": "brush[0][1]"
+                  },
+                  "y": {
+                    "signal": "brush[1][0]"
+                  },
+                  "y2": {
+                    "signal": "brush[1][1]"
+                  }
+                }
+              }
+            },
+            {
+              "type": "rule",
+              "interactive": false,
+              "encode": {
+                "enter": {
+                  "y2": {
+                    "signal": "lowerHeight + 10"
+                  }
+                },
+                "update": {
+                  "x": {
+                    "signal": "brush[0][0]"
+                  }
+                }
+              }
+            },
+            {
+              "type": "rule",
+              "interactive": false,
+              "encode": {
+                "enter": {
+                  "y2": {
+                    "signal": "lowerHeight + 10"
+                  }
+                },
+                "update": {
+                  "x": {
+                    "signal": "brush[0][1]"
+                  }
+                }
+              }
+            },
+            {
+              "type": "rule",
+              "interactive": false,
+              "encode": {
+                "enter": {
+                  "x2": {
+                    "signal": "graphWidth"
+                  },
+                  "y": {
+                    "signal": "lowerHeight"
+                  }
+                },
+                "update": {
+                  "y": {
+                    "signal": "brush[1][0]"
+                  }
+                }
+              }
+            },
+            {
+              "type": "rule",
+              "interactive": false,
+              "encode": {
+                "enter": {
+                  "x2": {
+                    "signal": "graphWidth"
+                  },
+                  "y": {
+                    "signal": "lowerHeight"
+                  }
+                },
+                "update": {
+                  "y": {
+                    "signal": "brush[1][1]"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    /****** START IP SELECT TABLE ******/
+    // We're doing a table since we can not (as of now) update binds dynamically
+    {
+      "type": "group",
+      "name": "ipSelect",
+      "signals": [
+        {
+          "name": "scrollBarWidth",
+          "update": "ipsToDisplay < minIps ? 0 : 12"
+        },
+        {
+          "name": "scrollbarFillOpacity",
+          "value": 0.2,
+          "on": [
+            {
+              "events": "@rect-scrollbar:mouseover",
+              "update": "0.4"
+            },
+            {
+              "events": "@rect-scrollbar:mouseout",
+              "update": "0.2"
+            }
+          ]
+        }
+      ],
+      "scales": [
+        {
+          "name": "yScale",
+          "type": "band",
+          "domain": {
+            "data": "ipSlice",
+            "field": "destIp",
+            "sort": true
+          },
+          "range": [
+            0,
+            {
+              "signal": "rowHeight * length(data('ipSlice'))"
+            }
+          ]
+        }
+      ],
+      "marks": [
+        {
+          "type": "text",
+          "encode": {
+            "enter": {
+              "text": {
+                "value": "IP Selection"
+              },
+              "width": {
+                "signal": "width - ipSelectX - 20"
+              },
+              "x": {
+                "signal": "ipSelectX"
+              },
+              "dy": {
+                "value": -5
+              }
+            }
+          }
+        },
+        {
+          "name": "rule-scrolltrack-1",
+          "type": "rule",
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "width - scrollBarWidth - 2"
+              },
+              "x2": {
+                "signal": "width - scrollBarWidth - 2"
+              },
+              "y2": {
+                "signal": "ipsScrollAreaHeight"
+              },
+              "stroke": {
+                "value": "black"
+              },
+              "strokeWidth": {
+                "signal": "!scrollBarWidth ? 0 : 0.2"
+              }
+            }
+          }
+        },
+        {
+          "name": "rule-scrolltrack-2",
+          "type": "rule",
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "width"
+              },
+              "x2": {
+                "signal": "width"
+              },
+              "y2": {
+                "signal": "ipsScrollAreaHeight"
+              },
+              "stroke": {
+                "value": "black"
+              },
+              "strokeWidth": {
+                "signal": "!scrollBarWidth ? 0 : 0.2"
+              }
+            }
+          }
+        },
+        {
+          "name": "rect-scrollbar",
+          "type": "rect",
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "width - scrollBarWidth - 1"
+              },
+              "y": {
+                "scale": "ipsScaleScrollBarY",
+                "signal": "ipsScrollPosition"
+              },
+              "width": {
+                "signal": "scrollBarWidth"
+              },
+              "height": {
+                "signal": "ipsScrollBarHeight"
+              },
+              "fill": {
+                "value": "#666666"
+              },
+              "fillOpacity": {
+                "signal": "scrollbarFillOpacity"
+              }
+            }
+          }
+        },
+        {
+          "name": "destIps-rect-cell",
+          "type": "rect",
+          "from": {
+            "data": "ipSlice"
+          },
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "ipSelectX"
+              },
+              "x2": {
+                "signal": "width - scrollBarWidth - 3"
+              },
+              "y": {
+                "scale": "yScale",
+                "field": "destIp",
+                "band": 0
+              },
+              "cursor": {
+                "value": "pointer"
+              },
+              "height": {
+                "signal": "rowHeight"
+              },
+              "opacity": [
+                {
+                  "test": "datum.destIp === selectedIp",
+                  "value": 0.4
+                },
+                {
+                  "value": 0.2
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "destIps-text-content",
+          "type": "text",
+          "from": {
+            "data": "ipSlice"
+          },
+          "encode": {
+            "update": {
+              "text": {
+                "signal": "datum.destIp"
+              },
+              "x": {
+                "signal": "ipSelectX"
+              },
+              "dx": {
+                "value": 5
+              },
+              "y": {
+                "scale": "yScale",
+                "field": "destIp",
+                "band": 0.5
+              },
+              "cursor": {
+                "value": "pointer"
+              }
+            }
+          }
+        }
+      ]
+    },
+  ]
+}

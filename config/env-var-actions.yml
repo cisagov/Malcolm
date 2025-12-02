@@ -9,10 +9,23 @@ copied_environment_variables:
   #     destination_key:
   #       source_key:
   #         "source_value": destination_value
+  arkime_offline:
+    arkime:
+      ARKIME_ALLOW_WISE_GUI_CONFIG:
+        ARKIME_ALLOW_WISE_GUI_CONFIG
+      ARKIME_EXPOSE_WISE_GUI:
+        ARKIME_EXPOSE_WISE_GUI:
+          "false": "true"
   auth_common:
     auth_common:
       NGINX_AUTH_MODE:
         NGINX_BASIC_AUTH
+  logstash:
+    logstash:
+      LOGSTASH_NETBOX_ENRICHMENT_DATASETS:
+        LOGSTASH_NETBOX_ENRICHMENT_DATASETS:
+          ? "suricata.alert,zeek.conn,zeek.dhcp,zeek.dns,zeek.known_hosts,zeek.known_services,zeek.ntlm,zeek.notice,zeek.signatures,zeek.software,zeek.weird"
+          : "suricata.alert,zeek.conn,zeek.dce_rpc,zeek.dhcp,zeek.dns,zeek.known_hosts,zeek.known_routers,zeek.known_services,zeek.login,zeek.ntlm,zeek.notice,zeek.rdp,zeek.rfb,zeek.signatures,zeek.smb_cmd,zeek.smb_files,zeek.smb_mapping,zeek.software,zeek.ssh,zeek.weird"
   netbox:
     netbox:
       REMOTE_AUTH_HEADER:
@@ -105,6 +118,10 @@ copied_environment_variables:
       REDIS_CACHE_HOST:
         REDIS_CACHE_HOST:
           "netbox-redis-cache": redis-cache
+      REDIS_NETBOX_DATABASE:
+        REDIS_DATABASE
+      REDIS_NETBOX_CACHE_DATABASE:
+        REDIS_CACHE_DATABASE
     netbox_secret:
       REDIS_PASSWORD:
         REDIS_PASSWORD
@@ -114,6 +131,8 @@ removed_environment_variables:
   #   - key2
   arkime:
     - OPENSEARCH_MAX_SHARDS_PER_NODE
+    - ARKIME_EXPOSE_WISE_GUI
+    - ARKIME_ALLOW_WISE_GUI_CONFIG
   arkime_live:
     - VIEWER
   arkime_offline:
@@ -145,6 +164,8 @@ removed_environment_variables:
     - DB_NAME
     - REDIS_CACHE_HOST
     - REDIS_HOST
+    - REDIS_CACHE_DATABASE
+    - REDIS_DATABASE
     - REMOTE_AUTH_STAFF_USERS
     - REMOTE_AUTH_SUPERUSERS
   netbox_redis_cache:

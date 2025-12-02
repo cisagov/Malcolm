@@ -21,7 +21,6 @@ Vagrant.configure("2") do |config|
     rsync__exclude: [".git/",
                      "netbox/media/",
                      "malcolm-iso/malcolm-*.*",
-                     "hedgehog-iso/hedgehog-*.*",
                      "hedgehog-raspi/raspi_4_*.*"]
   config.vm.synced_folder '.', '/vagrant', disabled: true
 
@@ -73,6 +72,7 @@ Vagrant.configure("2") do |config|
       rsync \
       squashfs-tools \
       virt-what \
+      xmlstarlet \
       xorriso
     mkdir -p /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg

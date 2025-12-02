@@ -56,17 +56,12 @@ class PresentationMode(Enum):
 ###################################################################################################
 # Constants for Malcolm image prefix and dotfile secret key
 MALCOLM_IMAGE_PREFIX = "ghcr.io/idaholab/malcolm/"
-MALCOLM_VERSION = "25.11.0"
+MALCOLM_VERSION = "25.12.0"
 
 ###################################################################################################
 # Constants for Malcolm configmap directory replacer
 MALCOLM_DOTFILE_SECRET_KEY = "K8S_SECRET"
 MALCOLM_CONFIGMAP_DIR_REPLACER = "_MALDIR_"
-
-###################################################################################################
-# Operating system mode constants
-OS_MODE_HEDGEHOG = "hedgehog"
-OS_MODE_MALCOLM = "malcolm"
 
 ###################################################################################################
 # Directory path constants
@@ -75,6 +70,29 @@ HEDGEHOG_ZEEK_DIR = "zeek"
 MALCOLM_DB_DIR = "datastore"
 MALCOLM_PCAP_DIR = "pcap"
 MALCOLM_LOGS_DIR = "logs"
+
+###################################################################################################
+SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER = "8005"
+SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES = "8006"
+
+# Malcolm extension fields for docker-compose
+COMPOSE_MALCOLM_EXTENSION = "x-malcolm"
+COMPOSE_MALCOLM_EXTENSION_HEDGEHOG = "hedgehog"
+COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL = "request_acl"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW = "aux-forwarders"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE = "aide"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG = "auditlog"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU = "cpu"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF = "df"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK = "disk"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG = "kmsg"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM = "mem"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK = "network"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD = "systemd"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL = "thermal"
+COMPOSE_MALCOLM_EXTENSION_PRUNE = "prune"
+COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP = "pcap"
+COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS = "logs"
 
 ###################################################################################################
 # Directory path constants for volume mapping

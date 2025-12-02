@@ -1,0 +1,11 @@
+[connection]
+id=default-ethernet
+type=ethernet
+interface-name=*
+autoconnect=true
+
+[ipv4]
+method=disabled
+
+[ipv6]
+method=ignore

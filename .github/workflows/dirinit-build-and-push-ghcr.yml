@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'Dockerfiles/dirinit.Dockerfile'
       - 'shared/bin/docker-uid-gid-setup.sh'

@@ -7,7 +7,7 @@ import os
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 MALCOLM_DIR = os.path.dirname(SCRIPT_DIR)
-SENSOR_DIR = os.path.join(MALCOLM_DIR, 'hedgehog-iso')
+MALCOLM_ISO_DIR = os.path.join(MALCOLM_DIR, 'malcolm-iso')
 
 # pylint: disable=invalid-name
 
@@ -71,38 +71,15 @@ hostname = 'Hedgehog-rpi-%s' % version
 # Nothing yet!
 extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
-    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
-    'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
-    'cp -r "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true'
-    % MALCOLM_DIR,
-    'cp -r shared/* "${ROOT?}/opt/buildshared"',
-    'cp -r "%s/interface/"* "${ROOT?}/opt/sensor"' % SENSOR_DIR,
-    'rm -r "${ROOT?}/opt/sensor/requirements.txt"',
-    'cp -r "%s/interface/requirements.txt" "${ROOT?}/opt/sensor/requirements-interface.txt"' % SENSOR_DIR,
-    'cp -r "%s/config/requirements.txt" "${ROOT?}/opt/sensor/requirements-sensor.txt"' % SENSOR_DIR,
-    'cp -r "%s/shared/bin/"* "${ROOT?}/usr/local/bin"' % MALCOLM_DIR,
-    'cp "%s/scripts/malcolm_utils.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
-    'cp "%s/scripts/malcolm_constants.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
-    'cp "%s/config/archives/beats.list.chroot" "${ROOT?}/etc/apt/sources.list.d/beats.list"' % SENSOR_DIR,
-    'cp "%s/config/archives/beats.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
-    'cp "%s/config/archives/fluentbit.list.chroot" "${ROOT?}/etc/apt/sources.list.d/fluentbit.list"' % SENSOR_DIR,
-    'cp "%s/config/archives/fluentbit.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
-    'cp -r "%s/config/includes.chroot/"* "${ROOT?}/"' % SENSOR_DIR,
-    'rm -r "${ROOT?}/etc/live"',
-    'cp -r "%s/config/hooks/normal/"* "${ROOT?}/opt/hooks/"' % SENSOR_DIR,
-    'cp -r "%s/config/package-lists/"* "${ROOT?}/opt/deps/"' % SENSOR_DIR,
-    'cp -r "%s/docs/images/hedgehog/logo/hedgehog-ascii-text.txt"* "${ROOT?}/root/"' % MALCOLM_DIR,
-    'cp -r "%s/nginx/landingpage/css/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
-    'cp -r "%s/nginx/landingpage/js/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
-    'cp -r "%s/docs/images/hedgehog/logo/favicon.ico" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
-    'cp -r "%s/docs/images/hedgehog/logo/hedgehog-wallpaper-plain.png" "${ROOT?}/opt/sensor/assets/img/bg-masthead.png"'
-    % MALCOLM_DIR,
+    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{deps,hooks}\'',
+    '/bin/bash -x -c \'pushd "%s/" ; git ls-files --exclude-standard | rsync -R --files-from=- ./ "${ROOT?}/opt/Malcolm/"; popd\''
+    % (MALCOLM_DIR),
 ]
 
 extra_chroot_shell_cmds.extend(
     [
         'chmod 755 /root/sensor_install.sh',
-        '/root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
+        'bash -x /root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
     ]
 )
 

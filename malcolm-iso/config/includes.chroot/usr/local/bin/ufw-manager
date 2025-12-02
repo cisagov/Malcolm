@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if (( $EUID == 0 )); then
+    /usr/local/bin/ufw_manager.sh
+elif groups | grep -Pq '\b(sudo|netdev)\b'; then
+    sudo /usr/local/bin/ufw_manager.sh
+else
+    su -l -c /usr/local/bin/ufw_manager.sh
+fi

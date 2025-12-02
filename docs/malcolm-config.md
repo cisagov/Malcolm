@@ -24,8 +24,8 @@ Although the configuration script automates many of the following configuration 
         + `INDEX_MANAGEMENT_SEGMENTS` - the number of segments Arlime will use to optimize sessions (default `1`)
         + `INDEX_MANAGEMENT_HOT_WARM_ENABLED` - whether or not Arkime should use a hot/warm design (storing non-session data in a warm index); setting up hot/warm index policies also requires configuration on the local nodes in accordance with the [Arkime documentation](https://arkime.com/faq#ilm)
     - The following variables configure exposing [Arkime's WISE Plugin](https://arkime.com/wise). By default, Malcolm leverages the WISE plugin internally but does not expose the functionality to the end user:
-        + `ARKIME_EXPOSE_WISE_GUI` - if set to `true` the WISE interface will be available at: `https://<MALCOLM-IP>/wise`. This defaults to `false`
-        + `ARKIME_ALLOW_WISE_GUI_CONFIG` - if set to `true` the WISE interface can be used to configure the WISE service. This only applies if `ARKIME_EXPOSE_WISE_GUI` is set to `true`. The default value is `false`.
+        + `ARKIME_EXPOSE_WISE_GUI` - if set to `true` the WISE interface will be available at: `https://<MALCOLM-IP>/wise`. This defaults to `true`.
+        + `ARKIME_ALLOW_WISE_GUI_CONFIG` - if set to `true` the WISE interface can be used to configure the WISE service. This only applies if `ARKIME_EXPOSE_WISE_GUI` is set to `true`. The default value is `true`.
         + `ARKIME_WISE_CONFIG_PIN_CODE` - the WISE service requires a configuration pin. This value will be required to save any WISE configuration changes.  The default value is `WISE2019`.
         + `ARKIME_WISE_SERVICE_URL` - to leverage WISE, arkime-capture needs to be provided a `wiseURL` value. The value of this environment variable is copied into the `wiseURL` value in arkime-live containers.
         + `WISE` - indicates if the WISE service is `on` or `off`. This environment variable defaults to `off`.
@@ -46,7 +46,7 @@ Although the configuration script automates many of the following configuration 
     - `DASHBOARDS_TIMEPICKER_FROM` and `DASHBOARDS_TIMEPICKER_TO` – sets the "from" and "to" values, respectively, for OpenSearch Dashboard's `timepicker:timeDefaults` [setting](https://docs.opensearch.org/latest/dashboards/management/advanced-settings/#general-settings) (default `now-24h` and `now`, meaning "last 24 hours")
     -  – if set to `true`, [OpenSearch Dashboards](dashboards.md#DashboardsVisualizations) will be set to dark mode upon initialization (default `true`)
     - `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` - the maximum cumulative size of OpenSearch indices are allowed to consume before the oldest indices are deleted, see [**Managing disk usage**](#DiskUsage) below
-* **`filebeat.env`** - settings specific to [Filebeat](https://www.elastic.co/products/beats/filebeat), particularly for how Filebeat watches for new log files to parse and how it receives and stores [third-Party logs](third-party-logs.md#ThirdPartyLogs)
+* **`filebeat.env`** - settings specific to [Filebeat](https://www.elastic.co/products/beats/filebeat), particularly for how Filebeat watches for new log files to parse and how it receives and stores [third-Party logs](third-party-logs.md)
     - `LOG_CLEANUP_MINUTES` and `ZIP_CLEANUP_MINUTES` - these variables deal cleaning up already-processed log files, see [**Managing disk usage**](#DiskUsage) below
     - The following variables configure Malcolm's ability to [accept syslog](https://www.elastic.co/guide/en/beats/filebeat/current/syslog.html) messages:
         + `FILEBEAT_SYSLOG_TCP_LISTEN` and `FILEBEAT_SYSLOG_UDP_LISTEN` - if set to `true`, Malcolm will accept syslog messages over TCP and/or UDP, respectively
@@ -117,7 +117,7 @@ Although the configuration script automates many of the following configuration 
         + `MALCOLM_NETWORK_INDEX_SUFFIX` - Suffix used to create index to which network traffic logs are written
             * supports [Ruby `strftime`](https://docs.ruby-lang.org/en/3.2/strftime_formatting_rdoc.html) strings in `％{}`) (e.g., hourly: `％{％y％m％dh％H}`, twice daily: `％{％P％y％m％d}`, daily (default): `％{％y％m％d}`, weekly: `％{％yw％U}`, monthly: `％{％ym％m}`
             * supports expanding dot-delimited field names in `｛｛ ｝｝` (e.g., `｛｛event.provider｝｝％{％y％m％d}`)
-    - The following variables control the OpenSearch indices to which other logs ([third-party logs](third-party-logs.md#ThirdPartyLogs), resource utilization reports from network sensors, etc.) are written.
+    - The following variables control the OpenSearch indices to which other logs ([third-party logs](third-party-logs.md), resource utilization reports from network sensors, etc.) are written.
         + `MALCOLM_OTHER_INDEX_PATTERN` - Index pattern for other logs written via Logstash (default is `malcolm_beats_*`)
         + `MALCOLM_OTHER_INDEX_TIME_FIELD` - Default time field to use for other logs in Logstash and Dashboards (default is `@timestamp`)
         + `MALCOLM_OTHER_INDEX_SUFFIX` - Suffix used to create index to which other logs are written (with the same rules as `MALCOLM_NETWORK_INDEX_SUFFIX` above) (default is `％{％y％m％d}`)
@@ -288,5 +288,3 @@ In instances where Malcolm is deployed with the intention of running indefinitel
     - `EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT` - specifies a maximum fill percentage for the file system containing the `./zeek-logs/extract_files/`; in other words, if the disk is more than this percentage utilized, the prune condition triggers
     - `EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS` - the interval between checking the prune conditions, in seconds (default `300`)
 * [Index management policies](index-management.md) can be handled via plugins provided as part of the OpenSearch and Elasticsearch platforms, respectively. In addition to those tools, the `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` variable in **`dashboards-helper.env`** defines a maximum cumulative that OpenSearch indices are allowed to consume before the oldest indices [are deleted]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/dashboards/scripts/opensearch_index_size_prune.py), specified as either as a human-readable data size (e.g., `250G`) or as a percentage of the total disk size (e.g., `70%`): e.g., a value of `500G` means "delete the oldest OpenSearch indices if the total space consumed by Malcolm's indices exceeds five hundred gigabytes."
-
-Similar settings exist for managing disk usage on [Hedgehog Linux](malcolm-hedgehog-e2e-iso-install.md#HedgehogDiskUsage).

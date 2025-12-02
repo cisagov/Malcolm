@@ -1,0 +1,188 @@
+name: iso-build-push
+
+on:
+  workflow_call:
+    inputs:
+      profile:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      actions: write
+      packages: write
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: amd64
+            platform: linux/amd64
+    defaults:
+      run:
+        shell: bash
+    steps:
+      -
+        name: Cancel previous run in progress
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          ignore_sha: true
+          all_but_latest: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:master
+      -
+        name: Build environment setup
+        run: |
+          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          sudo rm -rf \
+            "$AGENT_TOOLSDIRECTORY" \
+            /opt/ghc \
+            /usr/lib/jvm \
+            /usr/local/.ghcup \
+            /usr/local/lib/android \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y update >/dev/null 2>&1
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge remove \
+            azure-cli \
+            dotnet* \
+            firefox \
+            google-chrome-stable \
+            google-cloud-cli \
+            microsoft-edge-stable \
+            mono-* \
+            mysql* \
+            postgresql* \
+            powershell \
+            temurin*  >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge autoremove >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
+               apt-transport-https \
+               bc \
+               build-essential \
+               ca-certificates \
+               curl \
+               debhelper-compat \
+               debian-archive-keyring \
+               debootstrap \
+               genisoimage \
+               gettext \
+               git \
+               gnupg2 \
+               imagemagick \
+               jq \
+               po4a \
+               rsync \
+               software-properties-common \
+               squashfs-tools \
+               virt-what \
+               xmlstarlet \
+               xorriso \
+               yq \
+               xz-utils
+          git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20230131' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
+          cd /tmp/live-build
+          dpkg-buildpackage -b -uc -us
+          cd /tmp
+          sudo dpkg -i /tmp/live-build*.deb
+          sudo rm -rf /tmp/live-build /tmp/live-build*.deb
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
+      -
+        name: Extract commit SHA
+        shell: bash
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        id: extract_commit_sha
+      -
+        name: Extract Malcolm version
+        shell: bash
+        run: |
+          echo "mversion=$(python3 - <<'PYCODE'
+          import importlib.util
+          spec = importlib.util.spec_from_file_location("malcolm_constants", "scripts/malcolm_constants.py")
+          mod = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+          print(mod.MALCOLM_VERSION)
+          PYCODE
+          )" >> "$GITHUB_OUTPUT"
+      -
+        name: Build image
+        run: |
+          sudo rm -rf ${GITHUB_WORKSPACE}/.git
+          IMAGES=( $(yq -r '.services[] | select(.profiles[]? == "${{ inputs.profile }}") | .image' docker-compose.yml | sort -u) )
+          for IMAGE in "${IMAGES[@]}"; do
+            REPO_IMAGE="$(echo "$IMAGE" | sed "s@^.*\(malcolm\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"
+            docker pull "$REPO_IMAGE" && \
+              docker tag "$REPO_IMAGE" "$IMAGE" && \
+              docker rmi "$REPO_IMAGE"
+          done
+          DEST_IMAGES_TXZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.xz
+          echo "Saving Malcolm Docker images (${{ inputs.profile }} run profile) to \"$DEST_IMAGES_TXZ\""
+          docker save "${IMAGES[@]}" | xz -1 > "$DEST_IMAGES_TXZ"
+          for IMAGE in "${IMAGES[@]}"; do
+            docker rmi "$IMAGE"
+          done
+          pushd ./malcolm-iso
+          mkdir -p ./shared
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
+          echo "MALCOLM_PROFILE=${{ inputs.profile }}" > ./shared/environment.chroot
+          sudo /usr/bin/env bash ./build.sh -r -i ${{ inputs.profile }} -d "$DEST_IMAGES_TXZ"
+          rm -rf ./shared/ "$DEST_IMAGES_TXZ"
+          sudo chmod 644 ./${{ inputs.profile }}-*.*
+          popd
+      -
+        name: Run Trivy vulnerability scanner
+        if: ${{ matrix.platform == 'linux/amd64' }}
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@0.29.0
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
+        with:
+          scan-type: 'fs'
+          scan-ref: './malcolm-iso'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          vuln-type: 'os,library'
+          hide-progress: true
+          ignore-unfixed: true
+          exit-code: '0'
+      -
+        name: Upload Trivy scan results to GitHub Security tab
+        if: ${{ matrix.platform == 'linux/amd64' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+      -
+        name: ghcr.io login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Build and push ISO image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./malcolm-iso
+          build-args: |
+            IMAGE_NAME=${{ inputs.profile }}
+          push: true
+          provenance: false
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/${{ inputs.profile }}:${{ steps.extract_branch.outputs.branch }}

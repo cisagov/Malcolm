@@ -42,4 +42,4 @@ After making these changes, right-click on the Docker 🐋 icon in the system tr
 
 ## Podman
 
-See [Docker vs. Podman](quickstart.md#DockerVPodman).
+Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. See the Linux instructions for [Installing and configuring Podman](host-config-linux.md#HostSystemConfigLinuxPodman) for more information.

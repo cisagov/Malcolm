@@ -12,6 +12,23 @@ from enum import Enum
 from typing import Tuple, List, Optional
 
 from scripts.malcolm_constants import (
+    COMPOSE_MALCOLM_EXTENSION,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP,
     DATABASE_MODE_ENUMS,
     DatabaseMode,
     DEFAULT_INDEX_DIR,
@@ -19,9 +36,11 @@ from scripts.malcolm_constants import (
     DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
+    ImageArchitecture,
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
-    ImageArchitecture,
+    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
 )
 from scripts.malcolm_common import (
     BuildBoundPathReplacers,
@@ -29,9 +48,19 @@ from scripts.malcolm_common import (
     LoadYaml,
     RemapBoundPaths,
 )
-from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
+from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir
 
 from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_AUX_FW_AIDE,
+    KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
+    KEY_CONFIG_ITEM_AUX_FW_CPU,
+    KEY_CONFIG_ITEM_AUX_FW_DF,
+    KEY_CONFIG_ITEM_AUX_FW_DISK,
+    KEY_CONFIG_ITEM_AUX_FW_KMSG,
+    KEY_CONFIG_ITEM_AUX_FW_MEM,
+    KEY_CONFIG_ITEM_AUX_FW_NETWORK,
+    KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
+    KEY_CONFIG_ITEM_AUX_FW_THERMAL,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
@@ -40,12 +69,18 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_IMAGE_ARCH,
     KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
+    KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     KEY_CONFIG_ITEM_NGINX_SSL,
     KEY_CONFIG_ITEM_OPEN_PORTS,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_PCAP_DIR,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+    KEY_CONFIG_ITEM_PRUNE_LOGS,
+    KEY_CONFIG_ITEM_PRUNE_PCAP,
+    KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
@@ -89,10 +124,9 @@ from scripts.installer.configs.constants.constants import (
     SERVICE_PORT_SFTP_INTERNAL,
     SERVICE_PORT_TCP_JSON,
     TRAEFIK_ENABLE,
-    UFW_MANAGER_SCRIPT,
     USERNS_MODE_KEEP_ID,
 )
-from scripts.installer.configs.constants.enums import InstallerResult
+from scripts.installer.configs.constants.enums import InstallerResult, OpenPortsChoices
 from scripts.installer.utils import InstallerLogger
 
 
@@ -203,13 +237,14 @@ def _get_traefik_config(malcolm_config):
         traefik_os_host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST) or ""
         traefik_entrypoint = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT) or ""
         traefik_resolver = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER) or ""
-        expose_opensearch = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS)) and bool(
-            malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH)
-        )
+        expose_opensearch = (
+            malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) != OpenPortsChoices.NO.value
+        ) and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH))
         os_primary_mode = (
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
         )
-    except Exception:
+    except Exception as e:
+        InstallerLogger.error(f"_get_traefik_config: {e}")
         traefik_labels_enabled = False
         traefik_host = traefik_os_host = traefik_entrypoint = traefik_resolver = ""
         expose_opensearch = False
@@ -264,7 +299,7 @@ def _apply_network_overrides(data: dict, network_name: Optional[str]) -> None:
 def _get_exposed_services_config(malcolm_config):
     try:
         traefik_labels_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS) or False)
-        open_ports = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) or False)
+        open_ports = malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) != OpenPortsChoices.NO.value
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
         os_primary_mode = (
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
@@ -278,7 +313,19 @@ def _get_exposed_services_config(malcolm_config):
         expose_sftp = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_SFTP) or False)
         syslog_tcp_port = (malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT) or 0) if open_ports else 0
         syslog_udp_port = (malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT) or 0) if open_ports else 0
-    except Exception:
+        reachback_request_acl = (
+            (malcolm_config.get_value(KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL) or [])
+            if (profile == PROFILE_HEDGEHOG)
+            else []
+        )
+        # these aren't directly for exposed ports, but do determine whether arkime or arkime-live
+        #   has the arkime reachback service port exposed
+        pcap_cap_tcpdump = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP) or False
+        pcap_cap_netsniff = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF) or False
+        pcap_cap_arkime_live = malcolm_config.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME) or False
+
+    except Exception as e:
+        InstallerLogger.error(f"_get_exposed_services_config: {e}")
         traefik_labels_enabled = False
         open_ports = False
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
@@ -290,6 +337,10 @@ def _get_exposed_services_config(malcolm_config):
         expose_sftp = False
         syslog_tcp_port = 0
         syslog_udp_port = 0
+        reachback_request_acl = []
+        pcap_cap_tcpdump = False
+        pcap_cap_netsniff = False
+        pcap_cap_arkime_live = False
 
     return (
         traefik_labels_enabled,
@@ -303,6 +354,10 @@ def _get_exposed_services_config(malcolm_config):
         expose_sftp,
         syslog_tcp_port,
         syslog_udp_port,
+        reachback_request_acl,
+        pcap_cap_tcpdump,
+        pcap_cap_netsniff,
+        pcap_cap_arkime_live,
     )
 
 
@@ -319,22 +374,14 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
         expose_sftp,
         syslog_tcp_port,
         syslog_udp_port,
+        reachback_request_acl,
+        pcap_cap_tcpdump,
+        pcap_cap_netsniff,
+        pcap_cap_arkime_live,
     ) = exposed_services_tuple
 
     ###################################
     # set bind IPs based on whether services should be externally exposed or not
-
-    ufw_manager_cmd = UFW_MANAGER_SCRIPT
-    if not which(ufw_manager_cmd):
-        if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
-            ufw_manager_cmd = os.path.join('/usr/local/bin/', ufw_manager_cmd)
-        else:
-            ufw_manager_cmd = None
-
-    if ufw_manager_cmd:
-        err, out = platform.run_process([ufw_manager_cmd, '-a', 'reset'], privileged=True)
-        if err != 0:
-            InstallerLogger.error(f"Resetting UFW firewall failed: {out}")
 
     for service, port_infos in {
         'filebeat': [
@@ -359,17 +406,42 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                         data['services'][service]['ports'].append(
                             f"{SERVICE_IP_EXPOSED}:{port_info[1]}:{port_info[2]}/{port_info[3]}"
                         )
-                        if ufw_manager_cmd:
-                            err, out = platform.run_process(
-                                [ufw_manager_cmd, '-a', 'allow', f'{port_info[1]}/{port_info[3]}'],
-                                privileged=True,
-                            )
-                            if err != 0:
-                                InstallerLogger.error(
-                                    f"Setting UFW 'allow {port_info[1]}/{port_info[3]}' failed: {out}"
-                                )
                 if not data['services'][service]['ports']:
                     data['services'][service].pop('ports', None)
+    ###################################
+
+    ###################################
+    # reachback request ACL for hedgehog Linux run profile
+
+    # remove previously exposed ports from compose
+    for hh_profile_service in ('file-monitor', 'arkime', 'arkime-live'):
+        if hh_profile_service in data['services']:
+            data['services'][hh_profile_service].pop('ports', None)
+
+    # remove HH ACL section from extension
+    if deep_get(data, [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_HEDGEHOG], []):
+        data[COMPOSE_MALCOLM_EXTENSION][COMPOSE_MALCOLM_EXTENSION_HEDGEHOG].pop(
+            COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL, None
+        )
+
+    # if we're hedgehog mode and have an ACL...
+    if (profile == PROFILE_HEDGEHOG) and reachback_request_acl:
+        # set the ACL into the malcolm extension
+        deep_set(
+            data,
+            [
+                COMPOSE_MALCOLM_EXTENSION,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+            ],
+            reachback_request_acl,
+        )
+        aclPorts = {'file-monitor': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES}
+        if any((pcap_cap_arkime_live, pcap_cap_netsniff, pcap_cap_tcpdump)):
+            # expose 8005 for arkime-live or arkime depending on where Arkime viewer will be running
+            aclPorts['arkime-live' if pcap_cap_arkime_live else 'arkime'] = SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER
+        for service, port in aclPorts.items():
+            data['services'][service]['ports'] = [f"{SERVICE_IP_EXPOSED}:{port}:{port}/tcp"]
     ###################################
 
     ###################################
@@ -390,20 +462,46 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                     f"{SERVICE_IP_EXPOSED}:{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}:{SERVICE_PORT_OSMALCOLM}/tcp"
                 )
 
-                if ufw_manager_cmd:
-                    err, out = platform.run_process(
-                        [
-                            ufw_manager_cmd,
-                            '-a',
-                            'allow',
-                            f"{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp",
-                        ],
-                        privileged=True,
-                    )
-                    if err != 0:
-                        InstallerLogger.error(
-                            f"Setting UFW 'allow {SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp' failed: {out}"
-                        )
+
+def _apply_malcolm_extensions(data: dict, malcolm_config):
+    ext_map = {
+        # forwarders
+        COMPOSE_MALCOLM_EXTENSION_AUX_FW: {
+            KEY_CONFIG_ITEM_AUX_FW_AIDE: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+            KEY_CONFIG_ITEM_AUX_FW_AUDITLOG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+            KEY_CONFIG_ITEM_AUX_FW_CPU: COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+            KEY_CONFIG_ITEM_AUX_FW_DF: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+            KEY_CONFIG_ITEM_AUX_FW_DISK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+            KEY_CONFIG_ITEM_AUX_FW_KMSG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+            KEY_CONFIG_ITEM_AUX_FW_MEM: COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+            KEY_CONFIG_ITEM_AUX_FW_NETWORK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+            KEY_CONFIG_ITEM_AUX_FW_SYSTEMD: COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+            KEY_CONFIG_ITEM_AUX_FW_THERMAL: COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+        },
+        # prune operations external to containers
+        COMPOSE_MALCOLM_EXTENSION_PRUNE: {
+            KEY_CONFIG_ITEM_PRUNE_PCAP: COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP,
+            KEY_CONFIG_ITEM_PRUNE_LOGS: COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
+        },
+    }
+    for ext_key, ext_key_map in ext_map.items():
+        ext_values = {}
+        for key in ext_key_map.keys():
+            ext_values[key] = bool(malcolm_config.get_value(key) or False)
+
+        if deep_get(data, [COMPOSE_MALCOLM_EXTENSION], []):
+            data[COMPOSE_MALCOLM_EXTENSION].pop(ext_key, None)
+
+        for key, value in ext_values.items():
+            deep_set(
+                data,
+                [
+                    COMPOSE_MALCOLM_EXTENSION,
+                    ext_key,
+                    ext_key_map[key],
+                ],
+                value,
+            )
 
 
 def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, dump_yaml) -> bool:
@@ -499,6 +597,9 @@ def update_compose_files(
 
                 # open ports for exposed services
                 _apply_exposed_services(data, _get_exposed_services_config(malcolm_config), platform)
+
+                # Malcolm x- extensions in compose file (except for reachback ACL which is done in _apply_exposed_services)
+                _apply_malcolm_extensions(data, malcolm_config)
 
                 # Traefik label handling
                 _apply_traefik_labels_if_present(data, _get_traefik_config(malcolm_config))

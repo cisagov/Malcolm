@@ -22,7 +22,7 @@ Under **Workflow permissions**, select **Read and write permissions** to allow t
 
 ![GitHub Actions permissions](./images/screenshots/github-actions-permissions.png)
 
-### Secrets and variables
+### <a name="secrets-and-variables"></a>Secrets and variables
 
 Expand **✴ Secrets and variables** in the left menu panel under **Security**, then select **Actions** from that menu.
 
@@ -87,7 +87,7 @@ Clicking on a package name will show details about that package. Note that most 
 
 ## Modifying workflow files
 
-### Triggers
+### <a name="triggers"></a>Triggers
 
 [Malcolm's workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are configured to build when any of the following [triggers](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows) occur (found in the `on:` section at the top of each workflow file):
 
@@ -102,15 +102,14 @@ These triggers may be modified according to the users' needs.
 
 Each container build workflow actually runs two paths in parallel: one for building and pushing the x86-64 images and one for building and pushing the arm64 images. As of the writing of this document, [Arm-based Linux runners](https://github.blog/changelog/2024-06-03-actions-arm-based-linux-and-windows-runners-are-now-in-public-beta/) are not yet publicly available (but are expected to be offered for open source and personal accounts by the end of 2024). For this reason, the arm64 builds are emulated with [QEMU](https://github.com/marketplace/actions/docker-setup-qemu). These emulated builds take *much* longer than their native x86-64 counterparts. Users who do not need the arm64 images may comment out that platform (by adding a `#` to the beginning of its line) under `jobs.docker.strategy.matrix.platform` in the workflow YML file.
 
-## Convenience scripts for development
+## <a name="convenience-scripts-for-development"></a>Convenience scripts for development
 
 As mentioned earlier, Malcolm images built using the instructions in this document are are named according to the pattern `ghcr.io/username/malcolm/image:branch`. However, note that the `image:` values found in [`docker-compose.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/docker-compose.yml) (and in the [Kubernetes](kubernetes.md#Kubernetes) [manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/)) look like `ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}`, using the OpenSearch container as an example. To run a local instance of Malcolm using these images instead of the official `ghcr.io/idaholab` ones, users will need to edit their `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) to pull the repository images and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `{{ site.malcolm.version }}`).
 
-Before explaining that script, a discussion of the workflow files for the [Hedgehog Linux](live-analysis.md#Hedgehog) ([hedgehog-iso-build-docker-wrap-push-ghcr.yml
-]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml)) and [Malcolm](malcolm-iso.md#ISO) ([malcolm-iso-build-docker-wrap-push-ghcr.yml
-]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml)) installer ISOs is warranted. The installer images are [ISO 9660](https://en.wikipedia.org/wiki/ISO_9660)-formatted files, not container images, so one may reasonably wonder about the purpose of the `ghcr.io/username/malcolm/malcolm:main` and `ghcr.io/username/malcolm/hedgehog:main` images pushed to ghcr.io. 
+Before explaining that script, a discussion of the workflow files for the [Malcolm](malcolm-iso.md#ISO) ([malcolm-iso-build-docker-wrap-push-ghcr.yml
+]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml)) (and its Hedgehog run profile variant) installer ISO is warranted. The installer images are [ISO 9660](https://en.wikipedia.org/wiki/ISO_9660)-formatted files, not container images, so one may reasonably wonder about the purpose of the `ghcr.io/username/malcolm/malcolm:main` and `ghcr.io/username/malcolm/hedgehog:main` images pushed to ghcr.io. 
 
-Examining [`malcolm-iso/Dockerfile`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso/Dockerfile) and [`hedgehog-iso/Dockerfile`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso/Dockerfile), one will see that these container images are just [thin wrappers](https://github.com/mmguero/docker-qemu-live-iso) around the ISO 9660 image files built during their respective workflows. These wrapper images serve two purposes:
+Examining [`malcolm-iso/Dockerfile`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso/Dockerfile), one will see that these container images are just [thin wrappers](https://github.com/mmguero/docker-qemu-live-iso) around the ISO 9660 image files built during their respective workflows. These wrapper images serve two purposes:
 
 * To provide an HTTP server from which the ISO itself can be downloaded
 * To boot a live ISO image in QEMU (based on [`tianon/qemu:native`](https://github.com/tianon/docker-qemu))

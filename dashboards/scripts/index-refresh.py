@@ -4,7 +4,6 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
-import json
 import logging
 import malcolm_utils
 import re
@@ -18,13 +17,15 @@ from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
 from malcolm_constants import DatabaseMode
 
-GET_STATUS_API = 'api/status'
-GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
-GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
-GET_PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
-OS_GET_INDEX_TEMPLATE_URI = '_index_template'
-OS_GET_COMPONENT_TEMPLATE_URI = '_component_template'
+GET_COMPONENT_TEMPLATE_URI = '_component_template'
+GET_INDEX_TEMPLATE_URI = '_index_template'
 GET_SHARDS_URL = '_cat/shards?h=index,state'
+GET_STATUS_API = 'api/status'
+KIBANA_DATA_VIEWS_URI = 'api/data_views'
+KIBANA_DATA_VIEW_URI = f'{KIBANA_DATA_VIEWS_URI}/data_view'
+OPENSEARCH_GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
+OPENSEARCH_GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
+OPENSEARCH_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
 SHARD_UNASSIGNED_STATUS = 'UNASSIGNED'
 NETBOX_URL_DEFAULT = 'http://netbox:8080/netbox'
 
@@ -70,6 +71,15 @@ def parse_args():
         type=str,
         default=os.getenv('OPENSEARCH_URL', None),
         help='OpenSearch URL',
+    )
+    parser.add_argument(
+        '-m',
+        '--malcolm',
+        dest='malcolm_url',
+        metavar='<protocol://host:port>',
+        type=str,
+        default=os.getenv('MALCOLM_URL', ''),
+        help='Malcolm URL (only used for --opensearch-mode elasticsearch-remote)',
     )
     parser.add_argument(
         '-b',
@@ -168,9 +178,20 @@ def setup_environment(args):
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     opensearch_creds = malcolm_utils.ParseCurlFile(args.opensearch_curl_rc_file)
 
+    if args.opensearch_mode == DatabaseMode.ElasticsearchRemote and args.malcolm_url:
+        args.malcolm_url = malcolm_utils.remove_suffix(args.malcolm_url, '/')
+    else:
+        args.malcolm_url = ''
+
     args.netbox_url = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(args.netbox_url, '/'), '/api')
     if args.netbox_url == NETBOX_URL_DEFAULT:
-        args.netbox_url = '/netbox'
+        if args.opensearch_mode == DatabaseMode.ElasticsearchRemote:
+            if args.malcolm_url:
+                args.netbox_url = f'{args.malcolm_url}/netbox'
+            else:
+                args.netbox_url = None
+        else:
+            args.netbox_url = '/netbox'
 
     opensearch_is_local = (
         args.opensearch_mode == DatabaseMode.OpenSearchLocal or args.opensearch_url == 'https://opensearch:9200'
@@ -208,13 +229,24 @@ def get_versions(args, session):
 
 
 def get_index_id(args, session):
-    resp = session.get(
-        f"{args.dashboards_url}/{GET_INDEX_PATTERN_INFO_URI}",
-        params={'type': 'index-pattern', 'fields': 'id', 'search': f'"{args.index}"'},
-    )
-    resp.raise_for_status()
-    data = resp.json()
-    index_id = data['saved_objects'][0]['id'] if data['saved_objects'] else None
+    index_id = None
+
+    if args.opensearch_mode == DatabaseMode.ElasticsearchRemote:
+        resp = session.get(f"{args.dashboards_url}/{KIBANA_DATA_VIEWS_URI}")
+        resp.raise_for_status()
+        for dv in resp.json().get("data_view", []):
+            if (dv.get("title") == args.index) and (index_id := dv["id"]):
+                break
+
+    else:
+        resp = session.get(
+            f"{args.dashboards_url}/{OPENSEARCH_GET_INDEX_PATTERN_INFO_URI}",
+            params={'type': 'index-pattern', 'fields': 'id', 'search': f'"{args.index}"'},
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        index_id = data['saved_objects'][0]['id'] if data['saved_objects'] else None
+
     if index_id:
         logging.info(f'Index ID for {args.index} is {index_id}')
         return index_id
@@ -222,13 +254,36 @@ def get_index_id(args, session):
         raise ValueError(f"Could not get index ID for {args.index}")
 
 
-def get_fields_list(args, session):
-    resp = session.get(
-        f"{args.dashboards_url}/{GET_FIELDS_URI}",
-        params={'pattern': args.index, 'meta_fields': ["_source", "_id", "_type", "_index", "_score"]},
-    )
-    resp.raise_for_status()
-    return resp.json()['fields']
+def kibana_fields_to_opensearch_format(kibana_fields: dict):
+    fields_out = []
+    for name, info in kibana_fields.items():
+        fields_out.append(
+            {
+                "name": name,
+                "type": info.get("type"),
+                "esTypes": info.get("esTypes") or [],
+                "searchable": info.get("searchable", False),
+                "aggregatable": info.get("aggregatable", False),
+                "readFromDocValues": info.get("readFromDocValues", False),
+            }
+        )
+    return fields_out
+
+
+def get_fields_list(args, session, index_id):
+    if args.opensearch_mode == DatabaseMode.ElasticsearchRemote:
+        resp = session.get(f"{args.dashboards_url}/{KIBANA_DATA_VIEW_URI}/{index_id}")
+        resp.raise_for_status()
+        result = kibana_fields_to_opensearch_format(malcolm_utils.deep_get(resp.json(), ['data_view', 'fields'], {}))
+    else:
+        resp = session.get(
+            f"{args.dashboards_url}/{OPENSEARCH_GET_FIELDS_URI}",
+            params={'pattern': args.index, 'meta_fields': ["_source", "_id", "_type", "_index", "_score"]},
+        )
+        resp.raise_for_status()
+        result = malcolm_utils.deep_get(resp.json(), ['fields'], [])
+
+    return result
 
 
 def merge_template_fields(args, session, fields):
@@ -237,7 +292,7 @@ def merge_template_fields(args, session, fields):
 
     try:
         # request template from OpenSearch and pull the mappings/properties (field list) out
-        get_template_response = session.get(f"{args.opensearch_url}/{OS_GET_INDEX_TEMPLATE_URI}/{args.template}")
+        get_template_response = session.get(f"{args.opensearch_url}/{GET_INDEX_TEMPLATE_URI}/{args.template}")
         get_template_response.raise_for_status()
         template_json = get_template_response.json()
 
@@ -252,7 +307,7 @@ def merge_template_fields(args, session, fields):
             # also include fields from component templates into template_fields before processing
             # https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates
             for component_name in malcolm_utils.deep_get(template, ['index_template', 'composed_of'], default=[]):
-                comp_resp = session.get(f"{args.opensearch_url}/{OS_GET_COMPONENT_TEMPLATE_URI}/{component_name}")
+                comp_resp = session.get(f"{args.opensearch_url}/{GET_COMPONENT_TEMPLATE_URI}/{component_name}")
                 comp_resp.raise_for_status()
                 comp_json = comp_resp.json()
                 for component in comp_json.get('component_templates', []):
@@ -294,11 +349,16 @@ def merge_template_fields(args, session, fields):
 
 
 def get_prev_field_format_map(args, session, index_id):
-    resp = session.get('{}/{}/{}'.format(args.dashboards_url, GET_PUT_INDEX_PATTERN_URI, index_id))
-    resp.raise_for_status()
-    return malcolm_utils.LoadStrIfJson(
-        malcolm_utils.deep_get(resp.json(), ['attributes', 'fieldFormatMap'], default="{}"), default={}
-    )
+    if args.opensearch_mode == DatabaseMode.ElasticsearchRemote:
+        resp = session.get(f"{args.dashboards_url}/{KIBANA_DATA_VIEW_URI}/{index_id}")
+        resp.raise_for_status()
+        return malcolm_utils.deep_get(resp.json(), ['data_view', 'fieldFormats'], {})
+    else:
+        resp = session.get('{}/{}/{}'.format(args.dashboards_url, OPENSEARCH_INDEX_PATTERN_URI, index_id))
+        resp.raise_for_status()
+        return malcolm_utils.LoadStrIfJson(
+            malcolm_utils.deep_get(resp.json(), ['attributes', 'fieldFormatMap'], default="{}"), default={}
+        )
 
 
 def build_field_format_map(args, fields, prev_field_format_map):
@@ -319,7 +379,7 @@ def build_field_format_map(args, fields, prev_field_format_map):
     format_map = prev_field_format_map or {}
 
     def netbox_url(path):
-        return f'{args.netbox_url}{path}'
+        return f'{args.netbox_url}{path}' if args.netbox_url else ''
 
     # mapping of fields (by suffixes or exact names) -> urlTemplate
     field_map = {
@@ -350,8 +410,9 @@ def build_field_format_map(args, fields, prev_field_format_map):
         'related.role': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicerole'),
         'related.service': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.service'),
         'related.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
-        'zeek.files.extracted_uri': lambda: '/{{value}}',
+        'zeek.files.extracted_uri': lambda: (args.malcolm_url + '/{{value}}') if args.malcolm_url else '',
     }
+    field_map = {k: v for k, v in field_map.items() if v()}
 
     for f in [
         x
@@ -367,29 +428,40 @@ def build_field_format_map(args, fields, prev_field_format_map):
         )
         if template_func:
             fmt['params']['urlTemplate'] = template_func()
-        else:
+        elif args.malcolm_url or (args.opensearch_mode != DatabaseMode.ElasticsearchRemote):
             # for Arkime to query by database field name, see arkime issue/PR 1461/1463
             val_quote = '"' if f['type'] == 'string' else ''
             prefix = '' if name.startswith(('zeek', 'suricata')) else 'db:'
-            fmt['params']['urlTemplate'] = f'/iddash2ark/{prefix}{name} == {val_quote}{{{{value}}}}{val_quote}'
+            fmt['params'][
+                'urlTemplate'
+            ] = f'{args.malcolm_url}/iddash2ark/{prefix}{name} == {val_quote}{{{{value}}}}{val_quote}'
 
-        format_map[name] = fmt
+        if fmt['params'].get('urlTemplate', None) != None:
+            format_map[name] = fmt
 
     return format_map
 
 
 def update_dashboard_index_pattern(args, session, index_id, fields, field_format_map):
-    put_index_info = {
-        'attributes': {
-            'title': args.index,
-            'fields': json.dumps(fields),
-            'fieldFormatMap': json.dumps(field_format_map),
+    if args.opensearch_mode == DatabaseMode.ElasticsearchRemote:
+        payload = {
+            'data_view': {
+                'title': args.index,
+                'fieldFormats': field_format_map,
+            }
         }
-    }
-    put_response = session.put(
-        f"{args.dashboards_url}/{GET_PUT_INDEX_PATTERN_URI}/{index_id}", data=json.dumps(put_index_info)
-    )
-    put_response.raise_for_status()
+        resp = session.post(f"{args.dashboards_url}/{KIBANA_DATA_VIEW_URI}/{index_id}", json=payload)
+        resp.raise_for_status()
+    else:
+        payload = {
+            'attributes': {
+                'title': args.index,
+                'fields': fields,
+                'fieldFormatMap': field_format_map,
+            }
+        }
+        resp = session.put(f"{args.dashboards_url}/{OPENSEARCH_INDEX_PATTERN_URI}/{index_id}", json=put_index_info)
+        resp.raise_for_status()
 
 
 def fix_unassigned_shards(args, session):
@@ -399,7 +471,7 @@ def fix_unassigned_shards(args, session):
         if len(shard_info) == 2 and shard_info[1] == SHARD_UNASSIGNED_STATUS:
             put_response = session.put(
                 f"{args.opensearch_url}/{shard_info[0]}/_settings",
-                data=json.dumps({'index': {'number_of_replicas': 0}}),
+                json={'index': {'number_of_replicas': 0}},
             )
             put_response.raise_for_status()
 
@@ -418,7 +490,7 @@ def main():
     # find the ID of the index name (probably will be the same as the name)
     index_id = get_index_id(args, session)
     # get the current fields list
-    fields = get_fields_list(args, session)
+    fields = get_fields_list(args, session, index_id)
     # get the fields from the template, if specified, and merge those into the fields list
     fields = merge_template_fields(args, session, fields)
     logging.info(f'{args.index} would have {len(fields)} fields')

@@ -5,21 +5,13 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'keycloak/**'
       - 'Dockerfiles/keycloak.Dockerfile'
-      - 'shared/bin/*'
-      - '!shared/bin/capa-build.sh'
-      - '!shared/bin/common-init.sh'
-      - '!shared/bin/tx-rx-secure.sh'
-      - '!shared/bin/os-disk-config.py'
-      - '!shared/bin/extracted_files_http_server.py'
-      - '!shared/bin/pcap_processor.py'
-      - '!shared/bin/web-ui-asset-download.sh'
-      - '!shared/bin/preseed_late_user_config.sh'
-      - '!shared/bin/configure-interfaces.py'
-      - '!shared/bin/suricata*'
-      - '!shared/bin/zeek*'
+      - 'container-health-scripts/keycloak.sh'
+      - 'shared/bin/docker-uid-gid-setup.sh'
+      - 'shared/bin/service_check_passthrough.sh'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:

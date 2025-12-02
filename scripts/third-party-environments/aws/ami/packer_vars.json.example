@@ -1,7 +1,7 @@
 {
   "instance_type": "t2.micro",
   "instance_arch": "x86_64",
-  "malcolm_tag": "v25.11.0",
+  "malcolm_tag": "v25.12.0",
   "malcolm_repo": "idaholab/Malcolm",
   "malcolm_uid": "1000",
   "ssh_username": "ec2-user",

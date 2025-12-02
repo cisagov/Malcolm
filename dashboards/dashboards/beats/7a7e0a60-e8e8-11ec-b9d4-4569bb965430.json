@@ -2,7 +2,7 @@
   "objects": [
     {
       "attributes": {
-        "description": "auditd logs from Malcolm sensors",
+        "description": "auditd logs from Hedgehog Linux sensors and Malcolm aggregators",
         "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
@@ -10,7 +10,7 @@
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "panelsJSON": "[{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":32,\"i\":\"ba9f89da-81aa-4657-8e3f-f67ff9d73560\"},\"panelIndex\":\"ba9f89da-81aa-4657-8e3f-f67ff9d73560\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":13,\"h\":16,\"i\":\"fa287c8f-3598-4790-b4bc-c4eb9720312a\"},\"panelIndex\":\"fa287c8f-3598-4790-b4bc-c4eb9720312a\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_1\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":21,\"y\":0,\"w\":27,\"h\":16,\"i\":\"40d3f96f-00e8-4137-b76c-b29002d572a4\"},\"panelIndex\":\"40d3f96f-00e8-4137-b76c-b29002d572a4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":16,\"w\":26,\"h\":33,\"i\":\"48c93940-44c6-4ae1-94f9-c1030b6ff349\"},\"panelIndex\":\"48c93940-44c6-4ae1-94f9-c1030b6ff349\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":34,\"y\":16,\"w\":14,\"h\":16,\"i\":\"5d0e478d-9e6a-4024-9a4b-f96daa6c41a5\"},\"panelIndex\":\"5d0e478d-9e6a-4024-9a4b-f96daa6c41a5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":32,\"w\":8,\"h\":17,\"i\":\"6314eaf8-023d-49dd-974e-bb745958db0b\"},\"panelIndex\":\"6314eaf8-023d-49dd-974e-bb745958db0b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":34,\"y\":32,\"w\":14,\"h\":17,\"i\":\"c93ce18b-3f75-4096-b3c3-7c4ee1129d6d\"},\"panelIndex\":\"c93ce18b-3f75-4096-b3c3-7c4ee1129d6d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":49,\"w\":48,\"h\":25,\"i\":\"7bc79245-f1e3-47fd-a7de-d58a97ee8161\"},\"panelIndex\":\"7bc79245-f1e3-47fd-a7de-d58a97ee8161\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"}]",
         "timeRestore": false,
-        "title": "Malcolm Sensor Audit Logs",
+        "title": "Malcolm System Audit Logs",
         "version": 1
       },
       "id": "7a7e0a60-e8e8-11ec-b9d4-4569bb965430",
@@ -96,10 +96,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor Audit Logs - Host",
+        "title": "Malcolm System Audit Logs - Host",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"Last Audit Log\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Malcolm System Audit Logs - Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"customLabel\":\"Last Audit Log\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "5240ca70-e8e7-11ec-b9d4-4569bb965430",
       "migrationVersion": {
@@ -125,10 +125,10 @@
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "title": "Malcolm Sensor Audit Logs - Logs Over Time by Type",
+        "title": "Malcolm System Audit Logs - Logs Over Time by Type",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Logs Over Time by Type\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"miscbeat.auditlog.type\",\"terms_size\":\"20\",\"hide_in_legend\":0,\"label\":\"\"}],\"time_field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"default_timefield\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"isModelInvalid\":false,\"filter\":{\"query\":\"event.module:auditlog AND miscbeat.auditlog:*\",\"language\":\"kuery\"},\"legend_position\":\"right\"}}"
+        "visState": "{\"title\":\"Malcolm System Audit Logs - Logs Over Time by Type\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"miscbeat.auditlog.type\",\"terms_size\":\"20\",\"hide_in_legend\":0,\"label\":\"\"}],\"time_field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"default_timefield\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"isModelInvalid\":false,\"filter\":{\"query\":\"event.module:auditlog AND miscbeat.auditlog:*\",\"language\":\"kuery\"},\"legend_position\":\"right\"}}"
       },
       "id": "103beef0-e8e9-11ec-b9d4-4569bb965430",
       "migrationVersion": {
@@ -149,10 +149,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor Audit Logs - Audit Log Type",
+        "title": "Malcolm System Audit Logs - Audit Log Type",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Audit Log Type\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Audit Log Type\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":1,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Audit Log Type\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"row\":true}}"
+        "visState": "{\"title\":\"Malcolm System Audit Logs - Audit Log Type\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Audit Log Type\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":1,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Audit Log Type\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"row\":true}}"
       },
       "id": "a2ca0240-e8e7-11ec-b9d4-4569bb965430",
       "migrationVersion": {
@@ -179,10 +179,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor Audit Logs - Syscall",
+        "title": "Malcolm System Audit Logs - Syscall",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Syscall\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.SYSCALL\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Syscall\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Malcolm System Audit Logs - Syscall\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.SYSCALL\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Syscall\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "c97e4db0-e8e7-11ec-b9d4-4569bb965430",
       "migrationVersion": {
@@ -209,10 +209,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor Audit Logs - Account",
+        "title": "Malcolm System Audit Logs - Account",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Account\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.acct\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Effective Account\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.UID\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"UID\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Malcolm System Audit Logs - Account\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.acct\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Effective Account\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.UID\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"UID\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "6a601060-e8e8-11ec-b9d4-4569bb965430",
       "migrationVersion": {
@@ -239,10 +239,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "Malcolm Sensor Audit Logs - Executable",
+        "title": "Malcolm System Audit Logs - Executable",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "version": 1,
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Executable\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.exe\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Executable\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Malcolm System Audit Logs - Executable\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.auditlog.exe\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Executable\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "f9b1a0e0-e8e7-11ec-b9d4-4569bb965430",
       "migrationVersion": {
@@ -280,7 +280,7 @@
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"event.module:auditlog AND miscbeat.auditlog:*\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [],
-        "title": "Malcolm Sensor Audit Log - Logs",
+        "title": "Malcolm System Audit Log - Logs",
         "version": 1
       },
       "id": "15ac5e30-e8e7-11ec-b9d4-4569bb965430",

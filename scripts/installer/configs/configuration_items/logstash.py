@@ -46,6 +46,8 @@ CONFIG_ITEM_LOGSTASH_HOST = ConfigItem(
     key=KEY_CONFIG_ITEM_LOGSTASH_HOST,
     label="Logstash Host",
     default_value=None,
+    # blank is allowed because Hedgehog might be capturing but *not* forwarding
+    accept_blank=True,
     validator=lambda x: isinstance(x, str),
     question='Logstash host and port (for capture-only "Hedgehog" run profile; e.g., 192.168.1.123:5044)',
     widget_type=WidgetType.TEXT,

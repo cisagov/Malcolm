@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: redis-cache-container
-        image: ghcr.io/idaholab/malcolm/redis:25.11.0
+        image: ghcr.io/idaholab/malcolm/redis:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -57,13 +57,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
-          - configMapRef:
-              name: netbox-common-env
           - secretRef:
               name: redis-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "redis-cache.malcolm.local"
         livenessProbe:
           exec:
             command:

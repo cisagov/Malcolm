@@ -1,10 +1,10 @@
 clamd==1.0.2
 dominate==2.9.1
 git+https://github.com/mmguero-dev/python-humanfriendly.git
-psutil==7.0.0
-pycryptodome==3.22.0
+psutil==7.1.3
+pycryptodome==3.23.0
 python-magic==0.4.27
 stream-zip==0.0.83
 supervisor==4.3.0
 watchdog==6.0.0
-yara-python==4.5.1
+yara-python==4.5.4

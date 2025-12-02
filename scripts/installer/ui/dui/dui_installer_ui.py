@@ -107,18 +107,30 @@ class DialogInstallerUI(InstallerUI):
             items.insert(0, ("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
         items.insert(0, ("Configuration Only", "Yes" if install_context.config_only else "No"))
 
-        # present a single yes/no dialog that includes the full summary
-        lines = [
-            "FINAL CONFIGURATION SUMMARY" + (" (DRY RUN)" if is_dry_run else ""),
-            "",
-        ]
-        for label, value in items:
-            lines.append(f"{label}: {format_summary_value(label, value)}")
-        lines.append("")
-        prompt = (
-            "Proceed with dry-run using the above configuration?"
-            if is_dry_run
-            else "Proceed with Malcolm installation using the above configuration?"
-        )
-        lines.append(prompt)
-        return self.ask_yes_no("\n".join(lines), default=False, force_interaction=True)
+        while True:
+            # present a single yes/no dialog that includes the full summary
+            lines = [
+                "FINAL CONFIGURATION SUMMARY" + (" (DRY RUN)" if is_dry_run else ""),
+                "",
+            ]
+            for label, value in items:
+                lines.append(f"{label}: {format_summary_value(label, value)}")
+            lines.append("")
+            prompt = (
+                "Proceed with dry-run using the above configuration?"
+                if is_dry_run
+                else f"Proceed {'' if install_context.config_only else 'with Malcolm installation '}using the above configuration?"
+            )
+            lines.append(prompt)
+            proceed_response = self.ask_yes_no("\n".join(lines), default=False, force_interaction=True)
+            if (not proceed_response) and (not is_dry_run):
+                if self.ask_yes_no(
+                    "The changes to configuration will be discarded, are you sure?",
+                    default=False,
+                    force_interaction=True,
+                ):
+                    break
+            else:
+                break
+
+        return proceed_response

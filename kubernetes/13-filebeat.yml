@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/idaholab/malcolm/filebeat-oss:25.11.0
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -56,6 +56,8 @@ spec:
               name: nginx-env
           - configMapRef:
               name: beats-common-env
+          - configMapRef:
+              name: netbox-common-env
           - configMapRef:
               name: filebeat-env
         livenessProbe:
@@ -83,7 +85,7 @@ spec:
             subPath: "nginx"
       initContainers:
       - name: filebeat-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.11.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true

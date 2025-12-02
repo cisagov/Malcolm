@@ -17,7 +17,7 @@ fi
 if [ -f "$CAPTURE_STORAGE_FORMAT_FILE" ]; then
   logger "Initializing disk(s) to store captured artifacts"
   date >>/var/log/os-disk-config.log 2>&1
-  python3 /usr/local/bin/os-disk-config.py -m malcolm -u $CAPTURE_STORAGE_FORMAT_FLAG >>/var/log/os-disk-config.log 2>&1
+  python3 /usr/local/bin/os-disk-config.py -u $CAPTURE_STORAGE_FORMAT_FLAG >>/var/log/os-disk-config.log 2>&1
   rm -f "$CAPTURE_STORAGE_FORMAT_FILE"
 fi
 
@@ -37,4 +37,4 @@ EOF
 
 sed -i "1i #!/bin/sh" /etc/rc.local
 
-chmod o+rx /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/configure-*.py
+chmod o+rx /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/system-quickstart.py

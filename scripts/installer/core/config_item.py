@@ -127,3 +127,36 @@ class ConfigItem:
     @question.setter
     def question(self, value: Union[str, Callable[[], Any]]):
         self._question = value
+
+
+class ListOfStringsConfigItem(ConfigItem):
+    """Custom ConfigItem that converts comma-separated strings to lists of strings"""
+
+    def set_value(self, value: Any) -> Tuple[bool, str]:
+        """Set and validate a new value, with automatic string-to-list conversion."""
+
+        # Convert string input to list if needed
+        if isinstance(value, str):
+            if value.strip():
+                converted_value = [s.strip() for s in value.split(",") if s.strip()]
+            else:
+                converted_value = []
+        else:
+            converted_value = value
+
+        # Now validate the converted value
+        if self.validator:
+            result = self.validator(converted_value)
+            if isinstance(result, tuple):
+                valid, error = result
+            else:
+                valid = result
+                error = "Invalid value" if not valid else ""
+
+            if not valid:
+                return False, error
+
+        # Store the converted value
+        self.is_modified = True
+        self.value = converted_value
+        return True, ""

@@ -20,8 +20,7 @@ from malcolm_utils import LoadFileIfJson, deep_get, set_logging, get_verbosity_e
 # --------------------------------------------------------------------
 
 lock_filename = os.path.join(gettempdir(), f'{os.path.basename(__file__)}.lock')
-clean_log_seconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
-clean_zip_seconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
+
 filebeat_registry_filename = os.getenv(
     'FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json"
 )
@@ -32,6 +31,16 @@ zeek_current_dir = os.path.join(zeek_dir, "current/")
 zeek_processed_dir = os.path.join(zeek_dir, "processed/")
 
 suricata_dir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/"), '')
+
+# We're only able to do this pruning because we're forwarding the logs along to Logstash
+#   so they're not needed here anymore. If we're *not* forwarding, we can't delete them
+#   based on age like that.
+if (os.getenv('MALCOLM_PROFILE') == 'hedgehog') and not os.getenv('LOGSTASH_HOST'):
+    clean_log_seconds = 0
+    clean_zip_seconds = 0
+else:
+    clean_log_seconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
+    clean_zip_seconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
 
 now_time = time.time()
 

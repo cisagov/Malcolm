@@ -16,6 +16,7 @@
         <value type="int" value="7"/>
         <value type="int" value="15"/>
         <value type="int" value="16"/>
+        <value type="int" value="30"/>
         <value type="int" value="20"/>
         <value type="int" value="24"/>
         <value type="int" value="22"/>
@@ -41,7 +42,7 @@
         <value type="int" value="13"/>
         <value type="int" value="14"/>
       </property>
-      <property name="disable-struts" type="bool" value="false"/>
+      <property name="enable-struts" type="bool" value="true"/>
     </property>
   </property>
   <property name="plugins" type="empty">
@@ -149,6 +150,12 @@
     <property name="plugin-29" type="string" value="launcher">
       <property name="items" type="array">
         <value type="string" value="16782182331.desktop"/>
+        <value type="string" value="17635619921.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-30" type="string" value="launcher">
+      <property name="items" type="array">
+        <value type="string" value="17637466371.desktop"/>
       </property>
     </property>
   </property>

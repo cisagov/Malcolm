@@ -2,7 +2,7 @@
 
 `GET` or `POST` - /mapi/dashboard-export/`<dashid>`
 
-Uses the [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/) or [Elastic Kibana](https://www.elastic.co/guide/en/kibana/current/dashboard-api-export.html) API to export the JSON document representing a dashboard (identified by `dashid`). If the query parameter `replace` is not set to `false`, this API will also perform some modifications on the dashboard as described in the [**Adding new visualizations and dashboards**](contributing-dashboards.md#DashboardsNewViz) section of the [contributor guide](contributing-guide.md#Contributing).
+Uses the [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/) or [Elastic Kibana](https://www.elastic.co/guide/en/kibana/current/dashboard-api-export.html) API to export the JSON document representing a dashboard (identified by `dashid`). If the query parameter `replace` is not set to `false`, this API will also perform some modifications on the dashboard as described in the [**Adding new visualizations and dashboards**](contributing-dashboards.md#DashboardsNewViz) section of the [contributor guide](contributing-guide.md).
 
 Parameters:
 

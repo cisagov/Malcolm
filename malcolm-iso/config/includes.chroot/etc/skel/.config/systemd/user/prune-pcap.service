@@ -1,0 +1,12 @@
+[Unit]
+AssertPathExists=%h/Malcolm/docker-compose.yml
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/prune-malcolm-artifacts.sh -m pcap -t 90 -i 60 -r
+Restart=on-failure
+PrivateTmp=false
+NoNewPrivileges=false
+
+[Install]
+WantedBy=default.target

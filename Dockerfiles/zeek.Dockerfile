@@ -34,7 +34,7 @@ USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=8.0.3-0
+ARG ZEEK_VERSION=8.0.4-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -56,7 +56,7 @@ ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 ADD --chmod=644 zeek/requirements.txt /usr/local/src/requirements.txt
 
-ENV SUPERCRONIC_VERSION "0.2.38"
+ENV SUPERCRONIC_VERSION "0.2.39"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 

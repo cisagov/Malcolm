@@ -8,7 +8,6 @@
 This module contains all configuration items related to exposing ports,
 including Logstash, OpenSearch, Filebeat, SFTP, and Syslog ports.
 """
-
 from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import OpenPortsChoices
@@ -27,7 +26,7 @@ CONFIG_ITEM_OPEN_PORTS = ConfigItem(
     label="Expose Malcolm Service Ports",
     default_value=OpenPortsChoices.NO.value,
     choices=[x.value for x in OpenPortsChoices],
-    validator=lambda x: isinstance(x, str) and x in [v.value for v in OpenPortsChoices],
+    validator=lambda x: isinstance(x, str) and (x in [v.value for v in OpenPortsChoices]),
     question="Should Malcolm accept logs and metrics from a Hedgehog sensor or other forwarder?",
     widget_type=WidgetType.SELECT,
 )

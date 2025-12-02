@@ -123,7 +123,7 @@ if [[ -n "$SERVICE" ]]; then
         elif [[ "$SERVICE" == "dashboards-helper" ]]; then
             PORT=28991
         elif [[ "$SERVICE" == "file-monitor" ]]; then
-            PORT=8440
+            PORT=8006
         elif [[ "$SERVICE" == "freq" ]]; then
             PORT=10004
         elif [[ "$SERVICE" == "keycloak" ]]; then

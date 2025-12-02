@@ -20,11 +20,13 @@ import ssl
 import sys
 import time
 from Crypto.Cipher import AES
+from contextlib import nullcontext
 from datetime import datetime, timedelta, UTC
 from dominate.tags import *
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
+from tempfile import TemporaryDirectory
 from urllib.parse import urlparse, parse_qs
 
 from malcolm_utils import (
@@ -32,13 +34,13 @@ from malcolm_utils import (
     EVP_KEY_SIZE,
     OPENSSL_ENC_MAGIC,
     PKCS5_SALT_LEN,
+    openssl_self_signed_keygen,
     pushd,
     remove_prefix,
     set_logging,
     get_verbosity_env_var_count,
     sizeof_fmt,
     str2bool,
-    temporary_filename,
 )
 
 ###################################################################################################
@@ -526,14 +528,22 @@ def serve_on_port(
     server_class=ThreadingHTTPServer,
     handler_class=HTTPHandler,
 ):
-    with pushd(path):
-        server = server_class(("", port), functools.partial(handler_class, directory=path))
-        if tlsOk := (tls and os.path.isfile(str(tls_key_file)) and os.path.isfile(str(tls_cert_file))):
-            ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
-            ctx.load_cert_chain(certfile=tls_cert_file, keyfile=tls_key_file)
-            server.socket = ctx.wrap_socket(server.socket, server_side=True)
-        print(f"serving {path} at port {port}{' over TLS' if tlsOk else ''}")
-        server.serve_forever()
+    with (
+        TemporaryDirectory() if (tls and tls_key_file is None and tls_cert_file is None) else nullcontext()
+    ) as temp_cert_dir:
+        if temp_cert_dir and openssl_self_signed_keygen(outdir=temp_cert_dir, ca_prefix=None, server_prefix="server"):
+            tls_cert_file = os.path.join(temp_cert_dir, "server.crt")
+            tls_key_file = os.path.join(temp_cert_dir, "server.key")
+        with pushd(path):
+            server = server_class(("", port), functools.partial(handler_class, directory=path))
+            if tlsOk := (tls and os.path.isfile(str(tls_key_file)) and os.path.isfile(str(tls_cert_file))):
+                ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
+                ctx.load_cert_chain(certfile=tls_cert_file, keyfile=tls_key_file)
+                server.socket = ctx.wrap_socket(server.socket, server_side=True)
+            if tls and not tlsOk:
+                raise Exception.create('Unable to use or generate TLS certificates')
+            print(f"serving {path} at port {port}{' over TLS' if tlsOk else ''}")
+            server.serve_forever()
 
 
 ###################################################################################################
@@ -548,7 +558,7 @@ def main():
     defaultTls = os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS', 'false')
     defaultLinks = os.getenv('EXTRACTED_FILE_HTTP_SERVER_LINKS', 'false')
     defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
-    defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
+    defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8006))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
     defaultAssetsDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/opt/assets')
@@ -582,7 +592,7 @@ def main():
         const=True,
         default=defaultTls,
         metavar='true|false',
-        help=f"Serve with TLS (must specify --tls-keyfile and --tls-certfile)",
+        help=f"Serve with TLS (specify --tls-keyfile and --tls-certfile, or a temporary self-signed certificate will be used)",
     )
     parser.add_argument(
         '--rbac',

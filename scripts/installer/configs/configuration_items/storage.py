@@ -32,6 +32,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
     KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
+    KEY_CONFIG_ITEM_PRUNE_PCAP,
+    KEY_CONFIG_ITEM_PRUNE_LOGS,
 )
 
 CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS = ConfigItem(
@@ -39,7 +41,7 @@ CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS = ConfigItem(
     label="Clean Up Artifacts",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Should Malcolm delete the oldest database indices and capture artifacts based on available storage?",
+    question="Should Malcolm manage storage by removing the oldest data when necessary?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -90,7 +92,7 @@ CONFIG_ITEM_SURICATA_LOG_DIR = ConfigItem(
 
 CONFIG_ITEM_ARKIME_MANAGE_PCAP = ConfigItem(
     key=KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
-    label="Delete Old PCAP",
+    label="Arkime PCAP Management",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Should Arkime delete PCAP files based on available storage? (see https://arkime.com/faq#pcap-deletion)",
@@ -203,6 +205,30 @@ CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS = ConfigItem(
     validator=lambda x: isinstance(x, int),
     question="How many segments should Arkime use to optimize?",
     widget_type=WidgetType.NUMBER,
+)
+
+# CONFIG_ITEM_PRUNE_PCAP and CONFIG_ITEM_PRUNE_LOGS *only* apply
+#   to ISO-installed environment and will not be visible otherwise.
+#   These are for system-level prunes *external* to the Malcolm
+#   containers, which may not be running to take care of the
+#   pruning in the Hedgehog run profile mode.
+
+CONFIG_ITEM_PRUNE_PCAP = ConfigItem(
+    key=KEY_CONFIG_ITEM_PRUNE_PCAP,
+    label="Prune Oldest PCAP",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Prune oldest PCAP from filesystem based on available storage?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_PRUNE_LOGS = ConfigItem(
+    key=KEY_CONFIG_ITEM_PRUNE_LOGS,
+    label="Prune Oldest Logs",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Prune oldest logs from filesystem based on available storage?",
+    widget_type=WidgetType.CHECKBOX,
 )
 
 

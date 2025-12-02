@@ -1,7 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=set-dconf-screen-lock-defaults
-Comment=Set DCONF Screen Lock Defaults
-Exec=/usr/local/bin/set-dconf-screen-lock-defaults.sh
-Terminal=false
-Type=Application

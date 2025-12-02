@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=System Quickstart
+Exec=tilix --title="System Quickstart" --maximize -e /bin/bash -l -c "/usr/local/bin/system-quickstart"
+Comment=Configure hostname, network time, and SSH access
+Terminal=false
+Type=Application
+Icon=preferences-system-network
+Categories=Network;Utility;X-XFCE;X-Xfce-Toplevel;
+StartupNotify=true
