@@ -1,462 +1,479 @@
 {
-  "version": "7.10.0",
   "objects": [
     {
-      "id": "caef3ade-d289-4d05-a511-149f3e97f238",
-      "type": "dashboard",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-04-29T15:49:16.000Z",
-      "version": "WzM0MzgsMV0=",
       "attributes": {
-        "title": "SSH",
-        "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.10.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":0,\"y\":26,\"w\":9,\"h\":18,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":9,\"y\":26,\"w\":11,\"h\":18,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":0,\"y\":44,\"w\":22,\"h\":18,\"i\":\"13\"},\"panelIndex\":\"13\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":27,\"y\":8,\"w\":21,\"h\":18,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":8,\"y\":8,\"w\":19,\"h\":18,\"i\":\"1becdc6f-a3f4-46f7-b5b0-72a67a679e0f\"},\"panelIndex\":\"1becdc6f-a3f4-46f7-b5b0-72a67a679e0f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":20,\"y\":26,\"w\":14,\"h\":18,\"i\":\"68d1576b-a947-46f9-a99d-b951a09a95c7\"},\"panelIndex\":\"68d1576b-a947-46f9-a99d-b951a09a95c7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":35,\"y\":44,\"w\":13,\"h\":18,\"i\":\"26424c79-7bf6-45f0-bf5c-ca687818490b\"},\"panelIndex\":\"26424c79-7bf6-45f0-bf5c-ca687818490b\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_9\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":22,\"y\":44,\"w\":13,\"h\":18,\"i\":\"db42e16c-0961-4dda-a58a-dd44b5197bcf\"},\"panelIndex\":\"db42e16c-0961-4dda-a58a-dd44b5197bcf\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_10\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":34,\"y\":26,\"w\":14,\"h\":18,\"i\":\"4a419bd4-4f84-446b-b269-1f6f1c2c27fe\"},\"panelIndex\":\"4a419bd4-4f84-446b-b269-1f6f1c2c27fe\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":36,\"i\":\"4afc3dad-4ba2-4e21-9f31-87453145b668\"},\"panelIndex\":\"4afc3dad-4ba2-4e21-9f31-87453145b668\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"}]",
-        "optionsJSON": "{\"useMargins\":true}",
-        "version": 1,
-        "timeRestore": false,
+        "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\"}}},\"filter\":[]}"
-        }
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\",\"time_zone\":\"Africa/Abidjan\"}}},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":26,\"w\":9,\"h\":18,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":9,\"y\":26,\"w\":11,\"h\":18,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":44,\"w\":22,\"h\":18,\"i\":\"13\"},\"panelIndex\":\"13\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":27,\"y\":8,\"w\":21,\"h\":18,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":8,\"y\":8,\"w\":19,\"h\":18,\"i\":\"1becdc6f-a3f4-46f7-b5b0-72a67a679e0f\"},\"panelIndex\":\"1becdc6f-a3f4-46f7-b5b0-72a67a679e0f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":20,\"y\":26,\"w\":14,\"h\":18,\"i\":\"68d1576b-a947-46f9-a99d-b951a09a95c7\"},\"panelIndex\":\"68d1576b-a947-46f9-a99d-b951a09a95c7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":34,\"y\":26,\"w\":14,\"h\":18,\"i\":\"4a419bd4-4f84-446b-b269-1f6f1c2c27fe\"},\"panelIndex\":\"4a419bd4-4f84-446b-b269-1f6f1c2c27fe\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":22,\"y\":44,\"w\":13,\"h\":18,\"i\":\"db42e16c-0961-4dda-a58a-dd44b5197bcf\"},\"panelIndex\":\"db42e16c-0961-4dda-a58a-dd44b5197bcf\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_10\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":35,\"y\":44,\"w\":13,\"h\":18,\"i\":\"26424c79-7bf6-45f0-bf5c-ca687818490b\"},\"panelIndex\":\"26424c79-7bf6-45f0-bf5c-ca687818490b\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_11\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":28,\"i\":\"9c4291e0-76e6-4c61-be2b-58833775b182\"},\"panelIndex\":\"9c4291e0-76e6-4c61-be2b-58833775b182\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":90,\"w\":48,\"h\":36,\"i\":\"4afc3dad-4ba2-4e21-9f31-87453145b668\"},\"panelIndex\":\"4afc3dad-4ba2-4e21-9f31-87453145b668\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"}]",
+        "timeRestore": false,
+        "title": "SSH",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "panel_0",
-          "type": "visualization",
-          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3"
-        },
-        {
-          "name": "panel_1",
-          "type": "visualization",
-          "id": "14e6c4af-72c5-4ce3-94fc-0cb1d501af96"
-        },
-        {
-          "name": "panel_2",
-          "type": "visualization",
-          "id": "17a08d5e-7ee7-43ed-b7f4-eaed153bdb7d"
-        },
-        {
-          "name": "panel_3",
-          "type": "visualization",
-          "id": "71ef0954-81c5-4953-b455-f996b21e8f08"
-        },
-        {
-          "name": "panel_4",
-          "type": "visualization",
-          "id": "4d7cb8d4-9f67-4469-b3f5-74d6fb942d35"
-        },
-        {
-          "name": "panel_5",
-          "type": "visualization",
-          "id": "AWDHEYk4xQT5EBNmq4k5"
-        },
-        {
-          "name": "panel_6",
-          "type": "visualization",
-          "id": "35ca43f9-14cc-4266-8a55-25f859530ba2"
-        },
-        {
-          "name": "panel_7",
-          "type": "visualization",
-          "id": "eba2e900-4dd0-11ea-8336-d3388483188b"
-        },
-        {
-          "name": "panel_8",
-          "type": "visualization",
-          "id": "baa06220-4dd4-11ea-8336-d3388483188b"
-        },
-        {
-          "name": "panel_9",
-          "type": "visualization",
-          "id": "562d3ec0-4dd5-11ea-8336-d3388483188b"
-        },
-        {
-          "name": "panel_10",
-          "type": "visualization",
-          "id": "3760b940-4dd5-11ea-8336-d3388483188b"
-        },
-        {
-          "name": "panel_11",
-          "type": "visualization",
-          "id": "90422180-4dd4-11ea-8336-d3388483188b"
-        },
-        {
-          "name": "panel_12",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "caef3ade-d289-4d05-a511-149f3e97f238",
       "migrationVersion": {
         "dashboard": "7.9.3"
-      }
-    },
-    {
-      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:09.616Z",
-      "version": "Wzg3MiwxXQ==",
+      "references": [
+        {
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "14e6c4af-72c5-4ce3-94fc-0cb1d501af96",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "17a08d5e-7ee7-43ed-b7f4-eaed153bdb7d",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "71ef0954-81c5-4953-b455-f996b21e8f08",
+          "name": "panel_3",
+          "type": "visualization"
+        },
+        {
+          "id": "4d7cb8d4-9f67-4469-b3f5-74d6fb942d35",
+          "name": "panel_4",
+          "type": "visualization"
+        },
+        {
+          "id": "AWDHEYk4xQT5EBNmq4k5",
+          "name": "panel_5",
+          "type": "visualization"
+        },
+        {
+          "id": "35ca43f9-14cc-4266-8a55-25f859530ba2",
+          "name": "panel_6",
+          "type": "visualization"
+        },
+        {
+          "id": "eba2e900-4dd0-11ea-8336-d3388483188b",
+          "name": "panel_7",
+          "type": "visualization"
+        },
+        {
+          "id": "baa06220-4dd4-11ea-8336-d3388483188b",
+          "name": "panel_8",
+          "type": "visualization"
+        },
+        {
+          "id": "90422180-4dd4-11ea-8336-d3388483188b",
+          "name": "panel_9",
+          "type": "visualization"
+        },
+        {
+          "id": "3760b940-4dd5-11ea-8336-d3388483188b",
+          "name": "panel_10",
+          "type": "visualization"
+        },
+        {
+          "id": "562d3ec0-4dd5-11ea-8336-d3388483188b",
+          "name": "panel_11",
+          "type": "visualization"
+        },
+        {
+          "id": "ae24a700-cfa0-11f0-b77d-79037ad18c51",
+          "name": "panel_12",
+          "type": "visualization"
+        },
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "panel_13",
+          "type": "search"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2025-12-02T17:53:06.603Z",
+      "version": "WzEyOTcsMV0="
+    },
+    {
       "attributes": {
-        "title": "Navigation",
-        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
-        "uiStateJSON": "{}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
-        }
+        },
+        "title": "Navigation",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}"
       },
-      "references": [],
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "14e6c4af-72c5-4ce3-94fc-0cb1d501af96",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc4OSwxXQ==",
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:23:42.854Z",
+      "version": "WzEyNjIsMV0="
+    },
+    {
       "attributes": {
-        "visState": "{\"title\":\"SSH - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}}],\"listeners\":{}}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "SSH - Log Count Over Time",
         "uiStateJSON": "{}",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"SSH - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "14e6c4af-72c5-4ce3-94fc-0cb1d501af96",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "17a08d5e-7ee7-43ed-b7f4-eaed153bdb7d",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5MCwxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc4NywxXQ=="
+    },
+    {
       "attributes": {
-        "visState": "{\"title\":\"SSH - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "SSH - Source IP Address",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"SSH - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "17a08d5e-7ee7-43ed-b7f4-eaed153bdb7d",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "71ef0954-81c5-4953-b455-f996b21e8f08",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-11T18:27:49.060Z",
-      "version": "WzM0MDEsMV0=",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc4OCwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "SSH - Destination IP Address",
-        "visState": "{\"title\":\"SSH - Destination IP Address\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP Address\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "SSH - Destination IP Address",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"SSH - Destination IP Address\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP Address\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "71ef0954-81c5-4953-b455-f996b21e8f08",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "4d7cb8d4-9f67-4469-b3f5-74d6fb942d35",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5MywxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc4OSwxXQ=="
+    },
+    {
       "attributes": {
-        "visState": "{\"title\":\"SSH - Client/Server\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.client\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Client\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.server\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Server\"}}],\"listeners\":{}}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "SSH - Client/Server",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"SSH - Client/Server\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.client\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Client\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.server\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Server\"}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "4d7cb8d4-9f67-4469-b3f5-74d6fb942d35",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "AWDHEYk4xQT5EBNmq4k5",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5NCwxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5MCwxXQ=="
+    },
+    {
       "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "SSH - Log Count",
-        "visState": "{\"title\":\"SSH - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
         "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
-        "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"SSH - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "AWDHEYk4xQT5EBNmq4k5",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "35ca43f9-14cc-4266-8a55-25f859530ba2",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5NSwxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5MSwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "SSH -Server",
-        "visState": "{\"title\":\"SSH -Server\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.server\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Server\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "SSH -Server",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"SSH -Server\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.server\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Server\"}}]}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "35ca43f9-14cc-4266-8a55-25f859530ba2",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "eba2e900-4dd0-11ea-8336-d3388483188b",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-11T18:25:38.325Z",
-      "version": "WzMzNzYsMV0=",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5MiwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "SSH - Version",
-        "visState": "{\"title\":\"SSH - Version\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ssh.version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":8,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"SSH Version\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"SSH Version\",\"aggType\":\"terms\"}]}}}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "SSH - Version",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "version": 1,
+        "visState": "{\"title\":\"SSH - Version\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ssh.version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":8,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"SSH Version\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"SSH Version\",\"aggType\":\"terms\"}]}}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "eba2e900-4dd0-11ea-8336-d3388483188b",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "baa06220-4dd4-11ea-8336-d3388483188b",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5NywxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5MywxXQ=="
+    },
+    {
       "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "SSH - Client Algorithms",
-        "visState": "{\"title\":\"SSH - Client Algorithms\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Algorithms Offered by Server\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hasshAlgorithms\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Algorithms Offered by Client\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
-        "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"SSH - Client Algorithms\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Algorithms Offered by Server\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hasshAlgorithms\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Algorithms Offered by Client\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "baa06220-4dd4-11ea-8336-d3388483188b",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "562d3ec0-4dd5-11ea-8336-d3388483188b",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "WzgwMCwxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5NCwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "SSH - HASSH Server Hash",
-        "visState": "{\"title\":\"SSH - HASSH Server Hash\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"HASSH Client Hash\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hasshServer\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"HASSH Server Hash\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{}"
         },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "3760b940-4dd5-11ea-8336-d3388483188b",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5OSwxXQ==",
-      "attributes": {
-        "title": "SSH - HASSH Client Hash",
-        "visState": "{\"title\":\"SSH - HASSH Client Hash\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"HASSH Client Hash\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hassh\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"HASSH Client Hash\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "90422180-4dd4-11ea-8336-d3388483188b",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "Wzc5OCwxXQ==",
-      "attributes": {
+        "savedSearchRefName": "search_0",
         "title": "SSH - Server Algorithms",
-        "visState": "{\"title\":\"SSH - Server Algorithms\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Algorithms Offered by Client\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hasshServerAlgorithms\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Algorithms Offered by Server\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
-        "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"SSH - Server Algorithms\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Algorithms Offered by Client\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hasshServerAlgorithms\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Algorithms Offered by Server\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "88a40703-9791-4f96-bc06-992f96c9b350"
-        }
-      ],
+      "id": "90422180-4dd4-11ea-8336-d3388483188b",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "88a40703-9791-4f96-bc06-992f96c9b350",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:00.506Z",
-      "version": "WzgwMSwxXQ==",
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5NywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "SSH - Logs",
         "description": "",
-        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "SSH - HASSH Client Hash",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"SSH - HASSH Client Hash\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"HASSH Client Hash\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hassh\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"HASSH Client Hash\"}}]}"
+      },
+      "id": "3760b940-4dd5-11ea-8336-d3388483188b",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5NiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "SSH - HASSH Server Hash",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"SSH - HASSH Server Hash\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"HASSH Client Hash\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.ssh.hasshServer\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"HASSH Server Hash\"}}]}"
+      },
+      "id": "562d3ec0-4dd5-11ea-8336-d3388483188b",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "88a40703-9791-4f96-bc06-992f96c9b350",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5NSwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "title": "SSH - Connections Tree",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"SSH - Connections Tree\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  /**\\n    Version 1.0\\n    Authors:\\n      Mackenzie Zappe (mackenzie.zappe@inl.gov)\\n      Shelby Hiens\\n      Nicholas Donovan\\n    References:\\n      https://vega.github.io/vega/docs/\\n      https://vega.github.io/vega/examples/tree-layout/\\n    Commit:\\n      Corresponds to abd046f in SMILE-Analytics/trees-ssh/release\\n  **/\\n  ##  Set up Vega specification definitions\\n  ##  Pay attention to Vega additions after V5\\n  // ## todo stop on broadcasts\\n  \\\"$schema\\\": \\\"https://vega.github.io/schema/vega/v5.json\\\",\\n  // Make room for binds under the graph\\n  \\\"autosize\\\": {\\n    \\\"type\\\": \\\"fit-x\\\",\\n    \\\"contains\\\": \\\"padding\\\"\\n  },\\n  \\\"padding\\\": {\\n    \\\"left\\\": {\\\"expr\\\": \\\"width/100\\\"},\\n    \\\"top\\\": {\\\"expr\\\": \\\"height/100\\\"},\\n    \\\"right\\\": {\\\"expr\\\": \\\"width/100\\\"},\\n    \\\"bottom\\\": -150\\n  },\\n  ##  --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 0: Config --------------------------------------------------------------------------------------------------------\\n  ##  Define Specification constants like multiple legend positioning\\n  ##  - arguments set in Config WILL be overwritten if redefined later in specification\\n  \\\"config\\\": {\\n    \\\"signals\\\": [\\n      {\\n        \\\"name\\\": \\\"width\\\",\\n        \\\"init\\\": \\\"containerSize()[0]\\\",\\n        \\\"on\\\": [ {\\\"events\\\": \\\"window:resize\\\", \\\"update\\\": \\\"windowSize()[0]*0.6\\\"} ]\\n      },\\n      {\\n        \\\"name\\\": \\\"height\\\",\\n        \\\"init\\\": \\\"containerSize()[1]\\\",\\n        \\\"on\\\": [ {\\\"events\\\": \\\"window:resize\\\", \\\"update\\\": \\\"windowSize()[1]*0.6\\\"} ]\\n      },\\n      // Adjust font scale based on display size\\n      {\\n        \\\"name\\\": \\\"fontScale\\\",\\n        \\\"update\\\": \\\"clamp(min(width / 1920, height / 1080), 0.3, 1.3)\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"paddingScale\\\",\\n        \\\"update\\\": \\\"clamp(min(width / 1920, height / 1080), 0.5, 2)\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"labelFontSize\\\",\\n        \\\"init\\\": \\\"16 * fontScale\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"titleFontSize\\\",\\n        \\\"init\\\": \\\"20 * fontScale\\\"\\n      },\\n      // Warn if data truncated\\n      {\\n        \\\"name\\\": \\\"maxDataSize\\\",\\n        \\\"value\\\": 10000\\n      },\\n      {\\n        \\\"name\\\": \\\"dataMaxed\\\",\\n        \\\"update\\\": \\\"length(data('table')) >= maxDataSize\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"maxedWarning\\\", // Warning to display to user if number of documents being processed exceeds 10k per Vega limitation\\n        \\\"update\\\": \\\"dataMaxed ? warn('Maximum data response reached. Data may be truncated. Try adjusting timeframe.') : null\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"labelOffset\\\",\\n        \\\"value\\\": 15\\n      }\\n    ],\\n    \\\"axis\\\": {\\n      \\\"titleFontSize\\\": {\\n        \\\"signal\\\": \\\"titleFontSize\\\"\\n      },\\n      \\\"titlePadding\\\": {\\n        \\\"signal\\\": \\\"25 * paddingScale\\\"\\n      },\\n      \\\"labelFontSize\\\": {\\n        \\\"signal\\\": \\\"labelFontSize * .9\\\"\\n      },\\n      \\\"tickWidth\\\": 3\\n    },\\n    \\\"title\\\": {\\n      \\\"fontSize\\\": {\\n        \\\"signal\\\": \\\"titleFontSize * 1.2\\\"\\n      }\\n    },\\n    \\\"legend\\\": {\\n      \\\"titleFontSize\\\": {\\n        \\\"signal\\\": \\\"titleFontSize * 0.9\\\"\\n      },\\n      \\\"labelFontSize\\\": {\\n        \\\"signal\\\": \\\"labelFontSize\\\"\\n      },\\n      \\\"padding\\\": {\\n        \\\"signal\\\": \\\"10 * paddingScale\\\"\\n      }\\n    },\\n    \\\"text\\\": {\\n      \\\"fontSize\\\": {\\n        \\\"signal\\\": \\\"labelFontSize * 0.9\\\"\\n      },\\n      \\\"baseline\\\": \\\"middle\\\"\\n    },\\n    \\\"rule\\\": {\\n      \\\"strokeWidth\\\": 0.2,\\n      \\\"stroke\\\": \\\"firebrick\\\"\\n    }\\n  },\\n  ##  ---------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 1: Signals --------------------------------------------------------------------------------------------------------\\n  ##  - Define dynamic variables (Signals) that can be updated at any point during the specification\\n  \\\"signals\\\": [\\n    //    logs into console run `VEGA_DEBUG.view.logLevel(3)` in console first\\n    //    {\\n    //      \\\"name\\\": \\\"logger\\\",\\n    //      \\\"on\\\": [\\n    //        {\\n    //          \\\"events\\\": {\\\"signal\\\":  \\\"clear\\\"},\\n    //          \\\"update\\\": \\\"info(clear)\\\"\\n    //        }\\n    //      ],\\n    //    },\\n\\n    // Dynamic resizing signals based off window size\\n    {\\n      \\\"name\\\": \\\"width\\\",\\n      //\\\"value\\\": \\\"width\\\",\\n      \\\"on\\\": [ {\\\"events\\\": \\\"window:resize\\\", \\\"update\\\": \\\"windowSize()[0]*0.6\\\"} ]\\n    },\\n    {\\n      \\\"name\\\": \\\"height\\\",\\n      //\\\"value\\\": \\\"height\\\",\\n      \\\"on\\\": [ {\\\"events\\\": \\\"window:resize\\\", \\\"update\\\": \\\"windowSize()[1]*0.6\\\"} ]\\n    },\\n    // Zoom-related signals\\n    // Sets the custom domain range (x-axis) that is informed by autosize\\n    {\\n      \\\"name\\\": \\\"xrange\\\",\\n      \\\"update\\\": \\\"[0, width]\\\" // width is automatically defined based on autosize at top of scheme\\n    },\\n    {\\n    // Sets the custom range range (y-axis) that is informed by autosize\\n      \\\"name\\\": \\\"yrange\\\",\\n      \\\"update\\\": \\\"[height, 0]\\\" // height is automatically defined based on autosize at top of scheme\\n    },\\n    {\\n    // determines extent of domain -  Updated by 'xdom' signal\\n      \\\"name\\\": \\\"xext\\\",\\n      \\\"update\\\": \\\"[0, width]\\\"\\n    },\\n    {\\n    // determines extent of range -  Updated by 'ydom' signal\\n      \\\"name\\\": \\\"yext\\\",\\n      \\\"update\\\": \\\"[height, 0]\\\"\\n    },\\n    // Signal used to capture whether the user is pressing down and dragging at a certain spot in the visual\\n    {\\n      \\\"name\\\": \\\"down\\\",\\n      \\\"value\\\": null,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"mouseup,touchend\\\",\\n          \\\"update\\\": \\\"null\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"mousedown, touchstart\\\",\\n          \\\"update\\\": \\\"xy()\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"symbol:mousedown, symbol:touchstart\\\",\\n          \\\"update\\\": \\\"null\\\"\\n        }\\n      ]\\n    },\\n    // determines the x-position of the current cursor position as moved by the user\\n    {\\n      \\\"name\\\": \\\"xcur\\\",\\n      \\\"value\\\": null,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"mousedown, touchstart, touchend\\\",\\n          \\\"update\\\": \\\"xdom\\\"\\n        }\\n      ]\\n    },\\n    // determines the y-position of the current cursor position as moved by the user\\n    {\\n      \\\"name\\\": \\\"ycur\\\",\\n      \\\"value\\\": null,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"mousedown, touchstart, touchend\\\",\\n          \\\"update\\\": \\\"ydom\\\"\\n        }\\n      ]\\n    },\\n    // calculates position of where the mouse wants the center of the visual to be\\n    {\\n      \\\"name\\\": \\\"delta\\\",\\n      \\\"value\\\": [0, 0],\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": [\\n            {\\n              \\\"source\\\": \\\"window\\\",\\n              \\\"type\\\": \\\"mousemove\\\",\\n              \\\"consume\\\": true,\\n              \\\"between\\\": [\\n                {\\n                  \\\"type\\\": \\\"mousedown\\\"\\n                },\\n                {\\n                  \\\"source\\\": \\\"window\\\",\\n                  \\\"type\\\": \\\"mouseup\\\"\\n                }\\n              ]\\n            },\\n            {\\n              \\\"type\\\": \\\"touchmove\\\",\\n              \\\"consume\\\": true,\\n              \\\"filter\\\": \\\"event.touches.length === 1\\\"\\n            }\\n          ],\\n          \\\"update\\\": \\\"down ? [down[0]-x(), y()-down[1]] : [0,0]\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"anchor\\\",\\n      \\\"value\\\": [0, 0],\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"wheel\\\",\\n          \\\"update\\\": \\\"[invert('xscale', x()), invert('yscale', y())]\\\"\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"type\\\": \\\"touchstart\\\",\\n            \\\"filter\\\": \\\"event.touches.length===2\\\"\\n          },\\n          \\\"update\\\": \\\"[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]\\\"\\n        }\\n      ]\\n    },\\n    // if the user moves the mouse wheel/zooms on trackpad, do calculations to determine visual positions\\n    {\\n      \\\"name\\\": \\\"zoom\\\",\\n      \\\"value\\\": 1,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"wheel!\\\",\\n          \\\"force\\\": true,\\n          \\\"update\\\": \\\"pow(1.001, event.deltaY * pow(16, event.deltaMode))\\\"\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"dist2\\\"\\n          },\\n          \\\"force\\\": true,\\n          \\\"update\\\": \\\"dist1 / dist2\\\"\\n        },\\n        {\\n          \\\"events\\\": [\\n            {\\n              \\\"source\\\": \\\"view\\\",\\n              \\\"type\\\": \\\"dblclick\\\"\\n            }\\n          ],\\n          \\\"update\\\": \\\"1\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"dist1\\\",\\n      \\\"value\\\": 0,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": {\\n            \\\"type\\\": \\\"touchstart\\\",\\n            \\\"filter\\\": \\\"event.touches.length===2\\\"\\n          },\\n          \\\"update\\\": \\\"pinchDistance(event)\\\"\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"dist2\\\"\\n          },\\n          \\\"update\\\": \\\"dist2\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"dist2\\\",\\n      \\\"value\\\": 0,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": {\\n            \\\"type\\\": \\\"touchmove\\\",\\n            \\\"consume\\\": true,\\n            \\\"filter\\\": \\\"event.touches.length===2\\\"\\n          },\\n          \\\"update\\\": \\\"pinchDistance(event)\\\"\\n        }\\n      ]\\n    },\\n    //recalculate xext based on user mouse behavior\\n    {\\n      \\\"name\\\": \\\"xdom\\\",\\n      \\\"update\\\": \\\"xext\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"delta\\\"\\n          },\\n          \\\"update\\\": \\\"[xcur[0] + span(xcur) * delta[0] / width, xcur[1] + span(xcur) * delta[0] / width]\\\"\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"zoom\\\"\\n          },\\n          \\\"update\\\": \\\"[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]\\\"\\n        },\\n        {\\n          \\\"events\\\": [\\n            {\\n              \\\"source\\\": \\\"view\\\",\\n              \\\"type\\\": \\\"dblclick\\\"\\n            }\\n          ],\\n          \\\"update\\\": \\\"xrange\\\"\\n        }\\n      ]\\n    },\\n    //recalculate yext based on user mouse behavior\\n    {\\n      \\\"name\\\": \\\"ydom\\\",\\n      \\\"update\\\": \\\"yext\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"delta\\\"\\n          },\\n          \\\"update\\\": \\\"[ycur[0] + span(ycur) * delta[1] / height, ycur[1] + span(ycur) * delta[1] / height]\\\"\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"zoom\\\"\\n          },\\n          \\\"update\\\": \\\"[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]\\\"\\n        },\\n        {\\n          \\\"events\\\": [\\n            {\\n              \\\"source\\\": \\\"view\\\",\\n              \\\"type\\\": \\\"dblclick\\\"\\n            }\\n          ],\\n          \\\"update\\\": \\\"yrange\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"cx\\\",\\n      \\\"update\\\": \\\"width / 2\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"[symbol:mousedown, window:mouseup] > window:mousemove\\\",\\n          \\\"update\\\": \\\"cx==width/2?cx+0.001:width/2\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"cy\\\",\\n      \\\"update\\\": \\\"height / 2\\\"\\n    },\\n    // Takes User Input to define the initial root\\n    {\\n      \\\"name\\\": \\\"userInputRoot\\\",\\n      \\\"init\\\": \\\"''\\\",\\n      \\\"bind\\\": {\\n        \\\"input\\\": \\\"search\\\",\\n        \\\"placeholder\\\": \\\"  x.x.x.x \\\", // place holder to show syntax to user - spaces used to center placeholder in bind box\\n        \\\"name\\\": \\\"Root IP\\\",\\n        \\\"debounce\\\": 1200\\n      }\\n    },\\n    // Finds the index of the root src IP\\n    {\\n      \\\"name\\\": \\\"rootIndex\\\",\\n      \\\"update\\\": \\\"indexof(pluck(data('table'), 'src'), userInputRoot) \\\"\\n    },\\n    // Pulls the src information based on the rootIndex and stores it as intitialRoot\\n    {\\n      \\\"name\\\": \\\"initialRoot\\\",\\n      \\\"update\\\": \\\"pluck(data('table'), 'src')[rootIndex]\\\",\\n    },\\n    // pulls enrichment data for the intialRoot based on rootIndex\\n    {\\n      \\\"name\\\": \\\"initialRootData\\\",\\n      \\\"update\\\": \\\"pluck(data('table'), 'aggregated_objs')[rootIndex]\\\",\\n    },\\n    // checks if the searched IP exists in table or if the search bar is empty to determine whether to show the error\\n    {\\n      \\\"name\\\": \\\"nonexistentIPWarning\\\",\\n      \\\"update\\\": \\\"(rootIndex !== -1) || (userInputRoot === '') ? true : false\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"initialConnection2\\\",\\n      \\\"update\\\": \\\"null + '+' + userInputRoot\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"treeDepth\\\",\\n      \\\"update\\\": \\\"data('completeTree') && data('completeTree').root ? data('completeTree').root.height : -1\\\"\\n    },\\n    // Allow the depth of the tree to be chosen\\n    {\\n      \\\"name\\\": \\\"n\\\",\\n      \\\"init\\\": 3,\\n      \\\"bind\\\": {\\n        \\\"input\\\": \\\"range\\\",\\n        \\\"min\\\": 1,\\n        \\\"max\\\": 15,\\n        \\\"step\\\": 1,\\n        \\\"name\\\": \\\"Tree Height\\\",\\n        \\\"debounce\\\": 300\\n      }\\n    },\\n    // time filter toggle\\n    {\\n      \\\"name\\\": \\\"timeFilter\\\",\\n      \\\"init\\\": \\\"'Off'\\\",\\n      \\\"bind\\\": {\\n        \\\"input\\\": \\\"radio\\\",\\n        \\\"options\\\": [\\\"On\\\", \\\"Off\\\"],\\n        \\\"name\\\": \\\"Time Filter\\\",\\n        \\\"debounce\\\": 300\\n      }\\n    },\\n    {\\n      \\\"name\\\": \\\"On\\\",\\n      \\\"init\\\": \\\"\\\",\\n      \\\"debounce\\\": 300\\n    },\\n    {\\n      \\\"name\\\": \\\"Off\\\",\\n      \\\"update\\\": \\\"\\\",\\n      \\\"debounce\\\": 300\\n    },\\n    // change scale for nodeColor\\n    {\\n      \\\"name\\\": \\\"nodeColor\\\",\\n      \\\"init\\\": \\\"'set1'\\\",\\n      \\\"bind\\\": {\\n        \\\"input\\\": \\\"select\\\",\\n        \\\"options\\\": [\\\"observable10\\\", \\\"dark2\\\", \\\"paired\\\", \\\"set1\\\"],\\n        \\\"name\\\": \\\"Node Color\\\",\\n        \\\"debounce\\\": 1200\\n      }\\n    },\\n    // Save n history as [previous, current]\\n    {\\n      \\\"name\\\": \\\"nHist\\\",\\n      \\\"value\\\": [\\n        3\\n      ],\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"n\\\"\\n          },\\n          \\\"update\\\": \\\"slice(split(join(nHist)+','+n, ','), -2)\\\"\\n        }\\n      ]\\n    },\\n    // Save previous n\\n    {\\n      \\\"name\\\": \\\"nPrev\\\",\\n      \\\"update\\\": \\\"toNumber(nHist.length > 1 ? nHist[nHist.length-2] : nHist[0])\\\"\\n    },\\n    // When n shrinks we need to clear the graph and rebuild the tree\\n    {\\n      \\\"name\\\": \\\"clear\\\",\\n      \\\"init\\\": \\\"false\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"n\\\"\\n          },\\n          \\\"update\\\": \\\"n <= nPrev\\\",\\n          \\\"force\\\": true\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"timeFilter\\\"\\n          },\\n          \\\"update\\\": \\\"timeFilter\\\",\\n          \\\"force\\\": true\\n        },\\n        {\\n          \\\"events\\\": {\\n            \\\"signal\\\": \\\"userInputRoot\\\"\\n          },\\n          \\\"update\\\": \\\"nonexistentIPWarning\\\",\\n          \\\"force\\\": true\\n        },\\n      ]\\n    },\\n    // A counter that triggers the BF iteration\\n    {\\n      \\\"name\\\": \\\"step\\\",\\n      \\\"value\\\": 0,\\n      \\\"on\\\": [\\n        {\\n          // check the `update` condition every 50 ms\\n          \\\"events\\\": {\\n            \\\"type\\\": \\\"timer\\\",\\n            \\\"throttle\\\": 50\\n          },\\n          \\\"update\\\": \\\"data('next') && length(data('next')) ? step + 1 : step\\\"\\n        }\\n      ]\\n    },\\n    // Signals for collapsing a clicked node\\n    {\\n      \\\"name\\\": \\\"clicked\\\",\\n      \\\"value\\\": null,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"@node:click\\\",\\n          \\\"update\\\": \\\"{'identifier': datum.identifier}\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"@nodeLabel:click\\\",\\n          \\\"update\\\": \\\"{'identifier': datum.identifier}\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"clearCollapsed\\\",\\n      \\\"value\\\": false,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"dblclick[!event.item]\\\",\\n          \\\"update\\\": \\\"true\\\",\\n          \\\"force\\\": true\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"count_num_connections\\\",\\n      //\\\"value\\\": 0,\\n      //\\\"init\\\": \\\"data(datum.proto)\\\"\\n    },\\n    //Return the index of the device_array where the ip matches the current node's dst field\\n    {\\n      \\\"name\\\": \\\"nodeEnrich\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"indexof(pluck(datum.device_array, 'ip'), split(datum.identifier,'+')[1])\\\",\\n          \\\"force\\\": \\\"true\\\",\\n        },\\n        {\\n          \\\"events\\\": \\\"@node:mouseout\\\",\\n          \\\"update\\\": \\\"{}\\\",\\n          \\\"debounce\\\": 1000,\\n        },\\n      ]\\n    },\\n    // Get the data at nodeEnrich index from the device_array\\n    {\\n      \\\"name\\\": \\\"device_data\\\",\\n      \\\"value\\\": \\\"{'ip': null}\\\", //declare initial as null to avoid startup error\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"datum.device_array[nodeEnrich]\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"@node:mouseout\\\",\\n          \\\"update\\\": \\\"{}\\\",\\n          //\\\"debounce\\\": 1000,\\n        },\\n      ]\\n    },\\n    // Determine if netbox enrichment exists for a node and then pull the role value as a string\\n    {\\n      \\\"name\\\": \\\"netbox_role\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"device_data.device ? toString(pluck(device_data.device, 'role')) : null\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n      ]\\n    },\\n    // Determine if netbox enrichment exists for a node and then pull the name value as a string\\n    {\\n      \\\"name\\\": \\\"netbox_name\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"device_data.device ? toString(pluck(device_data.device, 'name')) : null\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n      ]\\n    },\\n    // {\\n    //   \\\"name\\\": \\\"device_host_name\\\",\\n    //   \\\"on\\\":[\\n    //     {\\n    //       \\\"events\\\": \\\"@node:mouseover\\\",\\n    //       \\\"update\\\": \\\"datum.device_array[2].host_name ? pluck(datum.device_array[2], 'host_name') : null\\\",\\n    //       \\\"force\\\": \\\"true\\\"\\n    //     },\\n    //   ]\\n    // },\\n    {\\n      \\\"name\\\": \\\"device_mac\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"device_data ? pluck(device_data, 'mac') : null \\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"device_oui\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"device_data ? pluck(device_data, 'oui') : null\\\",\\n          \\\"force\\\": true,\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"device_as\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"device_data ? pluck(device_data, 'as') : null\\\",\\n          \\\"force\\\": true,\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"device_ssh_version\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"datum.device_array[2].ssh_version ? datum.device_array[2].ssh_version : null\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n\\n      ]\\n    },\\n    // Format the node hover data so tooltip is populated\\n    {\\n      \\\"name\\\": \\\"device_info\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\": \\\"@node:mouseover\\\",\\n          \\\"update\\\": \\\"{'IP': device_data.ip, 'MAC': device_mac, 'OUI': device_oui, 'As': device_as, 'SSH Version': device_ssh_version, 'Netbox Name': netbox_name, 'Netbox Role': netbox_role}\\\",\\n          \\\"force\\\": \\\"true\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"@node:mouseout\\\",\\n          \\\"update\\\": \\\"{}\\\",\\n          //\\\"debounce\\\": 1000,\\n        },\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"color\\\",\\n      \\\"on\\\":[\\n        {\\n          \\\"events\\\":\\\"@node:mouseover\\\",\\n          \\\"update\\\":\\\"rgb(rgb(scale('color', datum.depth)).r * 0.7, rgb(scale('color', datum.depth)).g * 0.7, rgb(scale('color', datum.depth)).b * 0.7)\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"tooltip2\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"pluck(datum.target.enrichment, 'conn_state')\\\" },\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"tooltip3\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"pluck(datum.target.enrichment, 'protocolArr')\\\" },\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"tooltip4\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"pluck(datum.target.enrichment, 'direction')\\\" },\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"byte_data\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"pluck(datum.target.enrichment, 'bytesArr')\\\" },\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"enrichmentSrc\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"pluck(datum.target.enrichment, 'src')\\\"},\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"enrichmentDst\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"pluck(datum.target.enrichment, 'dst')\\\"},\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"bytes_extent\\\",\\n      \\\"update\\\": \\\"{'min': pluck(data('bytesExtent'), 'byteMin')[0], 'max': pluck(data('bytesExtent'), 'byteMax')[0]}\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"time_extent\\\",\\n      \\\"update\\\": \\\"{'min': pluck(data('timeExtent'), 'timeMin'), 'max': pluck(data('timeExtent'), 'timeMax')}\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"connection_time\\\",\\n      \\\"value\\\": {},\\n      \\\"on\\\": [\\n        {\\\"events\\\": \\\"path:mouseover\\\", \\\"update\\\": \\\"datum.target.date_obj\\\"},\\n        {\\\"events\\\": \\\"path:mouseout\\\", \\\"update\\\": \\\"{}\\\"}\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"legend_height\\\", \\\"value\\\": 28\\n    },\\n  ],\\n  ## --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 2: DATA --------------------------------------------------------------------------------------------------------\\n  ##  Define datasets and data normalization to be worked with in schema\\n  \\\"data\\\": [\\n    {\\n      // 'Raw' data that is being pulled using opensearch dsl and aggregations capability\\n      // https://docs.opensearch.org/latest/query-dsl/\\n      // https://docs.opensearch.org/latest/aggregations/bucket/index/\\n\\n\\n      \\\"name\\\": \\\"table\\\",\\n      \\\"url\\\": {\\n        \\\"index\\\": \\\"MALCOLM_NETWORK_INDEX_PATTERN_REPLACER\\\",\\n        \\\"body\\\": {\\n          \\\"query\\\": {\\n            \\\"bool\\\": {\\n              \\\"must\\\": [\\n                {\\n                  \\\"match\\\":{\\n                    \\\"event.dataset\\\":\\\"ssh\\\",\\n                  }\\n                }\\n                \\\"%dashboard_context-must_clause%\\\"\\n              ],\\n              \\\"must_not\\\": [\\n                \\\"%dashboard_context-must_not_clause%\\\"\\n              ],\\n              \\\"filter\\\": [\\n                \\\"%dashboard_context-filter_clause%\\\",\\n                {\\n                  \\\"range\\\": {\\n                    \\\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\\\": {\\n                      \\\"%timefilter%\\\": true\\n                    }\\n                  }\\n                },\\n                {\\n                  \\\"exists\\\": {\\n                    \\\"field\\\": \\\"event.id\\\"\\n                  }\\n                },\\n                {\\n                  \\\"exists\\\": {\\n                    \\\"field\\\": \\\"timestamp\\\"\\n                  }\\n                },\\n              ]\\n            }\\n          },\\n          // assign all relevant destination ips to each unique source\\n          \\\"aggs\\\": {\\n          ##  Define parameters for\\n            \\\"connections\\\": {\\n              \\\"composite\\\": {\\n                \\\"size\\\": 10000,\\n                \\\"sources\\\": [\\n                  {\\\"src\\\": { \\\"terms\\\": {\\\"field\\\": \\\"source.ip\\\"} } },\\n                  {\\\"dst\\\": {\\\"terms\\\": {\\\"field\\\": \\\"destination.ip\\\"}} },\\n                  // {\\\"conn_state\\\": {\\\"terms\\\": {\\\"field\\\": \\\"protocol\\\"}}}\\n                ]\\n              },\\n                \\\"aggs\\\": {\\n                  \\\"metadata\\\": {\\n                    \\\"top_hits\\\": {\\n                      \\\"size\\\": 1,\\n                      \\\"_source\\\": {\\n                        \\\"includes\\\": [\\n                          \\\"source\\\",\\n                          \\\"destination\\\",\\n                          // \\\"protocol\\\",\\n                          \\\"event.result\\\",\\n                          \\\"zeek.ssh.auth_attempts\\\",\\n                          \\\"zeek.ssh.direction\\\",\\n                          \\\"ssh.version\\\",\\n                          \\\"host\\\",\\n                          \\\"timestamp\\\",\\n                          \\\"event.id\\\"\\n                        ]\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n          \\\"size\\\": 0\\n          // this applies to hits, not aggregations, faster and reduces data size\\n      },\\n      \\\"format\\\": {\\n        \\\"property\\\": \\\"aggregations.connections.buckets\\\"\\n      },\\n      \\\"transform\\\": [\\n        // surfaced aggregated objs, src and dst device, protocols, segment names, conn states in the metadata (prettification)\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.metadata.hits.hits[0]._source.protocol ? datum.metadata.hits.hits[0]._source.protocol : null\\\",\\n          \\\"as\\\": \\\"proto\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.metadata.hits.hits[0]._id ? datum.metadata.hits.hits[0]._id : null\\\",\\n          \\\"as\\\": \\\"log_id\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"project\\\",\\n          \\\"fields\\\": [\\\"key.src\\\", \\\"key.dst\\\", \\\"metadata.hits.hits[0]._source.source\\\", \\\"metadata.hits.hits[0]._source.destination\\\", \\\"proto\\\", \\\"metadata.hits.hits[0]._source.event.result\\\", \\\"metadata.hits.hits[0]._source.zeek.ssh.auth_attempts\\\", \\\"metadata.hits.hits[0]._source.zeek.ssh.direction\\\", \\\"metadata.hits.hits[0]._source.ssh.version\\\", \\\"metadata.hits.hits[0]._source.host\\\", \\\"metadata.hits.hits[0]._source.timestamp\\\", \\\"metadata.hits.hits[0]._source.event.id\\\"],\\n          \\\"as\\\": [\\\"src\\\", \\\"dst\\\", \\\"source\\\", \\\"destination\\\", \\\"protocol\\\", \\\"conn_state\\\", \\\"total_bytes\\\", \\\"direction\\\", \\\"ssh_version\\\", \\\"host\\\", \\\"time\\\", \\\"event_id\\\"]\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"toString(datum.protocol)\\\",\\n          \\\"as\\\": \\\"proto_string\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"groupby\\\": [\\\"src\\\", \\\"dst\\\"],\\n          \\\"fields\\\":[\\\"proto\\\", \\\"total_bytes\\\"],\\n          \\\"ops\\\":[\\\"values\\\", \\\"mean\\\"],\\n          \\\"as\\\": [\\\"aggregated_objs\\\", \\\"byteAvg\\\"]\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"length(datum.aggregated_objs)\\\",\\n          \\\"as\\\": \\\"num_connections\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'conn_state') : null\\\",\\n          \\\"as\\\": \\\"conn_state\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'proto_string') : null\\\",\\n          \\\"as\\\": \\\"protocolArr\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'total_bytes') : null\\\",\\n          \\\"as\\\": \\\"bytesArr\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'time')[0] : null\\\",\\n          \\\"as\\\": \\\"timestamp\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'destination')[0] : null\\\", //hardcoded to first index of objects because device is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"dst_device\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'source')[0] : null\\\", //hardcoded to first index of objects because device is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"src_device\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs[0].destination.segment ? pluck(datum.aggregated_objs[0].destination.segment, toString('name')) : null\\\", //hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"dst_segment\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs[0].source.segment ? pluck(datum.aggregated_objs[0].source.segment, toString('name')) : null\\\", //hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"src_segment\\\"\\n        },\\n        // {\\n        //   \\\"type\\\":\\\"formula\\\",\\n        //   \\\"expr\\\": \\\"datum.aggregated_objs[0].host ? pluck(datum.aggregated_objs[0].host, 'name') : null\\\",\\n        //   \\\"as\\\": \\\"host_name\\\"\\n        // },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs[0].destination.geo ? pluck(datum.aggregated_objs[0].destination.geo, toString('country_name')) : null\\\", //hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"dst_country\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs[0].source.geo ? pluck(datum.aggregated_objs[0].source.geo, toString('country_name')) : null\\\", //hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"src_country\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs[0].ssh_version ? pluck(datum.aggregated_objs[0], 'ssh_version[1]') : null\\\", //hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"ssh_version\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, 'direction') : null\\\",\\n          \\\"as\\\": \\\"direction\\\"\\n        },\\n        {\\n          \\\"type\\\":\\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.aggregated_objs ? pluck(datum.aggregated_objs, toString('event_id')) : null\\\", //hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"event_id\\\"\\n        },\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"collapsyNodes\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"trigger\\\": \\\"clearCollapsed || initialRoot\\\",\\n          \\\"remove\\\": true\\n        },\\n        {\\n          \\\"trigger\\\": \\\"clicked\\\",\\n          \\\"toggle\\\": \\\"clicked\\\"\\n        }\\n      ]\\n    },\\n    // Acts as the queue for the Breadth first traversal\\n    {\\n      \\\"name\\\": \\\"queue\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"trigger\\\": \\\"clear || initialRoot\\\",\\n          \\\"remove\\\": true\\n        },\\n        {\\n          \\\"trigger\\\": \\\"clear || initialRoot\\\",\\n          \\\"insert\\\": \\\"{'id': initialRoot, 'depth': 0, 'identifier': initialConnection2, 'testCat': null}\\\"\\n        },\\n        {\\n          \\\"trigger\\\": \\\"step\\\",\\n          \\\"remove\\\": true\\n        },\\n        {\\n          \\\"trigger\\\": \\\"step\\\",\\n          \\\"insert\\\": \\\"data('next')\\\"\\n        }\\n      ]\\n    }\\n    // Tracks all visited nodes\\n    {\\n      \\\"name\\\": \\\"visited\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"trigger\\\": \\\"clear || initialRoot\\\",\\n          \\\"remove\\\": true\\n        },\\n        {\\n          \\\"trigger\\\": \\\"clear || initialRoot\\\",\\n          \\\"insert\\\": \\\"(nonexistentIPWarning !== false) && (userInputRoot !== '') ? {'src': null, 'dst': initialRoot, 'id': initialRoot, 'depth': 0, 'enrichment': initialRootData, 'identifier': initialConnection2, 'parentIdentifier': null, 'testSplit': null, 'testCat': null} : null\\\"    // If IP exists in table then insert the initial node, otherwise do not insert\\n        },\\n        {\\n          \\\"trigger\\\": \\\"step\\\",\\n          \\\"insert\\\": \\\"(nonexistentIPWarning !== false) && (userInputRoot !== '') ? data('next') : null\\\"\\n        },\\n      ],\\n      \\\"transform\\\":[\\n        // RootNode enrichment flattening - does not change enrichment transforms that are handled in table dataset\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) ? length(datum.enrichment) : 0\\\",\\n          \\\"as\\\": \\\"enrich_len\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'proto_string') : datum.protocolArr\\\",\\n          \\\"as\\\": \\\"protocolArr\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'conn_state') : datum.conn_state\\\",\\n          \\\"as\\\": \\\"conn_state\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'destination')[0] : datum.dst_device\\\", // hardcoded to first index of objects because device is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"dst_device\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'source')[0] : datum.src_device\\\", // hardcoded to first index of objects because device is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"src_device\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'destination.segment')) : datum.dst_segment\\\", // hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"dst_segment\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'source.segment')) : datum.src_segment\\\", // hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"src_segment\\\"\\n        },\\n        // {\\n        //   \\\"type\\\": \\\"formula\\\",\\n        //   \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'host.name')) : datum.host_name\\\", // hardcoded to first index of objects because device is enriched from netbox not network traffic\\n        //   \\\"as\\\": \\\"host_name\\\"\\n        // },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'destination.geo')) : datum.dst_country\\\", // hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"dst_country\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'source.geo')) : datum.src_country\\\", // hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"src_country\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? toString(pluck(datum.enrichment, 'ssh_version[0]')) : datum.ssh_version\\\", // hardcoded to first index of objects because segment is enriched from netbox not network traffic\\n          \\\"as\\\": \\\"ssh_version\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid(datum.enrichment) && datum.enrich_len > 0 ? pluck(datum.enrichment, 'direction') : datum.direction\\\",\\n          \\\"as\\\": \\\"direction\\\"\\n        },\\n      ]\\n    },\\n    // Tracks what nodes to search next\\n    {\\n      \\\"name\\\": \\\"next\\\",\\n      \\\"source\\\": \\\"table\\\",\\n      \\\"transform\\\": [\\n        // Stop if we reach n\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"treeDepth < n\\\"\\n        },\\n        // unique identifier for strat\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.src + '+' + datum.dst\\\",\\n          \\\"as\\\": \\\"identifier\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\" datum.src === pluck(data('visited'), 'dst')[indexof(pluck(data('visited'), 'dst'), datum.src)] ? pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'dst'), datum.src)] : null\\\",\\n          \\\"as\\\": \\\"parentIdentifier\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.src + '+' + datum.dst\\\",\\n          \\\"as\\\": \\\"testCat\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"split(datum.testCat,'+')[0]\\\",\\n          \\\"as\\\": \\\"testSplit\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"lookup\\\",\\n          \\\"from\\\": \\\"queue\\\",\\n          \\\"key\\\": \\\"identifier\\\",\\n          \\\"fields\\\": [\\n            \\\"parentIdentifier\\\"\\n          ],\\n          \\\"values\\\": [\\n            \\\"depth\\\"\\n          ],\\n          \\\"as\\\": [\\n            \\\"parentDepth\\\"\\n          ]\\n        },\\n        // Keep valid ids in the queue\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"isValid(datum.parentDepth)\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.dst\\\",\\n          \\\"as\\\": \\\"id\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.parentDepth + 1\\\",\\n          \\\"as\\\": \\\"depth\\\"\\n        },\\n        // Grab the parent node timestamp and insert into current node metadata\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"(datum.src === pluck(data('visited'), 'dst')[indexof(pluck(data('visited'), 'dst'), datum.src)]) && (datum.parentIdentifier === pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'identifier'), datum.parentIdentifier)]) ? pluck(data('visited'), 'timestamp')[indexof(pluck(data('visited'), 'dst'), datum.src)] : null\\\",\\n          \\\"as\\\": \\\"parentTime\\\"\\n        },\\n        // time filter - filter out past timestamps (nodes)\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"timeFilter === 'On' && datum.depth > 1 ? datum.timestamp > datum.parentTime : 'Off'\\\",\\n        },\\n      ]\\n    },\\n      // defines IP nodes and organizes data in tree data structure\\n    {\\n      \\\"name\\\": \\\"completeTree\\\",\\n      \\\"source\\\": [\\n        \\\"visited\\\"\\n      ],\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"groupby\\\": [\\n            \\\"parentIdentifier\\\",\\n            \\\"identifier\\\",\\n          ],\\n          \\\"fields\\\": [\\\"protocolArr\\\"], // passes down enrichment data\\n          \\\"ops\\\": [\\\"values\\\"],\\n          \\\"as\\\": [\\\"enrichment\\\"]\\n        },\\n        {\\n          \\\"type\\\": \\\"stratify\\\",\\n          \\\"key\\\": \\\"identifier\\\",\\n          \\\"parentKey\\\": \\\"parentIdentifier\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"tree\\\",\\n          \\\"method\\\": \\\"tidy\\\",\\n          \\\"size\\\": [\\n            {\\n              \\\"signal\\\": \\\"height\\\"\\n            },\\n            {\\n              \\\"signal\\\": \\\"width\\\"\\n            }\\n          ],\\n          \\\"separation\\\": true,\\n          \\\"as\\\": [\\n            \\\"y\\\",\\n            \\\"x\\\",\\n            \\\"depth\\\",\\n            \\\"children\\\"\\n          ]\\n        },\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"ancestors\\\",\\n      \\\"source\\\": \\\"completeTree\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"treeAncestors('completeTree', datum.identifier)\\\",\\n          \\\"as\\\": \\\"ancestors\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"flatten\\\",\\n          \\\"fields\\\": [\\n            \\\"ancestors\\\"\\n          ],\\n          \\\"as\\\": [\\n            \\\"ancestor\\\"\\n          ]\\n        },\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"datum.ancestor.identifier !== datum.identifier\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"indata('collapsyNodes', 'identifier', datum.ancestor.identifier)\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"collapsed\\\",\\n      \\\"source\\\": \\\"ancestors\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"groupby\\\": [\\n            \\\"identifier\\\"\\n          ]\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"visibleTree\\\",\\n      \\\"source\\\": \\\"completeTree\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"!indata('collapsed', 'identifier', datum.identifier)\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"stratify\\\",\\n          \\\"key\\\": \\\"identifier\\\",\\n          \\\"parentKey\\\": \\\"parentIdentifier\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"tree\\\",\\n          \\\"method\\\": \\\"tidy\\\",\\n          \\\"size\\\": [\\n            {\\n              \\\"signal\\\": \\\"height - 150\\\"\\n            },\\n            {\\n              \\\"signal\\\": \\\"width - 220\\\"\\n            }\\n          ],\\n          \\\"separation\\\": true,\\n          \\\"as\\\": [\\n            \\\"y\\\",\\n            \\\"x\\\",\\n            \\\"depth\\\",\\n            \\\"children\\\"\\n          ]\\n        },\\n        // Creates device_array to determine which device info to show on node hover\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"[pluck(datum.enrichment, 'dst_device')[0], pluck(datum.enrichment, 'src_device')[0], datum.enrichment[0]]\\\",\\n          \\\"as\\\": \\\"device_array\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"pluck(datum.enrichment, 'byteAvg')[0]\\\",    // must be pluck and NOT datum.byteAvg\\n          \\\"as\\\": \\\"byteAvg\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"pluck(datum.enrichment, 'timestamp')[0]\\\", // grabs timestamp field value from enrichment object\\n          \\\"as\\\": \\\"ts\\\"\\n        },\\n        // converts timestamp into a Date object for humanreadable version of timestamp field\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datetime(year(datum.ts), month(datum.ts), date(datum.ts), hours(datum.ts), minutes(datum.ts), seconds(datum.ts), milliseconds(datum.ts))\\\",\\n          \\\"as\\\": \\\"date_obj\\\"\\n        },\\n\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"bytesExtent\\\",\\n      \\\"source\\\": \\\"visibleTree\\\",\\n      \\\"transform\\\":[\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"fields\\\": [\\\"byteAvg\\\", \\\"byteAvg\\\"],\\n          \\\"ops\\\":[\\\"min\\\", \\\"max\\\"],\\n          \\\"as\\\": [\\\"byteMin\\\", \\\"byteMax\\\"]\\n        },\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"timeExtent\\\",\\n      \\\"source\\\": \\\"visited\\\",\\n      \\\"transform\\\":[\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"fields\\\": [\\\"timestamp\\\", \\\"timestamp\\\"],\\n          \\\"ops\\\":[\\\"min\\\", \\\"max\\\"],\\n          \\\"as\\\": [\\\"timeMin\\\", \\\"timeMax\\\"]\\n        },\\n      ]\\n    },\\n    // Calculate paths between nodes\\n    {\\n      \\\"name\\\": \\\"links\\\",\\n      \\\"source\\\": \\\"visibleTree\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"treelinks\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"linkpath\\\",\\n          \\\"orient\\\": \\\"horizontal\\\",\\n          \\\"shape\\\": \\\"diagonal\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"pluck(datum.target.enrichment, 'byteAvg')[0]\\\",\\n          \\\"as\\\": \\\"byteAvg\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isValid((datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min)) ? (datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min) : 1 \\\", //evaluates whether the normal number is valid, defaults to 1\\n          \\\"as\\\": \\\"byteAvg_normal\\\"\\n        },\\n      ]\\n    },\\n  ],\\n  ## --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 3: Scales -------------------------------------------------------------------------------------------------------\\n  ##  Maps data values to either categorical data or numerical data to change the way the data presents visually\\n  \\\"scales\\\": [\\n    // Assign a color for each layer\\n    {\\n      \\\"name\\\": \\\"color\\\",\\n      \\\"type\\\": \\\"linear\\\",\\n      \\\"range\\\": {\\n        \\\"scheme\\\": {\\\"signal\\\": \\\"nodeColor\\\"} // built in color scheme from Vega // observable10  set1 tableu1\\n      },\\n      \\\"domain\\\": [0,15], // hardcoded to fix infinite depth error\\n      \\\"zero\\\": true\\n    },\\n    {\\n      \\\"name\\\": \\\"dash_scale\\\",\\n      \\\"type\\\": \\\"ordinal\\\",\\n      \\\"domain\\\": [\\\"0 auth attempts made\\\", \\\"> 0 auth attempts made\\\"],\\n      \\\"range\\\": [[5,2], null]\\n    },\\n    {\\n    //  Scale to determine x visual bounds after user attempts to zoom or drag mouse\\n    // used to scale the x value for marks\\n      \\\"name\\\": \\\"xscale\\\",\\n      \\\"zero\\\": false,\\n      \\\"domain\\\": {\\n        \\\"signal\\\": \\\"xdom\\\"\\n      },\\n      \\\"range\\\": {\\n        \\\"signal\\\": \\\"xrange\\\"\\n      }\\n    },\\n    {\\n    //  Scale to determine y visual bounds after user attempts to zoom or drag mouse\\n      // used to scale the y value for marks\\n      \\\"name\\\": \\\"yscale\\\",\\n      \\\"zero\\\": false,\\n      \\\"domain\\\": {\\n        \\\"signal\\\": \\\"ydom\\\"\\n      },\\n      \\\"range\\\": {\\n        \\\"signal\\\": \\\"yrange\\\"\\n      }\\n    },\\n  ],\\n\\n  ## --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 5: Marks --------------------------------------------------------------------------------------------------------\\n  ##  Determines how the data visually appears in the visualization\\n  \\\"marks\\\": [\\n    {\\n      // Render the tree inside a group to allow us to manipulate the entire position\\n      //Group mark made to standardize positioning of marks in visualization\\n      \\\"type\\\": \\\"group\\\",\\n      \\\"type\\\": \\\"group\\\",\\n      \\\"name\\\": \\\"treeGroup\\\",\\n      \\\"encode\\\": {\\n        \\\"enter\\\": {\\n          // Offset to make first IP visible\\n          \\\"x\\\": {\\n            \\\"value\\\": 400\\n          },\\n          \\\"height\\\": {\\n            \\\"signal\\\": \\\"height-100\\\"\\n          },\\n          \\\"width\\\": {\\n            \\\"signal\\\": \\\"width\\\"\\n          }\\n        }\\n      },\\n      \\\"title\\\": {\\n        \\\"text\\\": \\\"SSH Connections Tree Hierarchy\\\",\\n        \\\"orient\\\": \\\"top\\\",\\n        \\\"align\\\": \\\"center\\\"\\n      },\\n      \\\"marks\\\": [\\n        // Draw the paths\\n        {\\n          \\\"type\\\": \\\"path\\\",\\n          \\\"name\\\": \\\"nodePath\\\",\\n          \\\"zindex\\\": 0,\\n          \\\"from\\\": {\\n            \\\"data\\\": \\\"links\\\",\\n          },\\n          \\\"encode\\\": {\\n            \\\"update\\\": {\\n              \\\"path\\\": {\\n                \\\"field\\\": \\\"path\\\"\\n              },\\n              \\\"stroke\\\": {\\n                \\\"value\\\": \\\"#7777\\\"\\n              },\\n              \\\"strokeDash\\\":[\\n                {\\n                \\\"test\\\":\\\"datum.byteAvg == 0\\\",\\n                \\\"value\\\": [10,5]\\n                },\\n                {\\n                  \\\"signal\\\": \\\"null\\\"\\n                }\\n              ],\\n              \\\"strokeWidth\\\": {\\\"signal\\\": \\\"5 + (datum.byteAvg_normal * (20-5))\\\"}\\n            },\\n            \\\"hover\\\": {\\n              \\\"cursor\\\": {\\n                \\\"value\\\": \\\"pointer\\\"\\n              },\\n              // Changes the link color on hover\\n              \\\"stroke\\\": {\\n                \\\"value\\\": \\\"#aaa\\\"\\n              },\\n              \\\"tooltip\\\": {\\n                \\\"signal\\\": \\\"{ 'Time': toString(datum.target.date_obj), 'Auth Attempt Avg': datum.byteAvg, 'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'dst_segment')), 'Src Country': toString(pluck(datum.target.enrichment, 'src_country')), 'Dst Country': toString(pluck(datum.target.enrichment, 'dst_country')), 'Event ID': toString(pluck(datum.target.enrichment, 'event_id')) }\\\",\\n              }\\n            }\\n          },\\n          \\\"transform\\\":[\\n              // redefine the source/target x/y positions after mouse moves so the links know where to be drawn\\n              {\\n              \\\"type\\\": \\\"linkpath\\\",\\n              \\\"orient\\\": \\\"horizontal\\\",\\n              \\\"shape\\\": \\\"diagonal\\\",\\n              \\\"sourceX\\\": {\\\"expr\\\": \\\"scale('xscale', datum.datum.source.x)\\\"},\\n              \\\"sourceY\\\": {\\\"expr\\\": \\\"scale('yscale', datum.datum.source.y)\\\"},\\n              \\\"targetX\\\": {\\\"expr\\\": \\\"scale('xscale', datum.datum.target.x)\\\"},\\n              \\\"targetY\\\": {\\\"expr\\\": \\\"scale('yscale', datum.datum.target.y)\\\"}\\n              },\\n            ]\\n        },\\n        {\\n        \\\"type\\\": \\\"text\\\",     // ip title for enrichment box\\n        \\\"from\\\": {\\\"data\\\": \\\"links\\\"},\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              // \\\"align\\\": {\\\"value\\\": \\\"left\\\"},\\n              \\\"baseline\\\": {\\\"value\\\": \\\"top\\\"},\\n              // \\\"fill\\\": {\\\"value\\\": \\\"white\\\"}, //JCR, changes color of IPs addrs in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme\\n              \\\"opacity\\\": {\\\"value\\\": 0},\\n            },\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\\"value\\\": -395},\\n              \\\"y\\\": {\\\"value\\\": 20},\\n              \\\"text\\\": {\\\"signal\\\": \\\"enrichmentSrc + ' - ' + enrichmentDst\\\"},\\n              \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n              \\\"fontStyle\\\": {\\\"value\\\": \\\"bold\\\"},\\n              \\\"fontSize\\\": {\\\"value\\\": 16},\\n              \\\"opacity\\\": {\\\"signal\\\": \\\"isArray(enrichmentSrc) ? 1 : 0\\\" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1\\n            },\\n          }\\n        },\\n        {\\n        \\\"type\\\": \\\"text\\\",     // header for conn state, auth attempts, direction\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              // \\\"align\\\": {\\\"value\\\": \\\"left\\\"},\\n              \\\"baseline\\\": {\\\"value\\\": \\\"top\\\"},\\n              // \\\"fill\\\": {\\\"value\\\": \\\"white\\\"}, //JCR, changes color of onn state, bytes, protocols label in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme\\n              \\\"opacity\\\": {\\\"value\\\": 0},\\n            },\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\\"value\\\": -395},\\n              \\\"y\\\": {\\\"value\\\": 40},\\n              \\\"text\\\": {\\\"value\\\": \\\"Authentication    Auth Attempts    Direction\\\"},\\n              \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n              \\\"fontStyle\\\": {\\\"value\\\": \\\"bold\\\"},\\n              \\\"fontSize\\\": {\\\"value\\\": 15},\\n              \\\"opacity\\\": {\\\"signal\\\": \\\"isArray(tooltip4) ? 1 : 0\\\" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1\\n            },\\n          }\\n        },\\n        {\\n        \\\"type\\\": \\\"text\\\",     // conn state text in enrichment box\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              // \\\"align\\\": {\\\"value\\\": \\\"left\\\"},\\n              \\\"baseline\\\": {\\\"value\\\": \\\"top\\\"},\\n              \\\"fill\\\": {\\\"value\\\": \\\"#159d8d\\\"} // JCR, changd to match Malcolm color scheme\\n            },\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\\"value\\\": -395},\\n              \\\"y\\\": {\\\"value\\\": 60},\\n              \\\"text\\\": {\\\"signal\\\": \\\"isArray(tooltip2) ? tooltip2 : 'Hover over node for node enrichment.' \\\"}, // checks if node enrichments is populated, if not display user instructions\\n              \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n              \\\"fontSize\\\": {\\\"value\\\": 15},\\n              \\\"opacity\\\": 1,\\n            }\\n          }\\n        },\\n        {\\n          \\\"type\\\": \\\"text\\\",     // auth attempts text in enrichment box\\n            \\\"encode\\\": {\\n              \\\"enter\\\": {\\n                \\\"baseline\\\": {\\\"value\\\": \\\"top\\\"},\\n                \\\"fill\\\": {\\\"value\\\": \\\"#159d8d\\\"} // JCR, changd to match Malcolm color scheme\\n              },\\n              \\\"update\\\": {\\n                \\\"x\\\": {\\\"value\\\": -274},\\n                \\\"y\\\": {\\\"value\\\": 60},\\n                \\\"text\\\": {\\\"signal\\\": \\\"byte_data\\\"},\\n                \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n                \\\"fontSize\\\": {\\\"value\\\": 15},\\n                \\\"opacity\\\": {\\\"signal\\\": \\\"isArray(byte_data) ? 1 : 0\\\" } // checks if byte_data is an array - if Array then text is an byte value and won't be [object Object] when opacity == 1\\n              }\\n            }\\n        },\\n        {\\n        \\\"type\\\": \\\"text\\\",     // direction text in enrichment box\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              \\\"baseline\\\": {\\\"value\\\": \\\"top\\\"},\\n              \\\"fill\\\": {\\\"value\\\": \\\"#159d8d\\\"}, // JCR, changed to match Malcolm color scheme\\n            },\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\\"signal\\\": \\\"isArray(tooltip4) ? -153 : -395\\\"},\\n              \\\"y\\\": {\\\"signal\\\": \\\"isArray(tooltip4) ? 60 : 75\\\"},\\n              \\\"text\\\": {\\\"signal\\\": \\\"isArray(tooltip4) ? tooltip4 : 'Hover over link for link enrichment.' \\\"}, // checks if link enrichments is populated, if not display user instructions\\n              \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n              \\\"fontSize\\\": {\\\"value\\\": 15},\\n              \\\"opacity\\\": 1,\\n            }\\n          }\\n        },\\n        {\\n          \\\"type\\\": \\\"text\\\",     // nonexistent IP warning text\\n          \\\"zindex\\\": 0,\\n          \\\"encode\\\": {\\n              \\\"enter\\\": {\\n                \\\"baseline\\\": {\\\"value\\\": \\\"center\\\"},\\n                \\\"orient\\\": \\\"bottom\\\"\\n                // \\\"fill\\\": {\\\"value\\\": \\\"#172430\\\"}, // JCR, if color isn't hardcoded them the color changes based on Malcolm theme\\n              },\\n              \\\"update\\\": {\\n                \\\"x\\\": {\\\"value\\\": -400},\\n                \\\"y\\\": {\\\"signal\\\": \\\"height-200\\\"},\\n                \\\"text\\\": {\\\"value\\\": \\\"IP address not found. Try adjusting the time range.\\\"},\\n                \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n                \\\"fontStyle\\\": {\\\"value\\\": \\\"bold\\\"},\\n                \\\"fontSize\\\": {\\\"signal\\\": \\\"titleFontSize\\\"},\\n                \\\"opacity\\\": {\\\"signal\\\": \\\"nonexistentIPWarning === true ? 0 : 1\\\" } // if IP exists in table then do not show error, otherwise show the error\\n              }\\n            }\\n        },\\n        // Draw the nodes\\n        {\\n          \\\"type\\\": \\\"symbol\\\",\\n          \\\"name\\\": \\\"node\\\",\\n          \\\"zindex\\\": 10,\\n          \\\"from\\\": {\\n            \\\"data\\\": \\\"visibleTree\\\"\\n          },\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              \\\"size\\\": {\\n                \\\"value\\\": 300\\n              },\\n              \\\"stroke\\\": {\\n                \\\"value\\\": \\\"black\\\"\\n              },\\n            },\\n            \\\"hover\\\": {\\n              \\\"cursor\\\": {\\n                \\\"value\\\": \\\"pointer\\\"\\n              },\\n            },\\n            \\\"update\\\": {\\n              // Make collapsed nodes larger\\n              \\\"size\\\": [\\n                {\\n                  \\\"test\\\": \\\"indata('collapsyNodes', 'identifier', datum.identifier)\\\",\\n                  \\\"signal\\\": \\\"300 * 1.5\\\"\\n                },\\n                {\\n                  \\\"signal\\\": \\\"300\\\"\\n                }\\n              ],\\n              // Stroke collapsed nodes\\n              \\\"strokeDash\\\": [\\n                {\\n                  \\\"test\\\": \\\"indata('collapsyNodes', 'identifier', datum.identifier)\\\",\\n                  \\\"signal\\\": \\\"[5,3]\\\"\\n                },\\n                {\\n                  \\\"signal\\\": \\\"null\\\"\\n                }\\n              ],\\n              \\\"strokeWidth\\\": [\\n                {\\n                  \\\"test\\\": \\\"indata('collapsyNodes', 'identifier', datum.identifier)\\\",\\n                  \\\"signal\\\": \\\"4\\\"\\n                },\\n                {\\n                  \\\"signal\\\": \\\"0\\\"\\n                }\\n              ],\\n              \\\"x\\\": {\\\"signal\\\": \\\"scale('xscale', datum.x)\\\" }, // x value is scaled to account for mouse behavior\\n              \\\"y\\\": {\\\"signal\\\": \\\"scale('yscale', datum.y)\\\"}, // y value is scaled to account for mouse behavior\\n              // Make collapsed nodes darker\\n              \\\"fill\\\": [\\n                {\\n                  \\\"test\\\": \\\"indata('collapsyNodes', 'identifier', datum.identifier)\\\", // || device_data.ip == datum.dst\\\",\\n                  \\\"signal\\\": \\\"rgb(rgb(scale('color', datum.depth)).r * 0.7, rgb(scale('color', datum.depth)).g * 0.7, rgb(scale('color', datum.depth)).b * 0.7)\\\"\\n                },\\n                {\\n                  \\\"scale\\\": \\\"color\\\",\\n                  \\\"field\\\": \\\"depth\\\"\\n                }\\n              ],\\n              // tooltip must be declared in update instead of hover to prevent ip collisions\\n              \\\"tooltip\\\": {\\n                \\\"signal\\\": \\\"device_info\\\",\\n              },\\n            },\\n\\n          }\\n        },\\n        {\\n          // IP address labels for the nodes\\n          \\\"type\\\": \\\"text\\\",\\n          \\\"name\\\": \\\"nodeLabel\\\",\\n          \\\"zindex\\\": 10,\\n          \\\"from\\\": {\\n            \\\"data\\\": \\\"visibleTree\\\"\\n          },\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              \\\"text\\\": {\\n                \\\"signal\\\": \\\"split(datum.identifier,'+')[1]\\\"\\n              },\\n              \\\"fontSize\\\": {\\\"value\\\": 15},\\n              \\\"font\\\": {\\\"value\\\": \\\"Arial\\\"},\\n              \\\"baseline\\\": {\\n                \\\"value\\\": \\\"middle\\\"\\n              }\\n            },\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\\"signal\\\": \\\"scale('xscale', datum.x)\\\" }, // x value is scaled to account for mouse behavior\\n              \\\"y\\\": {\\\"signal\\\": \\\"scale('yscale', datum.y)\\\"}, // y value is scaled to account for mouse behavior\\n              // Collapsed or parents have labels on left\\n              \\\"dx\\\": [\\n                {\\n                  \\\"test\\\": \\\"indata('collapsyNodes', 'identifier', datum.identifier) || datum.children\\\",\\n                  \\\"signal\\\": \\\"-1 * labelOffset\\\"\\n                },\\n                {\\n                  \\\"signal\\\": \\\"labelOffset\\\"\\n                }\\n              ],\\n              \\\"align\\\": [\\n                {\\n                  \\\"test\\\": \\\"indata('collapsyNodes', 'identifier', datum.identifier) || datum.children\\\",\\n                  \\\"signal\\\": \\\"'right'\\\"\\n                },\\n                {\\n                  \\\"signal\\\": \\\"'left'\\\"\\n                }\\n              ],\\n              \\\"opacity\\\": 1\\n            },\\n            \\\"hover\\\": {\\n              \\\"cursor\\\": {\\n                \\\"value\\\": \\\"pointer\\\"\\n              }\\n            }\\n          }\\n        }\\n     ]\\n    }\\n  ],\\n  \\\"legends\\\": [\\n    {\\n      \\\"title\\\": \\\"Average Auth Attempts\\\",\\n      \\\"orient\\\": \\\"none\\\",\\n      \\\"titleColor\\\": { \\\"value\\\": \\\"#159d8d\\\" },\\n      \\\"labelColor\\\": { \\\"value\\\": \\\"#159d8d\\\" },\\n      // \\\"fillColor\\\": { \\\"value\\\": \\\"#172430\\\" }, // JCR, left empty for auto theme color\\n      \\\"padding\\\": { \\\"value\\\": 5 },\\n      \\\"strokeDash\\\": \\\"dash_scale\\\",\\n      \\\"symbolType\\\": \\\"stroke\\\",\\n      \\\"symbolStrokeWidth\\\": 3,\\n      \\\"symbolSize\\\": 400,\\n      \\\"legendX\\\": 0,\\n      \\\"legendY\\\": { \\\"signal\\\": \\\"legend_height + 150\\\" },\\n\\n      \\\"encode\\\": {\\n        \\\"symbols\\\": {\\n          \\\"update\\\": {\\n            // \\\"stroke\\\": { \\\"value\\\": \\\"#dfe5ef\\\" },\\n            \\\"fillOpacity\\\": { \\\"value\\\": 0 }\\n          }\\n        },\\n        \\\"title\\\": {\\n          \\\"update\\\": {\\n            \\\"fontSize\\\": { \\\"value\\\": 14 }\\n          }\\n        },\\n        \\\"labels\\\": { \\\"update\\\": { \\\"fontSize\\\": { \\\"value\\\": 14 } } }\\n      }\\n    }\\n  ]\\n}\\n\"}}"
+      },
+      "id": "ae24a700-cfa0-11f0-b77d-79037ad18c51",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-12-02T17:02:27.182Z",
+      "version": "WzEyODQsMV0="
+    },
+    {
+      "attributes": {
         "columns": [
           "source.ip",
           "destination.ip",
@@ -467,27 +484,38 @@
           "zeek.ssh.mac_alg",
           "event.id"
         ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:ssh\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
         "sort": [
           [
             "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:ssh\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        "title": "SSH - Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "88a40703-9791-4f96-bc06-992f96c9b350",
       "migrationVersion": {
         "search": "7.9.3"
-      }
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-12-02T16:22:59.910Z",
+      "version": "Wzc5OCwxXQ=="
     }
-  ]
+  ],
+  "version": "3.3.0"
 }

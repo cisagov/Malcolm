@@ -1,507 +1,524 @@
 {
-  "version": "2.14.0",
   "objects": [
     {
-      "id": "2bec1490-eb94-11e9-a384-0fcf32210194",
-      "type": "dashboard",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-06-24T18:50:25.215Z",
-      "version": "WzEwMDAsMV0=",
       "attributes": {
-        "title": "BACnet",
-        "hits": 0,
         "description": "Dashboard for the BACnet (Building Automation and Control Networks) Protocol",
-        "panelsJSON": "[{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":33,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":7,\"h\":33,\"i\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\"},\"panelIndex\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":33,\"h\":12,\"i\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\"},\"panelIndex\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":15,\"y\":12,\"w\":19,\"h\":21,\"i\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\"},\"panelIndex\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":34,\"y\":12,\"w\":14,\"h\":21,\"i\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\"},\"panelIndex\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":33,\"w\":14,\"h\":37,\"i\":\"817b3d94-c72c-4ce1-a0f7-3a2f17cbdbd8\"},\"panelIndex\":\"817b3d94-c72c-4ce1-a0f7-3a2f17cbdbd8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":14,\"y\":33,\"w\":15,\"h\":19,\"i\":\"3d5b4c08-2847-4132-bf7b-01502d68a41f\"},\"panelIndex\":\"3d5b4c08-2847-4132-bf7b-01502d68a41f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":29,\"y\":33,\"w\":19,\"h\":19,\"i\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\"},\"panelIndex\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":14,\"y\":52,\"w\":34,\"h\":18,\"i\":\"0b084c50-859e-4065-b437-97ed1fe8b612\"},\"panelIndex\":\"0b084c50-859e-4065-b437-97ed1fe8b612\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":70,\"w\":12,\"h\":18,\"i\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\"},\"panelIndex\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_9\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":12,\"y\":70,\"w\":12,\"h\":18,\"i\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\"},\"panelIndex\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":24,\"y\":70,\"w\":24,\"h\":18,\"i\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\"},\"panelIndex\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":88,\"w\":48,\"h\":18,\"i\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\"},\"panelIndex\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_12\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":106,\"w\":48,\"h\":18,\"i\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\"},\"panelIndex\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":124,\"w\":48,\"h\":16,\"i\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\"},\"panelIndex\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":140,\"w\":48,\"h\":15,\"i\":\"a0050292-4d09-4c60-93cd-45f9516d1664\"},\"panelIndex\":\"a0050292-4d09-4c60-93cd-45f9516d1664\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"2.14.0\",\"gridData\":{\"x\":0,\"y\":155,\"w\":48,\"h\":19,\"i\":\"1b62ffd6-ba78-492c-b64a-99cbe5a34a31\"},\"panelIndex\":\"1b62ffd6-ba78-492c-b64a-99cbe5a34a31\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"}]",
-        "optionsJSON": "{\"useMargins\":true}",
-        "version": 1,
-        "timeRestore": false,
+        "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
-        }
+        },
+        "optionsJSON": "{\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":33,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":7,\"h\":33,\"i\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\"},\"panelIndex\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":33,\"h\":12,\"i\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\"},\"panelIndex\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":15,\"y\":12,\"w\":19,\"h\":21,\"i\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\"},\"panelIndex\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":34,\"y\":12,\"w\":14,\"h\":21,\"i\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\"},\"panelIndex\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":33,\"w\":14,\"h\":37,\"i\":\"817b3d94-c72c-4ce1-a0f7-3a2f17cbdbd8\"},\"panelIndex\":\"817b3d94-c72c-4ce1-a0f7-3a2f17cbdbd8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":14,\"y\":33,\"w\":15,\"h\":19,\"i\":\"3d5b4c08-2847-4132-bf7b-01502d68a41f\"},\"panelIndex\":\"3d5b4c08-2847-4132-bf7b-01502d68a41f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":29,\"y\":33,\"w\":19,\"h\":19,\"i\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\"},\"panelIndex\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":14,\"y\":52,\"w\":34,\"h\":18,\"i\":\"0b084c50-859e-4065-b437-97ed1fe8b612\"},\"panelIndex\":\"0b084c50-859e-4065-b437-97ed1fe8b612\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":70,\"w\":12,\"h\":18,\"i\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\"},\"panelIndex\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_9\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":12,\"y\":70,\"w\":12,\"h\":18,\"i\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\"},\"panelIndex\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":24,\"y\":70,\"w\":24,\"h\":18,\"i\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\"},\"panelIndex\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":88,\"w\":48,\"h\":28,\"i\":\"9b7b0156-4ff3-4089-9abd-237758c7e00e\"},\"panelIndex\":\"9b7b0156-4ff3-4089-9abd-237758c7e00e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":116,\"w\":48,\"h\":18,\"i\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\"},\"panelIndex\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_13\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":134,\"w\":48,\"h\":18,\"i\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\"},\"panelIndex\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":152,\"w\":48,\"h\":16,\"i\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\"},\"panelIndex\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":168,\"w\":48,\"h\":15,\"i\":\"a0050292-4d09-4c60-93cd-45f9516d1664\"},\"panelIndex\":\"a0050292-4d09-4c60-93cd-45f9516d1664\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"3.3.0\",\"gridData\":{\"x\":0,\"y\":183,\"w\":48,\"h\":19,\"i\":\"1b62ffd6-ba78-492c-b64a-99cbe5a34a31\"},\"panelIndex\":\"1b62ffd6-ba78-492c-b64a-99cbe5a34a31\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"}]",
+        "timeRestore": false,
+        "title": "BACnet",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "panel_0",
-          "type": "visualization",
-          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3"
-        },
-        {
-          "name": "panel_1",
-          "type": "visualization",
-          "id": "7fcb8b90-c7b7-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_2",
-          "type": "visualization",
-          "id": "0d0cbd30-c7b8-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_3",
-          "type": "visualization",
-          "id": "1be7a440-dc0e-11ea-82b5-4506a254a95f"
-        },
-        {
-          "name": "panel_4",
-          "type": "visualization",
-          "id": "6eb9b2f0-c77b-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_5",
-          "type": "visualization",
-          "id": "f0cfb630-3258-11ef-8dd5-df3551cbe6ca"
-        },
-        {
-          "name": "panel_6",
-          "type": "visualization",
-          "id": "877c8d70-25b1-11ee-98b1-ff2b1cf864b8"
-        },
-        {
-          "name": "panel_7",
-          "type": "visualization",
-          "id": "5cd45d10-c794-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_8",
-          "type": "visualization",
-          "id": "3c403120-325a-11ef-8dd5-df3551cbe6ca"
-        },
-        {
-          "name": "panel_9",
-          "type": "visualization",
-          "id": "543975b0-cab3-11ea-84cd-4f7b1f416f80"
-        },
-        {
-          "name": "panel_10",
-          "type": "visualization",
-          "id": "98b559c0-cab3-11ea-84cd-4f7b1f416f80"
-        },
-        {
-          "name": "panel_11",
-          "type": "visualization",
-          "id": "cc0501c0-caab-11ea-84cd-4f7b1f416f80"
-        },
-        {
-          "name": "panel_12",
-          "type": "visualization",
-          "id": "bfc334f0-ca05-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_13",
-          "type": "search",
-          "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_14",
-          "type": "search",
-          "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_15",
-          "type": "search",
-          "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2"
-        },
-        {
-          "name": "panel_16",
-          "type": "search",
-          "id": "f28bbce0-25b0-11ee-98b1-ff2b1cf864b8"
-        }
-      ],
+      "id": "2bec1490-eb94-11e9-a384-0fcf32210194",
       "migrationVersion": {
         "dashboard": "7.9.3"
-      }
-    },
-    {
-      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:47:29.923Z",
-      "version": "Wzg2MCwxXQ==",
+      "references": [
+        {
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "7fcb8b90-c7b7-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "0d0cbd30-c7b8-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "1be7a440-dc0e-11ea-82b5-4506a254a95f",
+          "name": "panel_3",
+          "type": "visualization"
+        },
+        {
+          "id": "6eb9b2f0-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_4",
+          "type": "visualization"
+        },
+        {
+          "id": "f0cfb630-3258-11ef-8dd5-df3551cbe6ca",
+          "name": "panel_5",
+          "type": "visualization"
+        },
+        {
+          "id": "877c8d70-25b1-11ee-98b1-ff2b1cf864b8",
+          "name": "panel_6",
+          "type": "visualization"
+        },
+        {
+          "id": "5cd45d10-c794-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_7",
+          "type": "visualization"
+        },
+        {
+          "id": "3c403120-325a-11ef-8dd5-df3551cbe6ca",
+          "name": "panel_8",
+          "type": "visualization"
+        },
+        {
+          "id": "543975b0-cab3-11ea-84cd-4f7b1f416f80",
+          "name": "panel_9",
+          "type": "visualization"
+        },
+        {
+          "id": "98b559c0-cab3-11ea-84cd-4f7b1f416f80",
+          "name": "panel_10",
+          "type": "visualization"
+        },
+        {
+          "id": "cc0501c0-caab-11ea-84cd-4f7b1f416f80",
+          "name": "panel_11",
+          "type": "visualization"
+        },
+        {
+          "id": "66f12790-cfa1-11f0-b77d-79037ad18c51",
+          "name": "panel_12",
+          "type": "visualization"
+        },
+        {
+          "id": "bfc334f0-ca05-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_13",
+          "type": "visualization"
+        },
+        {
+          "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_14",
+          "type": "search"
+        },
+        {
+          "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_15",
+          "type": "search"
+        },
+        {
+          "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "panel_16",
+          "type": "search"
+        },
+        {
+          "id": "f28bbce0-25b0-11ee-98b1-ff2b1cf864b8",
+          "name": "panel_17",
+          "type": "search"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2025-12-02T17:54:37.542Z",
+      "version": "WzEyOTgsMV0="
+    },
+    {
       "attributes": {
-        "title": "Navigation",
-        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
-        "uiStateJSON": "{}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
-        }
-      },
-      "references": [],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "7fcb8b90-c7b7-11ea-8578-f3ff6bdd82b2",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzE5NiwxXQ==",
-      "attributes": {
-        "title": "BACnet - Log Count",
-        "visState": "{\"title\":\"BACnet - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Log Count\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":7,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"group\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":32}}}}",
+        },
+        "title": "Navigation",
         "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}"
+      },
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:23:42.854Z",
+      "version": "WzEyNjIsMV0="
+    },
+    {
+      "attributes": {
         "description": "Count of BACnet logs including BACnet Discovery and Property logs",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:*bacnet*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        },
+        "title": "BACnet - Log Count",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Log Count\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":7,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"group\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":32}}}}"
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "7fcb8b90-c7b7-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "0d0cbd30-c7b8-11ea-8578-f3ff6bdd82b2",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzE5NywxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2MiwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Logs Over Time",
-        "visState": "{\"title\":\"BACnet - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY\"}},\"params\":{\"date\":true,\"interval\":\"P365D\",\"intervalESValue\":365,\"intervalESUnit\":\"d\",\"format\":\"YYYY\",\"bounds\":{\"min\":\"1971-01-14T16:39:09.309Z\",\"max\":\"2021-01-14T16:39:09.309Z\"}},\"label\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 365 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Log Type\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "BACnet Logs over Time",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:*bacnet*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        },
+        "title": "BACnet - Logs Over Time",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY\"}},\"params\":{\"date\":true,\"interval\":\"P365D\",\"intervalESValue\":365,\"intervalESUnit\":\"d\",\"format\":\"YYYY\",\"bounds\":{\"min\":\"1971-01-14T16:39:09.309Z\",\"max\":\"2021-01-14T16:39:09.309Z\"}},\"label\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 365 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Log Type\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}"
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "0d0cbd30-c7b8-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "1be7a440-dc0e-11ea-82b5-4506a254a95f",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzE5OCwxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2MywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Device Vendors",
-        "visState": "{\"title\":\"BACnet - Device Vendors\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Unique count of zeek.bacnet.instance_number\",\"aggType\":\"cardinality\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Device Vendor\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"zeek.bacnet.instance_number\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.bacnet_discovery.vendor\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Device Vendor\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "BACnet Device Vendors from i-am messages",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "BACnet - Device Vendors",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Device Vendors\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Unique count of zeek.bacnet.instance_number\",\"aggType\":\"cardinality\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Device Vendor\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"zeek.bacnet.instance_number\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.bacnet_discovery.vendor\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Device Vendor\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2"
-        }
-      ],
+      "id": "1be7a440-dc0e-11ea-82b5-4506a254a95f",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "6eb9b2f0-c77b-11ea-8578-f3ff6bdd82b2",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T18:34:03.765Z",
-      "version": "Wzk5MywxXQ==",
+      "references": [
+        {
+          "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2NCwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - BVLC Functions",
-        "visState": "{\"title\":\"BACnet - BVLC Functions\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.bacnet.bvlc_function\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"BVLC Function\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":12,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[]}}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "BACnet Virtual Link Control Functions (Link-Layer Control)",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "BACnet - BVLC Functions",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - BVLC Functions\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.bacnet.bvlc_function\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"BVLC Function\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":12,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[]}}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2"
-        }
-      ],
+      "id": "6eb9b2f0-c77b-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "f0cfb630-3258-11ef-8dd5-df3551cbe6ca",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T18:38:25.042Z",
-      "version": "Wzk5NCwxXQ==",
+      "references": [
+        {
+          "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2NSwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "ATT&CK for ICS Tactic - BACnet",
-        "visState": "{\"title\":\"ATT&CK for ICS Tactic - BACnet\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"ATT&CK for ICS Tactic\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"ATT&CK for ICS Tactic\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
-        "uiStateJSON": "{}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"network.protocol:bacnet\",\"language\":\"lucene\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "ATT&CK for ICS Tactic - BACnet",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"ATT&CK for ICS Tactic - BACnet\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"ATT&CK for ICS Tactic\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"ATT&CK for ICS Tactic\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "065593f0-3257-11ef-8dd5-df3551cbe6ca"
-        }
-      ],
+      "id": "f0cfb630-3258-11ef-8dd5-df3551cbe6ca",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "877c8d70-25b1-11ee-98b1-ff2b1cf864b8",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T18:48:45.491Z",
-      "version": "Wzk5OCwxXQ==",
+      "references": [
+        {
+          "id": "065593f0-3257-11ef-8dd5-df3551cbe6ca",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2NiwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Actions and Results",
-        "visState": "{\"title\":\"BACnet - Actions and Results\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Action\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Result\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:*bacnet* AND (event.result:* OR event.action:*)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        },
+        "title": "BACnet - Actions and Results",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Actions and Results\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Action\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Result\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "877c8d70-25b1-11ee-98b1-ff2b1cf864b8",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "5cd45d10-c794-11ea-8578-f3ff6bdd82b2",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T18:49:22.653Z",
-      "version": "Wzk5OSwxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2NywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Protocol Data Units (PDUs)",
-        "visState": "{\"title\":\"BACnet - Protocol Data Units (PDUs)\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.bacnet.pdu_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"PDU Service\",\"aggType\":\"terms\"}]}}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
         "description": "BACnet Application Layer Protocol Data Unit types and services",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "BACnet - Protocol Data Units (PDUs)",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Protocol Data Units (PDUs)\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.bacnet.pdu_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"PDU Service\",\"aggType\":\"terms\"}]}}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2"
-        }
-      ],
+      "id": "5cd45d10-c794-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "3c403120-325a-11ef-8dd5-df3551cbe6ca",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T18:47:41.106Z",
-      "version": "Wzk5NywxXQ==",
+      "references": [
+        {
+          "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2OCwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "ATT&CK for ICS Notices - BACnet",
-        "visState": "{\"title\":\"ATT&CK for ICS Notices - BACnet\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Tactic\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.technique.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Technique\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.notice.msg\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Notice Message\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":3,\"direction\":\"desc\"}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"network.protocol:bacnet\",\"language\":\"lucene\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "ATT&CK for ICS Notices - BACnet",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":3,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"ATT&CK for ICS Notices - BACnet\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Tactic\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.technique.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Technique\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.notice.msg\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Notice Message\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "065593f0-3257-11ef-8dd5-df3551cbe6ca"
-        }
-      ],
+      "id": "3c403120-325a-11ef-8dd5-df3551cbe6ca",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "543975b0-cab3-11ea-84cd-4f7b1f416f80",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwMiwxXQ==",
+      "references": [
+        {
+          "id": "065593f0-3257-11ef-8dd5-df3551cbe6ca",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ2OSwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Source IP",
-        "visState": "{\"title\":\"BACnet - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "Source IP Addresses from bacnet.log",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:(\\\"bacnet\\\")\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "98b559c0-cab3-11ea-84cd-4f7b1f416f80",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwMywxXQ==",
-      "attributes": {
-        "title": "BACnet - Destination IP",
-        "visState": "{\"title\":\"BACnet - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source IP\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}}]}",
+        },
+        "title": "BACnet - Source IP",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "Destination IP Addresses from bacnet.log",
         "version": 1,
+        "visState": "{\"title\":\"BACnet - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}"
+      },
+      "id": "543975b0-cab3-11ea-84cd-4f7b1f416f80",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3MCwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "Destination IP Addresses from bacnet.log",
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:(\\\"bacnet\\\")\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        },
+        "title": "BACnet - Destination IP",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source IP\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}}]}"
       },
+      "id": "98b559c0-cab3-11ea-84cd-4f7b1f416f80",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
       "references": [
         {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
+          "type": "index-pattern"
         }
       ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3MSwxXQ=="
     },
     {
-      "id": "cc0501c0-caab-11ea-84cd-4f7b1f416f80",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwNCwxXQ==",
       "attributes": {
-        "title": "BACnet - Device Discovery",
-        "visState": "{\"title\":\"BACnet - Device Discovery\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":4,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Vendor\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_discovery.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.instance_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Identifier\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_discovery.vendor\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Vendor\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}}",
         "description": "Results from BACnet i-am and i-have commands",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "BACnet - Device Discovery",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Device Discovery\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":4,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Vendor\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_discovery.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.instance_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Identifier\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_discovery.vendor\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Vendor\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2"
-        }
-      ],
+      "id": "cc0501c0-caab-11ea-84cd-4f7b1f416f80",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "bfc334f0-ca05-11ea-8578-f3ff6bdd82b2",
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
       "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3MiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "title": "BACnet - Trends",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet - Trends\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  /**\\n    Version 1.0\\n    Authors:\\n      Nicholas Donovan\\n      \\n      Sara Hudson\\n    Thanks to:\\n      Sebastian Vera\\n      Mackenzie Zappe\\n      Melanie Pierce\\n      Jessica Rooney\\n    References:\\n      https://vega.github.io/vega/docs/\\n      https://vega.github.io/vega/examples/overview-plus-detail/\\n      https://vega.github.io/vega/examples/interactive-legend/\\n      https://vega.github.io/vega/examples/table-scrollbar/\\n    Commit:\\n      Corresponds to 8ca1225 in SMILE-Analytics/squiggles/release\\n\\n    To Do\\n      Allow drag from main graph\\n      Allow IP Selection text filter box thing (on hold until I can set a signal bind position)\\n  **/\\n\\n  \\\"$schema\\\": \\\"https://vega.github.io/schema/vega/v5.json\\\",\\n  ##  --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 0: Config --------------------------------------------------------------------------------------------------------\\n  ##  Define Specification constants like multiple instruction positioning\\n  ##  - arguments set in Config WILL be overwritten if redefined later in specification\\n  \\\"config\\\": {\\n    \\\"signals\\\": [\\n      {\\n        \\\"name\\\": \\\"fontScale\\\",\\n        \\\"update\\\": \\\"clamp(min(width / 1920, height / 1080), 0.7, 1.2)\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"paddingScale\\\",\\n        \\\"update\\\": \\\"clamp(min(width / 1920, height / 1080), 0.5, 2)\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"labelFontSize\\\",\\n        \\\"init\\\": \\\"16 * fontScale\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"titleFontSize\\\",\\n        \\\"init\\\": \\\"18 * fontScale\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"upperHeight\\\",\\n        \\\"update\\\": \\\"height * 0.6\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"lowerHeight\\\",\\n        \\\"update\\\": \\\"height * 0.1\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"graphWidth\\\",\\n        \\\"update\\\": \\\"width * 0.80\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"overviewGraphY\\\",\\n        \\\"update\\\": \\\"upperHeight + (200 * paddingScale)\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"ipSelectX\\\",\\n        \\\"init\\\": \\\"graphWidth + (40 * paddingScale)\\\"\\n      },\\n      {\\n        \\\"name\\\": \\\"interpolate\\\",\\n        \\\"value\\\": \\\"linear\\\"\\n      }\\n    ],\\n    \\\"axis\\\": {\\n      \\\"titleFontSize\\\": {\\n        \\\"signal\\\": \\\"titleFontSize\\\"\\n      },\\n      \\\"titlePadding\\\": {\\n        \\\"signal\\\": \\\"25 * paddingScale\\\"\\n      },\\n      \\\"labelFontSize\\\": {\\n        \\\"signal\\\": \\\"labelFontSize\\\"\\n      },\\n      \\\"labelFontWeight\\\": \\\"bold\\\",\\n      \\\"tickWidth\\\": 3\\n    },\\n    \\\"title\\\": {\\n      \\\"fontSize\\\": {\\n        \\\"signal\\\": \\\"titleFontSize\\\"\\n      }\\n    },\\n    \\\"legend\\\": {\\n      \\\"orient\\\": \\\"top-left\\\",\\n      \\\"titleFontSize\\\": {\\n        \\\"signal\\\": \\\"titleFontSize * 0.9\\\"\\n      },\\n      \\\"labelFontSize\\\": {\\n        \\\"signal\\\": \\\"labelFontSize\\\"\\n      },\\n      \\\"symbolSize\\\": 128,\\n      \\\"symbolStrokeWidth\\\": 2,\\n      \\\"padding\\\": {\\n        \\\"signal\\\": \\\"10 * paddingScale\\\"\\n      }\\n    },\\n    \\\"text\\\": {\\n      \\\"fontSize\\\": {\\n        \\\"signal\\\": \\\"labelFontSize * 0.9\\\"\\n      },\\n      \\\"baseline\\\": \\\"middle\\\"\\n    },\\n    \\\"rule\\\": {\\n      \\\"strokeWidth\\\": 0.2,\\n      \\\"stroke\\\": \\\"firebrick\\\"\\n    },\\n    \\\"rect\\\": {\\n      \\\"fill\\\": \\\"darkgrey\\\"\\n    }\\n  },\\n  ##  ---------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 1: Signals --------------------------------------------------------------------------------------------------------\\n  ##  - Define dynamic variables (Signals) that can be updated at any point during the specification\\n  \\\"signals\\\": [\\n    /** For main and overview graphs **/\\n    {\\n      \\\"name\\\": \\\"xDetailZoom\\\"\\n    },\\n    // updated in overview marks group\\n    {\\n      \\\"name\\\": \\\"yDetailZoom\\\"\\n    },\\n    // updated in overview marks group\\n\\n    // Holds the identification for a hovered dot tooltip\\n    {\\n      \\\"name\\\": \\\"hoveredTimestamp\\\",\\n      \\\"value\\\": [\\n        null,\\n        null\\n      ],\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"@infoDot:mouseover\\\",\\n          \\\"update\\\": \\\"[datum.addr, datum.timestamp]\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"@infoDot:mouseout\\\",\\n          \\\"update\\\": \\\"[null, null]\\\"\\n        }\\n      ]\\n    },\\n    /** Legend **/\\n    // Clear the legend when clicking but not interacting with another event\\n    {\\n      \\\"name\\\": \\\"clear\\\",\\n      \\\"value\\\": true,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"pointerup[!event.item]\\\",\\n          \\\"update\\\": \\\"true\\\",\\n          \\\"force\\\": true\\n        }\\n      ]\\n    },\\n    // Allow multi-select while holding shift\\n    {\\n      \\\"name\\\": \\\"shift\\\",\\n      \\\"value\\\": false,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"@legendSymbol:pointerdown, @legendSymbol:pointerup || @legendLabel:pointerdown, @legendLabel:pointerup\\\",\\n          \\\"update\\\": \\\"event.shiftKey\\\",\\n          \\\"force\\\": true\\n        }\\n      ]\\n    },\\n    // Add clicked items to selected data set\\n    {\\n      \\\"name\\\": \\\"clicked\\\",\\n      \\\"value\\\": null,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"@legendSymbol:pointerdown, @legendSymbol:pointerup || @legendLabel:pointerdown, @legendLabel:pointerup\\\",\\n          \\\"update\\\": \\\"{value: datum.value}\\\",\\n          \\\"force\\\": true\\n        },\\n        {\\n          \\\"events\\\": \\\"@detailLine:pointerdown, @detailLine.pointerup\\\",\\n          \\\"update\\\": \\\"{value: datum.addr}\\\",\\n          \\\"force\\\": true\\n        }\\n      ]\\n    },\\n    /** Selection Tables **/\\n    {\\n      \\\"name\\\": \\\"ips\\\",\\n      \\\"update\\\": \\\"length(data('destIps')) ? pluck(data('destIps'), 'destIp') : warn('No IP addresses found.')\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"rowHeight\\\",\\n      \\\"value\\\": 30\\n    },\\n    {\\n      \\\"name\\\": \\\"minIps\\\",\\n      \\\"value\\\": 10\\n    },\\n    {\\n      \\\"name\\\": \\\"minUnits\\\",\\n      \\\"value\\\": 5\\n    },\\n    /** IP Selection **/\\n    {\\n      \\\"name\\\": \\\"ipsToDisplay\\\",\\n      \\\"update\\\": \\\"min(minIps, length(data('destIps')))\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"ipsScrollAreaHeight\\\",\\n      \\\"update\\\": \\\"rowHeight * ipsToDisplay\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"ipsScrollPositionMax\\\",\\n      \\\"update\\\": \\\"length(data('destIps')) - ipsToDisplay + 1\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"ipsScrollBarHeight\\\",\\n      \\\"init\\\": \\\"clamp((rowHeight * ipsToDisplay) * ipsToDisplay / length(data('destIps')), 30, 600)\\\"\\n    },\\n    // IP that was selected in the table\\n    {\\n      \\\"name\\\": \\\"selectedIp\\\",\\n      \\\"init\\\": \\\"ips[0]\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"@destIps-rect-cell:pointerdown, @destIps-rect-cell:pointerup || @destIps-text-content:pointerdown, @destIps-text-content:pointerup\\\",\\n          \\\"update\\\": \\\"datum.destIp\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"ipsScrollbarMouseDragY\\\",\\n      \\\"init\\\": \\\"0\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": \\\"[@rect-scrollbar:pointerdown, window:pointerup] > window:pointermove\\\",\\n          \\\"update\\\": \\\"clamp(y(), 1, ipsScrollAreaHeight)\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"ipsScrollPosition\\\",\\n      \\\"value\\\": 1,\\n      \\\"on\\\": [\\n        {\\n          \\\"events\\\": [\\n            {\\n              \\\"markname\\\": \\\"destIps-rect-cell\\\",\\n              \\\"type\\\": \\\"wheel\\\",\\n              \\\"consume\\\": true\\n            },\\n            {\\n              \\\"markname\\\": \\\"destIps-text-content\\\",\\n              \\\"type\\\": \\\"wheel\\\",\\n              \\\"consume\\\": true\\n            }\\n          ],\\n          \\\"update\\\": \\\"clamp(round(ipsScrollPosition + event.deltaY / abs(event.deltaY) * pow(1.0001, event.deltaY * pow(16, event.deltaMode)), 0), 1, ipsScrollPositionMax)\\\"\\n        },\\n        {\\n          \\\"events\\\": \\\"[@rect-scrollbar:pointerdown, window:pointerup] > window:pointermove\\\",\\n          \\\"update\\\": \\\"clamp(round(invert('ipsScaleScrollBarY', ipsScrollbarMouseDragY), 0), 1, ipsScrollPositionMax)\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"potentialDate\\\",\\n      \\\"value\\\": null,\\n      \\\"update\\\": \\\"timeParse(pluck(data('ipData'), 'value')[0], '%-m/%-d/%Y')\\\"\\n      // pluck(data('destIps'), 'destIp')\\n    },\\n    {\\n      \\\"name\\\": \\\"isDate\\\",\\n      \\\"value\\\": false,\\n      \\\"update\\\": \\\"potentialDate == null ? false : true\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"markDataset_signal\\\",\\n      \\\"update\\\": \\\"data('markDataset') ? pluck(data('markDataset'), 'dataset') : ['']\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"markNames\\\",\\n      \\\"value\\\": {\\n        \\\"bacnet_property\\\": \\\"BACnet - Analog/Binary IO\\\"\\n      }\\n    },\\n    {\\n      \\\"name\\\": \\\"markDatasetName\\\",\\n      \\\"update\\\": \\\"length(markDataset_signal) > 1 ? markDataset_signal : markNames[markDataset_signal[0]] ? markNames[markDataset_signal[0]] : markDataset_signal\\\"\\n    }\\n  ],\\n  ## --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 2: DATA --------------------------------------------------------------------------------------------------------\\n  ##  Define datasets and data normalization to be worked with in schema\\n  \\\"data\\\": [\\n    {\\n      // query OpenSearch based on time range\\n      \\\"name\\\": \\\"bacnetRaw\\\",\\n      \\\"url\\\": {\\n        \\\"index\\\": \\\"MALCOLM_NETWORK_INDEX_PATTERN_REPLACER\\\",\\n        \\\"body\\\": {\\n          \\\"query\\\": {\\n            \\\"bool\\\": {\\n              \\\"must\\\": [\\n                \\\"%dashboard_context-must_clause%\\\"\\n              ],\\n              \\\"must_not\\\": [\\n                \\\"%dashboard_context-must_not_clause%\\\"\\n              ],\\n              \\\"filter\\\": [\\n                \\\"%dashboard_context-filter_clause%\\\",\\n                {\\n                  \\\"range\\\": {\\n                    \\\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\\\": {\\n                      \\\"%timefilter%\\\": true\\n                    }\\n                  }\\n                },\\n                // Use the set time filter in opensearch\\n                {\\n                  \\\"term\\\": {\\n                    \\\"event.dataset\\\": \\\"bacnet_property\\\"\\n                  }\\n                },\\n                {\\n                  \\\"term\\\": {\\n                    \\\"zeek.bacnet_property.property\\\": \\\"present-value\\\"\\n                  }\\n                },\\n                // Retrieve modbus_detailed logs'\\n                {\\n                  \\\"exists\\\": {\\n                    \\\"field\\\": \\\"zeek.bacnet_property.value\\\"\\n                  }\\n                },\\n                // Ensure the values exist\\n                {\\n                  \\\"wildcard\\\": {\\n                    \\\"zeek.bacnet.pdu_service\\\": {\\n                      \\\"value\\\": \\\"*write*\\\"\\n                    }\\n                  }\\n                }\\n                // Only retrieve write records\\n              ],\\n              \\\"should\\\": [\\n                {\\n                  \\\"wildcard\\\": {\\n                    \\\"zeek.bacnet_property.object_type\\\": {\\n                      \\\"value\\\": \\\"analog*\\\"\\n                    }\\n                  }\\n                },\\n                {\\n                  \\\"wildcard\\\": {\\n                    \\\"zeek.bacnet_property.object_type\\\": {\\n                      \\\"value\\\": \\\"binary*\\\"\\n                    }\\n                  }\\n                }\\n              ],\\n              \\\"minimum_should_match\\\": 1\\n            }\\n          },\\n          \\\"size\\\": 10000,\\n          \\\"sort\\\": [\\n            {\\n              \\\"timestamp\\\": {\\n                \\\"order\\\": \\\"asc\\\"\\n              }\\n            }\\n          ],\\n          // These are the fields we retrieve\\n          \\\"_source\\\": [\\n            \\\"event.dataset\\\",\\n            \\\"event.id\\\",\\n            \\\"timestamp\\\",\\n            \\\"destination.ip\\\",\\n            \\\"destination.port\\\",\\n            \\\"zeek.bacnet.pdu_service\\\",\\n            \\\"zeek.bacnet_property.value\\\",\\n            \\\"zeek.bacnet.instance_number\\\",\\n            \\\"zeek.bacnet_property.object_type\\\"\\n          ]\\n        }\\n      },\\n      \\\"format\\\": {\\n        \\\"property\\\": \\\"hits.hits\\\"\\n      },\\n      // Save the needed fieldnames as something more usable and remove the rest of the data\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"project\\\",\\n          \\\"fields\\\": [\\n            \\\"_source.event.dataset\\\",\\n            \\\"_source.event.id\\\",\\n            \\\"_source.timestamp\\\",\\n            \\\"_source.destination.ip\\\",\\n            \\\"_source.destination.port\\\",\\n            \\\"_source.zeek.bacnet.pdu_service\\\",\\n            \\\"_source.zeek.bacnet.instance_number\\\",\\n            \\\"_source.zeek.bacnet_property.value\\\",\\n            \\\"_source.zeek.bacnet_property.object_type\\\"\\n          ],\\n          \\\"as\\\": [\\n            \\\"dataset\\\",\\n            \\\"id\\\",\\n            \\\"timestamp\\\",\\n            \\\"destIp\\\",\\n            \\\"destPort\\\",\\n            \\\"pduService\\\",\\n            \\\"instanceNumber\\\",\\n            \\\"value\\\",\\n            \\\"objectType\\\"\\n          ]\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"ipData\\\",\\n      \\\"source\\\": \\\"bacnetRaw\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"datum.destIp === selectedIp\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"bacnetData\\\",\\n      \\\"source\\\": \\\"ipData\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"toNumber(datum.instanceNumber)\\\",\\n          \\\"as\\\": \\\"instanceNumber\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"isDate ? time(potentialDate) : datum.value\\\",\\n          \\\"as\\\": \\\"value\\\"\\n        },\\n        // Save only required fields and trash the rest\\n        {\\n          \\\"type\\\": \\\"project\\\",\\n          \\\"fields\\\": [\\n            \\\"dataset\\\",\\n            \\\"id\\\",\\n            \\\"timestamp\\\",\\n            \\\"destIp\\\",\\n            \\\"destPort\\\",\\n            \\\"pduService\\\",\\n            \\\"instanceNumber\\\",\\n            \\\"value\\\",\\n            \\\"objectType\\\"\\n          ]\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"markData\\\",\\n      \\\"source\\\": [\\n        \\\"bacnetData\\\",\\n      ],\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.pduService\\\",\\n          \\\"as\\\": \\\"func\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"datum.instanceNumber\\\",\\n          \\\"as\\\": \\\"addr\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"null\\\",\\n          \\\"as\\\": \\\"unitId\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"formula\\\",\\n          \\\"expr\\\": \\\"{'objectType': datum.objectType}\\\",\\n          \\\"as\\\": \\\"hoverData\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"project\\\",\\n          \\\"fields\\\": [\\n            \\\"dataset\\\",\\n            \\\"id\\\",\\n            \\\"timestamp\\\",\\n            \\\"destIp\\\",\\n            \\\"destPort\\\",\\n            \\\"func\\\",\\n            \\\"addr\\\",\\n            \\\"value\\\",\\n            \\\"unitId\\\",\\n            \\\"hoverData\\\"\\n          ]\\n        }\\n      ]\\n    },\\n\\n    // Group unique IPs\\n    {\\n      \\\"name\\\": \\\"destIps\\\",\\n      \\\"source\\\": [\\n        \\\"bacnetRaw\\\"\\n      ],\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"groupby\\\": [\\n            \\\"destIp\\\"\\n          ]\\n        },\\n        {\\n          \\\"type\\\": \\\"collect\\\",\\n          \\\"sort\\\": {\\n            \\\"field\\\": \\\"destIp\\\"\\n          }\\n        }\\n      ]\\n    },\\n    // Hack for the table, filters only the position in the table\\n    {\\n      \\\"name\\\": \\\"ipSlice\\\",\\n      \\\"source\\\": \\\"destIps\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"filter\\\",\\n          \\\"expr\\\": \\\"(indexof(ips, datum.destIp) + 1 >= ipsScrollPosition) && (indexof(ips, datum.destIp) + 1 < (ipsScrollPosition + ipsToDisplay))\\\"\\n        }\\n      ]\\n    },\\n    // Holds selected legend items\\n    {\\n      \\\"name\\\": \\\"selected\\\",\\n      \\\"on\\\": [\\n        {\\n          \\\"trigger\\\": \\\"clear\\\",\\n          \\\"remove\\\": true\\n        },\\n        {\\n          \\\"trigger\\\": \\\"!shift\\\",\\n          \\\"remove\\\": true\\n        },\\n        {\\n          \\\"trigger\\\": \\\"!shift && clicked\\\",\\n          \\\"insert\\\": \\\"clicked\\\"\\n        },\\n        {\\n          \\\"trigger\\\": \\\"shift && clicked\\\",\\n          \\\"toggle\\\": \\\"clicked\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"name\\\": \\\"markDataset\\\",\\n      \\\"source\\\": \\\"markData\\\",\\n      \\\"transform\\\": [\\n        {\\n          \\\"type\\\": \\\"aggregate\\\",\\n          \\\"groupby\\\": [\\\"dataset\\\"],\\n        }\\n      ]\\n    }\\n  ],\\n  ## --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 3: Scales -------------------------------------------------------------------------------------------------------\\n  ##  Maps data values to either categorical data or numerical data to change the way the data presents visually\\n   \\n  \\\"scales\\\": [\\n    {\\n      \\\"name\\\": \\\"color\\\",\\n      \\\"type\\\": \\\"ordinal\\\",\\n      \\\"domain\\\": {\\n        \\\"data\\\": \\\"markData\\\",\\n        \\\"field\\\": \\\"addr\\\",\\n        \\\"sort\\\": true\\n      },\\n      \\\"range\\\": {\\n        \\\"scheme\\\": \\\"category20\\\"\\n      }\\n    },\\n    {\\n      \\\"name\\\": \\\"ipsScaleScrollBarY\\\",\\n      \\\"type\\\": \\\"linear\\\",\\n      \\\"domain\\\": [\\n        1,\\n        {\\n          \\\"signal\\\": \\\"ipsScrollPositionMax\\\"\\n        }\\n      ],\\n      \\\"range\\\": [\\n        0,\\n        {\\n          \\\"signal\\\": \\\"rowHeight * ipsToDisplay - ipsScrollBarHeight - 1\\\"\\n        }\\n      ]\\n    },\\n  ],\\n  ## --------------------------------------------------------------------------------------------------------------------------\\n  ##  SECTION 5: Marks --------------------------------------------------------------------------------------------------------\\n  ##  Determines how the data visually appears in the visualization\\n  /****** START MAIN GRAPH MARKS ******/\\n  \\\"marks\\\": [\\n    {\\n      \\\"type\\\": \\\"group\\\",\\n      \\\"name\\\": \\\"detail\\\",\\n      \\\"encode\\\": {\\n        \\\"enter\\\": {\\n          \\\"height\\\": {\\n            \\\"signal\\\": \\\"upperHeight\\\"\\n          },\\n          \\\"width\\\": {\\n            \\\"signal\\\": \\\"graphWidth\\\"\\n          }\\n        }\\n      },\\n      \\\"title\\\": {\\n        \\\"text\\\": {\\n          \\\"signal\\\": \\\"'Detailed Graph: ' + markDatasetName\\\"\\n        },\\n        \\\"orient\\\": \\\"top\\\",\\n        \\\"align\\\": \\\"center\\\"\\n      },\\n      \\\"scales\\\": [\\n        {\\n          \\\"name\\\": \\\"xScale\\\",\\n          \\\"type\\\": \\\"time\\\",\\n          \\\"domain\\\": {\\n            \\\"data\\\": \\\"markData\\\",\\n            \\\"field\\\": \\\"timestamp\\\"\\n          },\\n          \\\"domainRaw\\\": {\\n            \\\"signal\\\": \\\"xDetailZoom\\\"\\n          },\\n          \\\"range\\\": [\\n            0,\\n            {\\n              \\\"signal\\\": \\\"graphWidth\\\"\\n            }\\n          ],\\n          \\\"nice\\\": true\\n        },\\n        {\\n          \\\"name\\\": \\\"yScale\\\",\\n          \\\"type\\\": \\\"symlog\\\",\\n          \\\"domain\\\": {\\n            \\\"data\\\": \\\"markData\\\",\\n            \\\"field\\\": \\\"value\\\"\\n          },\\n          \\\"domainRaw\\\": {\\n            \\\"signal\\\": \\\"yDetailZoom\\\"\\n          },\\n          \\\"range\\\": [\\n            {\\n              \\\"signal\\\": \\\"upperHeight - 10\\\"\\n            },\\n            10\\n          ],\\n          \\\"nice\\\": true\\n        }\\n      ],\\n      \\\"axes\\\": [\\n        {\\n          \\\"scale\\\": \\\"xScale\\\",\\n          \\\"title\\\": \\\"Date & Time\\\",\\n          \\\"orient\\\": \\\"bottom\\\",\\n          \\\"format\\\": \\\"%m-%d-%Y %H:%M:%S\\\",\\n          \\\"formatType\\\": \\\"time\\\",\\n          \\\"labelAngle\\\": -30,\\n          \\\"labelPadding\\\": {\\n            \\\"signal\\\": \\\"50 * paddingScale\\\"\\n          },\\n          \\\"labelFontSize\\\": {\\n            \\\"signal\\\": \\\"labelFontSize * 0.95\\\"\\n          },\\n          \\\"grid\\\": true\\n        },\\n        {\\n          \\\"scale\\\": \\\"yScale\\\",\\n          \\\"title\\\": \\\"Values\\\",\\n          \\\"orient\\\": \\\"left\\\",\\n          // \\\"labelSeparation\\\": 100\\n          \\\"labelOverlap\\\": true\\n        }\\n      ],\\n      \\\"legends\\\": [\\n        {\\n          \\\"title\\\": \\\"PLC Address\\\",\\n          \\\"stroke\\\": \\\"color\\\",\\n          \\\"fill\\\": \\\"color\\\",\\n          \\\"encode\\\": {\\n            \\\"symbols\\\": {\\n              \\\"name\\\": \\\"legendSymbol\\\",\\n              \\\"interactive\\\": true,\\n              \\\"update\\\": {\\n                \\\"opacity\\\": [\\n                  {\\n                    \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.value)\\\",\\n                    \\\"value\\\": 0.7\\n                  },\\n                  {\\n                    \\\"value\\\": 0.15\\n                  }\\n                ],\\n                \\\"cursor\\\": {\\n                  \\\"value\\\": \\\"pointer\\\"\\n                }\\n              }\\n            },\\n            \\\"labels\\\": {\\n              \\\"name\\\": \\\"legendLabel\\\",\\n              \\\"interactive\\\": true,\\n              \\\"update\\\": {\\n                \\\"opacity\\\": [\\n                  {\\n                    \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.value)\\\",\\n                    \\\"value\\\": 1\\n                  },\\n                  {\\n                    \\\"value\\\": 0.25\\n                  }\\n                ],\\n                \\\"text\\\": {\\n                  \\\"signal\\\": \\\"'Address ' + datum.label\\\"\\n                },\\n                \\\"cursor\\\": {\\n                  \\\"value\\\": \\\"pointer\\\"\\n                }\\n              }\\n            }\\n          }\\n        }\\n      ],\\n      \\\"marks\\\": [\\n        {\\n          \\\"type\\\": \\\"group\\\",\\n          \\\"clip\\\": true,\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              \\\"height\\\": {\\n                \\\"field\\\": {\\n                  \\\"group\\\": \\\"height\\\"\\n                }\\n              },\\n              \\\"width\\\": {\\n                \\\"field\\\": {\\n                  \\\"group\\\": \\\"width\\\"\\n                }\\n              }\\n            }\\n          },\\n          \\\"from\\\": {\\n            // Separate data points by addr for graphing\\n            \\\"facet\\\": {\\n              \\\"name\\\": \\\"series\\\",\\n              \\\"data\\\": \\\"markData\\\",\\n              \\\"groupby\\\": \\\"addr\\\"\\n            }\\n          },\\n          \\\"marks\\\": [\\n            {\\n              \\\"type\\\": \\\"line\\\",\\n              \\\"name\\\": \\\"detailLine\\\",\\n              \\\"from\\\": {\\n                \\\"data\\\": \\\"series\\\"\\n              },\\n              \\\"interactive\\\": true,\\n              \\\"encode\\\": {\\n                \\\"update\\\": {\\n                  \\\"x\\\": {\\n                    \\\"scale\\\": \\\"xScale\\\",\\n                    \\\"field\\\": \\\"timestamp\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"scale\\\": \\\"yScale\\\",\\n                    \\\"field\\\": \\\"value\\\"\\n                  },\\n                  \\\"interpolate\\\": {\\n                    \\\"signal\\\": \\\"interpolate\\\"\\n                  },\\n                  \\\"opacity\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"value\\\": 1\\n                    },\\n                    {\\n                      \\\"value\\\": 0.05\\n                    }\\n                  ],\\n                  \\\"stroke\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"scale\\\": \\\"color\\\",\\n                      \\\"field\\\": \\\"addr\\\"\\n                    },\\n                    {\\n                      \\\"value\\\": \\\"#ccc\\\"\\n                    }\\n                  ],\\n                  \\\"cursor\\\": {\\n                    \\\"value\\\": \\\"pointer\\\"\\n                  }\\n                }\\n              }\\n            },\\n            {\\n              // TODO different symbol for registers vs coils\\n              \\\"type\\\": \\\"symbol\\\",\\n              \\\"name\\\": \\\"infoDot\\\",\\n              \\\"from\\\": {\\n                \\\"data\\\": \\\"series\\\"\\n              },\\n              \\\"encode\\\": {\\n                \\\"update\\\": {\\n                  \\\"x\\\": {\\n                    \\\"scale\\\": \\\"xScale\\\",\\n                    \\\"field\\\": \\\"timestamp\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"scale\\\": \\\"yScale\\\",\\n                    \\\"field\\\": \\\"value\\\"\\n                  },\\n                  \\\"interpolate\\\": {\\n                    \\\"signal\\\": \\\"interpolate\\\"\\n                  },\\n                  \\\"tooltip\\\": {\\n                    \\\"signal\\\": \\\"{ 'Dataset': datum.dataset, 'PLC IP:Port': datum.destIp + ':' + datum.destPort, 'Address': datum.addr, 'Function': datum.func, 'Value': datum.value,  'Date/Time': timeFormat(datum.timestamp, '%b %d, %Y') + ' ' + timeFormat(datum.timestamp, '%H:%M:%S:%L %Z'), 'Event ID': join(datum.id) }\\\"\\n                  },\\n                  \\\"opacity\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"value\\\": 1\\n                    },\\n                    {\\n                      \\\"value\\\": 0.25\\n                    }\\n                  ],\\n                  \\\"fill\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"signal\\\": \\\"(datum.addr === hoveredTimestamp[0] && datum.timestamp === hoveredTimestamp[1]) ? 'orange' : scale('color', datum.addr)\\\"\\n                    }\\n                  ]\\n                }\\n              }\\n            }\\n          ]\\n        }\\n      ]\\n    },\\n    /****** START OVERVIEW GRAPH ******/\\n    {\\n      \\\"type\\\": \\\"group\\\",\\n      \\\"name\\\": \\\"overview\\\",\\n      \\\"encode\\\": {\\n        \\\"enter\\\": {\\n          \\\"y\\\": {\\n            \\\"signal\\\": \\\"overviewGraphY\\\"\\n          },\\n          \\\"height\\\": {\\n            \\\"signal\\\": \\\"lowerHeight\\\"\\n          },\\n          \\\"width\\\": {\\n            \\\"signal\\\": \\\"graphWidth\\\"\\n          },\\n          \\\"fill\\\": {\\n            \\\"value\\\": \\\"transparent\\\"\\n          },\\n          \\\"cursor\\\": {\\n            \\\"value\\\": \\\"crosshair\\\"\\n          }\\n        }\\n      },\\n      \\\"title\\\": {\\n        \\\"text\\\": \\\"Overview Selection Graph\\\",\\n        \\\"orient\\\": \\\"bottom\\\",\\n        \\\"align\\\": \\\"center\\\"\\n      },\\n      \\\"signals\\\": [\\n        // Holds click-drag coordinates\\n        {\\n          \\\"name\\\": \\\"brush\\\",\\n          \\\"value\\\": [\\n            0,\\n            0\\n          ],\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": \\\"@overview:pointerdown\\\",\\n              \\\"update\\\": \\\"[[x(), x()], [y('overview'), y('overview')]]\\\"\\n            },\\n            {\\n              \\\"events\\\": \\\"[@overview:pointerdown, window:pointerup] > @overview:pointermove!\\\",\\n              \\\"update\\\": \\\"[[brush[0][0], clamp(x(), 0, graphWidth)], [brush[1][0], clamp(y('overview'), -5, lowerHeight + 10)]]\\\"\\n              // + 5 allows the selection to go slightly lower than the minimum value\\n            },\\n            {\\n              \\\"events\\\": {\\n                \\\"signal\\\": \\\"delta\\\"\\n              },\\n              \\\"update\\\": \\\"[clampRange([anchor[0][0] + delta[0], anchor[0][1] + delta[0]], 0, graphWidth), clampRange([anchor[1][0] + delta[1], anchor[1][1] + delta[1]], 0, lowerHeight + 5)]\\\"\\n            }\\n          ]\\n        },\\n        {\\n          \\\"name\\\": \\\"anchor\\\",\\n          \\\"value\\\": null,\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": \\\"@brushRect:pointerdown\\\",\\n              \\\"update\\\": \\\"slice(brush)\\\"\\n            }\\n          ]\\n        },\\n        {\\n          \\\"name\\\": \\\"down\\\",\\n          \\\"value\\\": [\\n            0,\\n            0\\n          ],\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": \\\"@brushRect:pointerdown\\\",\\n              \\\"update\\\": \\\"[x(), y('overview')]\\\"\\n            }\\n          ]\\n        },\\n        {\\n          \\\"name\\\": \\\"delta\\\",\\n          \\\"value\\\": [\\n            0,\\n            0\\n          ],\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": \\\"[@brushRect:pointerdown, window:pointerup] > @brushRect:pointermove!\\\",\\n              \\\"update\\\": \\\"[x() - down[0],  y('overview') - down[1]]\\\"\\n            }\\n          ]\\n        },\\n        // Calculates and pushes X scale outward\\n        {\\n          \\\"name\\\": \\\"xDetailZoom\\\",\\n          \\\"push\\\": \\\"outer\\\",\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": {\\n                \\\"signal\\\": \\\"brush\\\"\\n              },\\n              \\\"update\\\": \\\"(span(brush[0]) ? invert('xOverview', brush[0]) : null)\\\"\\n            }\\n          ]\\n        },\\n        // Calculates and pushes Y scale outward\\n        {\\n          \\\"name\\\": \\\"yDetailZoom\\\",\\n          \\\"push\\\": \\\"outer\\\",\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": {\\n                \\\"signal\\\": \\\"brush\\\"\\n              },\\n              \\\"update\\\": \\\"(span(brush[1]) ? reverse(invert('yOverview', brush[1])) : null)\\\"\\n            }\\n          ]\\n        }\\n      ],\\n      \\\"scales\\\": [\\n        {\\n          \\\"name\\\": \\\"xOverview\\\",\\n          \\\"type\\\": \\\"time\\\",\\n          \\\"range\\\": [\\n            0,\\n            {\\n              \\\"signal\\\": \\\"graphWidth\\\"\\n            }\\n          ],\\n          \\\"nice\\\": true,\\n          \\\"domain\\\": {\\n            \\\"data\\\": \\\"markData\\\",\\n            \\\"field\\\": \\\"timestamp\\\"\\n          }\\n        },\\n        {\\n          \\\"name\\\": \\\"yOverview\\\",\\n          \\\"type\\\": \\\"symlog\\\",\\n          \\\"range\\\": [\\n            {\\n              \\\"signal\\\": \\\"lowerHeight\\\"\\n            },\\n            10\\n          ],\\n          \\\"nice\\\": true,\\n          \\\"domain\\\": {\\n            \\\"data\\\": \\\"markData\\\",\\n            \\\"field\\\": \\\"value\\\"\\n          }\\n        }\\n      ],\\n      \\\"axes\\\": [\\n        {\\n          \\\"scale\\\": \\\"xOverview\\\",\\n          \\\"orient\\\": \\\"bottom\\\",\\n          \\\"labels\\\": false\\n        },\\n        {\\n          \\\"scale\\\": \\\"yOverview\\\",\\n          \\\"orient\\\": \\\"left\\\",\\n          \\\"labels\\\": false\\n        }\\n      ],\\n      \\\"marks\\\": [\\n        {\\n          \\\"type\\\": \\\"group\\\",\\n          \\\"from\\\": {\\n            \\\"facet\\\": {\\n              \\\"name\\\": \\\"series\\\",\\n              \\\"data\\\": \\\"markData\\\",\\n              \\\"groupby\\\": \\\"addr\\\"\\n            }\\n          },\\n          \\\"marks\\\": [\\n            {\\n              \\\"type\\\": \\\"line\\\",\\n              \\\"interactive\\\": false,\\n              \\\"from\\\": {\\n                \\\"data\\\": \\\"series\\\"\\n              },\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"x\\\": {\\n                    \\\"scale\\\": \\\"xOverview\\\",\\n                    \\\"field\\\": \\\"timestamp\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"scale\\\": \\\"yOverview\\\",\\n                    \\\"field\\\": \\\"value\\\"\\n                  },\\n                  \\\"interpolate\\\": {\\n                    \\\"signal\\\": \\\"interpolate\\\"\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"opacity\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"value\\\": 1\\n                    },\\n                    {\\n                      \\\"value\\\": 0.25\\n                    }\\n                  ],\\n                  \\\"stroke\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"scale\\\": \\\"color\\\",\\n                      \\\"field\\\": \\\"addr\\\"\\n                    },\\n                    {\\n                      \\\"value\\\": \\\"#ccc\\\"\\n                    }\\n                  ]\\n                }\\n              }\\n            },\\n            {\\n              \\\"type\\\": \\\"symbol\\\",\\n              \\\"name\\\": \\\"infoDot\\\",\\n              \\\"from\\\": {\\n                \\\"data\\\": \\\"series\\\"\\n              },\\n              \\\"interactive\\\": false,\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"x\\\": {\\n                    \\\"scale\\\": \\\"xOverview\\\",\\n                    \\\"field\\\": \\\"timestamp\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"scale\\\": \\\"yOverview\\\",\\n                    \\\"field\\\": \\\"value\\\"\\n                  },\\n                  \\\"interpolate\\\": {\\n                    \\\"signal\\\": \\\"interpolate\\\"\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"opacity\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"value\\\": 1\\n                    },\\n                    {\\n                      \\\"value\\\": 0.25\\n                    }\\n                  ],\\n                  \\\"fill\\\": [\\n                    {\\n                      \\\"test\\\": \\\"!length(data('selected')) || indata('selected', 'value', datum.addr)\\\",\\n                      \\\"signal\\\": \\\"(datum.addr === hoveredTimestamp[0] && datum.timestamp === hoveredTimestamp[1]) ? 'orange' : scale('color', datum.addr)\\\"\\n                    }\\n                  ]\\n                }\\n              }\\n            },\\n            // Shows the selected points\\n            {\\n              \\\"type\\\": \\\"rect\\\",\\n              \\\"name\\\": \\\"brushRect\\\",\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"fill\\\": {\\n                    \\\"value\\\": \\\"#333\\\"\\n                  },\\n                  \\\"fillOpacity\\\": {\\n                    \\\"value\\\": 0.2\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"x\\\": {\\n                    \\\"signal\\\": \\\"brush[0][0]\\\"\\n                  },\\n                  \\\"x2\\\": {\\n                    \\\"signal\\\": \\\"brush[0][1]\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"signal\\\": \\\"brush[1][0]\\\"\\n                  },\\n                  \\\"y2\\\": {\\n                    \\\"signal\\\": \\\"brush[1][1]\\\"\\n                  }\\n                }\\n              }\\n            },\\n            {\\n              \\\"type\\\": \\\"rule\\\",\\n              \\\"interactive\\\": false,\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"y2\\\": {\\n                    \\\"signal\\\": \\\"lowerHeight + 10\\\"\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"x\\\": {\\n                    \\\"signal\\\": \\\"brush[0][0]\\\"\\n                  }\\n                }\\n              }\\n            },\\n            {\\n              \\\"type\\\": \\\"rule\\\",\\n              \\\"interactive\\\": false,\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"y2\\\": {\\n                    \\\"signal\\\": \\\"lowerHeight + 10\\\"\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"x\\\": {\\n                    \\\"signal\\\": \\\"brush[0][1]\\\"\\n                  }\\n                }\\n              }\\n            },\\n            {\\n              \\\"type\\\": \\\"rule\\\",\\n              \\\"interactive\\\": false,\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"x2\\\": {\\n                    \\\"signal\\\": \\\"graphWidth\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"signal\\\": \\\"lowerHeight\\\"\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"y\\\": {\\n                    \\\"signal\\\": \\\"brush[1][0]\\\"\\n                  }\\n                }\\n              }\\n            },\\n            {\\n              \\\"type\\\": \\\"rule\\\",\\n              \\\"interactive\\\": false,\\n              \\\"encode\\\": {\\n                \\\"enter\\\": {\\n                  \\\"x2\\\": {\\n                    \\\"signal\\\": \\\"graphWidth\\\"\\n                  },\\n                  \\\"y\\\": {\\n                    \\\"signal\\\": \\\"lowerHeight\\\"\\n                  }\\n                },\\n                \\\"update\\\": {\\n                  \\\"y\\\": {\\n                    \\\"signal\\\": \\\"brush[1][1]\\\"\\n                  }\\n                }\\n              }\\n            }\\n          ]\\n        }\\n      ]\\n    },\\n    /****** START IP SELECT TABLE ******/\\n    // We're doing a table since we can not (as of now) update binds dynamically\\n    {\\n      \\\"type\\\": \\\"group\\\",\\n      \\\"name\\\": \\\"ipSelect\\\",\\n      \\\"signals\\\": [\\n        {\\n          \\\"name\\\": \\\"scrollBarWidth\\\",\\n          \\\"update\\\": \\\"ipsToDisplay < minIps ? 0 : 12\\\"\\n        },\\n        {\\n          \\\"name\\\": \\\"scrollbarFillOpacity\\\",\\n          \\\"value\\\": 0.2,\\n          \\\"on\\\": [\\n            {\\n              \\\"events\\\": \\\"@rect-scrollbar:mouseover\\\",\\n              \\\"update\\\": \\\"0.4\\\"\\n            },\\n            {\\n              \\\"events\\\": \\\"@rect-scrollbar:mouseout\\\",\\n              \\\"update\\\": \\\"0.2\\\"\\n            }\\n          ]\\n        }\\n      ],\\n      \\\"scales\\\": [\\n        {\\n          \\\"name\\\": \\\"yScale\\\",\\n          \\\"type\\\": \\\"band\\\",\\n          \\\"domain\\\": {\\n            \\\"data\\\": \\\"ipSlice\\\",\\n            \\\"field\\\": \\\"destIp\\\",\\n            \\\"sort\\\": true\\n          },\\n          \\\"range\\\": [\\n            0,\\n            {\\n              \\\"signal\\\": \\\"rowHeight * length(data('ipSlice'))\\\"\\n            }\\n          ]\\n        }\\n      ],\\n      \\\"marks\\\": [\\n        {\\n          \\\"type\\\": \\\"text\\\",\\n          \\\"encode\\\": {\\n            \\\"enter\\\": {\\n              \\\"text\\\": {\\n                \\\"value\\\": \\\"IP Selection\\\"\\n              },\\n              \\\"width\\\": {\\n                \\\"signal\\\": \\\"width - ipSelectX - 20\\\"\\n              },\\n              \\\"x\\\": {\\n                \\\"signal\\\": \\\"ipSelectX\\\"\\n              },\\n              \\\"dy\\\": {\\n                \\\"value\\\": -5\\n              }\\n            }\\n          }\\n        },\\n        {\\n          \\\"name\\\": \\\"rule-scrolltrack-1\\\",\\n          \\\"type\\\": \\\"rule\\\",\\n          \\\"encode\\\": {\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\n                \\\"signal\\\": \\\"width - scrollBarWidth - 2\\\"\\n              },\\n              \\\"x2\\\": {\\n                \\\"signal\\\": \\\"width - scrollBarWidth - 2\\\"\\n              },\\n              \\\"y2\\\": {\\n                \\\"signal\\\": \\\"ipsScrollAreaHeight\\\"\\n              },\\n              \\\"stroke\\\": {\\n                \\\"value\\\": \\\"black\\\"\\n              },\\n              \\\"strokeWidth\\\": {\\n                \\\"signal\\\": \\\"!scrollBarWidth ? 0 : 0.2\\\"\\n              }\\n            }\\n          }\\n        },\\n        {\\n          \\\"name\\\": \\\"rule-scrolltrack-2\\\",\\n          \\\"type\\\": \\\"rule\\\",\\n          \\\"encode\\\": {\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\n                \\\"signal\\\": \\\"width\\\"\\n              },\\n              \\\"x2\\\": {\\n                \\\"signal\\\": \\\"width\\\"\\n              },\\n              \\\"y2\\\": {\\n                \\\"signal\\\": \\\"ipsScrollAreaHeight\\\"\\n              },\\n              \\\"stroke\\\": {\\n                \\\"value\\\": \\\"black\\\"\\n              },\\n              \\\"strokeWidth\\\": {\\n                \\\"signal\\\": \\\"!scrollBarWidth ? 0 : 0.2\\\"\\n              }\\n            }\\n          }\\n        },\\n        {\\n          \\\"name\\\": \\\"rect-scrollbar\\\",\\n          \\\"type\\\": \\\"rect\\\",\\n          \\\"encode\\\": {\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\n                \\\"signal\\\": \\\"width - scrollBarWidth - 1\\\"\\n              },\\n              \\\"y\\\": {\\n                \\\"scale\\\": \\\"ipsScaleScrollBarY\\\",\\n                \\\"signal\\\": \\\"ipsScrollPosition\\\"\\n              },\\n              \\\"width\\\": {\\n                \\\"signal\\\": \\\"scrollBarWidth\\\"\\n              },\\n              \\\"height\\\": {\\n                \\\"signal\\\": \\\"ipsScrollBarHeight\\\"\\n              },\\n              \\\"fill\\\": {\\n                \\\"value\\\": \\\"#666666\\\"\\n              },\\n              \\\"fillOpacity\\\": {\\n                \\\"signal\\\": \\\"scrollbarFillOpacity\\\"\\n              }\\n            }\\n          }\\n        },\\n        {\\n          \\\"name\\\": \\\"destIps-rect-cell\\\",\\n          \\\"type\\\": \\\"rect\\\",\\n          \\\"from\\\": {\\n            \\\"data\\\": \\\"ipSlice\\\"\\n          },\\n          \\\"encode\\\": {\\n            \\\"update\\\": {\\n              \\\"x\\\": {\\n                \\\"signal\\\": \\\"ipSelectX\\\"\\n              },\\n              \\\"x2\\\": {\\n                \\\"signal\\\": \\\"width - scrollBarWidth - 3\\\"\\n              },\\n              \\\"y\\\": {\\n                \\\"scale\\\": \\\"yScale\\\",\\n                \\\"field\\\": \\\"destIp\\\",\\n                \\\"band\\\": 0\\n              },\\n              \\\"cursor\\\": {\\n                \\\"value\\\": \\\"pointer\\\"\\n              },\\n              \\\"height\\\": {\\n                \\\"signal\\\": \\\"rowHeight\\\"\\n              },\\n              \\\"opacity\\\": [\\n                {\\n                  \\\"test\\\": \\\"datum.destIp === selectedIp\\\",\\n                  \\\"value\\\": 0.4\\n                },\\n                {\\n                  \\\"value\\\": 0.2\\n                }\\n              ]\\n            }\\n          }\\n        },\\n        {\\n          \\\"name\\\": \\\"destIps-text-content\\\",\\n          \\\"type\\\": \\\"text\\\",\\n          \\\"from\\\": {\\n            \\\"data\\\": \\\"ipSlice\\\"\\n          },\\n          \\\"encode\\\": {\\n            \\\"update\\\": {\\n              \\\"text\\\": {\\n                \\\"signal\\\": \\\"datum.destIp\\\"\\n              },\\n              \\\"x\\\": {\\n                \\\"signal\\\": \\\"ipSelectX\\\"\\n              },\\n              \\\"dx\\\": {\\n                \\\"value\\\": 5\\n              },\\n              \\\"y\\\": {\\n                \\\"scale\\\": \\\"yScale\\\",\\n                \\\"field\\\": \\\"destIp\\\",\\n                \\\"band\\\": 0.5\\n              },\\n              \\\"cursor\\\": {\\n                \\\"value\\\": \\\"pointer\\\"\\n              }\\n            }\\n          }\\n        }\\n      ]\\n    },\\n  ]\\n}\\n\"}}"
+      },
+      "id": "66f12790-cfa1-11f0-b77d-79037ad18c51",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwNSwxXQ==",
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-12-02T17:07:37.225Z",
+      "version": "WzEyODgsMV0="
+    },
+    {
       "attributes": {
-        "title": "BACnet  - Read and Write Property ",
-        "visState": "{\"title\":\"BACnet  - Read and Write Property \",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":6,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Property Value\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_property.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.instance_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Identifier\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_property.property\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Property Type\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_property.value\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Property Value\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"}}}}",
         "description": "Results from BACnet Read-Property and Write-Property Commands",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "BACnet  - Read and Write Property ",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"BACnet  - Read and Write Property \",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":6,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Property Value\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_property.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.instance_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Identifier\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_property.property\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Property Type\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.bacnet_property.value\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Property Value\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2"
-        }
-      ],
+      "id": "bfc334f0-ca05-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwNiwxXQ==",
+      "references": [
+        {
+          "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3MywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Logs",
-        "description": "",
-        "hits": 0,
         "columns": [
           "source.ip",
           "destination.ip",
@@ -510,40 +527,40 @@
           "zeek.bacnet.pdu_service",
           "zeek.bacnet.invoke_id"
         ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:bacnet\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
         "sort": [
           [
             "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:bacnet\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        "title": "BACnet - Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "search": "7.9.3"
-      }
-    },
-    {
-      "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwNywxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3NCwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Property Logs",
-        "description": "",
-        "hits": 0,
         "columns": [
           "source.ip",
           "destination.ip",
@@ -553,40 +570,40 @@
           "zeek.bacnet_property.property",
           "zeek.bacnet_property.value"
         ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:bacnet_property\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
         "sort": [
           [
             "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:bacnet_property\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        "title": "BACnet - Property Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "search": "7.9.3"
-      }
-    },
-    {
-      "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwOCwxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3NSwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet - Discovery Logs",
-        "description": "",
-        "hits": 0,
         "columns": [
           "source.ip",
           "destination.ip",
@@ -595,40 +612,40 @@
           "zeek.bacnet.instance_number",
           "zeek.bacnet_discovery.vendor"
         ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:bacnet_discovery\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
         "sort": [
           [
             "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:bacnet_discovery\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        "title": "BACnet - Discovery Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2",
       "migrationVersion": {
         "search": "7.9.3"
-      }
-    },
-    {
-      "id": "f28bbce0-25b0-11ee-98b1-ff2b1cf864b8",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T17:46:30.843Z",
-      "version": "WzIwOSwxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3NiwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "BACnet Device Control - Logs",
-        "description": "",
-        "hits": 0,
         "columns": [
           "source.ip",
           "destination.ip",
@@ -637,35 +654,35 @@
           "zeek.bacnet.invoke_id",
           "zeek.uid"
         ],
-        "sort": [],
-        "version": 1,
+        "description": "",
+        "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.dataset:bacnet_device_control\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        },
+        "sort": [],
+        "title": "BACnet Device Control - Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "f28bbce0-25b0-11ee-98b1-ff2b1cf864b8",
       "migrationVersion": {
         "search": "7.9.3"
-      }
-    },
-    {
-      "id": "065593f0-3257-11ef-8dd5-df3551cbe6ca",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-06-24T18:24:42.158Z",
-      "version": "Wzk4OCwxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-12-02T16:22:31.563Z",
+      "version": "WzQ3NywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "ACID on ATT&CK for ICS",
-        "description": "",
-        "hits": 0,
         "columns": [
           "network.protocol",
           "threat.tactic.name",
@@ -675,22 +692,33 @@
           "destination.ip",
           "event.id"
         ],
-        "sort": [],
-        "version": 1,
+        "description": "",
+        "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"threat.framework:\\\"MITRE ATT&CK for ICS\\\"\",\"language\":\"lucene\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        },
+        "sort": [],
+        "title": "ACID on ATT&CK for ICS",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "065593f0-3257-11ef-8dd5-df3551cbe6ca",
       "migrationVersion": {
         "search": "7.9.3"
-      }
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-12-02T16:23:40.797Z",
+      "version": "WzEyNDgsMV0="
     }
-  ]
+  ],
+  "version": "3.3.0"
 }
