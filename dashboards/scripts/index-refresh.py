@@ -411,7 +411,11 @@ def build_field_format_map(args, fields, prev_field_format_map):
         'related.role': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicerole'),
         'related.service': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.service'),
         'related.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
-        'zeek.files.extracted_uri': lambda: (args.malcolm_url + '/{{value}}') if args.malcolm_url else '',
+        'zeek.files.extracted_uri': lambda: (
+            (args.malcolm_url + '/{{value}}')
+            if (args.malcolm_url or (args.opensearch_mode != DatabaseMode.ElasticsearchRemote))
+            else ''
+        ),
     }
     field_map = {k: v for k, v in field_map.items() if v()}
 
@@ -436,9 +440,10 @@ def build_field_format_map(args, fields, prev_field_format_map):
             fmt['params'][
                 'urlTemplate'
             ] = f'{args.malcolm_url}/iddash2ark/{prefix}{name} == {val_quote}{{{{value}}}}{val_quote}'
+        else:
+            continue
 
-        if fmt['params'].get('urlTemplate', None) != None:
-            format_map[name] = fmt
+        format_map[name] = fmt
 
     return format_map
 
@@ -461,7 +466,7 @@ def update_dashboard_index_pattern(args, session, index_id, fields, field_format
                 'fieldFormatMap': json.dumps(field_format_map),
             }
         }
-        resp = session.put(f"{args.dashboards_url}/{OPENSEARCH_INDEX_PATTERN_URI}/{index_id}", json=payload)
+        resp = session.put(f"{args.dashboards_url}/{OPENSEARCH_INDEX_PATTERN_URI}/{index_id}", data=json.dumps(payload))
         resp.raise_for_status()
 
 
@@ -472,7 +477,7 @@ def fix_unassigned_shards(args, session):
         if len(shard_info) == 2 and shard_info[1] == SHARD_UNASSIGNED_STATUS:
             put_response = session.put(
                 f"{args.opensearch_url}/{shard_info[0]}/_settings",
-                json={'index': {'number_of_replicas': 0}},
+                data=json.dumps({'index': {'number_of_replicas': 0}}),
             )
             put_response.raise_for_status()
 
