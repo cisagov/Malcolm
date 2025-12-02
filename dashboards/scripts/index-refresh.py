@@ -4,6 +4,7 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
+import json
 import logging
 import malcolm_utils
 import re
@@ -456,8 +457,8 @@ def update_dashboard_index_pattern(args, session, index_id, fields, field_format
         payload = {
             'attributes': {
                 'title': args.index,
-                'fields': fields,
-                'fieldFormatMap': field_format_map,
+                'fields': json.dumps(fields),
+                'fieldFormatMap': json.dumps(field_format_map),
             }
         }
         resp = session.put(f"{args.dashboards_url}/{OPENSEARCH_INDEX_PATTERN_URI}/{index_id}", json=payload)
