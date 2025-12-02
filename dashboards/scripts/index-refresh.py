@@ -460,7 +460,7 @@ def update_dashboard_index_pattern(args, session, index_id, fields, field_format
                 'fieldFormatMap': field_format_map,
             }
         }
-        resp = session.put(f"{args.dashboards_url}/{OPENSEARCH_INDEX_PATTERN_URI}/{index_id}", json=put_index_info)
+        resp = session.put(f"{args.dashboards_url}/{OPENSEARCH_INDEX_PATTERN_URI}/{index_id}", json=payload)
         resp.raise_for_status()
 
 
