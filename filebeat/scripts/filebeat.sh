@@ -7,10 +7,12 @@ if [[ ! ${LOGSTASH_HOST+x} ]]; then
   LOGSTASH_HOST="logstash:5044"
 fi
 
-if [[ -z "${LOGSTASH_HOST}" ]]; then
-  # LOGSTASH_HOST exists, but is empty, implying we are generating logs
-  #   but *not* forwarding them. Just sleep.
+if [[ -z "${LOGSTASH_HOST}" ]] || [[ "${LOGSTASH_HOST,,}" == "disabled" ]]; then
+  # LOGSTASH_HOST exists, but is empty, or is explicitly disabled,
+  # implying we are generating logs but *not* forwarding them. Just sleep.
+  echo "No Logstash host specified, going to sleep" >&2
   sleep infinity
+  exit 1
 
 else
   PATH_HOME=

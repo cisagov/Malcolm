@@ -552,7 +552,7 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - **Capture Live Traffic with tcpdump**
         + Select **Y** to use [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng) to generate PCAP files to be periodically rotated into Arkime for analysis.
     - **Capture Live Traffic with Arkime**
-        + When running the ["Hedgehog" run profile](live-analysis.md#Profiles), when using [a remote OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance), or in a [Kubernetes-based deployment](kubernetes.md#Kubernetes), users may choose to have Arkime's `capture` tool monitor live traffic on the network interface without using netsniff-ng or tcpdump to generate intermediate PCAP files. See [**Live Analysis**](live-analysis.md#LocalPCAP) for more information.
+        + When running the ["Hedgehog" run profile](live-analysis.md#Profiles), when using [a remote OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance), or in a [Kubernetes-based deployment](kubernetes.md#Kubernetes), users may choose to have Arkime's `capture` tool monitor live traffic on the network interface without using netsniff-ng or tcpdump to generate intermediate PCAP files. See [**Live Analysis**](live-analysis.md#LocalPCAP) for more information. If the sensor is capturing locally but *not* forwarding to a Malcolm aggregator, use netsniff-ng or tcpdump instead.
     - **Gather Traffic Capture Statistics**
         + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users enable this setting, Malcolm will gather capture statistics for [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats) to populate the **Packet Capture Statistics** dashboard.
     - **Optimize Interface Settings for Capture**
@@ -624,9 +624,9 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
             * **Primary OpenSearch/Elasticsearch URL**
                 * The URL of the remote OpenSearch/Elasticsearch instance to be used as the data store (e.g., `https://malcolm.example.org:9200` or `https://service.whatever.org/elasticsearch/`)
             * **Logstash Host**
-                * The IP address or hostname of the Malcolm aggregator, a colon (`:`), and the Logstash port (5044).
+                * The IP address or hostname of the Malcolm aggregator, a colon (`:`), and the Logstash port (5044). If the sensor is capturing locally but *not* forwarding to a Malcolm aggregator, explicitly set this to `disabled`.
             * **Arkime WISE URL**
-                * The URL for the Malcolm aggregator's [Arkime WISE](arkime.md#ArkimeWISE) service.
+                * The URL for the Malcolm aggregator's [Arkime WISE](arkime.md#ArkimeWISE) service. If the sensor is capturing locally but *not* forwarding to a Malcolm aggregator, explicitly set this to `disabled`.
             * **Malcolm Reachback ACL**
                 * A list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](file-scanning.md#ZeekFileExtraction). Minimally, this list should include the IP address of the Malcolm aggregator. This is only automatically populated from **Remote Malcolm Hostname or IP** if its value is an IP address.
     * **NetBox Site Name**
