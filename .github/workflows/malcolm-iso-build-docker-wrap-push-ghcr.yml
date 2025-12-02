@@ -17,7 +17,7 @@ on:
       - '!shared/bin/suricata*'
       - '.trigger_iso_workflow_build'
       - '.github/workflows/iso-build-push.yml'
-      - '.github/workflows/malcolm-hedgehog-profile-iso-build-docker-wrap-push-ghcr.yml'
+      - '.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
 
