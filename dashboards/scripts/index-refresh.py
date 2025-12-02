@@ -72,6 +72,15 @@ def parse_args():
         help='OpenSearch URL',
     )
     parser.add_argument(
+        '-m',
+        '--malcolm',
+        dest='malcolm_url',
+        metavar='<protocol://host:port>',
+        type=str,
+        default=os.getenv('MALCOLM_URL', None),
+        help='Malcolm URL (only used for --opensearch-mode elasticsearch-remote)',
+    )
+    parser.add_argument(
         '-b',
         '--netbox-url',
         dest='netbox_url',
@@ -350,7 +359,8 @@ def build_field_format_map(args, fields, prev_field_format_map):
         'related.role': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicerole'),
         'related.service': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.service'),
         'related.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
-        'zeek.files.extracted_uri': lambda: '/{{value}}',
+        'zeek.files.extracted_uri': lambda: f'{malcolm_utils.remove_suffix(args.malcolm_url, '/') if (args.malcolm_url and (args.opensearch_mode == DatabaseMode.ElasticsearchRemote)) else ''}'
+        + '/{{value}}',
     }
 
     for f in [
