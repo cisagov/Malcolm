@@ -124,7 +124,6 @@ if mkdir "$DESTDIR"; then
   # these scripts go in both the tarball and the run path
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/install.py "$RUN_PATH/"
-  cp $VERBOSE ./scripts/legacy_install.py "$RUN_PATH/"
   git ls-files ./scripts/installer | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
   rm -rf "$DESTDIR/"scripts/installer/tests "$DESTDIR/"scripts/installer/ui/gui
   pushd "./scripts" >/dev/null 2>&1
