@@ -30,6 +30,9 @@ from scripts.malcolm_constants import (
     MALCOLM_DB_DIR,
     MALCOLM_LOGS_DIR,
     MALCOLM_PCAP_DIR,
+    PROFILE_KEY,
+    PROFILE_MALCOLM,
+    PROFILE_HEDGEHOG,
     OrchestrationFramework,
     PresentationMode,
     SettingsFileFormat,
@@ -498,7 +501,23 @@ def main():
             and sys.stdin.isatty()
             and sys.stdout.isatty()
         ):
-            splash_screen()
+            # just "peek" at PROFILE process.env in the default config directory
+            #   we haven't loaded the config yet, or even imported python-dotenv,
+            #   so we're doing this the caveman way
+            splash_profile = PROFILE_MALCOLM
+            process_env_file = os.path.join(get_default_config_dir(), "process.env")
+            if os.path.isfile(process_env_file):
+                with open(process_env_file) as f:
+                    for line in f:
+                        if line.startswith(f"{PROFILE_KEY}="):
+                            splash_profile_tmp = line.split("=", 1)[1].strip()
+                            splash_profile = (
+                                splash_profile_tmp
+                                if splash_profile_tmp in (PROFILE_MALCOLM, PROFILE_HEDGEHOG)
+                                else PROFILE_MALCOLM
+                            )
+                            break
+            splash_screen(profile=splash_profile)
     except Exception:
         # Splash is non-critical; ignore failures
         pass
