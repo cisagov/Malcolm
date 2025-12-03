@@ -114,7 +114,7 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
             * [Issue and feature tracking](https://github.com/cisagov/malcolm/issues?q=is%3Aissue+is%3Aopen+-label%3Atraining)
             * [Project roadmap tracking](https://github.com/orgs/cisagov/projects/98)
         + Beyond engagement via the forums listed here, no expectation of any particular level of support should be assumed.
-* User experience/UI/intuitive
+* User experience and interface
     - Malcolm's user-friendly analyst-facing interfaces are accessible via an easy-to-nagivate [landing page](images/screenshots/malcolm_landing_page.png).
     - Malcolm's [documentation](README.md) is robust and usable.
     - A series of [YouTube videos](https://www.youtube.com/@malcolmnetworktrafficanalysis/playlists) are being developed for a [variety of topics](https://github.com/idaholab/Malcolm/wiki/Malcolm-Learning-Tree).
