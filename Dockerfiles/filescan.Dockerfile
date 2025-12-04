@@ -105,6 +105,7 @@ RUN set -e ; \
       libssl3 \
       libtool \
       make \
+      openssl \
       pkg-config \
       psmisc \
       rsync \
