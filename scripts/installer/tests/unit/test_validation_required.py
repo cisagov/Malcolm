@@ -12,31 +12,32 @@ import unittest
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.core.validation import validate_required
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
-    KEY_CONFIG_ITEM_DASHBOARDS_URL,
-    KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
-    KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
-    KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
-    KEY_CONFIG_ITEM_TRAEFIK_LABELS,
-    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
-    KEY_CONFIG_ITEM_TRAEFIK_HOST,
-    KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
-    KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
-    KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-    KEY_CONFIG_ITEM_PCAP_IFACE,
-    KEY_CONFIG_ITEM_NETBOX_MODE,
-    KEY_CONFIG_ITEM_NETBOX_URL,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
-    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
-    KEY_CONFIG_ITEM_PCAP_DIR,
-    KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
-    KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+    KEY_CONFIG_ITEM_DASHBOARDS_URL,
+    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
+    KEY_CONFIG_ITEM_FILESCAN_DATA_DIR,
     KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_LOGSTASH_HOST,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_NETBOX_MODE,
+    KEY_CONFIG_ITEM_NETBOX_URL,
+    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
+    KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
+    KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
+    KEY_CONFIG_ITEM_PCAP_DIR,
+    KEY_CONFIG_ITEM_PCAP_IFACE,
+    KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
+    KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+    KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
+    KEY_CONFIG_ITEM_TRAEFIK_HOST,
+    KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+    KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
+    KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
+    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
+    KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
 )
 from scripts.installer.configs.constants.enums import SearchEngineMode, NetboxMode
 
@@ -220,19 +221,23 @@ class TestValidationRequired(unittest.TestCase):
         # All three directories should be required and visible
         self.assertIn(KEY_CONFIG_ITEM_PCAP_DIR, keys)
         self.assertIn(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, keys)
+        self.assertIn(KEY_CONFIG_ITEM_FILESCAN_DATA_DIR, keys)
         self.assertIn(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, keys)
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_PCAP_DIR))
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_ZEEK_LOG_DIR))
+        self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_FILESCAN_DATA_DIR))
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_SURICATA_LOG_DIR))
 
         # Setting values via set_value satisfies the is_modified requirement
         self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_DIR, "/data/pcap")
         self.cfg.set_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, "/data/zeek")
+        self.cfg.set_value(KEY_CONFIG_ITEM_FILESCAN_DATA_DIR, "/data/filescan-data")
         self.cfg.set_value(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, "/data/suricata")
         issues = validate_required(self.cfg)
         keys = _issue_keys(issues)
         self.assertNotIn(KEY_CONFIG_ITEM_PCAP_DIR, keys)
         self.assertNotIn(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, keys)
+        self.assertNotIn(KEY_CONFIG_ITEM_FILESCAN_DATA_DIR, keys)
         self.assertNotIn(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, keys)
 
     # ---------------------- Index/Snapshot directories ----------------------

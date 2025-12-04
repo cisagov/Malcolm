@@ -48,6 +48,7 @@ from typing import Tuple, List, Optional
 from pathlib import Path
 
 from scripts.malcolm_constants import (
+    DEFAULT_FILESCAN_DATA_DIR,
     DEFAULT_INDEX_DIR,
     DEFAULT_INDEX_SNAPSHOT_DIR,
     DEFAULT_PCAP_DIR,
@@ -55,6 +56,9 @@ from scripts.malcolm_constants import (
     DEFAULT_ZEEK_LOG_DIR,
     FILEBEAT_SURICATA_LOG_CONTAINER_PATH,
     FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
+    FILEBEAT_FILESCAN_DATA_LOGS_PATH,
+    FILESCAN_DATA_LOGS_CONTAINER_PATH,
+    FILESCAN_DATA_FILES_CONTAINER_PATH,
     ImageArchitecture,
     MALCOLM_VERSION,
     OPENSEARCH_BACKUP_CONTAINER_PATH,
@@ -315,6 +319,7 @@ def BuildBoundPathReplacers(
     pcap_dir=DEFAULT_PCAP_DIR,
     suricata_log_dir=DEFAULT_SURICATA_LOG_DIR,
     zeek_log_dir=DEFAULT_ZEEK_LOG_DIR,
+    filescan_data_dir=DEFAULT_FILESCAN_DATA_DIR,
     index_dir=DEFAULT_INDEX_DIR,
     index_snapshot_dir=DEFAULT_INDEX_SNAPSHOT_DIR,
 ):
@@ -323,21 +328,24 @@ def BuildBoundPathReplacers(
         BoundPathReplacer("arkime-live", PCAP_DATA_CONTAINER_PATH, pcap_dir),
         BoundPathReplacer("filebeat", FILEBEAT_SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
         BoundPathReplacer("filebeat", FILEBEAT_ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
+        BoundPathReplacer("filebeat", FILEBEAT_FILESCAN_DATA_LOGS_PATH, os.path.join(filescan_data_dir, 'logs')),
+        BoundPathReplacer("filescan", FILESCAN_DATA_FILES_CONTAINER_PATH, os.path.join(filescan_data_dir, 'files')),
+        BoundPathReplacer("filescan", FILESCAN_DATA_LOGS_CONTAINER_PATH, os.path.join(filescan_data_dir, 'logs')),
         BoundPathReplacer("filescan", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
-        BoundPathReplacer("opensearch", OPENSEARCH_DATA_CONTAINER_PATH, index_dir),
         BoundPathReplacer("opensearch", OPENSEARCH_BACKUP_CONTAINER_PATH, index_snapshot_dir),
+        BoundPathReplacer("opensearch", OPENSEARCH_DATA_CONTAINER_PATH, index_dir),
         BoundPathReplacer("pcap-capture", PCAP_CAPTURE_CONTAINER_PATH, os.path.join(pcap_dir, 'upload')),
-        BoundPathReplacer("pcap-monitor", PCAP_CAPTURE_CONTAINER_PATH, pcap_dir),
         BoundPathReplacer("pcap-monitor", FILEBEAT_ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
+        BoundPathReplacer("pcap-monitor", PCAP_CAPTURE_CONTAINER_PATH, pcap_dir),
         BoundPathReplacer("suricata", PCAP_DATA_CONTAINER_PATH, pcap_dir),
         BoundPathReplacer("suricata", SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
         BoundPathReplacer("suricata-live", SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
         BoundPathReplacer("upload", UPLOAD_ARTIFACT_CONTAINER_PATH, os.path.join(pcap_dir, 'upload')),
         BoundPathReplacer("zeek", PCAP_CAPTURE_CONTAINER_PATH, pcap_dir),
-        BoundPathReplacer("zeek", ZEEK_LOG_UPLOAD_CONTAINER_PATH, os.path.join(zeek_log_dir, 'upload')),
         BoundPathReplacer("zeek", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
-        BoundPathReplacer("zeek-live", ZEEK_LIVE_LOG_CONTAINER_PATH, os.path.join(zeek_log_dir, 'live')),
+        BoundPathReplacer("zeek", ZEEK_LOG_UPLOAD_CONTAINER_PATH, os.path.join(zeek_log_dir, 'upload')),
         BoundPathReplacer("zeek-live", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
+        BoundPathReplacer("zeek-live", ZEEK_LIVE_LOG_CONTAINER_PATH, os.path.join(zeek_log_dir, 'live')),
     )
 
 

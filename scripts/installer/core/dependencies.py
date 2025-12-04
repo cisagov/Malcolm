@@ -1356,6 +1356,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
         )
     ),
+    KEY_CONFIG_ITEM_FILESCAN_DATA_DIR: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
+            condition=lambda use_default: not use_default,
+            ui_parent=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
+        )
+    ),
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,

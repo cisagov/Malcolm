@@ -27,6 +27,7 @@ from scripts.malcolm_constants import (
     DEFAULT_INDEX_SNAPSHOT_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
+    DEFAULT_FILESCAN_DATA_DIR,
     MALCOLM_DB_DIR,
     MALCOLM_LOGS_DIR,
     MALCOLM_PCAP_DIR,
@@ -157,7 +158,7 @@ def handle_artifact_path_preseed_file(malcolm_config):
 
                 dirs_to_create = {
                     MALCOLM_DB_DIR: [DEFAULT_INDEX_DIR, DEFAULT_INDEX_SNAPSHOT_DIR],
-                    MALCOLM_LOGS_DIR: [DEFAULT_ZEEK_LOG_DIR, DEFAULT_SURICATA_LOG_DIR],
+                    MALCOLM_LOGS_DIR: [DEFAULT_ZEEK_LOG_DIR, DEFAULT_SURICATA_LOG_DIR, DEFAULT_FILESCAN_DATA_DIR],
                 }
                 for base_key, subdirs in dirs_to_create.items():
                     if base_path := disk_format_info.get(base_key):
@@ -170,6 +171,7 @@ def handle_artifact_path_preseed_file(malcolm_config):
                     (MALCOLM_PCAP_DIR, None, KEY_CONFIG_ITEM_PCAP_DIR, False),
                     (MALCOLM_LOGS_DIR, DEFAULT_SURICATA_LOG_DIR, KEY_CONFIG_ITEM_SURICATA_LOG_DIR, True),
                     (MALCOLM_LOGS_DIR, DEFAULT_ZEEK_LOG_DIR, KEY_CONFIG_ITEM_ZEEK_LOG_DIR, True),
+                    (MALCOLM_LOGS_DIR, DEFAULT_FILESCAN_DATA_DIR, KEY_CONFIG_ITEM_FILESCAN_DATA_DIR, True),
                 ]
                 default_storage = True
                 for base_key, subdir, config_key, path_must_exist in paths_to_check:

@@ -100,6 +100,9 @@ COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS = "logs"
 # Container paths (inside containers) used for volume mappings
 FILEBEAT_SURICATA_LOG_CONTAINER_PATH = "/suricata"
 FILEBEAT_ZEEK_LOG_CONTAINER_PATH = "/zeek"
+FILEBEAT_FILESCAN_DATA_LOGS_PATH = "/filescan"
+FILESCAN_DATA_LOGS_CONTAINER_PATH = "/filescan/data/logs"
+FILESCAN_DATA_FILES_CONTAINER_PATH = "/filescan/data/files"
 OPENSEARCH_BACKUP_CONTAINER_PATH = "/opt/opensearch/backup"
 OPENSEARCH_DATA_CONTAINER_PATH = "/usr/share/opensearch/data"
 PCAP_CAPTURE_CONTAINER_PATH = "/pcap"
@@ -111,11 +114,12 @@ ZEEK_LIVE_LOG_CONTAINER_PATH = "/zeek/live"
 ZEEK_LOG_UPLOAD_CONTAINER_PATH = "/zeek/upload"
 
 # Default host directories when config values are not set
-DEFAULT_PCAP_DIR = "./pcap"
-DEFAULT_ZEEK_LOG_DIR = "./zeek-logs"
-DEFAULT_SURICATA_LOG_DIR = "./suricata-logs"
+DEFAULT_FILESCAN_DATA_DIR = "./filescan-data"
 DEFAULT_INDEX_DIR = "./opensearch"
 DEFAULT_INDEX_SNAPSHOT_DIR = "./opensearch-backup"
+DEFAULT_PCAP_DIR = "./pcap"
+DEFAULT_SURICATA_LOG_DIR = "./suricata-logs"
+DEFAULT_ZEEK_LOG_DIR = "./zeek-logs"
 
 
 ###################################################################################################
