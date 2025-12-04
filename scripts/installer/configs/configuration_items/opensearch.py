@@ -22,8 +22,6 @@ from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
-    KEY_CONFIG_ITEM_INDEX_DIR,
-    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_SSL_VERIFY,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
@@ -62,24 +60,6 @@ CONFIG_ITEM_OS_MEMORY = ConfigItem(
     validator=lambda x: isinstance(x, str) and bool(re.fullmatch(r'\d+([kKmMgG])?', x)),
     question="Memory allocation for OpenSearch (e.g., 16g, 9500m, etc.)",
     widget_type=WidgetType.TEXT,
-)
-
-CONFIG_ITEM_INDEX_DIR = ConfigItem(
-    key=KEY_CONFIG_ITEM_INDEX_DIR,
-    label="OpenSearch Index Directory",
-    default_value="",
-    validator=lambda x: isinstance(x, str),
-    question="OpenSearch index directory",
-    widget_type=WidgetType.DIRECTORY,
-)
-
-CONFIG_ITEM_INDEX_SNAPSHOT_DIR = ConfigItem(
-    key=KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-    label="OpenSearch Snapshot Directory",
-    default_value="",
-    validator=lambda x: isinstance(x, str),
-    question="OpenSearch index snapshots directory",
-    widget_type=WidgetType.DIRECTORY,
 )
 
 CONFIG_ITEM_OPENSEARCH_PRIMARY_URL = ConfigItem(

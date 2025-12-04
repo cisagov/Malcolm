@@ -48,7 +48,7 @@ from typing import Tuple, List, Optional
 from pathlib import Path
 
 from scripts.malcolm_constants import (
-    DEFAULT_FILESCAN_DATA_DIR,
+    DEFAULT_FILESCAN_LOG_DIR,
     DEFAULT_INDEX_DIR,
     DEFAULT_INDEX_SNAPSHOT_DIR,
     DEFAULT_PCAP_DIR,
@@ -56,9 +56,8 @@ from scripts.malcolm_constants import (
     DEFAULT_ZEEK_LOG_DIR,
     FILEBEAT_SURICATA_LOG_CONTAINER_PATH,
     FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
-    FILEBEAT_FILESCAN_DATA_LOGS_PATH,
-    FILESCAN_DATA_LOGS_CONTAINER_PATH,
-    FILESCAN_DATA_FILES_CONTAINER_PATH,
+    FILEBEAT_FILESCAN_LOG_PATH,
+    FILESCAN_LOG_CONTAINER_PATH,
     ImageArchitecture,
     MALCOLM_VERSION,
     OPENSEARCH_BACKUP_CONTAINER_PATH,
@@ -319,7 +318,7 @@ def BuildBoundPathReplacers(
     pcap_dir=DEFAULT_PCAP_DIR,
     suricata_log_dir=DEFAULT_SURICATA_LOG_DIR,
     zeek_log_dir=DEFAULT_ZEEK_LOG_DIR,
-    filescan_data_dir=DEFAULT_FILESCAN_DATA_DIR,
+    filescan_log_dir=DEFAULT_FILESCAN_LOG_DIR,
     index_dir=DEFAULT_INDEX_DIR,
     index_snapshot_dir=DEFAULT_INDEX_SNAPSHOT_DIR,
 ):
@@ -328,9 +327,8 @@ def BuildBoundPathReplacers(
         BoundPathReplacer("arkime-live", PCAP_DATA_CONTAINER_PATH, pcap_dir),
         BoundPathReplacer("filebeat", FILEBEAT_SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
         BoundPathReplacer("filebeat", FILEBEAT_ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
-        BoundPathReplacer("filebeat", FILEBEAT_FILESCAN_DATA_LOGS_PATH, os.path.join(filescan_data_dir, 'logs')),
-        BoundPathReplacer("filescan", FILESCAN_DATA_FILES_CONTAINER_PATH, os.path.join(filescan_data_dir, 'files')),
-        BoundPathReplacer("filescan", FILESCAN_DATA_LOGS_CONTAINER_PATH, os.path.join(filescan_data_dir, 'logs')),
+        BoundPathReplacer("filebeat", FILEBEAT_FILESCAN_LOG_PATH, filescan_log_dir),
+        BoundPathReplacer("filescan", FILESCAN_LOG_CONTAINER_PATH, filescan_log_dir),
         BoundPathReplacer("filescan", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
         BoundPathReplacer("opensearch", OPENSEARCH_BACKUP_CONTAINER_PATH, index_snapshot_dir),
         BoundPathReplacer("opensearch", OPENSEARCH_DATA_CONTAINER_PATH, index_dir),
@@ -1741,6 +1739,7 @@ LOG_IGNORE_REGEX = re.compile(
   | use_field_mapping
   | Using\s+geoip\s+database
   | Warning:\s+app-layer-
+  | WARNING:\s+This\s+is\s+a\s+development\s+server
   | you\s+may\s+need\s+to\s+run\s+securityadmin
 )
 """,

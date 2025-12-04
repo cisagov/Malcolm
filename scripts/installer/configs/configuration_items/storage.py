@@ -19,7 +19,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
     KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD,
     KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD,
-    KEY_CONFIG_ITEM_FILESCAN_DATA_DIR,
+    KEY_CONFIG_ITEM_FILESCAN_LOG_DIR,
+    KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS,
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM,
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD,
@@ -29,6 +30,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION,
     KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT,
     KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
+    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_PRUNE_LOGS,
     KEY_CONFIG_ITEM_PRUNE_PCAP,
@@ -64,12 +66,33 @@ CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS = ConfigItem(
     widget_type=WidgetType.CHECKBOX,
 )
 
+CONFIG_ITEM_INDEX_DIR = ConfigItem(
+    key=KEY_CONFIG_ITEM_INDEX_DIR,
+    label="OpenSearch Index Directory",
+    default_value="",
+    accept_blank=True,
+    validator=lambda x: isinstance(x, str),
+    question="OpenSearch index directory (blank for the default storage directory)",
+    widget_type=WidgetType.DIRECTORY,
+)
+
+CONFIG_ITEM_INDEX_SNAPSHOT_DIR = ConfigItem(
+    key=KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
+    label="OpenSearch Snapshot Directory",
+    default_value="",
+    accept_blank=True,
+    validator=lambda x: isinstance(x, str),
+    question="OpenSearch index snapshots directory (blank for the default storage directory)",
+    widget_type=WidgetType.DIRECTORY,
+)
+
 CONFIG_ITEM_PCAP_DIR = ConfigItem(
     key=KEY_CONFIG_ITEM_PCAP_DIR,
     label="PCAP Directory",
     default_value="",
+    accept_blank=True,
     validator=lambda x: isinstance(x, str),
-    question="PCAP storage directory",
+    question="PCAP storage directory (blank for the default storage directory)",
     widget_type=WidgetType.DIRECTORY,
 )
 
@@ -77,17 +100,19 @@ CONFIG_ITEM_ZEEK_LOG_DIR = ConfigItem(
     key=KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
     label="Zeek Log Directory",
     default_value="",
+    accept_blank=True,
     validator=lambda x: isinstance(x, str),
-    question="Zeek log storage directory",
+    question="Zeek log storage directory (blank for the default storage directory)",
     widget_type=WidgetType.DIRECTORY,
 )
 
-CONFIG_ITEM_FILESCAN_DATA_DIR = ConfigItem(
-    key=KEY_CONFIG_ITEM_FILESCAN_DATA_DIR,
-    label="Scanned Files Data Directory",
+CONFIG_ITEM_FILESCAN_LOG_DIR = ConfigItem(
+    key=KEY_CONFIG_ITEM_FILESCAN_LOG_DIR,
+    label="File Scanning Log Directory",
     default_value="",
+    accept_blank=True,
     validator=lambda x: isinstance(x, str),
-    question="Scanned files storage directory",
+    question="File scanning log storage directory (blank for the default storage directory)",
     widget_type=WidgetType.DIRECTORY,
 )
 
@@ -95,8 +120,9 @@ CONFIG_ITEM_SURICATA_LOG_DIR = ConfigItem(
     key=KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     label="Suricata Log Directory",
     default_value="",
+    accept_blank=True,
     validator=lambda x: isinstance(x, str),
-    question="Suricata log storage directory",
+    question="Suricata log storage directory (blank for the default storage directory)",
     widget_type=WidgetType.DIRECTORY,
 )
 

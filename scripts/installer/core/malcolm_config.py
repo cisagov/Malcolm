@@ -37,17 +37,16 @@ from scripts.malcolm_constants import (
     COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
 )
 from scripts.malcolm_common import (
-    DEFAULT_FILESCAN_DATA_DIR,
+    DEFAULT_FILESCAN_LOG_DIR,
     DEFAULT_INDEX_DIR,
     DEFAULT_INDEX_SNAPSHOT_DIR,
     DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
     DotEnvDynamic,
-    FILEBEAT_FILESCAN_DATA_LOGS_PATH,
+    FILEBEAT_FILESCAN_LOG_PATH,
     FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
-    FILESCAN_DATA_LOGS_CONTAINER_PATH,
-    FILESCAN_DATA_FILES_CONTAINER_PATH,
+    FILESCAN_LOG_CONTAINER_PATH,
     get_default_config_dir,
     LocalPathForContainerBindMount,
     OPENSEARCH_BACKUP_CONTAINER_PATH,
@@ -813,49 +812,37 @@ class MalcolmConfig(ObservableStoreMixin):
         compose_data: Dict[Any, Any],
         compose_file_name: str,
     ):
-        def parent_path(path_str, levels_up):
-            p = Path(path_str)
-            for _ in range(levels_up):
-                p = p.parent
-            return str(p)
-
         custom_path = False
         for config_key, service_tuple in {
             KEY_CONFIG_ITEM_PCAP_DIR: (
                 "arkime",
                 PCAP_DATA_CONTAINER_PATH,
                 os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_PCAP_DIR)),
-                0,
             ),
             KEY_CONFIG_ITEM_ZEEK_LOG_DIR: (
                 "filebeat",
                 FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
                 os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_ZEEK_LOG_DIR)),
-                0,
             ),
-            KEY_CONFIG_ITEM_FILESCAN_DATA_DIR: (
+            KEY_CONFIG_ITEM_FILESCAN_LOG_DIR: (
                 "filescan",
-                FILESCAN_DATA_LOGS_CONTAINER_PATH,
-                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_FILESCAN_DATA_DIR)),
-                1,
+                FILESCAN_LOG_CONTAINER_PATH,
+                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_FILESCAN_LOG_DIR)),
             ),
             KEY_CONFIG_ITEM_SURICATA_LOG_DIR: (
                 "suricata",
                 SURICATA_LOG_CONTAINER_PATH,
                 os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_SURICATA_LOG_DIR)),
-                0,
             ),
             KEY_CONFIG_ITEM_INDEX_DIR: (
                 "opensearch",
                 OPENSEARCH_DATA_CONTAINER_PATH,
                 os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_INDEX_DIR)),
-                0,
             ),
             KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR: (
                 "opensearch",
                 OPENSEARCH_BACKUP_CONTAINER_PATH,
                 os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_INDEX_SNAPSHOT_DIR)),
-                0,
             ),
         }.items():
             if local_path := LocalPathForContainerBindMount(
@@ -864,9 +851,8 @@ class MalcolmConfig(ObservableStoreMixin):
                 service_tuple[1],
                 os.path.dirname(compose_file_name),
             ):
-                resolved_local_path = parent_path(local_path, service_tuple[3])
-                if not same_file_or_dir(resolved_local_path, service_tuple[2]):
-                    self.apply_default(config_key, resolved_local_path, ignore_errors=True)
+                if not same_file_or_dir(local_path, service_tuple[2]):
+                    self.apply_default(config_key, local_path, ignore_errors=True)
                     custom_path = True
         if custom_path:
             self.apply_default(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, ignore_errors=True)

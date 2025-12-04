@@ -1356,7 +1356,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
         )
     ),
-    KEY_CONFIG_ITEM_FILESCAN_DATA_DIR: DependencySpec(
+    KEY_CONFIG_ITEM_FILESCAN_LOG_DIR: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
             condition=lambda use_default: not use_default,

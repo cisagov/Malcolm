@@ -47,7 +47,7 @@ zeek-logs
 suricata-logs
 redis
 postgres
-filescan-data
+filescan-logs
 netbox/media
 netbox/custom-plugins
 zeek/custom

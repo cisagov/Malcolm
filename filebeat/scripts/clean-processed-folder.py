@@ -33,6 +33,8 @@ zeek_processed_dir = os.path.join(zeek_dir, "processed/")
 
 suricata_dir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/"), '')
 
+filescan_dir = os.path.join(os.getenv('FILEBEAT_FILESCAN_LOG_PATH', "/filescan/"), '')
+
 # We're only able to do this pruning because we're forwarding the logs along to Logstash
 #   so they're not needed here anymore. If we're *not* forwarding, we can't delete them
 #   based on age like that.
@@ -245,9 +247,14 @@ def prune_files() -> None:
     logging.debug(f"Found {len(suricata_files)} Suricata files to consider.")
     process_files(suricata_files, fb_files, check_logs=True, check_archives=False, label="Suricata")
 
+    # check the filescan logs
+    filescan_files = list_files_in_dir(filescan_dir)
+    logging.debug(f"Found {len(filescan_files)} filescan files to consider.")
+    process_files(filescan_files, fb_files, check_logs=True, check_archives=False, label="Filescan")
+
     # clean up any old and empty directories in Zeek processed/ and suricata non-live directories
     clean_dir_seconds = min(i for i in (clean_log_seconds, clean_zip_seconds) if i > 0)
-    cleanup_empty_dirs([zeek_processed_dir, suricata_dir], clean_dir_seconds)
+    cleanup_empty_dirs([zeek_processed_dir, filescan_dir, suricata_dir], clean_dir_seconds)
 
     logging.debug("Finished pruning files.")
 

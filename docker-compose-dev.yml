@@ -347,7 +347,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./filescan-data/logs
+      source: ./filescan-logs
       target: /filescan
     - type: bind
       bind:
@@ -864,12 +864,12 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./filescan-data/logs
+      source: ./filescan-logs
       target: /filescan/data/logs
     - type: bind
       bind:
         create_host_path: false
-      source: ./filescan-data/files
+      source: ./zeek-logs/extract_files/filescan
       target: /filescan/data/files
       read_only: true
     healthcheck:

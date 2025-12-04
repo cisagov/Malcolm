@@ -36,7 +36,7 @@ from scripts.malcolm_constants import (
     DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
-    DEFAULT_FILESCAN_DATA_DIR,
+    DEFAULT_FILESCAN_LOG_DIR,
     ImageArchitecture,
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
@@ -67,7 +67,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
     KEY_CONFIG_ITEM_EXPOSE_SFTP,
-    KEY_CONFIG_ITEM_FILESCAN_DATA_DIR,
+    KEY_CONFIG_ITEM_FILESCAN_LOG_DIR,
     KEY_CONFIG_ITEM_IMAGE_ARCH,
     KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
@@ -565,8 +565,8 @@ def update_compose_files(
         use_default = malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS)
         pcap_dir = get_or_default(malcolm_config, KEY_CONFIG_ITEM_PCAP_DIR, DEFAULT_PCAP_DIR, use_default)
         zeek_log_dir = get_or_default(malcolm_config, KEY_CONFIG_ITEM_ZEEK_LOG_DIR, DEFAULT_ZEEK_LOG_DIR, use_default)
-        filescan_data_dir = get_or_default(
-            malcolm_config, KEY_CONFIG_ITEM_FILESCAN_DATA_DIR, DEFAULT_FILESCAN_DATA_DIR, use_default
+        filescan_log_dir = get_or_default(
+            malcolm_config, KEY_CONFIG_ITEM_FILESCAN_LOG_DIR, DEFAULT_FILESCAN_LOG_DIR, use_default
         )
         suricata_log_dir = get_or_default(
             malcolm_config, KEY_CONFIG_ITEM_SURICATA_LOG_DIR, DEFAULT_SURICATA_LOG_DIR, use_default
@@ -597,7 +597,7 @@ def update_compose_files(
                         pcap_dir,
                         suricata_log_dir,
                         zeek_log_dir,
-                        filescan_data_dir,
+                        filescan_log_dir,
                         index_dir,
                         index_snapshot_dir,
                     ),

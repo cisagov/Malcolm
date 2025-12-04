@@ -34,6 +34,10 @@ ARG EXTRACTED_FILE_HTTP_SERVER_KEY=infected
 ARG EXTRACTED_FILE_HTTP_SERVER_RECURSIVE=true
 ARG EXTRACTED_FILE_HTTP_SERVER_PORT=8006
 
+ARG EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE=1TB
+ARG EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT=0
+ARG EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS=300
+
 ################################################################################
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -53,6 +57,7 @@ ENV STRELKA_PORT $STRELKA_PORT
 ENV FILESCAN_HEALTH_PORT $FILESCAN_HEALTH_PORT
 
 ENV ZEEK_EXTRACTOR_PATH "/zeek/extract_files"
+
 ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR "/opt/assets"
 ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
 ENV EXTRACTED_FILE_HTTP_SERVER_ZIP $EXTRACTED_FILE_HTTP_SERVER_ZIP
@@ -60,16 +65,17 @@ ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
 ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
+ENV EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE $EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE
+ENV EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT $EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT
+ENV EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS $EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS
+
 ################################################################################
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
-ADD --chmod=755 filescan/docker-entrypoint.sh /docker-entrypoint.sh
-ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD --chmod=755 shared/bin/prune_files.sh /usr/local/bin/prune_files.sh
-ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-ADD --chmod=644 filescan/filescan-config.yml /filescan/filescan-config.yml
-ADD --chmod=644 filescan/supervisord.conf /etc/supervisord.conf
 ADD filescan/python-filescan/ /install-filescan/
+ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
+ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
+ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
+ADD --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
+ADD --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
 
 RUN set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
@@ -109,15 +115,17 @@ RUN set -e ; \
         chmod +x /usr/local/bin/supercronic ; \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
         chmod 755 /usr/local/bin/yq ; \
-    mkdir -p /filescan /filescan/data/files /filescan/data/logs ; \
+    mkdir -p /filescan /filescan/data/files /filescan/data/logs "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" ; \
+    cd /tmp && \
+      /usr/local/bin/web-ui-asset-download.sh -o "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css" && \
     cd /install-filescan ; \
         python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt ; \
         make ; \
         python3 -m pip install --break-system-packages --no-cache-dir . ; \
     cd /filescan ; \
-        find /filescan -type d -exec chmod 755 "{}" \; ; \
-        find /filescan -type f -exec chmod 644 "{}" \; ; \
-        chown -R $PUSER:$PGROUP /filescan/data ; \
+    find /filescan "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" -type d -exec chmod 755 "{}" \; ; \
+    find /filescan "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" -type f -exec chmod 644 "{}" \; ; \
+    chown -R $PUSER:$PGROUP /filescan/data "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" ; \
     apt-get remove -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge \
       automake \
       build-essential \
@@ -135,9 +143,25 @@ RUN set -e ; \
         apt-get clean -y -q ; \
         rm -rf /install-filescan /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /usr/lib/x86_64-linux-gnu/*.a
 
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 filescan/docker-entrypoint.sh /docker-entrypoint.sh
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/prune_files.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=644 filescan/filescan-config.yml /filescan/filescan-config.yml
+ADD --chmod=644 filescan/supervisord.conf /etc/supervisord.conf
+ADD --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
+ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
+
 ################################################################################
 
 VOLUME ["/filescan/data"]
+
+EXPOSE $EXTRACTED_FILE_HTTP_SERVER_PORT
+EXPOSE $FILESCAN_HEALTH_PORT
 
 WORKDIR /filescan
 

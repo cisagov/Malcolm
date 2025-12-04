@@ -1279,8 +1279,7 @@ def stop(wipe=False):
                 # there is some overlap here among some of these containers, but it doesn't matter
                 boundPathsToWipe = (
                     BoundPath("filebeat", "/zeek", True, None, None),
-                    BoundPath("filescan", "/filescan/data/logs", True, None, None),
-                    BoundPath("filescan", "/filescan/data/files", True, None, None),
+                    BoundPath("filescan", "/filescan/data/logs", True, None, ["."]),
                     BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
                     BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
                     BoundPath("redis", "/data", True, None, None),
@@ -1446,7 +1445,7 @@ def start():
                     [os.path.join('tmp', 'spool'), "variants"],
                     None,
                 ),
-                BoundPath("zeek", "/zeek/extract_files", False, None, None),
+                BoundPath("zeek", "/zeek/extract_files", False, ["quarantine", "preserved", "filescan"], None),
                 BoundPath("zeek", "/zeek/upload", False, None, None),
                 BoundPath("zeek", "/usr/local/zeek/share/zeek/site/custom", False, None, None),
                 BoundPath("zeek", "/usr/local/zeek/share/zeek/site/intel", False, ["Mandiant", "MISP", "STIX"], None),
