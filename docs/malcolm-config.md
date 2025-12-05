@@ -153,17 +153,12 @@ Although the configuration script automates many of the following configuration 
     - `PCAP_NODE_NAME` - specifies the node name to associate with network traffic metadata
     - `PCAP_UPLOAD_MAX_FILE_GB` - specifies the maximum uploadable file size in whole gigabytes (default `50`)
 * **`zeek.env`**, **`zeek-secret.env`**, **`zeek-live.env`** and **`zeek-offline.env`** - settings for [Zeek](https://www.zeek.org/index.html) and for scanning [extracted files](file-scanning.md#ZeekFileExtraction) Zeek observes in network traffic
-    - `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
-    - `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
-    - `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
-    - `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be scanned with [Yara](https://github.com/VirusTotal/yara)
     - `EXTRACTED_FILE_HTTP_SERVER_ENABLE` – if set to `true`, the directory containing [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be served over HTTP at `./extracted-files/` (e.g., **https://localhost/extracted-files/** if connecting locally)
     - `EXTRACTED_FILE_HTTP_SERVER_ZIP` – if to `true`, the Zeek-extracted files will be archived in a ZIP file upon download
     - `EXTRACTED_FILE_HTTP_SERVER_KEY` – specifies the password for the ZIP archive if `EXTRACTED_FILE_HTTP_SERVER_ZIP` is `true`; otherwise, this specifies the decryption password for encrypted Zeek-extracted files in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`)
     - `EXTRACTED_FILE_IGNORE_EXISTING` – if set to `true`, files extant in `./zeek-logs/extract_files/`  directory will be ignored on startup rather than scanned
     - `EXTRACTED_FILE_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction)
     - `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions (default `false`)
-    - `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only [user-defined rules](custom-rules.md#YARA) in `./yara/rules`
     - `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) to VirusTotal
     - `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
     - `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)

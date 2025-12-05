@@ -99,6 +99,14 @@ def custom_reverse_transform_suricata_rotated_pcap(value: str):
     return ("", live_suricata)
 
 
+def custom_transform_pipeline_enabled(value: bool) -> str:
+    return true_or_false_no_quotes(not value)
+
+
+def custom_reverse_transform_pipeline_enabled(value: str) -> bool:
+    return not _env_str_to_bool(value)
+
+
 def custom_transform_zeek_file_enable_vtot(vtotApiKey: str) -> str:
     return true_or_false_no_quotes(len(vtotApiKey) > 1)
 

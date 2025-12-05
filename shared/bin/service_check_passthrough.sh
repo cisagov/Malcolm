@@ -24,7 +24,7 @@ ENCODING="utf-8"
 # -f format   (http|json)
 VERBOSE_FLAG=
 SERVICE=
-DISABLED=
+DISABLED=0
 PORT=
 FORMAT=
 while getopts 'vds:p:f:' OPTION; do
@@ -58,6 +58,39 @@ while getopts 'vds:p:f:' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
+is_truthy_disabled() {
+    case "${1,,}" in
+        ""|0|false|no|f|n) return 1 ;;  # service is NOT disabled
+    esac
+    return 0                            # service IS disabled
+}
+
+is_disabled_because_not_local() {
+    case "${1,,}" in
+        0|false|no|f|n) return 0 ;;     # service is NOT local, so it IS disabled locally
+    esac
+    return 1                            # service IS local, so it is NOT disabled locally
+}
+
+is_host_net() {
+    # If eth0 doesn't exist, this is extremely likely host net
+    [ -e /sys/class/net/eth0 ] || return 0
+
+    # Count host-like interfaces (docker0, veth*, wlan*, etc.)
+    for iface in /sys/class/net/*; do
+        b=$(basename "$iface")
+        case "$b" in
+            lo|eth0) ;;  # normal container
+            *)
+                # More than lo+eth0 == probably host net
+                return 0
+                ;;
+        esac
+    done
+
+    return 1
+}
+
 # if service not specified via command line, use hostname instead
 if [[ -z "$SERVICE" ]]; then
     if command -v hostname >/dev/null 2>&1; then
@@ -72,28 +105,17 @@ if [[ -z "$SERVICE" ]]; then
         SERVICE="$(uname -a | awk '{print $2}')"
     fi
 fi
-SERVICE_UCASE="$(echo ${SERVICE^^} | tr '-' '_')"
 
 # if disabled wasn't specified, but service was, check environment variables
-if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
+if [[ "$DISABLED" == "0" ]] && [[ -n "$SERVICE" ]]; then
+
+    SERVICE_UCASE="$(echo ${SERVICE^^} | tr '-' '_')"
     DISABLED_VARNAME="${SERVICE_UCASE}_DISABLED"
-    if [[ -n "${!DISABLED_VARNAME}" ]] && \
-       [[ "${!DISABLED_VARNAME}" != "0" ]] && \
-       [[ "${!DISABLED_VARNAME}" != "false" ]] && \
-       [[ "${!DISABLED_VARNAME}" != "no" ]] && \
-       [[ "${!DISABLED_VARNAME}" != "f" ]] && \
-       [[ "${!DISABLED_VARNAME}" != "n" ]]; then
-        DISABLED=1
-    fi
     LOCAL_VARNAME="${SERVICE_UCASE}_LOCAL"
-    if [[ -n "${!LOCAL_VARNAME}" ]] && \
-       ( [[ "${!LOCAL_VARNAME}" == "0" ]] || \
-         [[ "${!LOCAL_VARNAME}" == "false" ]] || \
-         [[ "${!LOCAL_VARNAME}" == "no" ]] || \
-         [[ "${!LOCAL_VARNAME}" == "f" ]] || \
-         [[ "${!LOCAL_VARNAME}" == "n" ]] ); then
-        DISABLED=1
-    fi
+
+    is_truthy_disabled "${!DISABLED_VARNAME}" && DISABLED=1
+    [[ "$DISABLED" == "0" ]] && is_disabled_because_not_local "${!LOCAL_VARNAME}" && DISABLED=1
+
     # kinda hacky special cases
     if [[ "$SERVICE" == "opensearch" ]] && [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "opensearch-local" ]]; then
         DISABLED=1
@@ -107,6 +129,10 @@ if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
         DISABLED=1
     fi
     if [[ "$SERVICE" == "netbox" ]] && [[ "${NETBOX_MODE:-local}" != "local" ]]; then
+        DISABLED=1
+    fi
+    if ( [[ "$SERVICE_UCASE" == STRELKA* ]] || [[ "$SERVICE_UCASE" == FILESCAN* ]] ) && \
+        is_truthy_disabled "${PIPELINE_DISABLED:-false}"; then
         DISABLED=1
     fi
 fi
@@ -147,15 +173,22 @@ fi
 [[ -z "$PORT" ]] && PORT=80
 [[ -z "$FORMAT" ]] && FORMAT=http
 
-if [[ -n "$DISABLED" ]]; then
-    pushd "$(mktemp -d)" >/dev/null 2>&1
+if [[ "$DISABLED" == "1" ]]; then
+    echo "The local service $SERVICE has been disabled." >&2
 
-    if [[ "$FORMAT" == "json" ]]; then
-        cat << EOF > index.html
+    if is_host_net; then
+        # don't go exposing things if we're in host networking mode
+        command -v sleep >/dev/null 2>&1 && sleep infinity
+
+    else
+        pushd "$(mktemp -d)" >/dev/null 2>&1
+
+        if [[ "$FORMAT" == "json" ]]; then
+            cat << EOF > index.html
 { "error": { "code": 501, "message": "The local service $SERVICE has been disabled." } }
 EOF
-    else
-        cat << EOF > index.html
+        else
+            cat << EOF > index.html
 <html>
 <header><title>$SERVICE Disabled</title></header>
 <body>
@@ -164,28 +197,30 @@ EOF
 </body>
 </html>
 EOF
-    fi # json vs http
+        fi # json vs http
 
-    if command -v goStatic >/dev/null 2>&1; then
-        goStatic -vhost "" -path "$(pwd)" -fallback "index.html" -port $PORT
-    elif command -v python3 >/dev/null 2>&1; then
-        python3 -m http.server --bind 0.0.0.0 $PORT
-    elif command -v python >/dev/null 2>&1; then
-        python -m SimpleHTTPServer $PORT
-    elif command -v ruby >/dev/null 2>&1; then
-        ruby -run -ehttpd --bind-address=0.0.0.0 --port=$PORT .
-    elif command -v http-server >/dev/null 2>&1; then
-        http-server -a 0.0.0.0 --port $PORT
-    elif command -v php >/dev/null 2>&1; then
-        php -S 0.0.0.0:$PORT -t .
-    else
-        echo "No tool available for service HTTP" >&2
+        if command -v goStatic >/dev/null 2>&1; then
+            goStatic -vhost "" -path "$(pwd)" -fallback "index.html" -port $PORT
+        elif command -v python3 >/dev/null 2>&1; then
+            python3 -m http.server --bind 0.0.0.0 $PORT
+        elif command -v python >/dev/null 2>&1; then
+            python -m SimpleHTTPServer $PORT
+        elif command -v ruby >/dev/null 2>&1; then
+            ruby -run -ehttpd --bind-address=0.0.0.0 --port=$PORT .
+        elif command -v http-server >/dev/null 2>&1; then
+            http-server -a 0.0.0.0 --port $PORT
+        elif command -v php >/dev/null 2>&1; then
+            php -S 0.0.0.0:$PORT -t .
+        else
+            echo "No tool available for $FORMAT disabled status page" >&2
+            command -v sleep >/dev/null 2>&1 && sleep infinity
+        fi
+
+        popd >/dev/null 2>&1
     fi
 
-    popd >/dev/null 2>&1
-
 else
-    # the service isn't disabled, just do the service already
+    # the service isn't disabled, just play the song, Schneebly!
     exec "$@"
 fi
 

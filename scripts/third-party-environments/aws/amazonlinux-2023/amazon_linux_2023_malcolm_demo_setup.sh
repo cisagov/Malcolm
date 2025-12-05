@@ -597,9 +597,7 @@ function InstallMalcolm {
           | .configuration.fileCarveHttpServer = true
           | .configuration.fileCarveHttpServerZip = true
           | .configuration.fileCarveHttpServeEncryptKey = \"infected\"
-          | .configuration.capaScan = true
-          | .configuration.clamAvScan = true
-          | .configuration.yaraScan = true
+          | .configuration.pipelineEnabled = true
           | .configuration.netboxMode = \"local\"
           | .configuration.netboxSiteName = \"$(hostname -s)\"
           | .configuration.netboxLogstashEnrich = true

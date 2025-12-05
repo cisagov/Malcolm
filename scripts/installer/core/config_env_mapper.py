@@ -95,14 +95,12 @@ _BOOLEAN_VARS = [
     KEY_ENV_OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_PCAP_IFACE_TWEAK,
+    KEY_ENV_PIPELINE_ENABLED,
     KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES,
     KEY_ENV_SURICATA_STATS_ENABLED,
     KEY_ENV_SURICATA_STATS_EVE_ENABLED,
     KEY_ENV_SURICATA_UPDATE_RULES,
     KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES,
-    KEY_ENV_ZEEK_FILE_ENABLE_CAPA,
-    KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV,
-    KEY_ENV_ZEEK_FILE_ENABLE_YARA,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP,
     KEY_ENV_ZEEK_FILE_UPDATE_RULES,
@@ -230,6 +228,10 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
     KEY_ENV_SURICATA_ROTATED_PCAP: TransformHook(
         forward=custom_transform_suricata_rotated_pcap,
         reverse=custom_reverse_transform_suricata_rotated_pcap,
+    ),
+    KEY_ENV_PIPELINE_ENABLED: TransformHook(
+        forward=custom_transform_pipeline_enabled,
+        reverse=custom_reverse_transform_pipeline_enabled,
     ),
     KEY_ENV_ZEEK_FILE_ENABLE_VTOT: TransformHook(
         forward=custom_transform_zeek_file_enable_vtot,
@@ -714,9 +716,8 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_KEY].config_items = [
                 KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY
             ]
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_YARA].config_items = [KEY_CONFIG_ITEM_YARA_SCAN]
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_CAPA].config_items = [KEY_CONFIG_ITEM_CAPA_SCAN]
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV].config_items = [KEY_CONFIG_ITEM_CLAM_AV_SCAN]
+            self.env_var_by_map_key[KEY_ENV_PIPELINE_ENABLED].config_items = [KEY_CONFIG_ITEM_PIPELINE_ENABLED]
+
             self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_UPDATE_RULES].config_items = [
                 KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE
             ]

@@ -156,12 +156,12 @@ KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP = "EXTRACTED_FILE_HTTP_SERVER_ZIP"  # ZIP HTTP
 KEY_ENV_ZEEK_FILE_HTTP_SERVER_KEY = (
     "EXTRACTED_FILE_HTTP_SERVER_KEY"  # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
 )
-KEY_ENV_ZEEK_FILE_ENABLE_YARA = "EXTRACTED_FILE_ENABLE_YARA"  # file scanning via yara
-KEY_ENV_ZEEK_FILE_ENABLE_CAPA = "EXTRACTED_FILE_ENABLE_CAPA"  # PE file scanning via capa
-KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV = "EXTRACTED_FILE_ENABLE_CLAMAV"  # file scanning via clamav
 KEY_ENV_ZEEK_FILE_ENABLE_VTOT = "EXTRACTED_FILE_ENABLE_VTOT"  # file scanning via virustotal
-KEY_ENV_ZEEK_FILE_UPDATE_RULES = "EXTRACTED_FILE_UPDATE_RULES"  # rule updates (yara/capa via git, clamav via freshclam)
+KEY_ENV_ZEEK_FILE_UPDATE_RULES = "EXTRACTED_FILE_UPDATE_RULES"  # file scannign rule/signature updates
 KEY_ENV_ZEEK_FILE_WATCHER_POLLING = "EXTRACTED_FILE_WATCHER_POLLING"  # Use polling for file watching vs. native
+KEY_ENV_PIPELINE_ENABLED = (
+    "PIPELINE_DISABLED"  # Pipeline DISABLED (note that this is boolean is reversed from the installer logic)
+)
 
 
 def get_env_key_dict():

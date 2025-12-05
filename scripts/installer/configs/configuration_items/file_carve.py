@@ -19,9 +19,8 @@ from scripts.installer.configs.constants.enums import (
 )
 from scripts.malcolm_constants import WidgetType
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_CAPA_SCAN,
-    KEY_CONFIG_ITEM_CLAM_AV_SCAN,
     KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
+    KEY_CONFIG_ITEM_PIPELINE_ENABLED,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP,
@@ -29,7 +28,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_FILE_PRESERVE_MODE,
     KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE,
     KEY_CONFIG_ITEM_VTOT_API_KEY,
-    KEY_CONFIG_ITEM_YARA_SCAN,
 )
 
 
@@ -121,30 +119,12 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY = ConfigItem(
     widget_type=WidgetType.PASSWORD,
 )
 
-CONFIG_ITEM_CLAM_AV_SCAN = ConfigItem(
-    key=KEY_CONFIG_ITEM_CLAM_AV_SCAN,
-    label="Scan with ClamAV",
+CONFIG_ITEM_PIPELINE_ENABLED = ConfigItem(
+    key=KEY_CONFIG_ITEM_PIPELINE_ENABLED,
+    label="Scan with Strelka",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Scan extracted files with ClamAV?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
-CONFIG_ITEM_YARA_SCAN = ConfigItem(
-    key=KEY_CONFIG_ITEM_YARA_SCAN,
-    label="Scan with YARA",
-    default_value=True,
-    validator=lambda x: isinstance(x, bool),
-    question="Scan extracted files with YARA?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
-CONFIG_ITEM_CAPA_SCAN = ConfigItem(
-    key=KEY_CONFIG_ITEM_CAPA_SCAN,
-    label="Scan with capa",
-    default_value=True,
-    validator=lambda x: isinstance(x, bool),
-    question="Scan extracted files with capa?",
+    question="Scan extracted files with Strelka?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -162,7 +142,7 @@ CONFIG_ITEM_FILE_SCAN_RULE_UPDATE = ConfigItem(
     label="Update Scan Rules",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Periodically pull ClamAV/YARA/capa signature/rule updates?",
+    question="Periodically pull file scanning signature/rule updates?",
     widget_type=WidgetType.CHECKBOX,
 )
 

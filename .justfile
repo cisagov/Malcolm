@@ -51,7 +51,7 @@ _base_config +CAPTURE_FLAG:
 
   ( [[ "${MALCOLM_CONTAINER_RUNTIME:-docker}" == "docker" ]] || [[ "${MALCOLM_CONTAINER_RUNTIME}" == "podman" ]] ) && ORCH_MODE=DOCKER_COMPOSE || ORCH_MODE=KUBERNETES
   ( [[ "${ZEEK_INTEL_ON_STARTUP:-false}" == "true" ]] || [[ -n "${ZEEK_INTEL_CRON_EXPRESSION}" ]] ) && ZEEK_INTEL=true || ZEEK_INTEL=false
-  ( [[ -z "${OPENSEARCH_PATH}" ]] || [[ -z "${OPENSEARCH_SNAPSHOT_PATH}" ]] || [[ -z "${PCAP_PATH}" ]] || [[ -z "${SURICATA_PATH}" ]] || [[ -z "${ZEEK_PATH}" ]] ) && \
+  ( [[ -z "${OPENSEARCH_PATH}" ]] || [[ -z "${OPENSEARCH_SNAPSHOT_PATH}" ]] || [[ -z "${FILESCAN_PATH}" ]] || [[ -z "${PCAP_PATH}" ]] || [[ -z "${SURICATA_PATH}" ]] || [[ -z "${ZEEK_PATH}" ]] ) && \
     DEFAULT_PATHS=true || DEFAULT_PATHS=false
 
   tee "${JQ_FILE}" >/dev/null <<EOF
@@ -68,9 +68,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.autoOui = ${AUTO_OUI:-true}
     | .configuration.autoSuricata = ${AUTO_SURICATA:-true}
     | .configuration.autoZeek = ${AUTO_ZEEK:-true}
-    | .configuration.capaScan = ${EXTRACTED_FILE_CAPA:-true}
     | .configuration.captureLiveNetworkTraffic = ${CAPTURE_LIVE}
-    | .configuration.clamAvScan = ${EXTRACTED_FILE_CLAMAV:-true}
     | .configuration.containerNetworkName = "${NETWORK_NAME}"
     | .configuration.dashboardsDarkMode = ${DARK_MODE:-true}
     | .configuration.dashboardsUrl = "${DASHBOARDS_URL:-http://dashboards:5601/dashboards}"
@@ -83,12 +81,14 @@ _base_config +CAPTURE_FLAG:
     | .configuration.extractedFileMaxPercentThreshold = ${EXTRACTED_FILE_TOTAL_DISK_USAGE_PERCENT_THRESHOLD:-100}
     | .configuration.extractedFileMaxSizeThreshold = "${EXTRACTED_FILE_MAX_SIZE_THRESHOLD:-1T}"
     | .configuration.filebeatTcpDefaults = ${FILEBEAT_TCP_EXPOSE:-false}
-    | .configuration.fileCarveEnabled = true
+    | .configuration.pipelineEnabled = ${PIPELINE_ENABLED:-true}
+    | .configuration.fileCarveEnabled = ${PIPELINE_ENABLED:-true}
     | .configuration.fileCarveHttpServeEncryptKey = "${EXTRACTED_FILE_SERVER_PASSWORD:-infected}"
     | .configuration.fileCarveHttpServer = ${EXTRACTED_FILE_SERVER:-true}
     | .configuration.fileCarveHttpServerZip = ${EXTRACTED_FILE_SERVER_ZIP:-true}
     | .configuration.fileCarveMode = "${FILE_EXTRACTION:-interesting}"
     | .configuration.filePreserveMode = "${FILE_PRESERVATION:-quarantined}"
+    | .configuration.filescanLogDir = "${FILESCAN_PATH}"
     | .configuration.fileScanRuleUpdate = ${FILE_SCAN_RULE_UPDATE:-false}
     | .configuration.indexDir = "${OPENSEARCH_PATH}"
     | .configuration.indexManagementHistoryInWeeks = ${INDEX_MANAGEMENT_WEEKS_OF_HISTORY:-13}
@@ -137,7 +137,6 @@ _base_config +CAPTURE_FLAG:
     | .configuration.traefikResolver = "${TRAEFIK_RESOLVER}"
     | .configuration.useDefaultStorageLocations = ${DEFAULT_PATHS}
     | .configuration.vtotApiKey = "${VIRUSTOTAL_API_KEY}"
-    | .configuration.yaraScan = ${EXTRACTED_FILE_YARA:-true}
     | .configuration.zeekICSBestGuess = ${ZEEK_ICS_BEST_GUESS:-true}
     | .configuration.zeekIntelCronExpression = "${ZEEK_INTEL_CRON_EXPRESSION}"
     | .configuration.zeekIntelFeedSince = "${ZEEK_INTEL_FEED_SINCE:-24 hours ago}"
@@ -186,11 +185,8 @@ _base_config +CAPTURE_FLAG:
           "upload-common.env:MALCOLM_API_DEBUG=${MALCOLM_API_DEBUG:-false}" \
           "upload-common.env:PCAP_PIPELINE_IGNORE_PREEXISTING=${PCAP_PIPELINE_IGNORE_PREEXISTING:-false}" \
           "zeek-offline.env:ZEEK_AUTO_ANALYZE_PCAP_THREADS=${ZEEK_AUTO_ANALYZE_PCAP_THREADS:-2}" \
-          "zeek.env:CAPA_MAX_REQUESTS=${CAPA_MAX_REQUESTS:-2}" \
-          "zeek.env:CLAMD_MAX_REQUESTS=${CLAMD_MAX_REQUESTS:-4}" \
           "zeek.env:EXTRACTED_FILE_HTTP_SERVER_MAGIC=${EXTRACTED_FILE_HTTP_SERVER_MAGIC:-true}" \
           "zeek.env:EXTRACTED_FILE_IGNORE_EXISTING=${EXTRACTED_FILE_IGNORE_EXISTING:-false}" \
-          "zeek.env:YARA_MAX_REQUESTS=${YARA_MAX_REQUESTS:-4}" \
           "zeek.env:ZEEK_DISABLE_ICS_GE_SRTP=${ZEEK_DISABLE_ICS_GE_SRTP:-false}" \
           "zeek.env:ZEEK_DISABLE_ICS_GENISYS=${ZEEK_DISABLE_ICS_GENISYS:-true}" \
           "zeek.env:ZEEK_SYNCHROPHASOR_DETAILED=${ZEEK_SYNCHROPHASOR_DETAILED:-false}"

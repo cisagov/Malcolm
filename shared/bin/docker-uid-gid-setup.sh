@@ -215,7 +215,6 @@ fi
 su -s /bin/bash -p ${EXEC_USER} << EOF
 export USER="${EXEC_USER}"
 export HOME="${USER_HOME}"
-whoami
 id
 if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
   ulimit -c ${PUSER_RLIMIT_C:-0} >/dev/null 2>&1

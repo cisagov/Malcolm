@@ -739,7 +739,7 @@ services:
     - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
-    - ./config/strelka.env
+    - ./config/pipeline.env
     - ./config/filescan.env
     volumes:
     - type: bind
@@ -791,6 +791,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/redis.env
+    - ./config/pipeline.env
     shm_size: 512mb
     volumes:
     - type: bind
@@ -832,6 +833,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/redis.env
+    - ./config/pipeline.env
     volumes:
     - type: bind
       bind:
@@ -873,6 +875,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/redis.env
+    - ./config/pipeline.env
     volumes:
     - type: bind
       bind:

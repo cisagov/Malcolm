@@ -63,9 +63,7 @@ if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; t
         | .configuration.fileCarveHttpServer = true
         | .configuration.fileCarveHttpServerZip = true
         | .configuration.fileCarveHttpServeEncryptKey = "infected"
-        | .configuration.capaScan = true
-        | .configuration.clamAvScan = true
-        | .configuration.yaraScan = true
+        | .configuration.pipelineEnabled = true
         | .configuration.netboxMode = "local"
         | .configuration.netboxSiteName = "malcolm"
         | .configuration.netboxLogstashEnrich = true

@@ -339,6 +339,7 @@ Pod Name | State | Pod IP | Pod Kind | Worker Node | CPU Usage | Memory Usage | 
 
 Run `./scripts/configure` to configure Malcolm. For an in-depth treatment of the configuration options, see the **Malcolm Configuration Menu Items** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems)**.:
 
+# TODO: THIS NEEDS TO BE UPDATED FOR PIPELINE
 
 ```
 --- Malcolm Configuration Menu ---

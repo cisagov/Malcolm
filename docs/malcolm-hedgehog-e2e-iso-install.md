@@ -204,6 +204,8 @@ user@host:~/Malcolm$ ./scripts/configure
                                        v{{ site.malcolm.version }}. Press any key to continue...
 ```
 
+# TODO: THIS NEEDS TO BE UPDATED FOR PIPELINE
+
 The items in the **Malcolm Configuration Menu** are arranged hierarchically, with the current setting displayed next to each option. For the most part, each option in the menu corresponds to an [environment variable](malcolm-config.md#MalcolmConfigEnvVars) stored in the [`./config`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config) directory, used by Malcolm to determine runtime behavior.
 
 ```

@@ -112,6 +112,8 @@ docker compose exec file-monitor /usr/local/bin/yara_rules_setup.sh
 docker compose exec file-monitor supervisorctl restart yara
 ```
 
+# TODO: THIS NEEDS TO BE UPDATED FOR PIPELINE
+
 If the `EXTRACTED_FILE_YARA_CUSTOM_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only user-defined rules in `./yara/rules`.
 
 ## <a name="NetBox"></a>NetBox Plugins
