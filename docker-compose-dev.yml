@@ -1606,8 +1606,8 @@ services:
 
 volumes:
   # shared named volume so filebeat can access nginx access logs
-  strelka-logs:
   nginx-log-path:
+  strelka-logs:
 
 networks:
   default:

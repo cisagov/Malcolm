@@ -33,6 +33,8 @@ RUN apk update --no-cache && \
 
 WORKDIR /home/${PUSER}
 
+EXPOSE 6379
+
 ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \

@@ -22,7 +22,8 @@ broker:
   keylocation: "path to key location"
   calocation: "path to target ca bundle"
   topic: "topic name here"
-  s3redundancy: "Boolean to pipe logs to S3 if kafka connection interrupted"
+  # pipe logs to S3 if kafka connection interrupted
+  s3redundancy: false
 s3:
   accesskey: "S3 Access Key"
   secretkey: "S3 Secret Key"

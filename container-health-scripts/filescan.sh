@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
-[[ "${FILESCAN_DISABLED:-false}" == 'true' ]] && exit 0
+( [[ "${PIPELINE_DISABLED:-false}" == 'true' ]] || [[ "${FILESCAN_DISABLED:-false}" == 'true' ]] ) && exit 0
 
-(( $(supervisorctl status 2>/dev/null | grep -cPv '(^INFO:|STARTING|RUNNING|Not started$)') == 0 )) && exit 0 || exit 1
+JQ_EVAL=$(
+    curl --fail --silent -XGET http://localhost:${FILESCAN_HEALTH_PORT:-8001}/health | \
+        jq '.state == "running" and ([.programs[][].healthy] | all) and ([.programs[][].state == "running"] | all)' 2>/dev/null
+)
+[[ "$JQ_EVAL" == "true" ]] && exit 0 && exit 1
+
