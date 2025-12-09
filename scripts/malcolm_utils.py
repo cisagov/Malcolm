@@ -666,7 +666,7 @@ def openssl_self_signed_keygen(
                 organizationName                = {org}
                 organizationalUnitName          = {prefix}
 
-                [ usr_cert ]
+                [usr_cert]
                 basicConstraints = CA:FALSE
                 nsCertType = client, server
                 nsComment = "{prefix} Certificate"
@@ -676,7 +676,7 @@ def openssl_self_signed_keygen(
                 extendedKeyUsage = serverAuth, clientAuth
 
                 [v3_req]
-                keyUsage = keyEncipherment, dataEncipherment
+                keyUsage = dataEncipherment, digitalSignature, keyEncipherment
                 extendedKeyUsage = serverAuth, clientAuth
                 """
                 server_conf_contents = textwrap.dedent(conf_contents).format(
