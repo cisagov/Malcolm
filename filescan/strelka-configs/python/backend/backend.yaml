@@ -727,7 +727,7 @@ scanners:
           - "*"
       priority: 5
       options:
-        location: "/etc/strelka/yara/"
+        location: "/yara-rules"
         compiled:
           enabled: True
           filename: "rules.compiled"

@@ -806,6 +806,12 @@ services:
       source: ./filescan/strelka-configs/python/backend/
       target: /etc/strelka/configmap
       read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./yara/rules
+      target: /yara-rules/custom
+      read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
