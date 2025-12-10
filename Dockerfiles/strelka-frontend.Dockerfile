@@ -48,7 +48,7 @@ ENTRYPOINT ["/sbin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "strelka_frontend", \
-            "/usr/local/bin/strelka-expand-redis-config.sh" ]
+            "/usr/local/bin/docker-entrypoint.sh" ]
 
 CMD ["strelka-frontend", "-locallog=true", "-kafkalog=false" ]
 

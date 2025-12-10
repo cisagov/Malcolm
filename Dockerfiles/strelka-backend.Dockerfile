@@ -88,7 +88,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "strelka_backend", \
-            "/usr/local/bin/strelka-expand-redis-config.sh" ]
+            "/usr/local/bin/docker-entrypoint.sh" ]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

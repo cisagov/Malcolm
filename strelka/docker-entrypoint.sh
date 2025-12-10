@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+# expand REDIS environment variables into the appropriate config yaml files
 FILES=(
   /etc/strelka/manager.yaml
   /etc/strelka/backend.yaml
@@ -20,5 +21,9 @@ for FILE in "${FILES[@]}"; do
     ' "$FILE"
   fi
 done
+
+# Find the directory containing libcrypto.so, and add it to LD_LIBRARY_PATH
+export LIBCRYPTO_DIR=$(dirname "$(find /usr/lib /lib -name 'libcrypto.so*' | head -n 1)")
+export LD_LIBRARY_PATH="${LIBCRYPTO_DIR}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 [[ $# -gt 0 ]] && exec "$@"
