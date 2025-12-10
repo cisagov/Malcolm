@@ -22,8 +22,4 @@ for FILE in "${FILES[@]}"; do
   fi
 done
 
-# Find the directory containing libcrypto.so, and add it to LD_LIBRARY_PATH
-export LIBCRYPTO_DIR=$(dirname "$(find /usr/lib /lib -name 'libcrypto.so*' | head -n 1)")
-export LD_LIBRARY_PATH="${LIBCRYPTO_DIR}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
 [[ $# -gt 0 ]] && exec "$@"

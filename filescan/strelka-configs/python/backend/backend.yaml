@@ -200,11 +200,11 @@ scanners:
           - 'application/x-gzip'
           - 'gzip_file'
       priority: 5
-  'ScanHash':
-    - positive:
-        flavors:
-          - '*'
-      priority: 5
+  # 'ScanHash':
+  #   - positive:
+  #       flavors:
+  #         - '*'
+  #     priority: 5
   'ScanHeader':
     - positive:
         flavors:
