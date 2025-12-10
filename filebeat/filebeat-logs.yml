@@ -52,7 +52,7 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   json:
-    expand_keys: false
+    expand_keys: true
     add_error_key: false
     ignore_decoding_error: true
     keys_under_root: true
