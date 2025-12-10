@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from . import logging
+
 log = logging.getLogger(__name__)
 
 import hashlib
@@ -11,7 +12,14 @@ from datetime import datetime, UTC, timedelta
 from itertools import chain
 from pathlib import Path, PurePosixPath
 from pydantic import (
-    BaseModel, Discriminator, Field, PlainSerializer, PlainValidator, TypeAdapter, computed_field, model_validator,
+    BaseModel,
+    Discriminator,
+    Field,
+    PlainSerializer,
+    PlainValidator,
+    TypeAdapter,
+    computed_field,
+    model_validator,
 )
 from typing import ClassVar, Any, Final, Iterator, Literal, Self, Annotated
 from uuid import UUID
@@ -46,7 +54,7 @@ class FileEvent(BaseModel):
         if not isinstance(data, dict):
             raise TypeError(type(data))
 
-        if (local_path := data.get('local_path')):
+        if local_path := data.get('local_path'):
             fh = None
             try:
                 if (path := data.get('path')) is None:
@@ -60,7 +68,8 @@ class FileEvent(BaseModel):
                     fh = fh or local_path.open('rb')
                     try:
                         with mmap.mmap(
-                            fh.fileno(), 0,
+                            fh.fileno(),
+                            0,
                             access=mmap.ACCESS_READ,
                         ) as buf:
                             sha256 = hashlib.sha256(buf).hexdigest()
@@ -70,12 +79,14 @@ class FileEvent(BaseModel):
                 if fh:
                     fh.close()
 
-            data.update({
-                'path': path,
-                'size': size,
-                'sha256': sha256,
-                'mime_type': mime_type,
-            })
+            data.update(
+                {
+                    'path': path,
+                    'size': size,
+                    'sha256': sha256,
+                    'mime_type': mime_type,
+                }
+            )
 
         return handler(data)
 
@@ -99,7 +110,8 @@ class FileEvent(BaseModel):
             if (new := real / self.path).exists():
                 log.warning(
                     'file exists in search path, but without prefix: %s => %s',
-                    self.path, base,
+                    self.path,
+                    base,
                 )
                 return new
         if (new := Path(self.path)).exists():
@@ -111,6 +123,7 @@ class FileEvent(BaseModel):
 class MessageBase(BaseModel):
     id: UUID
     time: UTCDatetime = Field(default_factory=lambda: datetime.now(UTC))
+
 
 class ScanRequest(MessageBase):
     type: Annotated[Literal['request'], Field(repr=False)] = 'request'
@@ -134,6 +147,7 @@ class ScanRequest(MessageBase):
             name=name,
         )
 
+
 class ScanResult(MessageBase):
     type: Annotated[Literal['result'], Field(repr=False)] = 'result'
     name: str
@@ -144,12 +158,14 @@ class ScanResult(MessageBase):
     def _key(self) -> str:
         return f'{self.id}:{self.name}'
 
+
 class ScanSubmit(MessageBase):
     type: Annotated[Literal['submit'], Field(repr=False)] = 'submit'
     count: int
     file: FileEvent
     source: str | None = None
     metadata: dict[str, str] | None = None
+
 
 class ScanBegin(MessageBase):
     type: Annotated[Literal['begin'], Field(repr=False)] = 'begin'
@@ -160,7 +176,8 @@ class ScanBegin(MessageBase):
         return f'{self.id}:{self.name}'
 
     def get_result(
-        self, result: Any = None,
+        self,
+        result: Any = None,
         *,
         error: Any = ...,
         time: datetime | None = None,
@@ -187,6 +204,7 @@ class ScanBegin(MessageBase):
             name=self.name,
         )
 
+
 class ScanTimeout(MessageBase):
     type: Annotated[Literal['timeout'], Field(repr=False)] = 'timeout'
     name: str
@@ -195,6 +213,7 @@ class ScanTimeout(MessageBase):
     def _key(self) -> str:
         return f'{self.id}:{self.name}'
 
+
 class ScanEnd(MessageBase):
     type: Annotated[Literal['end'], Field(repr=False)] = 'end'
     name: str
@@ -202,6 +221,7 @@ class ScanEnd(MessageBase):
     @property
     def _key(self) -> str:
         return f'{self.id}:{self.name}'
+
 
 class ScanComplete(MessageBase):
     type: Annotated[Literal['complete'], Field(repr=False)] = 'complete'
@@ -213,29 +233,26 @@ class ScanComplete(MessageBase):
 type AnyScanRequest = Annotated[
     ScanRequest,
     # restore this if we end up with additional request message types
-    None #Discriminator('type')
+    None,  # Discriminator('type')
 ]
 AnyScanRequestType: Final = TypeAdapter(AnyScanRequest)
 
 type AnyScanResult = Annotated[
     ScanResult,
     # restore this if we end up with additional result message types
-    None #Discriminator('type')
+    None,  # Discriminator('type')
 ]
 AnyScanResultType: Final = TypeAdapter(AnyScanResult)
 
 type AnyScanNotification = Annotated[
-    ScanSubmit | ScanBegin | ScanEnd | ScanTimeout | ScanComplete,
-    Discriminator('type')
+    ScanSubmit | ScanBegin | ScanEnd | ScanTimeout | ScanComplete, Discriminator('type')
 ]
 AnyScanNotificationType: Final = TypeAdapter(AnyScanNotification)
 
 type AnyScanMessage = Annotated[
-    ScanRequest | ScanResult | ScanSubmit | ScanBegin | ScanEnd | ScanTimeout | ScanComplete,
-    Discriminator('type')
+    ScanRequest | ScanResult | ScanSubmit | ScanBegin | ScanEnd | ScanTimeout | ScanComplete, Discriminator('type')
 ]
 AnyScanMessageType: Final = TypeAdapter(AnyScanMessage)
-
 
 
 class FileScanMap:
@@ -267,9 +284,9 @@ class FileScanMap:
             self.scans.values(),
             lambda s: (s.complete, s.expired),
             [
-                (True, ...),    # completed (regardless of expiration)
-                (..., True),    # expired (regardless of  completion)
-                (False, False), # neither completed nor expired
+                (True, ...),  # completed (regardless of expiration)
+                (..., True),  # expired (regardless of  completion)
+                (False, False),  # neither completed nor expired
             ],
         )
         self.scans.clear()
@@ -297,17 +314,15 @@ class FileScan(BaseModel):
     @property
     def complete(self) -> bool:
         elapsed = datetime.now(UTC) - self.start
-        return ( \
-                ((self.expected >= 0) and len(self.results) >= self.expected) \
-                or ((elapsed >= self.min_scan_time) and not self.expired) \
-            ) \
-            and all(s.complete for s in self.results.values())
+        return (
+            ((self.expected >= 0) and len(self.results) >= self.expected)
+            or ((elapsed >= self.min_scan_time) and not self.expired)
+        ) and all(s.complete for s in self.results.values())
 
     @property
     def expired(self) -> bool:
         elapsed = datetime.now(UTC) - self.start
-        return self.max_scan_time is not None \
-            and elapsed > self.max_scan_time
+        return self.max_scan_time is not None and elapsed > self.max_scan_time
 
     @classmethod
     def for_event(
@@ -398,5 +413,3 @@ class FileResult(BaseModel):
                     return False
         log.debug('ignoring message: %r', event)
         return False
-
-

@@ -13,6 +13,7 @@ from typing import Annotated, Any, ClassVar, Final, Literal, Self, override
 from . import logging
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from _typeshed import SupportsRead
 else:
@@ -22,6 +23,7 @@ log = logging.getLogger(__name__)
 
 
 VAR_REGEX: Final = re.compile(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}')
+
 
 class EnvironAwareConstructor(ruamel.yaml.constructor.RoundTripConstructor):
     environ: ClassVar = os.environ
@@ -46,13 +48,16 @@ yaml.Constructor = EnvironAwareConstructor
 type DirWatchStrategy = Literal['guess', 'inotify', 'polling']
 type ResolvedPath = Annotated[Path, PlainValidator(lambda p: Path(p).resolve())]
 
+
 class DirectoryWatch(BaseModel, frozen=True):
     type: Literal["directory"] = "directory"
     path: ResolvedPath
     recursive: bool = False
     strategy: DirWatchStrategy = 'guess'
 
+
 type NonEmptyString = Annotated[str, PlainValidator(lambda v: v if v else None)]
+
 
 class RedisOptions(BaseModel, frozen=True):
     host: str = 'localhost'
@@ -61,7 +66,9 @@ class RedisOptions(BaseModel, frozen=True):
     username: NonEmptyString | None = None
     password: NonEmptyString | None = None
 
+
 type RedisWatchMethod = Literal['list', 'pubsub']
+
 
 class RedisWatch(BaseModel, frozen=True):
     type: Literal['redis'] = 'redis'
@@ -70,15 +77,19 @@ class RedisWatch(BaseModel, frozen=True):
     keys: list[str] = []
     source: str | None = None
 
+
 type AnyWatch = Annotated[DirectoryWatch | RedisWatch, Discriminator('type')]
+
 
 class RedisKeys(BaseModel, frozen=True):
     request: str = "filescan_request"
     notify: str = "filescan_notify"
     result: str = "filescan_result"
 
+
 class RedisOutputOptions(RedisOptions, frozen=True):
     keys: RedisKeys = RedisKeys()
+
 
 class BaseConfig(BaseModel, frozen=True):
     redis: RedisOutputOptions = RedisOutputOptions()
@@ -95,4 +106,3 @@ class BaseConfig(BaseModel, frozen=True):
     @classmethod
     def from_file(cls, file: SupportsRead[str]) -> Self:
         return cls.model_validate(yaml.load(file))
-

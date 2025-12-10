@@ -5,6 +5,7 @@ from __future__ import annotations
 __version__ = '0.1a'
 
 from filescan import logging
+
 logging.basicConfig()
 log = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class StrelkaOptions(ScannerOptions, frozen=True):
     secure: bool = True
     timeout: float = 3600.0
     chunksize: int = 128 * 1024
+
 
 class StrelkaConfig(BaseConfig, frozen=True):
     strelka: StrelkaOptions = StrelkaOptions()
@@ -71,4 +73,3 @@ class StrelkaScanner(Scanner[StrelkaConfig, StrelkaOptions]):
 
 if __name__ == '__main__':
     scanner_main(StrelkaScanner)
-

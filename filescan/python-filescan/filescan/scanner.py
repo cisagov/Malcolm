@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from filescan import logging
+
 log = logging.getLogger(__name__)
 
 import anyio
@@ -81,7 +82,9 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
             keys = {gc.redis.keys.request}
             log.info(
                 'subscribing to keys: %s:%d/%d => {%s}',
-                gc.redis.host, gc.redis.port, gc.redis.db,
+                gc.redis.host,
+                gc.redis.port,
+                gc.redis.db,
                 ', '.join(keys),
             )
             await pubsub.subscribe(*keys)
@@ -94,8 +97,7 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
                         timeout=5.0,
                     )
                     try:
-                        if not msg or msg.get('type') != 'message' \
-                                or not (data := msg.get('data')):
+                        if not msg or msg.get('type') != 'message' or not (data := msg.get('data')):
                             continue
                         request = ScanRequest.model_validate_json(data)
                     except:
@@ -107,8 +109,7 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
             pass
 
     @abstractmethod
-    async def scan(self, request: ScanRequest) -> Any:
-        ...
+    async def scan(self, request: ScanRequest) -> Any: ...
 
 
 def scanner_main(
@@ -121,20 +122,15 @@ def scanner_main(
         version = getattr(script, '__version__', None)
 
     @click.command()
-    @click.version_option(
-            version,
-            help = "print the version of this tool and exit")
+    @click.version_option(version, help="print the version of this tool and exit")
+    @click.option("--verbose", "-v", count=True, help="increase logging verbosity (may be repeated)")
+    @click.option("--quiet/--no-quiet", "-q", help="run silently except for critical errors")
     @click.option(
-            "--verbose", "-v",
-            count= True,
-            help = "increase logging verbosity (may be repeated)")
-    @click.option(
-            "--quiet/--no-quiet", "-q",
-            help = "run silently except for critical errors")
-    @click.option(
-            "--config", "-c",
-            type = click.Path(exists=True, dir_okay=False, path_type=Path),
-            help = "specify a config file to load")
+        "--config",
+        "-c",
+        type=click.Path(exists=True, dir_okay=False, path_type=Path),
+        help="specify a config file to load",
+    )
     async def main(
         verbose: int,
         quiet: bool,
@@ -146,8 +142,7 @@ def scanner_main(
         if config:
             options = scanner_class.config_class.from_path(config)
         else:
-            log.warning('no config file specified, this is probably not what '
-                        'you want! continuing anyway...')
+            log.warning('no config file specified, this is probably not what ' 'you want! continuing anyway...')
             options = scanner_class.config_class()
 
         try:
@@ -172,7 +167,9 @@ def scanner_main(
                 )
                 log.fatal(
                     'unable to open redis connection: %s:%d/%d',
-                    options.redis.host, options.redis.port, options.redis.db,
+                    options.redis.host,
+                    options.redis.port,
+                    options.redis.db,
                 )
                 # this is an error we can't really recover from
                 sys.exit(1)
@@ -191,5 +188,3 @@ def scanner_main(
             pass
 
     return main()
-
-

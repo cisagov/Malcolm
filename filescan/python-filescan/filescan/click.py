@@ -35,4 +35,3 @@ AppendFile: Final = click.File(
     mode="a",
     encoding="utf-8",
 )
-

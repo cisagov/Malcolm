@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from filescan import logging
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -25,15 +26,28 @@ else:
 
 
 type SupervisorHealth = Literal[
-    'healthy', 'unhealthy', 'error',
+    'healthy',
+    'unhealthy',
+    'error',
 ]
 type SupervisorState = Literal[
-    'unknown', 'fatal', 'running', 'restarting', 'shutdown',
+    'unknown',
+    'fatal',
+    'running',
+    'restarting',
+    'shutdown',
 ]
 type ProcessState = Literal[
-    'stopped', 'starting', 'running', 'backoff', 'stopping', 'exited',
-    'fatal', 'unknown',
+    'stopped',
+    'starting',
+    'running',
+    'backoff',
+    'stopping',
+    'exited',
+    'fatal',
+    'unknown',
 ]
+
 
 class State(BaseModel):
     health: SupervisorHealth = 'healthy'
@@ -41,6 +55,7 @@ class State(BaseModel):
     version: str | None = None
     programs: dict[str, list[Program]] = {}
     error: str | None = None
+
 
 class Program(BaseModel):
     name: str
@@ -60,6 +75,7 @@ ERRORED: Final = {'FATAL', 'BACKOFF', 'UNKNOWN'}
 @app.route('/')
 def root() -> Any:
     return redirect(url_for('health'), code=302)
+
 
 @app.route('/health')
 def health() -> Any:
@@ -91,15 +107,20 @@ def health() -> Any:
                 if prog.start:
                     prog.stop = proc['end']
                     prog.exitstatus = proc['exitstatus']
-            if (prog.state in ERRORED) \
-                    or (prog.stop and (prog.exitstatus not in cfg['exitcodes'])) \
-                    or (cfg['autostart'] and prog.state != 'running'):
+            if (
+                (prog.state in ERRORED)
+                or (prog.stop and (prog.exitstatus not in cfg['exitcodes']))
+                or (cfg['autostart'] and prog.state != 'running')
+            ):
                 prog.healthy = False
                 result.health = 'unhealthy'
             elif prog.state == 'running':
                 prog.healthy = True
 
-            programs.setdefault(proc['group'], [],).append(prog)
+            programs.setdefault(
+                proc['group'],
+                [],
+            ).append(prog)
 
     except Exception as e:
         log.exception('failed to get supervisor/process states')
@@ -113,7 +134,7 @@ def health() -> Any:
 
     return result.model_dump(exclude_none=True)
 
+
 @app.errorhandler(404)
 def page_not_found(_) -> Any:
     return 'page not found', 404
-

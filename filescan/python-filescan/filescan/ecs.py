@@ -8,8 +8,16 @@ from pydantic import BaseModel, Field, model_validator, AnyUrl
 from pydantic_core import core_schema as _cs
 from pydantic_core.core_schema import CoreSchema
 from typing import (
-    Annotated, ClassVar, Any, Iterator, Literal, overload, Optional as O, Self,
-    Iterable, Final,
+    Annotated,
+    ClassVar,
+    Any,
+    Iterator,
+    Literal,
+    overload,
+    Optional as O,
+    Self,
+    Iterable,
+    Final,
 )
 
 
@@ -34,7 +42,7 @@ class Array[T]:
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source, handler) -> CoreSchema:
-        item_type, = typing.get_args(source)
+        (item_type,) = typing.get_args(source)
         list_schema = _cs.list_schema(handler.generate_schema(item_type))
         return _cs.chain_schema(
             [
@@ -44,7 +52,7 @@ class Array[T]:
             ],
             serialization=_cs.plain_serializer_function_ser_schema(
                 cls._to_list,
-                return_schema = list_schema,
+                return_schema=list_schema,
             ),
         )
 
@@ -54,16 +62,14 @@ class Array[T]:
         items: Iterable[T],
         *,
         in_record: Literal[True] = True,
-    ) -> None:
-        ...
+    ) -> None: ...
     @overload
     def __init__(
         self,
         items: tuple[()] = (),
         *,
         in_record: Literal[False],
-    ) -> None:
-        ...
+    ) -> None: ...
     def __init__(
         self,
         items: Iterable[T] = (),
@@ -88,6 +94,7 @@ class Array[T]:
 
     def __iter__(self) -> Iterator[T]:
         yield from self.__list
+
 
 Array.MISSING = Array(in_record=False)
 
@@ -122,32 +129,94 @@ type Int = int
 type Octal = Annotated[int, _OctalInteger]
 type Keyword = str
 
-FileType: Final = StrEnum("FileType", [
-    "file", "dir", "symlink",
-])
+FileType: Final = StrEnum(
+    "FileType",
+    [
+        "file",
+        "dir",
+        "symlink",
+    ],
+)
 
-EventAgentIdStatus: Final = StrEnum("EventAgentIdStatus", [
-    "verified", "mismatch", "missing", "auth_metadata_missing",
-])
-EventCategory: Final = StrEnum("EventCategory", [
-    "api", "authentication", "configuration", "database", "driver", "email",
-    "file", "host", "iam", "intrusion_detection", "library", "malware",
-    "network", "package", "process", "registry", "session", "threat",
-    "vulnerability", "web",
-])
+EventAgentIdStatus: Final = StrEnum(
+    "EventAgentIdStatus",
+    [
+        "verified",
+        "mismatch",
+        "missing",
+        "auth_metadata_missing",
+    ],
+)
+EventCategory: Final = StrEnum(
+    "EventCategory",
+    [
+        "api",
+        "authentication",
+        "configuration",
+        "database",
+        "driver",
+        "email",
+        "file",
+        "host",
+        "iam",
+        "intrusion_detection",
+        "library",
+        "malware",
+        "network",
+        "package",
+        "process",
+        "registry",
+        "session",
+        "threat",
+        "vulnerability",
+        "web",
+    ],
+)
 
-EventKind: Final = StrEnum("EventKind", [
-    "alert", "asset", "enrichment", "event", "metric", "state",
-    "pipeline_error", "signal",
-])
-EventOutcome: Final = StrEnum("EventOutcome", [
-    "failure", "success", "unknown",
-])
-EventType: Final = StrEnum("EventType", [
-    "access", "admin", "allowed", "change", "connection", "creation",
-    "deletion", "denied", "end", "error", "group", "indicator", "info",
-    "installation", "protocol", "start", "user",
-])
+EventKind: Final = StrEnum(
+    "EventKind",
+    [
+        "alert",
+        "asset",
+        "enrichment",
+        "event",
+        "metric",
+        "state",
+        "pipeline_error",
+        "signal",
+    ],
+)
+EventOutcome: Final = StrEnum(
+    "EventOutcome",
+    [
+        "failure",
+        "success",
+        "unknown",
+    ],
+)
+EventType: Final = StrEnum(
+    "EventType",
+    [
+        "access",
+        "admin",
+        "allowed",
+        "change",
+        "connection",
+        "creation",
+        "deletion",
+        "denied",
+        "end",
+        "error",
+        "group",
+        "indicator",
+        "info",
+        "installation",
+        "protocol",
+        "start",
+        "user",
+    ],
+)
+
 
 class NestedModel(BaseModel):
     MISSING: ClassVar[Self]
@@ -159,6 +228,7 @@ class NestedModel(BaseModel):
         super().__init_subclass__()
         cls.MISSING = cls(in_record=False)
 
+
 class Hash(NestedModel):
     # ECS fields
     md5: O[str] = None
@@ -168,6 +238,7 @@ class Hash(NestedModel):
     sha512: O[str] = None
     ssdeep: O[str] = None
     tlsh: O[str] = None
+
 
 class File(NestedModel):
     # ECS nested objects
@@ -200,6 +271,7 @@ class File(NestedModel):
     # non-ECS fields
     source: O[str] = None
 
+
 class Event(NestedModel):
     # ECS fields
     action: O[str] = None
@@ -229,11 +301,13 @@ class Event(NestedModel):
     type: O[EventType] = None
     url: O[AnyUrl] = None
 
+
 class Network(NestedModel):
     # ECS fields
     # ...
     protocol: O[str] = None
     # ...
+
 
 class Record(BaseModel):
     @model_validator(mode="wrap")
@@ -250,7 +324,6 @@ class Record(BaseModel):
     event: Event = Event.MISSING
     file: File = File.MISSING
     hash: Hash = Hash.MISSING
-
 
 
 """

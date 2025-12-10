@@ -40,41 +40,65 @@ from logging import (
 )
 
 __all__ = (
-    "BaseLogRecord", "BaseStreamHandler", "critical", "CRITICAL", "debug",
-    "DEBUG", "error", "ERROR", "exception", "getLogger", "info", "INFO",
-    "Logger", "LogRecord", "StreamHandler", "warning", "WARNING",
+    "BaseLogRecord",
+    "BaseStreamHandler",
+    "critical",
+    "CRITICAL",
+    "debug",
+    "DEBUG",
+    "error",
+    "ERROR",
+    "exception",
+    "getLogger",
+    "info",
+    "INFO",
+    "Logger",
+    "LogRecord",
+    "StreamHandler",
+    "warning",
+    "WARNING",
 )
 
 
 DEFAULT_FORMAT: Final = {
-    "%": " ".join([
-        "%(asctime)s", "│",
-        "%(levelicon)s",
-        "%(processName)-12s",
-        #"%(workerName)-16s",
-        "%(message)s",
-    ]),
-    "{": " ".join([
-        "{asctime:s}", "│",
-        "{levelicon:s}",
-        "{processName:<12s}",
-        #"{workerName:<16s}",
-        "{message:s}",
-    ]),
-    "$": " ".join([
-        "${asctime}", "│",
-        "${levelicon}",
-        "${processName}",
-        #"${workerName}",
-        "${message}",
-    ]),
+    "%": " ".join(
+        [
+            "%(asctime)s",
+            "│",
+            "%(levelicon)s",
+            "%(processName)-12s",
+            # "%(workerName)-16s",
+            "%(message)s",
+        ]
+    ),
+    "{": " ".join(
+        [
+            "{asctime:s}",
+            "│",
+            "{levelicon:s}",
+            "{processName:<12s}",
+            # "{workerName:<16s}",
+            "{message:s}",
+        ]
+    ),
+    "$": " ".join(
+        [
+            "${asctime}",
+            "│",
+            "${levelicon}",
+            "${processName}",
+            # "${workerName}",
+            "${message}",
+        ]
+    ),
 }
 DEFAULT_DATEFMT: Final = "%Y-%m-%d %H:%M:%S"
 DEFAULT_WORKER_NAME: Final = "<main>"
 SUPERVISOR_PROCESS_NAME: Final = os.getenv("SUPERVISOR_PROCESS_NAME", None)
 
 
-PERCENT_RE: Final = re.compile(r"""
+PERCENT_RE: Final = re.compile(
+    r"""
     %
     (?:\((?P<key>[A-Za-z_][A-Za-z0-9_]*)\))?
     (?P<flags>[-#0 +]+)?
@@ -82,22 +106,32 @@ PERCENT_RE: Final = re.compile(r"""
     (?:\.(?P<precision>0|[1-9][0-9]*|\*))?
     (?P<size>[hlL]+)?
     (?P<type>[diouxXeEfFgGcrsa])
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
-PLURAL_RE: Final = re.compile(rf"""
+PLURAL_RE: Final = re.compile(
+    rf"""
     ^
     (\ +)
     (\w+)\(e?s\)
     ((?:$|\s|[{re.escape(string.punctuation)}]).*)
     $
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
 
-_ArgType: Final = type("ARG", (), {
-    "__repr__": lambda _: "<ARG>",
-    "__str__": lambda _: "*",
-})
+_ArgType: Final = type(
+    "ARG",
+    (),
+    {
+        "__repr__": lambda _: "<ARG>",
+        "__str__": lambda _: "*",
+    },
+)
 ARG: Final = _ArgType()
+
 
 @dataclasses.dataclass
 class FormatSpec:
@@ -132,19 +166,15 @@ class FormatSpec:
 
     @property
     def arg_index(self) -> int | None:
-        return self.index + self.width_is_arg + self.precision_is_arg \
-                if self.value_is_arg else None
+        return self.index + self.width_is_arg + self.precision_is_arg if self.value_is_arg else None
 
     @property
     def width_index(self) -> int | None:
-        return self.index \
-                if self.width_is_arg else None
+        return self.index if self.width_is_arg else None
 
     @property
     def precision_index(self) -> int | None:
-        return self.index + self.width_is_arg \
-                if self.precision_is_arg else None
-
+        return self.index + self.width_is_arg if self.precision_is_arg else None
 
 
 def _parse_percent_format(format: str) -> Iterator[FormatSpec]:
@@ -161,19 +191,21 @@ def _parse_percent_format(format: str) -> Iterator[FormatSpec]:
     p = 0
     c = 0
     while p < len(format):
-        if (m := PERCENT_RE.search(format, pos=p)):
+        if m := PERCENT_RE.search(format, pos=p):
             gd = m.groupdict()
-            yield (fs := FormatSpec(
-                raw=format[m.start():m.end()],
-                text=format[p:m.start()],
-                type=gd["type"],
-                key=gd["key"],
-                index=c,
-                flags=set(gd["flags"] or ""),
-                width=_parse_int(gd["width"]),
-                precision=_parse_int(gd["precision"]),
-                size=gd["size"],
-            ))
+            yield (
+                fs := FormatSpec(
+                    raw=format[m.start() : m.end()],
+                    text=format[p : m.start()],
+                    type=gd["type"],
+                    key=gd["key"],
+                    index=c,
+                    flags=set(gd["flags"] or ""),
+                    width=_parse_int(gd["width"]),
+                    precision=_parse_int(gd["precision"]),
+                    size=gd["size"],
+                )
+            )
             c += fs.argcount
             p = m.end()
         else:
@@ -184,6 +216,7 @@ def _parse_percent_format(format: str) -> Iterator[FormatSpec]:
             )
             break
 
+
 def _fix_percent_plurals(
     fmt: str,
     args: tuple[Any, ...] = (),
@@ -193,7 +226,7 @@ def _fix_percent_plurals(
     new = ""
     for spec in _parse_percent_format(fmt):
         if last:
-            if (m := PLURAL_RE.match(spec.text)):
+            if m := PLURAL_RE.match(spec.text):
                 pre, noun, post = m.groups()
                 val = None
                 if last.key is not None:
@@ -270,7 +303,8 @@ def create_log_record(*args, **kwargs) -> LogRecord:
         setattr(record, k, v)
     # store our shorthand forms for the level name
     record.shortlevel, record.levelicon = _level_shorthand_mapping.get(
-        record.levelno, _level_shorthand_mapping[None],
+        record.levelno,
+        _level_shorthand_mapping[None],
     )
     # store a shorthand location (so we can do column alignment)
     record.location = f"{record.filename}:{record.lineno}"
@@ -302,7 +336,7 @@ class Logger(BaseLogger):
 
 class LoggerAdapter(BaseLoggerAdapter):
     def trace(self, msg: str, *args, **kwargs) -> None:
-        if (fn := getattr(self.logger, "trace", None)):
+        if fn := getattr(self.logger, "trace", None):
             fn(msg, *args, **kwargs)
         else:
             if self.isEnabledFor(TRACE):
@@ -326,13 +360,13 @@ logging.addLevelName(TRACE, "TRACE")
 
 # define our stock shorthands
 _level_shorthand_mapping = {
-    TRACE:      ("TRCE", "🪡"),
-    DEBUG:      ("DBG",  "🪴"),
-    INFO:       ("INFO", "💬"),
-    WARNING:    ("WARN", "🚧"),
-    ERROR:      ("ERR",  "🚨"),
-    CRITICAL:   ("CRIT", "💥"),
-    None:       ("????", "❓"),
+    TRACE: ("TRCE", "🪡"),
+    DEBUG: ("DBG", "🪴"),
+    INFO: ("INFO", "💬"),
+    WARNING: ("WARN", "🚧"),
+    ERROR: ("ERR", "🚨"),
+    CRITICAL: ("CRIT", "💥"),
+    None: ("????", "❓"),
 }
 
 
@@ -383,13 +417,10 @@ def basicConfig(
             level = quiet_level
         elif verbosity is not None:
             all_levels = sorted(
-                (
-                    v for v in set(logging.getLevelNamesMapping().values())
-                    if 0 < v <= base_level
-                ),
+                (v for v in set(logging.getLevelNamesMapping().values()) if 0 < v <= base_level),
                 reverse=True,
             )
-            level = all_levels[max(0, min(verbosity, len(all_levels)-1))]
+            level = all_levels[max(0, min(verbosity, len(all_levels) - 1))]
         else:
             level = DEFAULT_LOGLEVEL
     # build default handlers if none were provided
@@ -422,6 +453,4 @@ def basicConfig(
 
 
 def trace(msg: str, *args, stacklevel: int = 1, **kwargs) -> None:
-    root.log(TRACE, msg, *args, stacklevel=stacklevel+1, **kwargs)
-
-
+    root.log(TRACE, msg, *args, stacklevel=stacklevel + 1, **kwargs)

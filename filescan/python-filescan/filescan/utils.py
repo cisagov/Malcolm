@@ -28,5 +28,3 @@ def group_items[ItemT, KeyT](
             yield group, matches
     else:
         yield from results.items()
-
-

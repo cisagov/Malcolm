@@ -54,7 +54,8 @@ class AsyncFSEventAdapter(FileSystemEventHandler):
 
 class AsyncFileSystemEventHandler:
     def __new__(
-        cls, *args,
+        cls,
+        *args,
         portal: BlockingPortal,
         **kwargs,
     ) -> AsyncFSEventAdapter:
@@ -73,19 +74,24 @@ class AsyncFileSystemEventHandler:
 
     async def on_any_event(self, _: FileSystemEvent, /) -> None:
         pass
+
     async def on_closed(self, _: ClosedEvent, /) -> None:
         pass
+
     async def on_closed_no_write(self, _: ClosedNoWriteEvent, /) -> None:
         pass
+
     async def on_created(self, _: CreatedEvent, /) -> None:
         pass
+
     async def on_deleted(self, _: DeletedEvent, /) -> None:
         pass
+
     async def on_modified(self, _: ModifiedEvent, /) -> None:
         pass
+
     async def on_moved(self, _: MovedEvent, /) -> None:
         pass
+
     async def on_opened(self, _: OpenedEvent, /) -> None:
         pass
-
-

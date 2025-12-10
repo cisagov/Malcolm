@@ -51,9 +51,18 @@ filebeat.inputs:
     - ${FILEBEAT_FILESCAN_LOG_PATH:/filescan}/*.log
   symlinks: true
   fields_under_root: true
+  json:
+    expand_keys: true
+    add_error_key: false
+    ignore_decoding_error: true
+    keys_under_root: false
+  processors:
+    - rename:
+        fields:
+          - from: "json"
+            to: "filescan"
   tags: ["_filebeat_filescan_live"]
   compression_level: 0
-  exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}

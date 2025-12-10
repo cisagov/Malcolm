@@ -10,11 +10,15 @@ from typing import AsyncIterator, Iterator, Any, cast
 from uuid import UUID
 
 from ..aio import (
-    SingleOrIterable, chunk_async_data_stream, asynciter_save_exception,
+    SingleOrIterable,
+    chunk_async_data_stream,
+    asynciter_save_exception,
 )
 from .proto import strelka_pb2_grpc
 from .proto.strelka_pb2 import (
-    Attributes, Request, ScanFileRequest,
+    Attributes,
+    Request,
+    ScanFileRequest,
     ScanResponse as ScanResponse,
 )
 
@@ -33,7 +37,7 @@ class StrelkaFrontend:
     chunksize: int
 
     def __init__(
-        self, 
+        self,
         host: str = 'localhost',
         port: int = 57314,
         *,
@@ -88,7 +92,7 @@ class StrelkaFrontend:
             source=(source or self.source),
             gatekeeper=self.gatekeeper,
         )
-        attributes=Attributes(
+        attributes = Attributes(
             filename=filename,
             metadata=self._typecheck_metadata(metadata),
         )
@@ -147,5 +151,3 @@ class StrelkaFrontend:
             # see comment above about pygrpc and eating exception
             except anyio.get_cancelled_exc_class() as e:
                 raise (hold.exception() or e) from None
-
-

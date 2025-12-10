@@ -10,36 +10,36 @@ from typing import Iterable, Callable, Any
 from types import CoroutineType
 import redis.asyncio
 import redis.asyncio.client
-#from asyncio import TaskGroup
+
+# from asyncio import TaskGroup
 from pydantic import BaseModel, TypeAdapter
 from itertools import chain
 
 from filescan.aio import WorkerPool
 
 from . import logging
-#from .asyncio import EventLoop, TaskCreatorMixin
+
+# from .asyncio import EventLoop, TaskCreatorMixin
 
 
 type Handler[*A] = Callable[[*A], Coroutine[Any, Any, None]]
+
 
 class HandlerMixin[*A]:
     HANDLER_PREFIX: ClassVar = 'on_'
 
     def get_handlers(self) -> Iterator[str]:
-        yield from (
-            n.removeprefix(self.HANDLER_PREFIX)
-            for n in dir(self)
-            if n.startswith(self.HANDLER_PREFIX)
-        )
+        yield from (n.removeprefix(self.HANDLER_PREFIX) for n in dir(self) if n.startswith(self.HANDLER_PREFIX))
 
     def get_handler(self, key: Any) -> Handler[*A] | None:
         return getattr(self, f'{self.HANDLER_PREFIX}{key!s}', None)
 
     async def call_handler(
-        self, key: Any,
+        self,
+        key: Any,
         *a: *A,
     ) -> None:
-        if (handler := self.get_handler(key)):
+        if handler := self.get_handler(key):
             return await handler(*a)
 
 
@@ -48,14 +48,11 @@ type _Coro = Coroutine[Any, Any, None] | CoroutineType[Any, Any, None]
 type _Method[S, **P, T, C: _Coro] = Callable[Concatenate[S, T, P], C]
 type _Function[**P, T, C: _Coro] = Callable[Concatenate[T, P], C]
 
+
 @overload
-def decode_data_as_model[S, **P, T: BaseModel, C: _Coro](
-        _: _Method[S, P, T, C], /) -> _Method[S, P, str | None, C]:
-    ...
+def decode_data_as_model[S, **P, T: BaseModel, C: _Coro](_: _Method[S, P, T, C], /) -> _Method[S, P, str | None, C]: ...
 @overload
-def decode_data_as_model[**P, T: BaseModel, C: _Coro](
-        _: _Function[P, T, C], /) -> _Function[P, str | None, C]:
-    ...
+def decode_data_as_model[**P, T: BaseModel, C: _Coro](_: _Function[P, T, C], /) -> _Function[P, str | None, C]: ...
 def decode_data_as_model[S, **P, T: BaseModel, C: _Coro](
     async_func: _Method[S, P, T, C] | _Function[P, T, C],
     /,
@@ -68,33 +65,42 @@ def decode_data_as_model[S, **P, T: BaseModel, C: _Coro](
     if argspec.args[0] == 'self':
         assert len(argspec.args) > 1, 'wrapped method takes no arguments'
         async_func = cast(Callable[Concatenate[S, T, P], C], async_func)
+
         @functools.wraps(async_func)
         def method_wrapper(self: S, data: str | None, *args: P.args, **kwargs: P.kwargs) -> C:
             if not data:
+
                 async def dummy() -> None:
                     return None
+
                 return cast(C, dummy())
             if isinstance(model, TypeAdapter):
                 return async_func(self, model.validate_json(data), *args, **kwargs)
             else:
                 return async_func(self, model.model_validate_json(data), *args, **kwargs)
+
         return method_wrapper
     else:
         async_func = cast(Callable[Concatenate[T, P], C], async_func)
+
         @functools.wraps(async_func)
         def function_wrapper(data: str | None, *args: P.args, **kwargs: P.kwargs) -> C:
             if not data:
+
                 async def dummy() -> None:
                     return None
+
                 return cast(C, dummy())
             if isinstance(model, TypeAdapter):
                 return async_func(model.validate_json(data), *args, **kwargs)
             else:
                 return async_func(model.model_validate_json(data), *args, **kwargs)
+
         return function_wrapper
 
 
 type Key = str
+
 
 class Alias:
     def __new__(cls, value: Alias | str) -> Alias:
@@ -166,11 +172,11 @@ class AliasMapping:
         return key in self._key_to_alias
 
     def remove_alias(self, alias: Alias) -> None:
-        if (key := self._alias_to_key.pop(alias, None)):
+        if key := self._alias_to_key.pop(alias, None):
             self._key_to_alias.pop(key)
 
     def remove_key(self, key: Key) -> None:
-        if (alias := self._key_to_alias.pop(key, None)):
+        if alias := self._key_to_alias.pop(key, None):
             self._alias_to_key.pop(alias)
 
     def add_alias(self, alias: Alias | str, key: Key) -> None:
@@ -224,7 +230,9 @@ class RedisConnection[OptsT](metaclass=ABCMeta):
     ) -> None:
         super().__init__()
         self._redis = redis.asyncio.Redis(
-            host=host, port=port, db=db,
+            host=host,
+            port=port,
+            db=db,
             decode_responses=decode_responses,
             **kw,
         )
@@ -273,7 +281,8 @@ class RedisPublisher[OptsT](RedisConnection[OptsT]):
         return {
             self.aliases.alias(k): v
             for k, v in await self.redis.pubsub_numsub(
-                *self.aliases.unalias_all(map(Alias, channels)), **kw,
+                *self.aliases.unalias_all(map(Alias, channels)),
+                **kw,
             )
         }
 
@@ -315,7 +324,9 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
         **kw,
     ) -> None:
         super().__init__(
-            host, port, db=db,
+            host,
+            port,
+            db=db,
             options=options,
             decode_responses=decode_responses,
             aliases_to_keys=aliases_to_keys,
@@ -323,9 +334,15 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
             **kw,
         )
         self._pubsub = self.redis.pubsub()
-        self._channel_aliases = set(map(Alias, chain(
-            channels, map(Alias, self.get_handlers()),
-        )))
+        self._channel_aliases = set(
+            map(
+                Alias,
+                chain(
+                    channels,
+                    map(Alias, self.get_handlers()),
+                ),
+            )
+        )
         self._subscribed_aliases = set()
 
     async def add_subscribed_channel(self, alias: Alias | str) -> None:
@@ -340,10 +357,10 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
         all_keys = set(self.aliases.unalias_all(self._channel_aliases))
         sub_keys = set(self.aliases.unalias_all(self._subscribed_aliases))
 
-        if (to_sub := all_keys - sub_keys):
+        if to_sub := all_keys - sub_keys:
             await self.pubsub.subscribe(*to_sub)
             self._subscribed_aliases |= set(self.aliases.alias_all(to_sub))
-        if (to_unsub := sub_keys - all_keys):
+        if to_unsub := sub_keys - all_keys:
             await self.pubsub.unsubscribe(*to_unsub)
             self._subscribed_aliases -= set(self.aliases.alias_all(to_unsub))
 
@@ -365,6 +382,7 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
             logging.debug('starting Redis subscriber: %r', self)
             while True:
                 await self.dispatch_message(await self.get_message())
+
         return [*super().get_work_coros(), work()]
 
     async def get_message(self, timeout: float | None = None) -> Message:
@@ -381,11 +399,15 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
         channel = self.aliases.alias(key)
         async with anyio.create_task_group() as group:
             group.start_soon(
-                self.on_message, data, channel,
+                self.on_message,
+                data,
+                channel,
                 name='message_handler',
             )
             group.start_soon(
-                self.call_handler, channel, data,
+                self.call_handler,
+                channel,
+                data,
                 name=f'{channel}_handler',
             )
 
@@ -412,16 +434,24 @@ class RedisListWatcher[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
         **kw,
     ) -> None:
         super().__init__(
-            host, port, db=db,
+            host,
+            port,
+            db=db,
             options=options,
             decode_responses=decode_responses,
             aliases_to_keys=aliases_to_keys,
             workers=workers,
             **kw,
         )
-        self._list_aliases = set(map(Alias, chain(
-            list_keys, map(Alias, self.get_handlers()),
-        )))
+        self._list_aliases = set(
+            map(
+                Alias,
+                chain(
+                    list_keys,
+                    map(Alias, self.get_handlers()),
+                ),
+            )
+        )
 
     def add_watched_list(self, key: Alias | str) -> None:
         self._list_aliases.add(Alias(key))
@@ -439,6 +469,7 @@ class RedisListWatcher[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
             logging.debug('starting Redis list watcher: %r', self)
             while True:
                 await self.dispatch_item(*await self.get_item())
+
         return [*super().get_work_coros(), work()]
 
     async def blpop(
@@ -458,15 +489,17 @@ class RedisListWatcher[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
     async def dispatch_item(self, list_key: Alias, data: str) -> None:
         async with anyio.create_task_group() as group:
             group.start_soon(
-                self.on_item, data, list_key,
+                self.on_item,
+                data,
+                list_key,
                 name='item_handler',
             )
             group.start_soon(
-                self.call_handler, list_key, data,
+                self.call_handler,
+                list_key,
+                data,
                 name=f'{list_key}_handler',
             )
 
     async def on_item(self, data: str, key: Alias, /) -> None:
         pass
-
-

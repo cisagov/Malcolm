@@ -11,23 +11,32 @@ import types
 from anyio.abc import CancelScope, TaskGroup
 from itertools import count
 from typing import (
-    Any, AsyncGenerator, Awaitable, Callable, Coroutine, Final, Self,
-    AsyncIterator, Iterator, Iterable, Generator, AsyncIterable,
+    Any,
+    AsyncGenerator,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Final,
+    Self,
+    AsyncIterator,
+    Iterator,
+    Iterable,
+    Generator,
+    AsyncIterable,
 )
 
 
 log = logging.Logger(__name__)
 
 
-type AnyAwaitable[T] = Awaitable[T] \
-                     | Coroutine[None, None, T] \
-                     | types.CoroutineType[None, None, T]
+type AnyAwaitable[T] = Awaitable[T] | Coroutine[None, None, T] | types.CoroutineType[None, None, T]
 
 
 def run_as_main[T](main: AnyAwaitable[T]) -> T:
     async def _helper() -> T:
         async with main_task_group():
             return await main
+
     return anyio.run(_helper)
 
 
@@ -57,7 +66,8 @@ class AtEventLoopExit:
     def add_exit_callback[**P](
         self,
         callback: Callable[P, Any],
-        *a: P.args, **kw: P.kwargs,
+        *a: P.args,
+        **kw: P.kwargs,
     ) -> None:
         self._callbacks.append(functools.partial(callback, *a, **kw))
 
@@ -77,7 +87,9 @@ class AtEventLoopExit:
                 exceptions,
             )
 
+
 _atexit: Final = AtEventLoopExit()
+
 
 def add_loop_exit_callback[**P](
     callback: Callable[P, Any],
@@ -121,7 +133,8 @@ class WorkerPool:
 
     async def create_worker(self, coro: AnyAwaitable[Any]) -> None:
         self._group.start_soon(
-            self._do_work, coro,
+            self._do_work,
+            coro,
             name=f'{self._name}:{next(self._counter)}',
         )
 
@@ -135,6 +148,7 @@ def asynciter_save_exception[T](
     exception: concurrent.futures.Future | None = None,
 ) -> tuple[AsyncIterator[T], concurrent.futures.Future]:
     exception = exception or concurrent.futures.Future()
+
     async def _asynciter_save_exception() -> AsyncIterator[T]:
         try:
             async for element in iterator:
@@ -148,11 +162,13 @@ def asynciter_save_exception[T](
             raise
         else:
             exception.set_result(None)
+
     return _asynciter_save_exception(), exception
 
 
-type SingleOrIterable[T] = T | Iterator[T] | Iterable[T] | Generator[T] | \
-                AsyncIterator[T] | AsyncIterable[T] | AsyncGenerator[T]
+type SingleOrIterable[T] = T | Iterator[T] | Iterable[T] | Generator[T] | AsyncIterator[T] | AsyncIterable[
+    T
+] | AsyncGenerator[T]
 
 
 async def as_asynciter[T](
@@ -201,7 +217,7 @@ async def chunk_async_data_stream(
 
 # FIXME: probably remove this altogether, mostly here for the possibility that
 #        we might need it at some point yet... but that's probably unlikely
-#class TaskGroupWrapper(anyio.AsyncContextManagerMixin, TaskGroup):
+# class TaskGroupWrapper(anyio.AsyncContextManagerMixin, TaskGroup):
 #    __wrapped: TaskGroup
 #
 #    def __init__(self, *, group: TaskGroup | None = None) -> None:
@@ -234,5 +250,3 @@ async def chunk_async_data_stream(
 #
 #    def __repr__(self) -> str:
 #        return '<{} @0x{:x}>'.format(type(self).__qualname__, id(self))
-
-
