@@ -28,7 +28,7 @@ Logstash can then be easily extended to add more [`logstash/pipelines`]({{ site.
 
 In order to add a new **parse pipeline** for `cooltool` after tweaking [`filebeat-logs.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/filebeat/filebeat-logs.yml) as described above, create a `cooltool` directory under [`logstash/pipelines`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines) that follows the same pattern as the `zeek` parse pipeline. This directory will have an input file (tiny), a filter file (possibly large), and an output file (tiny). In the filter file, be sure to set the field [`event.hash`](https://www.elastic.co/guide/en/ecs/master/ecs-event.html#field-event-hash) to a unique value to identify indexed documents in OpenSearch; the [fingerprint filter](https://www.elastic.co/guide/en/logstash/current/plugins-filters-fingerprint.html) may be useful for this.
 
-Finally, in the [`./config/logstash.env` file](malcolm-config.md#MalcolmConfigEnvVars), set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable to `cooltool-parse,zeek-parse,suricata-parse,beats-parse` (assuming the pipeline address from the previous step was named `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to all parse pipelines.
+Finally, in the [`./config/logstash.env` file](malcolm-config.md#MalcolmConfigEnvVars), set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable to `cooltool-parse,zeek-parse,suricata-parse,beats-parse,filescan-parse` (assuming the pipeline address from the previous step was named `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to all parse pipelines.
 
 ## <a name="LogstashZeek"></a>Parsing new Zeek logs
 
