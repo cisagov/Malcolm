@@ -52,15 +52,15 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   json:
-    expand_keys: true
+    expand_keys: false
     add_error_key: false
     ignore_decoding_error: true
-    keys_under_root: false
+    keys_under_root: true
   processors:
     - rename:
         fields:
-          - from: "json"
-            to: "filescan"
+          - from: "source"
+            to: "service.type"
   tags: ["_filebeat_filescan_live"]
   compression_level: 0
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}

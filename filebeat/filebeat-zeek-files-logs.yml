@@ -42,24 +42,27 @@ filebeat.inputs:
 
 processors:
   - decode_json_fields:
-      fields: [ "message" ]
+      fields: ["message"]
       process_array: true
       target: "file"
-  - drop_fields:
-      fields: [ "message" ]
-      ignore_missing: true
-  - replace:
-      fields:
-        - field: "log.file.path"
-          pattern: "/json_streaming_([^/]+)$"
-          replacement: "/$1"
-      when:
-        regexp:
-          log.file.path: "/json_streaming_"
   - drop_event:
       when:
         not:
           has_fields: ["file.extracted"]
+  - copy_fields:
+      fields:
+        - from: "file"
+          to: "_keep_file"
+      ignore_missing: true
+  - drop_fields:
+      fields:
+        - "/^[A-Za-z0-9].*/"
+      ignore_missing: true
+  - rename:
+      fields:
+        - from: "_keep_file"
+          to: "file"
+      ignore_missing: true
 
 #================================ Outputs ======================================
 
