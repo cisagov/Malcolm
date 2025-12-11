@@ -61,7 +61,7 @@ filebeat.inputs:
         fields:
           - from: "source"
             to: "service.type"
-  tags: ["_filebeat_filescan_live"]
+  tags: ["_filebeat_filescan"]
   compression_level: 0
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}

@@ -83,7 +83,7 @@ else
     yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" -i "${TMP_CONFIG_FILE}"
   fi
 
-  # for hedgehog profile, add `_filebeat_zeek_hedgehog` just to the Zeek logs
+  # for hedgehog profile, add `_filebeat_zeek_hedgehog` to the Zeek logs and
   if [[ "${MALCOLM_PROFILE:-malcolm}" == "hedgehog" ]]; then
      yq -P eval '
       (
@@ -93,6 +93,15 @@ else
             (.tags[] | test("^_filebeat_zeek"))
           )
       ).tags += ["_filebeat_zeek_hedgehog"]
+    ' -i "${TMP_CONFIG_FILE}"
+     yq -P eval '
+      (
+        .["filebeat.inputs"][]
+        | select(
+            (.type | test("(?i)log")) and
+            (.tags[] | test("^_filebeat_filescan"))
+          )
+      ).tags += ["_filebeat_filescan_hedgehog"]
     ' -i "${TMP_CONFIG_FILE}"
   fi
 

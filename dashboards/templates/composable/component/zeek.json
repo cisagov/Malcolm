@@ -237,9 +237,6 @@
                 "analyzers": {
                   "type": "keyword"
                 },
-                "conn_uids": {
-                  "type": "keyword"
-                },
                 "depth": {
                   "type": "integer"
                 },
@@ -288,9 +285,6 @@
                 "parent_fuid": {
                   "type": "keyword"
                 },
-                "rx_hosts": {
-                  "type": "ip"
-                },
                 "seen_bytes": {
                   "type": "long"
                 },
@@ -305,9 +299,6 @@
                 },
                 "total_bytes": {
                   "type": "long"
-                },
-                "tx_hosts": {
-                  "type": "ip"
                 }
               }
             },

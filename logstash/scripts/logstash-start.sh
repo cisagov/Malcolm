@@ -48,7 +48,7 @@ export OPENSEARCH_SECONDARY_URL
 
 # copy over pipeline filters from host-mapped volumes (if any) into their final resting places
 find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
-  xargs -0 -n 1 -I '{}' bash -c '
+  xargs -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   PIPELINES_DEST_DIR="$PIPELINES_DIR"/"$PIPELINE_NAME"
   mkdir -p "$PIPELINES_DEST_DIR"
@@ -58,7 +58,7 @@ find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null |
 # dynamically generate final pipelines.yml configuration file from all of the pipeline directories
 > "$PIPELINES_CFG"
 find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
-  xargs -0 -n 1 -I '{}' bash -c '
+  xargs -0 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   PIPELINE_ADDRESS_NAME="$(cat "{}"/*.conf | sed -e "s/:[\}]*.*\(}\)/\1/" | envsubst | grep -P "\baddress\s*=>" | awk "{print \$3}" | sed "s/[\"'']//g" | head -n 1)"
   if [[ -n "$OPENSEARCH_SECONDARY_URL" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
