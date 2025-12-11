@@ -2,7 +2,7 @@ repository: idaholab/Malcolm
 title: Malcolm
 offline_mode: false
 malcolm:
-  version: 25.12.0
+  version: 25.12.1
 description: A powerful, easily deployable network traffic analysis tool suite for network security monitoring
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0

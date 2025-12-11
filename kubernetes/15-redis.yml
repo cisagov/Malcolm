@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: redis-container
-        image: ghcr.io/idaholab/malcolm/redis:25.12.0
+        image: ghcr.io/idaholab/malcolm/redis:25.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -76,7 +76,7 @@ spec:
             subPath: redis
       initContainers:
       - name: redis-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
