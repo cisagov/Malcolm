@@ -33,7 +33,7 @@ ENV PUSER_RLIMIT_UNLOCK true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 USER root
 
-ENV SUPERCRONIC_VERSION "0.2.39"
+ENV SUPERCRONIC_VERSION "0.2.40"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
