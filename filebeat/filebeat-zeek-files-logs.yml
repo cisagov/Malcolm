@@ -10,7 +10,7 @@ logging.metrics.enabled: false
 filebeat.inputs:
 - type: log
   paths:
-    - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/json_streaming_files.log
+    - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/json_streaming_files*.log
   symlinks: true
   fields_under_root: true
   compression_level: 0
@@ -25,7 +25,7 @@ filebeat.inputs:
 
 - type: log
   paths:
-    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/spool/logger-*/json_streaming_files.log
+    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/spool/logger-*/json_streaming_files*.log
   symlinks: true
   fields_under_root: true
   compression_level: 0
