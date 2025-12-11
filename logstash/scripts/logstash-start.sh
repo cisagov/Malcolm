@@ -48,7 +48,7 @@ export OPENSEARCH_SECONDARY_URL
 
 # copy over pipeline filters from host-mapped volumes (if any) into their final resting places
 find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
-  xargs -I '{}' bash -c '
+  xargs -0 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   PIPELINES_DEST_DIR="$PIPELINES_DIR"/"$PIPELINE_NAME"
   mkdir -p "$PIPELINES_DEST_DIR"
