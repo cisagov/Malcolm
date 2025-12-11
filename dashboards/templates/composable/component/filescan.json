@@ -1,0 +1,15 @@
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "filescan": {
+          "properties": {
+            "results": {
+              "type": "flat_object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@
     "ecs_process",
     "ecs_related",
     "ecs_server",
+    "ecs_service",
     "ecs_source",
     "ecs_threat",
     "ecs_url",

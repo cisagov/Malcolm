@@ -17,6 +17,7 @@
     "ecs_related",
     "ecs_rule",
     "ecs_server",
+    "ecs_service",
     "ecs_source",
     "ecs_threat",
     "ecs_url",
