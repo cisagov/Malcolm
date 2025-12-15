@@ -93,6 +93,12 @@ copied_environment_variables:
     arkime:
       CLUSTER_MAX_SHARDS_PER_NODE:
         OPENSEARCH_MAX_SHARDS_PER_NODE
+  pipeline:
+    zeek:
+      YARA_CUSTOM_RULES_ONLY:
+        EXTRACTED_FILE_YARA_CUSTOM_ONLY
+      RULES_UPDATE_ENABLED:
+        EXTRACTED_FILE_UPDATE_RULES
   postgres:
     netbox:
       DB_HOST:

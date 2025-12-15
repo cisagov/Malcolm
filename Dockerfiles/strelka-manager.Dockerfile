@@ -21,7 +21,7 @@ USER root
 
 ENV TERM xterm
 
-ENV YQ_VERSION "4.49.2"
+ENV YQ_VERSION "4.50.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 RUN apk update --no-cache && \

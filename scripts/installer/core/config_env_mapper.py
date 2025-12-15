@@ -103,7 +103,7 @@ _BOOLEAN_VARS = [
     KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP,
-    KEY_ENV_ZEEK_FILE_UPDATE_RULES,
+    KEY_ENV_PIPELINE_RULES_UPDATE,
     KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP,
 ]
 
@@ -718,7 +718,7 @@ class EnvMapper:
             ]
             self.env_var_by_map_key[KEY_ENV_PIPELINE_ENABLED].config_items = [KEY_CONFIG_ITEM_PIPELINE_ENABLED]
 
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_UPDATE_RULES].config_items = [
+            self.env_var_by_map_key[KEY_ENV_PIPELINE_RULES_UPDATE].config_items = [
                 KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE
             ]
             self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].config_items = [

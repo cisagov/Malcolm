@@ -20,13 +20,13 @@ ENV PUSER_PRIV_DROP true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 USER root
 
-ARG EXTRACTED_FILE_UPDATE_RULES=false
-ENV EXTRACTED_FILE_UPDATE_RULES $EXTRACTED_FILE_UPDATE_RULES
+ARG RULES_UPDATE_ENABLED=false
+ENV RULES_UPDATE_ENABLED $RULES_UPDATE_ENABLED
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ENV YQ_VERSION "4.49.2"
+ENV YQ_VERSION "4.50.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV SUPERCRONIC_VERSION "0.2.39"
@@ -59,6 +59,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     mkdir -p "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
     cd "${YARA_RULES_SRC_DIR}" && \
       /usr/local/bin/yara_rules_setup.sh -u -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}" -f "${YARA_COMPILED_RULES_FILE}" && \
+      rm -rf "${YARA_RULES_SRC_DIR}"/* && \
+      find "${YARA_RULES_DIR}" -type l \( ! -exec test -r "{}" \; \) -delete && \
     chown -R ${PUSER}:${PGROUP} "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
       find "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
     echo "0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\" -f \"${YARA_COMPILED_RULES_FILE}\"" > ${SUPERCRONIC_CRONTAB} && \

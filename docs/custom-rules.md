@@ -98,23 +98,21 @@ docker compose exec zeek-live supervisorctl restart live-zeek
 
 ## <a name="YARA"></a>YARA
 
-# TODO!!! UPDATE THIS FOR PIPELINE
-
 [Custom rules](https://yara.readthedocs.io/en/stable/writingrules.html) files for [YARA](https://github.com/VirusTotal/yara) (with either the `*.yara` or `*.yar` file extension) may be placed in the `./yara/rules/` subdirectory in the Malcolm installation directory.
 
 New rules files will take effect by either restarting Malcolm (specifically the `file-monitor` container) or when the automatic rule update runs (if automatic rule updates are enabled). This can also be done manually without restarting Malcolm by running the following commands from the Malcolm installation directory:
 
+# TODO: THIS NEEDS TO BE UPDATED FOR PIPELINE
+
 ```
-docker compose exec file-monitor /usr/local/bin/yara_rules_setup.sh
+docker compose exec strelka-backend /usr/local/bin/yara_rules_setup.sh
 ```
 
 ```
 docker compose exec file-monitor supervisorctl restart yara
 ```
 
-# TODO: THIS NEEDS TO BE UPDATED FOR PIPELINE
-
-If the `EXTRACTED_FILE_YARA_CUSTOM_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only user-defined rules in `./yara/rules`.
+If the `YARA_CUSTOM_RULES_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`./config/pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env.example) is set to `true`, Malcolm will bypass its default YARA rulesets and use only user-defined rules in `./yara/rules`.
 
 ## <a name="NetBox"></a>NetBox Plugins
 
@@ -151,8 +149,6 @@ For example, this method may be used to forward Malcolm's logs to a generic [HTT
 
 7. Define a new [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`./config/logstash.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/logstash.env.example) named `LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES` with the value `internal-os,external-os,my-pipeline-id`.
 8. [Restart Malcolm](running.md#StopAndRestart).
-
-
 
 ## <a name="Other"></a>Other Customizations
 

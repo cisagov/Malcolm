@@ -906,7 +906,7 @@ def merge_fields(base_fields, new_fields):
 def get_arkime_fields(args):
     result = {}
     try:
-        s = SearchClass(using=databaseClient, index=app.config["ARKIME_FIELDS_INDEX"]).extra(size=6000)
+        s = SearchClass(using=databaseClient, index=app.config["ARKIME_FIELDS_INDEX"]).extra(size=7500)
         for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
             fieldname = malcolm_utils.deep_get(hit, ['dbField2'])
             if not fieldname:

@@ -35,9 +35,16 @@ Malcolm leverages the following excellent open source tools, among others:
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for Nginx
 * [Fluent Bit](https://fluentbit.io/) - for forwarding metrics to Malcolm from [network sensors](live-analysis.md#Hedgehog) (packet-capture appliances)
 * [Mark Baggett](https://github.com/MarkBaggett)'s [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings (e.g., domain names observed in DNS traffic)
-* [Florian Roth](https://github.com/Neo23x0)'s [Signature-Base](https://github.com/Neo23x0/signature-base) Yara ruleset
-* [Bart Blaze](https://github.com/bartblaze)'s [Yara ruleset](https://github.com/bartblaze/Yara-rules)
-* [ReversingLabs](https://github.com/reversinglabs)' [Yara ruleset](https://github.com/reversinglabs/reversinglabs-yara-rules)
+* These YARA rulesets:
+    * [advanced-threat-research/Yara-Rules](https://github.com/advanced-threat-research/Yara-Rules)
+    * [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)
+    * [elastic/protections-artifacts](https://github.com/elastic/protections-artifacts)
+    * [eset/malware-ioc](https://github.com/eset/malware-ioc)
+    * [kevoreilly/CAPEv2](https://github.com/kevoreilly/CAPEv2)
+    * [Neo23x0/signature-base](https://github.com/Neo23x0/signature-base)
+    * [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
+    * [SEKOIA-IO/Community](https://github.com/SEKOIA-IO/Community)
+    * [volexity/threat-intel](https://github.com/volexity/threat-intel)
 * These [Zeek packages]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/zeek_install_plugins.sh):
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
