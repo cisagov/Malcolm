@@ -2,7 +2,7 @@ FROM debian:13-slim AS npmget
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -28,37 +28,37 @@ LABEL org.opencontainers.image.description='Malcolm container providing an inter
 
 ARG DEFAULT_UID=33
 ARG DEFAULT_GID=33
-ENV DEFAULT_UID $DEFAULT_UID
-ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "www-data"
-ENV PGROUP "www-data"
+ENV DEFAULT_UID=$DEFAULT_UID
+ENV DEFAULT_GID=$DEFAULT_GID
+ENV PUSER="www-data"
+ENV PGROUP="www-data"
 # This is to handle an issue when running with rootless podman and
 #   "userns_mode: keep-id". It seems that anything defined as a VOLUME
 #   in the Dockerfile is getting set with an ownership of 999:999.
 #   This is to override that, although I'm not yet sure if there are
 #   other implications. See containers/podman#23347.
-ENV PUSER_CHOWN "/var/www/upload/server/php/chroot/files"
+ENV PUSER_CHOWN="/var/www/upload/server/php/chroot/files"
 # not dropping privileges globally in this container as required to run SFTP server. this can
 # be handled by supervisord instead on an as-needed basis, and/or php-fpm/nginx itself
 # will drop privileges to www-data as well.
-ENV PUSER_PRIV_DROP false
+ENV PUSER_PRIV_DROP=false
 USER root
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM=xterm
 
 ARG PHP_VERSION=8.4
-ENV PHP_VERSION $PHP_VERSION
+ENV PHP_VERSION=$PHP_VERSION
 
 ARG FILEPOND_SERVER_BRANCH=master
-ENV FILEPOND_SERVER_BRANCH $FILEPOND_SERVER_BRANCH
+ENV FILEPOND_SERVER_BRANCH=$FILEPOND_SERVER_BRANCH
 
 ARG STALE_UPLOAD_DELETE_MIN=360
-ENV STALE_UPLOAD_DELETE_MIN $STALE_UPLOAD_DELETE_MIN
+ENV STALE_UPLOAD_DELETE_MIN=$STALE_UPLOAD_DELETE_MIN
 
-ENV SUPERCRONIC_VERSION "0.2.41"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
-ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+ENV SUPERCRONIC_VERSION="0.2.41"
+ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
+ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
 COPY --from=npmget /usr/local/lib/node_modules/filepond /var/www/upload/filepond
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-validate-size /var/www/upload/filepond-plugin-file-validate-size
@@ -151,12 +151,9 @@ ENTRYPOINT ["/usr/bin/tini", \
 CMD ["/usr/local/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 
 # to be populated at build-time:
-ARG BUILD_DATE
-ARG MALCOLM_VERSION
-ARG VCS_REVISION
-ENV BUILD_DATE $BUILD_DATE
-ENV MALCOLM_VERSION $MALCOLM_VERSION
-ENV VCS_REVISION $VCS_REVISION
+ARG BUILD_DATE=ARG MALCOLM_VERSION=ARG VCS_REVISION=ENV BUILD_DATE=$BUILD_DATE
+ENV MALCOLM_VERSION=$MALCOLM_VERSION
+ENV VCS_REVISION=$VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION

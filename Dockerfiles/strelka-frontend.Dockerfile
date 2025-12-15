@@ -12,17 +12,17 @@ LABEL org.opencontainers.image.description='Malcolm container for the Strelka fr
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
-ENV DEFAULT_UID $DEFAULT_UID
-ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "front"
-ENV PGROUP "front"
-ENV PUSER_PRIV_DROP true
+ENV DEFAULT_UID=$DEFAULT_UID
+ENV DEFAULT_GID=$DEFAULT_GID
+ENV PUSER="front"
+ENV PGROUP="front"
+ENV PUSER_PRIV_DROP=true
 USER root
 
-ENV TERM xterm
+ENV TERM=xterm
 
-ENV YQ_VERSION "4.50.1"
-ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+ENV YQ_VERSION="4.50.1"
+ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
@@ -53,16 +53,12 @@ ENTRYPOINT ["/sbin/tini", \
 CMD ["strelka-frontend", "-locallog=true", "-kafkalog=false" ]
 
 # to be populated at build-time:
-ARG BUILD_DATE
-ARG MALCOLM_VERSION
-ARG VCS_REVISION
-
-ENV BUILD_DATE $BUILD_DATE
-ENV MALCOLM_VERSION $MALCOLM_VERSION
-ENV VCS_REVISION $VCS_REVISION
-ENV BUILD_DATE $BUILD_DATE
-ENV MALCOLM_VERSION $MALCOLM_VERSION
-ENV VCS_REVISION $VCS_REVISION
+ARG BUILD_DATE=ARG MALCOLM_VERSION=ARG VCS_REVISION=ENV BUILD_DATE=$BUILD_DATE
+ENV MALCOLM_VERSION=$MALCOLM_VERSION
+ENV VCS_REVISION=$VCS_REVISION
+ENV BUILD_DATE=$BUILD_DATE
+ENV MALCOLM_VERSION=$MALCOLM_VERSION
+ENV VCS_REVISION=$VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION

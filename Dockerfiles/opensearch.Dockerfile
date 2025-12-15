@@ -12,33 +12,33 @@ LABEL org.opencontainers.image.description='Malcolm container providing OpenSear
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
-ENV DEFAULT_UID $DEFAULT_UID
-ENV DEFAULT_GID $DEFAULT_GID
-ENV PUID $DEFAULT_UID
-ENV PUSER "opensearch"
-ENV PGROUP "opensearch"
-ENV PUSER_PRIV_DROP true
-ENV PUSER_RLIMIT_UNLOCK true
+ENV DEFAULT_UID=$DEFAULT_UID
+ENV DEFAULT_GID=$DEFAULT_GID
+ENV PUID=$DEFAULT_UID
+ENV PUSER="opensearch"
+ENV PGROUP="opensearch"
+ENV PUSER_PRIV_DROP=true
+ENV PUSER_RLIMIT_UNLOCK=true
 # This is to handle an issue when running with rootless podman and
 #   "userns_mode: keep-id". It seems that anything defined as a VOLUME
 #   in the Dockerfile is getting set with an ownership of 999:999.
 #   This is to override that, although I'm not yet sure if there are
 #   other implications. See containers/podman#23347.
-ENV PUSER_CHOWN "/var/local/ca-trust"
+ENV PUSER_CHOWN="/var/local/ca-trust"
 USER root
 
-ENV TERM xterm
+ENV TERM=xterm
 
-ENV TINI_VERSION v0.19.0
-ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
+ENV TINI_VERSION=v0.19.0
+ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION "4.50.1"
-ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+ENV YQ_VERSION="4.50.1"
+ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ARG DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
-ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
-ENV DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI $DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI
+ENV DISABLE_INSTALL_DEMO_CONFIG=$DISABLE_INSTALL_DEMO_CONFIG
+ENV DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=$DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI
 ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
@@ -89,7 +89,7 @@ ENV cluster.routing.allocation.node_initial_primaries_recoveries 8
 ENV discovery.type "single-node"
 ENV indices.query.bool.max_clause_count 8192
 ENV logger.level "WARN"
-ENV MAX_LOCKED_MEMORY "unlimited"
+ENV MAX_LOCKED_MEMORY="unlimited"
 ENV path.repo "/opt/opensearch/backup"
 
 # see PUSER_CHOWN comment above
@@ -104,12 +104,9 @@ ENTRYPOINT ["/usr/bin/tini", \
 CMD [ "/usr/share/opensearch/opensearch-docker-entrypoint.sh" ]
 
 # to be populated at build-time:
-ARG BUILD_DATE
-ARG MALCOLM_VERSION
-ARG VCS_REVISION
-ENV BUILD_DATE $BUILD_DATE
-ENV MALCOLM_VERSION $MALCOLM_VERSION
-ENV VCS_REVISION $VCS_REVISION
+ARG BUILD_DATE=ARG MALCOLM_VERSION=ARG VCS_REVISION=ENV BUILD_DATE=$BUILD_DATE
+ENV MALCOLM_VERSION=$MALCOLM_VERSION
+ENV VCS_REVISION=$VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION

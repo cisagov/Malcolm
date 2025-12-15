@@ -12,14 +12,14 @@ LABEL org.opencontainers.image.description='Malcolm container providing Redis, a
 
 ARG DEFAULT_UID=999
 ARG DEFAULT_GID=1000
-ENV DEFAULT_UID $DEFAULT_UID
-ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "redis"
-ENV PGROUP "redis"
-ENV PUSER_PRIV_DROP true
+ENV DEFAULT_UID=$DEFAULT_UID
+ENV DEFAULT_GID=$DEFAULT_GID
+ENV PUSER="redis"
+ENV PGROUP="redis"
+ENV PUSER_PRIV_DROP=true
 USER root
 
-ENV TERM xterm
+ENV TERM=xterm
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -42,12 +42,9 @@ ENTRYPOINT ["/sbin/tini", \
             "-s", "redis"]
 
 # to be populated at build-time:
-ARG BUILD_DATE
-ARG MALCOLM_VERSION
-ARG VCS_REVISION
-ENV BUILD_DATE $BUILD_DATE
-ENV MALCOLM_VERSION $MALCOLM_VERSION
-ENV VCS_REVISION $VCS_REVISION
+ARG BUILD_DATE=ARG MALCOLM_VERSION=ARG VCS_REVISION=ENV BUILD_DATE=$BUILD_DATE
+ENV MALCOLM_VERSION=$MALCOLM_VERSION
+ENV VCS_REVISION=$VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION
