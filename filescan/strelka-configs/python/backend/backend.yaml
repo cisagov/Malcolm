@@ -267,7 +267,7 @@ scanners:
       options:
         beautify: True
         max_strings: 50
-  'ScanJpeg':
+  'ScanJpegEof':
     - positive:
         flavors:
           - 'image/jpeg'
