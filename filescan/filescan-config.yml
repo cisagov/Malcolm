@@ -4,7 +4,7 @@ redis:
   db: ${REDIS_FILESCAN_CACHE_DATABASE}
   password: ${REDIS_PASSWORD}
 path_maps:
-  /zeek/extracted-files: ${ZEEK_EXTRACTOR_PATH}
+  /zeek/extract_files: ${ZEEK_EXTRACTOR_PATH}
   /filescan/files: /filescan/data/files
 
 watcher:

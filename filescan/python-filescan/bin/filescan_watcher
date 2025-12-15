@@ -353,14 +353,14 @@ def remap_path(config: WatcherConfig, path: Path) -> tuple[PurePosixPath, Path]:
                 return PurePosixPath(path), new
     for base, real in config.path_maps.items():
         if (new := real / path).exists():
-            log.info(
+            log.warning(
                 'file exists in search path, but without prefix: %s => %s',
                 path,
                 base,
             )
             return base / path, new
     if path.exists():
-        log.info('file exists, but not in search path: %s', path)
+        log.warning('file exists, but not in search path: %s', path)
         return PurePosixPath(path), path
     raise FileNotFoundError(path)
 

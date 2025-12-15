@@ -63,6 +63,22 @@ processors:
         - from: "_keep_file"
           to: "file"
       ignore_missing: true
+  - script:
+      lang: javascript
+      params:
+        file_path: ${ZEEK_EXTRACTOR_PATH:/zeek/extract_files}
+      source: >
+        var params = {file_path: "/zeek/extract_files"};
+        function register(scriptParams) {
+            params = scriptParams;
+        }
+        function process(event) {
+          var prefix = params.file_path;
+          var field = event.Get("file.extracted");
+          if (!prefix || !field) return;
+          if (prefix.charAt(prefix.length - 1) === "/") prefix = prefix.slice(0, -1);
+          event.Put("file.extracted", prefix + "/" + field);
+        }
 
 #================================ Outputs ======================================
 

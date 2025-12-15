@@ -57,6 +57,8 @@ spec:
           - secretRef:
               name: redis-env
           - configMapRef:
+              name: zeek-env
+          - configMapRef:
               name: beats-common-env
           - configMapRef:
               name: netbox-common-env

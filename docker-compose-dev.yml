@@ -315,6 +315,7 @@ services:
     - ./config/upload-common.env
     - ./config/nginx.env
     - ./config/redis.env
+    - ./config/zeek.env
     - ./config/beats-common.env
     - ./config/netbox-common.env
     - ./config/filebeat.env
