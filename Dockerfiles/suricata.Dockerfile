@@ -117,7 +117,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
-        (echo "0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
+        (echo "0 0 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" /etc/supervisor.d && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" /etc/supervisor.d && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \

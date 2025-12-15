@@ -58,12 +58,12 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       chmod +x /usr/local/bin/supercronic && \
     mkdir -p "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
     cd "${YARA_RULES_SRC_DIR}" && \
-      /usr/local/bin/yara_rules_setup.sh -u -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}" -f "${YARA_COMPILED_RULES_FILE}" && \
+      /usr/local/bin/yara_rules_setup.sh -u && \
       rm -rf "${YARA_RULES_SRC_DIR}"/* && \
       find "${YARA_RULES_DIR}" -type l \( ! -exec test -r "{}" \; \) -delete && \
     chown -R ${PUSER}:${PGROUP} "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
       find "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
-    echo "0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\" -f \"${YARA_COMPILED_RULES_FILE}\"" > ${SUPERCRONIC_CRONTAB} && \
+    echo "0 0 * * * /usr/local/bin/yara_rules_setup.sh -s" > ${SUPERCRONIC_CRONTAB} && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -20,7 +20,8 @@ YARA_RULES_DIR=${YARA_RULES_DIR:-"/yara-rules"}
 YARA_COMPILED_RULES_FILE=${YARA_COMPILED_RULES_FILE:-"rules.compiled"}
 [[ "${RULES_UPDATE_ENABLED:-false}" == "true" ]] && GIT_UPDATE=1 || GIT_UPDATE=0
 [[ "${YARA_CUSTOM_RULES_ONLY:-false}" == "true" ]] && CUSTOM_RULES_ONLY=1 || CUSTOM_RULES_ONLY=0
-while getopts 'cvuf:r:y:' OPTION; do
+STRELKA_RESTART_AFTER_UPDATE=0
+while getopts 'cusvf:r:y:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -29,6 +30,10 @@ while getopts 'cvuf:r:y:' OPTION; do
 
     c)
       CUSTOM_RULES_ONLY=1
+      ;;
+
+    s)
+      STRELKA_RESTART_AFTER_UPDATE=1
       ;;
 
     u)
@@ -119,6 +124,10 @@ function get_top_level_subdir_for_symlink() {
     echo "${target%%/*}"
 }
 
+function filename_base() {
+  local f="${1##*/}"
+  echo "${f%.*}"
+}
 
 mkdir -p "${YARA_RULES_SRC_DIR}" "${YARA_RULES_DIR}"
 
@@ -172,7 +181,7 @@ while IFS= read -r -d '' YARA_FILE; do
   fi
 
   # good file, add with namespace
-  YARA_NAMESPACE=$(echo "$(get_top_level_subdir_for_symlink "${YARA_FILE}")" | sed 's/[^A-Za-z0-9]/_/g')_$(basename "${YARA_FILE}" | sed 's/[^A-Za-z0-9]/_/g')
+  YARA_NAMESPACE=$(echo "$(get_top_level_subdir_for_symlink "${YARA_FILE}")" | sed 's/[^A-Za-z0-9]/_/g')_$(filename_base "${YARA_FILE}" | sed 's/[^A-Za-z0-9]/_/g')
   [[ "${YARA_NAMESPACE}" =~ ^[A-Za-z] ]] || YARA_NAMESPACE="ns_${YARA_NAMESPACE}"
   # Use awk to remove contiguous duplicates
   YARA_NAMESPACE=$(echo "${YARA_NAMESPACE}" | awk -F'_' '{
@@ -207,5 +216,7 @@ else
 fi
 
 popd >/dev/null
+
+[[ ${STRELKA_RESTART_AFTER_UPDATE} == 1 ]] && [[ ${YARAC_RESULT} == 0 ]] && supervisorctl restart backend
 
 exit ${YARAC_RESULT}
