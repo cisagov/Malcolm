@@ -203,13 +203,17 @@ done < <(find . \
 
 # precompile yara rules for performance gains in Streka
 if (( ${#YARAC_ARGS[@]} > 0 )); then
-  rm -f "${YARA_COMPILED_RULES_FILE}"
-  yarac "${YARAC_ARGS[@]}" "${YARA_COMPILED_RULES_FILE}"
+  yarac "${YARAC_ARGS[@]}" "${YARA_COMPILED_RULES_FILE}.new" >&2
   YARAC_RESULT=$?
-  [[ ${YARAC_RESULT} == 0 ]] && \
-    echo "Compiled ${#YARAC_ARGS[@]} YARA rule files to \"${YARA_RULES_DIR}/${YARA_COMPILED_RULES_FILE}\"" >&2 || \
+  if [[ ${YARAC_RESULT} == 0 ]]; then
+    mv -f -b -S .prev "${YARA_COMPILED_RULES_FILE}.new" "${YARA_COMPILED_RULES_FILE}"
+    touch /tmp/dummy
+    RULE_COUNT="$(yara -q -S -C "${YARA_COMPILED_RULES_FILE}" /tmp/dummy 2>/dev/null | grep "number of rules" | head -n 1 | tr -d '[:space:]' | cut -d: -f2)"
+    rm -f /tmp/dummy
+    echo "Compiled ${#YARAC_ARGS[@]} YARA rule files (${RULE_COUNT} rules) to \"${YARA_RULES_DIR}/${YARA_COMPILED_RULES_FILE}\""
+  else
     echo "Failed to compile YARA rules" >&2
-
+  fi
 else
   echo "No valid YARA files found; refusing to generate empty compiled set" >&2
   YARAC_RESULT=1
