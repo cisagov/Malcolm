@@ -43,6 +43,8 @@ ADD --chmod=755 container-health-scripts/strelka-frontend.sh /usr/local/bin/cont
 
 EXPOSE 57314
 
+VOLUME [ "/var/log/strelka" ]
+
 ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
