@@ -108,14 +108,14 @@ class FileEvent(BaseModel):
                     return new
         for base, real in path_maps.items():
             if (new := real / self.path).exists():
-                log.warning(
+                log.info(
                     'file exists in search path, but without prefix: %s => %s',
                     self.path,
                     base,
                 )
                 return new
         if (new := Path(self.path)).exists():
-            log.warning('file exists, but not in search path: %s', new)
+            log.info('file exists, but not in search path: %s', new)
             return new
         raise FileNotFoundError(self.path)
 
