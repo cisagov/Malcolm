@@ -166,7 +166,7 @@ jobs:
       -
         name: Upload Trivy scan results to GitHub Security tab
         if: ${{ matrix.platform == 'linux/amd64' }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'
       -
