@@ -386,7 +386,7 @@ def addLevelName(
 
 BASE_LOGLEVEL: Final = logging.WARNING
 QUIET_LOGLEVEL: Final = logging.CRITICAL
-DEFAULT_LOGLEVEL: Final = logging.INFO
+DEFAULT_LOGLEVEL: Final = logging.WARNING
 
 
 def basicConfig(

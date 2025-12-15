@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from filescan import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
 import os
