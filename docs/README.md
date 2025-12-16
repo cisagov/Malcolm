@@ -97,6 +97,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Email Sender Accounts](alerting.md#AlertingEmail)
 * [Search Queries in Arkime and OpenSearch Dashboards](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
+    - [Analytics](analytics.md#Analytics)
     - [Custom Rules, Scripts and Plugins](custom-rules.md#CustomRulesAndScripts)
         + [Arkime](custom-rules.md#Arkime)
         + [Suricata](custom-rules.md#Suricata)
@@ -131,7 +132,6 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Preloading NetBox inventory](asset-interaction-analysis.md#NetBoxPreload)
         + [Backup and restore](asset-interaction-analysis.md#NetBoxBackup)
     - [CyberChef](cyberchef.md#CyberChef)
-    - [Analytics](analytics.md#Analytics)
     - [API](api.md#API)
 * [Forwarding Third-Party Logs to Malcolm](third-party-logs.md)
 * [Malcolm installer ISO](malcolm-iso.md#ISO)
