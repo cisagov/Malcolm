@@ -143,7 +143,7 @@ ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=644 filebeat/supervisord.conf /etc/supervisord.conf
 
-RUN for INPUT in logs zeek-files-logs nginx tcp syslog-tcp syslog-udp; do \
+RUN for INPUT in logs filescan-preservation zeek-files-logs nginx tcp syslog-tcp syslog-udp; do \
       mkdir -p /usr/share/filebeat-$INPUT/data; \
       chown -R root:${PGROUP} /usr/share/filebeat-$INPUT; \
       cp -a /usr/share/filebeat/module /usr/share/filebeat-$INPUT/module; \
