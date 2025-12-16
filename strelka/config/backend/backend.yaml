@@ -209,7 +209,7 @@ scanners:
           - backslash
 #          - raw
 #          - hex
-  'ScanGif':
+  'ScanGifEof':
     - positive:
         flavors:
           - 'image/gif'

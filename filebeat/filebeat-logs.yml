@@ -46,6 +46,8 @@ filebeat.inputs:
 
 #-------------------------- File scanning/pipeline result log ------------------
 # (c.f. comments regarding settings from previous section)
+# note that filebeat-filescan-preservation.yml contains a duplicate input
+# section that is used to signal cleanup based on preservation policies
 - type: log
   paths:
     - ${FILEBEAT_FILESCAN_LOG_PATH:/filescan}/*.log

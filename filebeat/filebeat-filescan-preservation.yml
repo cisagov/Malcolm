@@ -1,0 +1,46 @@
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+
+name: "${PCAP_NODE_NAME:malcolm}"
+
+logging.metrics.enabled: false
+
+#================================ Inputs =======================================
+
+#-------------------------- File scanning/pipeline result log ------------------
+# note that filebeat-logs.yml contains a duplicate input
+# section that is used to actually send the log to logstash
+- type: log
+  paths:
+    - ${FILEBEAT_FILESCAN_LOG_PATH:/filescan}/*.log
+  symlinks: true
+  fields_under_root: true
+  json:
+    expand_keys: true
+    add_error_key: false
+    ignore_decoding_error: true
+    keys_under_root: true
+  processors:
+    - rename:
+        fields:
+          - from: "source"
+            to: "service.type"
+  tags: ["_filebeat_filescan"]
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+  # TODO: is this right?
+  close_renamed: false
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: false
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
+#================================ Outputs ======================================
+#-------------------------- Redis Output (for preservation) --------------------
+output.redis:
+  hosts: ["${REDIS_HOST:redis-cache}:${REDIS_PORT:6379}"]
+  password: "${REDIS_PASSWORD}"
+  db: ${REDIS_FILESCAN_PRESERVATION_DATABASE:2}
+  key: "filescan_notify"
+  datatype: "list"

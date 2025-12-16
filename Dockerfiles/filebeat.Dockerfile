@@ -135,6 +135,7 @@ ADD --chmod=644 filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.y
 ADD --chmod=644 filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/filebeat-syslog-udp.yml
 ADD --chmod=644 filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
 ADD --chmod=644 filebeat/filebeat-zeek-files-logs.yml /usr/share/filebeat-zeek-files-logs/filebeat-zeek-files-logs.yml
+ADD --chmod=644 filebeat/filebeat-filescan-preservation.yml /usr/share/filebeat-filescan-preservation/filebeat-filescan-preservation.yml
 ADD filebeat/scripts /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
