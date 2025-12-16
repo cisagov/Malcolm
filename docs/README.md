@@ -131,6 +131,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Preloading NetBox inventory](asset-interaction-analysis.md#NetBoxPreload)
         + [Backup and restore](asset-interaction-analysis.md#NetBoxBackup)
     - [CyberChef](cyberchef.md#CyberChef)
+    - [Analytics](analytics.md#Analytics)
     - [API](api.md#API)
 * [Forwarding Third-Party Logs to Malcolm](third-party-logs.md)
 * [Malcolm installer ISO](malcolm-iso.md#ISO)
