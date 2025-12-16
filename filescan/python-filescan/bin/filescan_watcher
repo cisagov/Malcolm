@@ -327,7 +327,7 @@ async def watch_pubsub(
         pubsub = conn.pubsub()
         await pubsub.subscribe(*keys.keys())
         while True:
-            msg = await pubsub.get_message(ignore_subscribe_messages=True)
+            msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=None)
             if (
                 not msg
                 or msg.get('type') != 'message'

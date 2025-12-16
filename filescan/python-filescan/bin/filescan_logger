@@ -56,7 +56,7 @@ async def watch_pubsub(
         pubsub = connection.pubsub()
         await pubsub.subscribe(*keys)
         while True:
-            msg = await pubsub.get_message(ignore_subscribe_messages=True)
+            msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=None)
             if not msg or msg.get('type') != 'message' or not msg.get('channel') or not (data := msg.get('data')):
                 continue
 
