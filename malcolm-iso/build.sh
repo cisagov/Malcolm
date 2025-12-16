@@ -180,6 +180,7 @@ PYCODE
   mkdir -p "$MALCOLM_DEST_DIR/postgres/"
   mkdir -p "$MALCOLM_DEST_DIR/redis/"
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
+  mkdir -p "$MALCOLM_DEST_DIR/strelka/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata-logs/live/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata/include-configs/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata/rules/"
@@ -224,6 +225,7 @@ PYCODE
   cp ./arkime/rules/*.yml "$MALCOLM_DEST_DIR/arkime/rules/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
   cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
+  cp -r ./strelka/config/ "$MALCOLM_DEST_DIR/strelka/"
   cp ./netbox/preload/*.yml "$MALCOLM_DEST_DIR/netbox/preload/"
 
   sed -i "s/^\(MALCOLM_PROFILE=\).*/\1"${IMAGE_NAME}"/" "$MALCOLM_DEST_DIR"/config/process.env.example

@@ -90,6 +90,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/postgres/"
   mkdir $VERBOSE -p "$DESTDIR/redis/"
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
+  mkdir $VERBOSE -p "$DESTDIR/strelka/"
   mkdir $VERBOSE -p "$DESTDIR/suricata-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/suricata/include-configs/"
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
@@ -119,6 +120,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   git ls-files ./netbox/config | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
   git ls-files -z ./netbox/preload/*.yml | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/netbox/preload/"
+  git ls-files ./strelka/config | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
   cp $VERBOSE ./shared/bin/tx-rx-secure.sh "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
 

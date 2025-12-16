@@ -154,13 +154,13 @@ if (( $# == 0 )); then
     (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
   done
 
-  #DIRS_IN_IMAGES=(
-  #  "/filescan;filescan;20"
-  #)
-  #for i in ${DIRS_IN_IMAGES[@]}; do
-  #  DIR="$(echo "$i" | cut -d';' -f1)"
-  #  IMAGE="$(echo "$i" | cut -d';' -f2)"
-  #  MINSIZE="$(echo "$i" | cut -d';' -f3)"
-  #  (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
-  #done
+  DIRS_IN_IMAGES=(
+    "/var/lib/clamav;strelka-backend;200000000"
+  )
+  for i in ${DIRS_IN_IMAGES[@]}; do
+    DIR="$(echo "$i" | cut -d';' -f1)"
+    IMAGE="$(echo "$i" | cut -d';' -f2)"
+    MINSIZE="$(echo "$i" | cut -d';' -f3)"
+    (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
+  done
 fi

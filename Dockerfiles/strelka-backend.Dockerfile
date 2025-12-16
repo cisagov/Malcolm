@@ -37,6 +37,11 @@ ENV YARA_RULES_SRC_DIR="/yara-rules-src"
 ENV YARA_RULES_DIR="/yara-rules"
 ENV YARA_COMPILED_RULES_FILE="rules.compiled"
 
+ARG EXTRACTED_FILE_MAX_BYTES=134217728
+ENV EXTRACTED_FILE_MAX_BYTES=$EXTRACTED_FILE_MAX_BYTES
+ENV CLAMD_SOCKET_FILE=/tmp/clamd.ctl
+ENV CLAMAV_RULES_DIR "/var/lib/clamav"
+
 ADD --chmod=755 strelka/*.sh /usr/local/bin/
 ADD --chmod=755 strelka/backend/*.sh /usr/local/bin/
 
@@ -44,9 +49,14 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
+      bc \
+      clamav \
+      clamav-daemon \
+      clamav-freshclam \
       curl \
       git \
       jq \
+      libclamunrar12 \
       procps \
       psmisc \
       rsync \
@@ -56,17 +66,35 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       chmod 755 /usr/local/bin/yq && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
-    mkdir -p "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+    mkdir -p "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" /var/log/clamav "${CLAMAV_RULES_DIR}" && \
     cd "${YARA_RULES_SRC_DIR}" && \
       /usr/local/bin/yara_rules_setup.sh -u && \
       rm -rf "${YARA_RULES_SRC_DIR}"/* && \
       find "${YARA_RULES_DIR}" -type l \( ! -exec test -r "{}" \; \) -delete && \
-    chown -R ${PUSER}:${PGROUP} "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
-      find "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
+    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+      find /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
+    sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
+      sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
+      sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
+      sed -i "s/^LocalSocketGroup .*$/LocalSocketGroup ${PGROUP}/g" /etc/clamav/clamd.conf && \
+      sed -i "s/^MaxFileSize .*$/MaxFileSize $EXTRACTED_FILE_MAX_BYTES/g" /etc/clamav/clamd.conf && \
+      sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf && \
+      echo "TCPSocket 3310" >> /etc/clamav/clamd.conf && \
+    if ! [ -z $HTTPProxyServer ]; then echo "HTTPProxyServer $HTTPProxyServer" >> /etc/clamav/freshclam.conf; fi && \
+      if ! [ -z $HTTPProxyPort   ]; then echo "HTTPProxyPort $HTTPProxyPort" >> /etc/clamav/freshclam.conf; fi && \
+      sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
+      sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf && \
+
     echo "0 0 * * * /usr/local/bin/yara_rules_setup.sh -s" > ${SUPERCRONIC_CRONTAB} && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+USER ${PUSER}
+
+RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
+
+USER root
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=644 strelka/backend/supervisord.conf /etc/supervisord.conf
@@ -79,9 +107,10 @@ ADD --chmod=755 container-health-scripts/strelka-backend.sh /usr/local/bin/conta
 #   in the Dockerfile is getting set with an ownership of 999:999.
 #   This is to override that, although I'm not yet sure if there are
 #   other implications. See containers/podman#23347.
-ENV PUSER_CHOWN="$YARA_RULES_DIR;$YARA_RULES_SRC_DIR"
+ENV PUSER_CHOWN="$CLAMAV_RULES_DIR;$YARA_RULES_DIR;$YARA_RULES_SRC_DIR"
 
 # see PUSER_CHOWN comment above
+VOLUME ["$CLAMAV_RULES_DIR"]
 VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]
 

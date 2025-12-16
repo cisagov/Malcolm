@@ -1,5 +1,4 @@
-
-version: 2024.04.22.01
+version: 2025.12.16.01
 logging_cfg: '/etc/strelka/logging.yaml'
 limits:
   max_files: 5000
@@ -11,7 +10,6 @@ coordinator:
   addr: 'strelka-coordinator:6379'
   db: 0
   password: null
-#  blocking_pop_time_sec: 5
 tasting:
   mime_db: null
   yara_rules: '/etc/strelka/taste/'
@@ -20,18 +18,6 @@ caching:
 telemetry:
   traces:
     sampling: 1.0
-# OTLP-gRPC
-#    exporter: otlp-grpc
-#    addr: jaeger:4317
-# OTLP-HTTP
-#    exporter: otlp-http
-#    addr: http://jaeger:4318/v1/traces
-# Jaeger Thrift Collector
-#    exporter: jaeger-http-thrift
-#    addr: http://jaeger:14268/api/traces
-# Jaeger Thrift Agent
-#    exporter: jaeger-udp-thrift
-#    addr: jaeger:6831
 scanners:
 #  'ScanAntiword':
 #    - positive:
@@ -70,11 +56,47 @@ scanners:
           - 'application/x-bzip2'
           - 'bzip2_file'
       priority: 5
+  'ScanCapa':
+    - positive:
+        flavors:
+          # todo: is this list exhaustive? are there more types that should be included
+          - 'application/bat'
+          - 'application/ecmascript'
+          - 'application/javascript'
+          - 'application/PowerShell'
+          - 'application/vnd.microsoft.portable-executable'
+          - 'application/x-bat'
+          - 'application/x-coredump'
+          - 'application/x-dosexec'
+          - 'application/x-elf'
+          - 'application/x-executable'
+          - 'application/x-msdos-program'
+          - 'application/x-msdownload'
+          - 'application/x-object'
+          - 'application/x-pe-app-32bit-i386'
+          - 'application/x-sh'
+          - 'application/x-sharedlib'
+          - 'text/jscript'
+          - 'text/vbscript'
+          - 'text/x-python'
+          - 'text/x-shellscript'
+      priority: 5
+#  'ScanCart':
+#    - positive:
+#        flavors:
+#          # hmmmm...
+#          # $ file --brief --mime src/python/tests/fixtures/test.cart
+#          # application/octet-stream; charset=binary
+#          - 'application/octet-stream'
+      priority: 5
   'ScanClamav':
     - positive:
         flavors:
           - '*'
       priority: 5
+      options:
+        clamd_socket: null
+        freshen: False
 #  'ScanCcn':
 #    - positive:
 #        flavors:
@@ -200,11 +222,6 @@ scanners:
           - 'application/x-gzip'
           - 'gzip_file'
       priority: 5
-  # 'ScanHash':
-  #   - positive:
-  #       flavors:
-  #         - '*'
-  #     priority: 5
   'ScanHeader':
     - positive:
         flavors:
@@ -294,9 +311,6 @@ scanners:
           - 'cab_file'
           - 'application/x-cpio'
           - 'cpio_file'
-          - 'application/x-xar'
-          - 'xar_file'
-#          - 'arj_file'  # ARJ support missing from ScanLibarchive
           - 'application/x-debian-package'
           - 'debian_package_file'
       priority: 5
@@ -420,20 +434,6 @@ scanners:
           - 'application/msonenote'
           - 'onenote_file'
       priority: 5
-#  'ScanPcap':
-#    - positive:
-#        flavors:
-#          - 'pcap_file'
-#          - 'pcapng_file'
-#      priority: 5
-#      options:
-#        scanner_timeout: 120
-#        zeek_conn: True
-#        zeek_conn_limit: 100
-#        zeek_proto: True
-#        suricata_config: "/etc/strelka/suricata/suricata.yaml"
-#        suricata_rules: "/etc/strelka/suricata/suricata.rules"
-#        suricata_alert_dedupe: True
   'ScanPdf':
     - positive:
         flavors:
@@ -681,6 +681,8 @@ scanners:
         flavors:
           - 'vsto_file'
       priority: 5
+      options:
+        limit: 1000
   'ScanX509':
     - positive:
         flavors:
@@ -694,6 +696,12 @@ scanners:
       priority: 5
       options:
         type: 'pem'
+  'ScanXar':
+    - positive:
+        flavors:
+          - 'application/x-xar'
+          - 'xar_file'
+      priority: 5
   'ScanXl4ma':
     - positive:
         flavors:
@@ -772,4 +780,9 @@ scanners:
         flavors:
           - 'application/zlib'
           - 'zlib_file'
+      priority: 5
+  'ScanZstd':
+    - positive:
+        flavors:
+          - 'application/zstd'
       priority: 5

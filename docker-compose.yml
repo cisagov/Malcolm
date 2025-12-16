@@ -804,7 +804,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./filescan/strelka-configs/python/backend/
+      source: ./strelka/config/backend/
       target: /etc/strelka/configmap
       read_only: true
     - type: bind
@@ -851,7 +851,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./filescan/strelka-configs/go/frontend/
+      source: ./strelka/config/frontend/
       target: /etc/strelka/configmap
       read_only: true
     - strelka-logs:/var/log/strelka/
@@ -893,7 +893,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./filescan/strelka-configs/go/manager/
+      source: ./strelka/config/manager/
       target: /etc/strelka/configmap
       read_only: true
     healthcheck:

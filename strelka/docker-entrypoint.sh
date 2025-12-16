@@ -10,7 +10,7 @@ FILES=(
 )
 
 for FILE in "${FILES[@]}"; do
-  if [[ -f "$FILE" ]]; then
+  if [[ -f "${FILE}" ]]; then
     yq -i '
       .coordinator.addr = strenv(REDIS_CACHE_HOST) + ":" + strenv(REDIS_CACHE_PORT) |
       .coordinator.db = (strenv(REDIS_STRELKA_COORDINATOR_CACHE_DATABASE) | tonumber) |
@@ -18,7 +18,13 @@ for FILE in "${FILES[@]}"; do
       .gatekeeper.addr = strenv(REDIS_CACHE_HOST) + ":" + strenv(REDIS_CACHE_PORT) |
       .gatekeeper.db = (strenv(REDIS_STRELKA_GATEKEEPER_CACHE_DATABASE) | tonumber) |
       .gatekeeper.password = strenv(REDIS_PASSWORD)
-    ' "$FILE"
+    ' "${FILE}"
+    if [[ "${FILE}" == "/etc/strelka/backend.yaml" ]] && [[ -n "${CLAMD_SOCKET_FILE:-}" ]]; then
+      yq eval -i '
+      .scanners."ScanClamav"[0].options.clamd_socket = strenv(CLAMD_SOCKET_FILE)
+        // .scanners."ScanClamav"[0].options.clamd_socket
+      ' "${FILE}"
+    fi
   fi
 done
 
