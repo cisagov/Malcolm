@@ -552,18 +552,18 @@ def main():
     global args
     global orig_path
 
-    defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
-    defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
-    defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
-    defaultTls = os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS', 'false')
-    defaultLinks = os.getenv('EXTRACTED_FILE_HTTP_SERVER_LINKS', 'false')
-    defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
-    defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8006))
-    defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
-    defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
-    defaultAssetsDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/opt/assets')
-    defaultAssetsDirReqReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR_REQ_REPLACER', '/assets')
-    defaultAssetsDirRespReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR_RESP_REPLACER', '/assets')
+    defaultZip = os.getenv('FILESCAN_HTTP_SERVER_ZIP', 'false')
+    defaultRecursive = os.getenv('FILESCAN_HTTP_SERVER_RECURSIVE', 'true')
+    defaultMagic = os.getenv('FILESCAN_HTTP_SERVER_MAGIC', 'false')
+    defaultTls = os.getenv('FILESCAN_HTTP_SERVER_TLS', 'false')
+    defaultLinks = os.getenv('FILESCAN_HTTP_SERVER_LINKS', 'false')
+    defaultMalcolm = os.getenv('FILESCAN_HTTP_SERVER_MALCOLM', 'false')
+    defaultPort = int(os.getenv('FILESCAN_HTTP_SERVER_PORT', 8006))
+    defaultKey = os.getenv('FILESCAN_HTTP_SERVER_KEY', 'infected')
+    defaultDir = os.getenv('FILESCAN_HTTP_SERVER_PATH', orig_path)
+    defaultAssetsDir = os.getenv('FILESCAN_HTTP_SERVER_ASSETS_DIR', '/opt/assets')
+    defaultAssetsDirReqReplacer = os.getenv('FILESCAN_HTTP_SERVER_ASSETS_DIR_REQ_REPLACER', '/assets')
+    defaultAssetsDirRespReplacer = os.getenv('FILESCAN_HTTP_SERVER_ASSETS_DIR_RESP_REPLACER', '/assets')
     defaultRBAC = os.getenv('ROLE_BASED_ACCESS', 'false')
 
     parser = argparse.ArgumentParser(description=script_name, add_help=True, usage='{} <arguments>'.format(script_name))
@@ -610,7 +610,7 @@ def main():
         help=f'TLS Key File',
         metavar='<filename>',
         type=str,
-        default=os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS_KEYFILE', None),
+        default=os.getenv('FILESCAN_HTTP_SERVER_TLS_KEYFILE', None),
     )
     parser.add_argument(
         '--tls-certfile',
@@ -618,7 +618,7 @@ def main():
         help=f'TLS Certificate File',
         metavar='<filename>',
         type=str,
-        default=os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS_CERTFILE', None),
+        default=os.getenv('FILESCAN_HTTP_SERVER_TLS_CERTFILE', None),
     )
     parser.add_argument(
         '-d',
@@ -724,9 +724,7 @@ def main():
             parser.print_help()
         sys.exit(e.code)
 
-    args.verbose = set_logging(
-        os.getenv('EXTRACTED_FILE_HTTP_SERVER_LOGLEVEL', ''), args.verbose, set_traceback_limit=True
-    )
+    args.verbose = set_logging(os.getenv('FILESCAN_HTTP_SERVER_LOGLEVEL', ''), args.verbose, set_traceback_limit=True)
     logging.debug(os.path.join(script_path, script_name))
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")

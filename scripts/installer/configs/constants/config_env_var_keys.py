@@ -130,7 +130,7 @@ KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES = (
 
 KEY_ENV_ZEEK_VTOT_API2_KEY = "VTOT_API2_KEY"  # virustotal API key
 KEY_ENV_ZEEK_EXTRACTOR_MODE = "ZEEK_EXTRACTOR_MODE"  # zeek file extraction mode
-KEY_ENV_ZEEK_FILE_PRESERVATION = "EXTRACTED_FILE_PRESERVATION"  # zeek file preservation mode
+KEY_ENV_ZEEK_FILE_PRESERVATION = "FILESCAN_PRESERVATION"  # zeek file preservation mode
 KEY_ENV_ZEEK_DISABLE_ICS_ALL = "ZEEK_DISABLE_ICS_ALL"  # disable/enable ICS analyzers
 KEY_ENV_ZEEK_DISABLE_BEST_GUESS_ICS = "ZEEK_DISABLE_BEST_GUESS_ICS"  # disable/enable ICS best guess
 KEY_ENV_ZEEK_LIVE_CAPTURE = "ZEEK_LIVE_CAPTURE"  # live traffic analysis with Zeek
@@ -147,18 +147,17 @@ KEY_ENV_ZEEK_INTEL_FEED_SINCE = "ZEEK_INTEL_FEED_SINCE"  # Threat indicator "sin
 KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION = (
     "ZEEK_INTEL_ITEM_EXPIRATION"  # Intel::item_expiration timeout for intelligence items
 )
-KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT = "EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT"  # total disk fill threshold for pruning zeek extracted files
+KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT = "FILESCAN_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT"  # total disk fill threshold for pruning zeek extracted files
 KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_MAX_SIZE = (
-    "EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE"  # zeek extracted files maximum consumption threshold
+    "FILESCAN_PRUNE_THRESHOLD_MAX_SIZE"  # zeek extracted files maximum consumption threshold
 )
-KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE = "EXTRACTED_FILE_HTTP_SERVER_ENABLE"  # HTTP server for extracted files
-KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP = "EXTRACTED_FILE_HTTP_SERVER_ZIP"  # ZIP HTTP server for extracted files
+KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE = "FILESCAN_HTTP_SERVER_ENABLE"  # HTTP server for extracted files
+KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP = "FILESCAN_HTTP_SERVER_ZIP"  # ZIP HTTP server for extracted files
 KEY_ENV_ZEEK_FILE_HTTP_SERVER_KEY = (
-    "EXTRACTED_FILE_HTTP_SERVER_KEY"  # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
+    "FILESCAN_HTTP_SERVER_KEY"  # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
 )
-KEY_ENV_ZEEK_FILE_ENABLE_VTOT = "EXTRACTED_FILE_ENABLE_VTOT"  # file scanning via virustotal
+KEY_ENV_ZEEK_FILE_ENABLE_VTOT = "FILESCAN_VTOT_ENABLED"  # file scanning via virustotal
 KEY_ENV_PIPELINE_RULES_UPDATE = "RULES_UPDATE_ENABLED"  # file scanning rule/signature updates
-KEY_ENV_ZEEK_FILE_WATCHER_POLLING = "EXTRACTED_FILE_WATCHER_POLLING"  # Use polling for file watching vs. native
 KEY_ENV_PIPELINE_ENABLED = (
     "PIPELINE_DISABLED"  # Pipeline DISABLED (note that this is boolean is reversed from the installer logic)
 )

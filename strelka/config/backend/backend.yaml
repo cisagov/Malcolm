@@ -30,11 +30,11 @@ scanners:
 #        flavors:
 #          - 'base64'
 #      priority: 5
-  'ScanBase64PE':
-    - positive:
-        flavors:
-          - 'base64_pe'
-      priority: 5
+#  'ScanBase64PE':
+#    - positive:
+#        flavors:
+#          - 'base64_pe'
+#      priority: 5
   'ScanBatch':
     - positive:
         flavors:

@@ -112,7 +112,7 @@ def custom_transform_zeek_file_enable_vtot(vtotApiKey: str) -> str:
 
 
 def custom_reverse_transform_zeek_file_enable_vtot(value: str):
-    """When importing EXTRACTED_FILE_ENABLE_VTOT we cannot reconstruct the actual API key.
+    """When importing FILESCAN_VTOT_ENABLED we cannot reconstruct the actual API key.
 
     To avoid failing validation on the `vtotApiKey` (expects string), return an
     empty string regardless of the boolean flag. The flag merely indicates
@@ -178,16 +178,6 @@ def custom_reverse_transform_zeek_rotated_pcap(value: str):
     rotated = _env_str_to_bool(value)
     live_zeek = not rotated
     return ("", live_zeek)
-
-
-def custom_transform_zeek_file_watcher_polling(orch_mode) -> str:
-    """Return 'true' when running under Kubernetes orchestration."""
-    return true_or_false_no_quotes(_orch_is_k8s(orch_mode))
-
-
-def custom_reverse_transform_zeek_file_watcher_polling(value: str):
-    """Return the appropriate OrchestrationFramework value based on the polling flag."""
-    return _orch_from_bool_str(value)
 
 
 def custom_transform_pcap_pipeline_polling(orch_mode) -> str:

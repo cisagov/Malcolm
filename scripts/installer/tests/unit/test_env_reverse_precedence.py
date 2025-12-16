@@ -9,7 +9,6 @@ from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_CONTAINER_RUNTIME_KEY,
-    KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
     KEY_ENV_FILEBEAT_WATCHER_POLLING,
     KEY_ENV_PCAP_PIPELINE_POLLING,
     KEY_ENV_ZEEK_ROTATED_PCAP,
@@ -59,7 +58,6 @@ class TestEnvReversePrecedence(unittest.TestCase):
 
         # Set derived polling flags to "true" (which imply Kubernetes)
         for ek in (
-            KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
             KEY_ENV_PCAP_PIPELINE_POLLING,
             KEY_ENV_FILEBEAT_WATCHER_POLLING,
         ):

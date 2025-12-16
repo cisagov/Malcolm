@@ -18,7 +18,6 @@ from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_ZEEK_ROTATED_PCAP,
     KEY_ENV_PCAP_ENABLE_TCPDUMP,
     KEY_ENV_CONTAINER_RUNTIME_KEY,
-    KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
     KEY_ENV_PCAP_PIPELINE_POLLING,
     KEY_ENV_FILEBEAT_WATCHER_POLLING,
 )
@@ -173,7 +172,6 @@ class TestEnvMultiConditional(unittest.TestCase):
             f.write(f"{var_name}=podman\n")
         # set derived polling flags to false so they don't override orchestration
         for ek in (
-            KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
             KEY_ENV_PCAP_PIPELINE_POLLING,
             KEY_ENV_FILEBEAT_WATCHER_POLLING,
         ):

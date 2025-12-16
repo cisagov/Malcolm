@@ -497,7 +497,6 @@ services:
     - ./config/ssl.env
     - ./config/upload-common.env
     - ./config/zeek.env
-    - ./config/zeek-secret.env
     - ./config/zeek-offline.env
     depends_on:
     - opensearch
@@ -565,7 +564,6 @@ services:
     - ./config/upload-common.env
     - ./config/pcap-capture.env
     - ./config/zeek.env
-    - ./config/zeek-secret.env
     - ./config/zeek-live.env
     volumes:
     - type: bind
@@ -739,8 +737,8 @@ services:
     - ./config/dashboards.env
     - ./config/redis.env
     - ./config/zeek.env
-    - ./config/zeek-secret.env
     - ./config/pipeline.env
+    - ./config/filescan-secret.env
     - ./config/filescan.env
     volumes:
     - type: bind

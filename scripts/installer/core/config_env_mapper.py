@@ -255,10 +255,6 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
         forward=custom_transform_zeek_rotated_pcap,
         reverse=custom_reverse_transform_zeek_rotated_pcap,
     ),
-    KEY_ENV_ZEEK_FILE_WATCHER_POLLING: TransformHook(
-        forward=custom_transform_zeek_file_watcher_polling,
-        reverse=custom_reverse_transform_zeek_file_watcher_polling,
-    ),
     KEY_ENV_PCAP_PIPELINE_POLLING: TransformHook(
         forward=custom_transform_pcap_pipeline_polling,
         reverse=custom_reverse_transform_pcap_pipeline_polling,
@@ -721,13 +717,6 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_PIPELINE_RULES_UPDATE].config_items = [
                 KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE
             ]
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].config_items = [
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-            ]
-            # Polling flags are derived from orchestration mode
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].derived_items = [
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-            ]
 
             # reverse precedence configuration (conflict-prone items)
 
@@ -736,7 +725,6 @@ class EnvMapper:
                 KEY_ENV_CONTAINER_RUNTIME_KEY,
                 # We don't derive orchestration mode from polling, they could have reason
                 #   to set polling = false without using kubernetes. runtime is enough.
-                # KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
                 # KEY_ENV_PCAP_PIPELINE_POLLING,
                 # KEY_ENV_FILEBEAT_WATCHER_POLLING,
             ]

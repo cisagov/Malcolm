@@ -43,8 +43,6 @@ spec:
               name: pcap-capture-env
           - configMapRef:
               name: zeek-env
-          - secretRef:
-              name: zeek-secret-env
           - configMapRef:
               name: zeek-live-env
         livenessProbe:

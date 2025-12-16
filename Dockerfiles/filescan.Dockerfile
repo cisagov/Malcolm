@@ -29,15 +29,14 @@ ARG STRELKA_PORT=57314
 ARG FILESCAN_HEALTH_PORT=8001
 ARG FILESCAN_VERBOSITY=
 
-ARG EXTRACTED_FILE_HTTP_SERVER_ENABLE=false
-ARG EXTRACTED_FILE_HTTP_SERVER_ZIP=true
-ARG EXTRACTED_FILE_HTTP_SERVER_KEY=infected
-ARG EXTRACTED_FILE_HTTP_SERVER_RECURSIVE=true
-ARG EXTRACTED_FILE_HTTP_SERVER_PORT=8006
+ARG FILESCAN_HTTP_SERVER_ENABLE=false
+ARG FILESCAN_HTTP_SERVER_ZIP=true
+ARG FILESCAN_HTTP_SERVER_KEY=infected
+ARG FILESCAN_HTTP_SERVER_PORT=8006
 
-ARG EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE=1TB
-ARG EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT=0
-ARG EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS=300
+ARG FILESCAN_PRUNE_THRESHOLD_MAX_SIZE=1TB
+ARG FILESCAN_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT=0
+ARG FILESCAN_PRUNE_INTERVAL_SECONDS=300
 
 ################################################################################
 
@@ -60,23 +59,22 @@ ENV FILESCAN_VERBOSITY=$FILESCAN_VERBOSITY
 
 ENV ZEEK_EXTRACTOR_PATH="/zeek/extract_files"
 
-ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR="/opt/assets"
-ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE=$EXTRACTED_FILE_HTTP_SERVER_ENABLE
-ENV EXTRACTED_FILE_HTTP_SERVER_ZIP=$EXTRACTED_FILE_HTTP_SERVER_ZIP
-ENV EXTRACTED_FILE_HTTP_SERVER_KEY=$EXTRACTED_FILE_HTTP_SERVER_KEY
-ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE=$EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
-ENV EXTRACTED_FILE_HTTP_SERVER_PORT=$EXTRACTED_FILE_HTTP_SERVER_PORT
+ENV FILESCAN_HTTP_SERVER_ASSETS_DIR="/opt/assets"
+ENV FILESCAN_HTTP_SERVER_ENABLE=$FILESCAN_HTTP_SERVER_ENABLE
+ENV FILESCAN_HTTP_SERVER_ZIP=$FILESCAN_HTTP_SERVER_ZIP
+ENV FILESCAN_HTTP_SERVER_KEY=$FILESCAN_HTTP_SERVER_KEY
+ENV FILESCAN_HTTP_SERVER_PORT=$FILESCAN_HTTP_SERVER_PORT
 
-ENV EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE=$EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE
-ENV EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT=$EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT
-ENV EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS=$EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS
+ENV FILESCAN_PRUNE_THRESHOLD_MAX_SIZE=$FILESCAN_PRUNE_THRESHOLD_MAX_SIZE
+ENV FILESCAN_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT=$FILESCAN_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT
+ENV FILESCAN_PRUNE_INTERVAL_SECONDS=$FILESCAN_PRUNE_INTERVAL_SECONDS
 
 ################################################################################
 ADD filescan/python-filescan/ /install-filescan/
-ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
-ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
-ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
-ADD --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
+ADD nginx/landingpage/css "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css"
+ADD nginx/landingpage/js "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/js"
+ADD --chmod=644 docs/images/logo/Malcolm_background.png "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
+ADD --chmod=644 docs/images/icon/favicon.ico "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 ADD --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
 
 RUN set -e ; \
@@ -118,17 +116,17 @@ RUN set -e ; \
         chmod +x /usr/local/bin/supercronic ; \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
         chmod 755 /usr/local/bin/yq ; \
-    mkdir -p /filescan /filescan/data/files /filescan/data/logs "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" ; \
+    mkdir -p /filescan /filescan/data/files /filescan/data/logs "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" ; \
     cd /tmp && \
-      /usr/local/bin/web-ui-asset-download.sh -o "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css" && \
+      /usr/local/bin/web-ui-asset-download.sh -o "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css" && \
     cd /install-filescan ; \
         python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt ; \
         make ; \
         python3 -m pip install --break-system-packages --no-cache-dir . ; \
     cd /filescan ; \
-    find /filescan "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" -type d -exec chmod 755 "{}" \; ; \
-    find /filescan "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" -type f -exec chmod 644 "{}" \; ; \
-    chown -R $PUSER:$PGROUP /filescan/data "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" ; \
+    find /filescan "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" -type d -exec chmod 755 "{}" \; ; \
+    find /filescan "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" -type f -exec chmod 644 "{}" \; ; \
+    chown -R $PUSER:$PGROUP /filescan/data "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" ; \
     apt-get remove -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge \
       automake \
       build-essential \
@@ -163,7 +161,7 @@ ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 
 VOLUME ["/filescan/data"]
 
-EXPOSE $EXTRACTED_FILE_HTTP_SERVER_PORT
+EXPOSE $FILESCAN_HTTP_SERVER_PORT
 EXPOSE $FILESCAN_HEALTH_PORT
 
 WORKDIR /filescan
