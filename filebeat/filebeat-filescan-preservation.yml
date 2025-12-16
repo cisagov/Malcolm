@@ -9,6 +9,7 @@ logging.metrics.enabled: false
 #-------------------------- File scanning/pipeline result log ------------------
 # note that filebeat-logs.yml contains a duplicate input
 # section that is used to actually send the log to logstash
+filebeat.inputs:
 - type: log
   paths:
     - ${FILEBEAT_FILESCAN_LOG_PATH:/filescan}/*.log
