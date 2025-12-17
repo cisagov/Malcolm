@@ -3,6 +3,17 @@ redis:
   port: ${REDIS_CACHE_PORT}
   db: ${REDIS_FILESCAN_CACHE_DATABASE}
   password: ${REDIS_PASSWORD}
+
+archivist:
+  policy: ${FILESCAN_PRESERVATION}
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    db: ${REDIS_FILESCAN_PRESERVATION_DATABASE}
+    password: ${REDIS_PASSWORD}
+  keys:
+    - filescan_notify
+
 path_maps:
   /zeek/extract_files: ${ZEEK_EXTRACTOR_PATH}
   /filescan/files: /filescan/data/files
