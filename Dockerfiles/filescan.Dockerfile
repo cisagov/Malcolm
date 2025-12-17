@@ -20,6 +20,7 @@ ENV DEFAULT_GID=$DEFAULT_GID
 ENV PUSER="scan"
 ENV PGROUP="scan"
 ENV PUSER_PRIV_DROP=true
+ENV PUSER_RLIMIT_UNLOCK=true
 USER root
 
 ################################################################################
