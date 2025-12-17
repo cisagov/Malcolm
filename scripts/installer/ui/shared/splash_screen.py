@@ -8,6 +8,7 @@ import os
 import sys
 
 from scripts.malcolm_common import get_malcolm_version, ClearScreen as safe_clear
+from scripts.malcolm_constants import PROFILE_MALCOLM, PROFILE_HEDGEHOG
 from typing import Optional
 
 UNICODE_GLYPHS = {
@@ -55,17 +56,67 @@ UNICODE_GLYPHS = {
         " ██████████████ ",
         "░░░░░░░░░░░░░░  ",
     ],
+    "H": [
+        " ████     ████  ",
+        "░░███     ░███  ",
+        " ░███     ░███  ",
+        " ░████████████  ",
+        " ░███░░░░░░███  ",
+        " ░███     ░███  ",
+        " ░███     ░███  ",
+        " █████    █████ ",
+        "░░░░░    ░░░░░  ",
+    ],
+    "E": [
+        " ██████████████ ",
+        "░░███░░░░░░░░░░ ",
+        " ░███           ",
+        " ░███████████   ",
+        " ░███░░░░░░░░   ",
+        " ░███           ",
+        " ░███           ",
+        " ██████████████ ",
+        "░░░░░░░░░░░░░░  ",
+    ],
+    "D": [
+        " ████████████   ",
+        "░░███░░░░░░███  ",
+        " ░███     ░███  ",
+        " ░███      ███  ",
+        " ░███      ███  ",
+        " ░███     ░███  ",
+        " ░███     ███   ",
+        " ███████████    ",
+        "░░░░░░░░░░░     ",
+    ],
+    "G": [
+        " ██████████████ ",
+        "░░███░░░░░░░░░██",
+        " ░███        ░░ ",
+        " ░███           ",
+        " ░███   ███████ ",
+        " ░███   ░░░░░██ ",
+        " ░███        ██ ",
+        " █████████████  ",
+        "░░░░░░░░░░░░░   ",
+    ],
 }
 
-LEFT_WORD = ["M", "A", "L", "C"]
-RIGHT_WORD = ["L", "M"]
+LEFT_WORD = {
+    PROFILE_MALCOLM: ["M", "A", "L", "C"],
+    PROFILE_HEDGEHOG: ["H", "E", "D", "G", "E", "H"],
+}
+RIGHT_WORD = {
+    PROFILE_MALCOLM: ["L", "M"],
+    PROFILE_HEDGEHOG: ["G"],
+}
 WHEEL_FRAME_COUNT = 16
 
 HEADER_TEXT = "Welcome To"
 FOOTER_TEXT = "Press any key to continue..."
 
 
-def splash_screen():
+def splash_screen(profile: str = PROFILE_MALCOLM):
     """Render an animated Malcolm splash with a spinning ASCII 'O'."""
     if not (sys.stdin.isatty() and sys.stdout.isatty()):
         return
@@ -82,8 +133,8 @@ def splash_screen():
     letter_height = len(UNICODE_GLYPHS["M"])
 
     baked_glyphs = bake_glyphs(on_char, shadow_char)
-    left_glyphs = [baked_glyphs[name] for name in LEFT_WORD]
-    right_glyphs = [baked_glyphs[name] for name in RIGHT_WORD]
+    left_glyphs = [baked_glyphs[name] for name in LEFT_WORD[profile if profile in LEFT_WORD else PROFILE_MALCOLM]]
+    right_glyphs = [baked_glyphs[name] for name in RIGHT_WORD[profile if profile in RIGHT_WORD else PROFILE_MALCOLM]]
 
     wheel_frames = build_wheel_frames(letter_height, on_char)
 

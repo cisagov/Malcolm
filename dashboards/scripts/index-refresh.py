@@ -412,7 +412,7 @@ def build_field_format_map(args, fields, prev_field_format_map):
         'related.service': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.service'),
         'related.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
         'zeek.files.extracted_uri': lambda: (
-            (args.malcolm_url + '/{{value}}')
+            (args.malcolm_url + '/{{rawValue}}')
             if (args.malcolm_url or (args.opensearch_mode != DatabaseMode.ElasticsearchRemote))
             else ''
         ),

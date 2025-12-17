@@ -67,7 +67,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/keycloak` (based on `quay.io/keycloak/keycloak:26.1`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
-* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.22`)
+* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.23`)
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:13-slim`)
