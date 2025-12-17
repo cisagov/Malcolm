@@ -97,6 +97,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Email Sender Accounts](alerting.md#AlertingEmail)
 * [Search Queries in Arkime and OpenSearch Dashboards](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
+    - [Analytics](analytics.md#Analytics)
     - [Custom Rules, Scripts and Plugins](custom-rules.md#CustomRulesAndScripts)
         + [Arkime](custom-rules.md#Arkime)
         + [Suricata](custom-rules.md#Suricata)

@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
       - name: file-monitor-container
-        image: ghcr.io/idaholab/malcolm/file-monitor:25.12.0
+        image: ghcr.io/idaholab/malcolm/file-monitor:25.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -96,7 +96,7 @@ spec:
             name: file-monitor-yara-rules-custom-volume
       initContainers:
       - name: file-monitor-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
