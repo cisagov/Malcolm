@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# TODO perhaps this is dumb... I can probably just subscribe to the same thing filescan_logger does :/
+
 from __future__ import annotations
 
 __version__ = '0.1a'
