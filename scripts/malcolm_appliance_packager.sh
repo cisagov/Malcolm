@@ -96,8 +96,6 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
   mkdir $VERBOSE -p "$DESTDIR/yara/rules/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/current/"
-  mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/preserved/"
-  mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/quarantine/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/filescan/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/processed/"

@@ -27,8 +27,8 @@ Files flagged via any of these methods will be logged as Zeek `signatures.log` e
 
 The `FILESCAN_PRESERVATION` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) determines the behavior for preservation of Zeek-extracted files:
 
-* `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
-* `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
+* `quarantined`: preserve only flagged files in `./zeek-logs/extract_files`
+* `all`: preserve all extracted files  files in `./zeek-logs/extract_files`
 * `none`: preserve no extracted files
 
 The `FILESCAN_HTTP_SERVER_…` [environment variables in `zeek.env` and `zeek-secret.env`](malcolm-config.md#MalcolmConfigEnvVars) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server accessible at **https://localhost/extracted-files/** if connecting locally. Beware that Zeek-extracted files may contain malware. As such, these files may be optionally ZIP archived (without a password or password-protected according to the [WinZip AES encryption specification](https://www.winzip.com/en/support/aes-encryption/)) or encrypted (to be decrypted using `openssl`, e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`) upon download. In other words:

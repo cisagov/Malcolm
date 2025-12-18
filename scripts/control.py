@@ -1445,7 +1445,7 @@ def start():
                     [os.path.join('tmp', 'spool'), "variants"],
                     None,
                 ),
-                BoundPath("zeek", "/zeek/extract_files", False, ["quarantine", "preserved", "filescan"], None),
+                BoundPath("zeek", "/zeek/extract_files", False, ["filescan"], None),
                 BoundPath("zeek", "/zeek/upload", False, None, None),
                 BoundPath("zeek", "/usr/local/zeek/share/zeek/site/custom", False, None, None),
                 BoundPath("zeek", "/usr/local/zeek/share/zeek/site/intel", False, ["Mandiant", "MISP", "STIX"], None),

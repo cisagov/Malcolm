@@ -461,8 +461,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
             * Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
         + **File Preservation**
             * This determines the behavior for preservation of Zeek-extracted files:
-                -  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
-                - `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
+                -  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files`
+                - `all`: preserve all extracted files `./zeek-logs/extract_files`
                 - `none`: preserve no extracted files
         + **Preserved Files HTTP Server**
             * Choosing **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://﹤Malcolm host or IP address﹥/extracted-files/**. Beware that Zeek-extracted files may contain malware.
