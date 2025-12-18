@@ -17,6 +17,7 @@ ENV DEFAULT_GID=$DEFAULT_GID
 ENV PUSER="strelka"
 ENV PGROUP="strelka"
 ENV PUSER_PRIV_DROP=true
+ENV PUSER_RLIMIT_UNLOCK=true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 USER root
 
