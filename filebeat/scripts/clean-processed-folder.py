@@ -24,7 +24,6 @@ lock_filename = os.path.join(gettempdir(), f'{os.path.basename(__file__)}.lock')
 filebeat_registry_filenames = [
     os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json"),
     os.getenv('FILEBEAT_REDIS_REGISTRY_FILE', "/usr/share/filebeat-zeek-files-logs/data/registry/filebeat/log.json"),
-    os.getenv('FILEBEAT_FILESCAN_RESULTS_FILE', "/usr/share/filebeat-filescan-preservation/data/registry/filebeat/log.json"),
 ]
 
 zeek_dir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')

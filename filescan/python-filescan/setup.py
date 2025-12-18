@@ -10,7 +10,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     scripts=[
         'bin/filescan_watcher',
-        'bin/filescan_archivist',
         'bin/filescan_scanner_strelka',
         'bin/filescan_logger',
     ],

@@ -13,24 +13,55 @@ import anyio
 import redis.exceptions
 import sys
 from datetime import datetime, UTC, timedelta
+from enum import Enum
 from filescan.click import click
 from filescan.config import BaseConfig
 from filescan.model import AnyScanMessageType, FileScanMap
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from redis.asyncio import Redis
 from typing import TextIO
 
 
 ################################################################################
+################################################################################
+class FilePreservationMode(Enum):
+    QUARANTINED = "quarantined"
+    ALL = "all"
+    NONE = "none"
 
 
 class LoggerOptions(BaseModel, frozen=True):
     max_scan_time: timedelta | None = None
 
 
+class PreservationOptions(BaseModel, frozen=True):
+    policy: FilePreservationMode | None = FilePreservationMode.ALL
+    concurrent_deletes: int = Field(default=8, ge=1, le=64)
+
+
 class LoggerConfig(BaseConfig, frozen=True):
     logger: LoggerOptions = LoggerOptions()
+    preservation: PreservationOptions = PreservationOptions()
+
+
+async def preservation_cleanup_scan_artifacts(scan, policy, limiter):
+    async with limiter:
+        try:
+            log.debug(
+                "preservation_cleanup_scan_artifacts %s: %r",
+                policy,
+                scan,
+            )
+
+            # TODO: logic goes here
+            # await anyio.to_thread.run_sync(
+            #     Path(scan.path).unlink,
+            #     abandon_on_cancel=True,
+            # )
+
+        except Exception:
+            log.exception("cleanup failed for scan %s", scan.id)
 
 
 async def watch_pubsub(
@@ -38,41 +69,61 @@ async def watch_pubsub(
     connection: Redis,
     output: TextIO,
 ) -> None:
-    scans = FileScanMap(
-        max_scan_time=config.logger.max_scan_time,
-    )
-    keys = {
-        config.redis.keys.notify,
-        config.redis.keys.result,
-    }
-    log.info(
-        'subscribing to keys: %s:%d/%d => {%s}',
-        config.redis.host,
-        config.redis.port,
-        config.redis.db,
-        ', '.join(keys),
-    )
-    try:
-        pubsub = connection.pubsub()
-        await pubsub.subscribe(*keys)
-        while True:
-            msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=None)
-            if not msg or msg.get('type') != 'message' or not msg.get('channel') or not (data := msg.get('data')):
-                continue
+    cleanup_limiter = anyio.CapacityLimiter(config.preservation.concurrent_deletes)
+    async with anyio.create_task_group() as preservation_cleanup_group:
+        preservation_cleanup_group.cancel_scope.shield = True
+        scans = FileScanMap(
+            max_scan_time=config.logger.max_scan_time,
+        )
+        keys = {
+            config.redis.keys.notify,
+            config.redis.keys.result,
+        }
+        preservation_policy = config.preservation.policy
+        log.info(
+            'subscribing to keys: %s:%d/%d => {%s}, preservation policy: {%s}',
+            config.redis.host,
+            config.redis.port,
+            config.redis.db,
+            ', '.join(keys),
+            preservation_policy.value,
+        )
+        try:
+            pubsub = connection.pubsub()
+            try:
+                await pubsub.subscribe(*keys)
+                while True:
+                    msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=None)
+                    if (
+                        not msg
+                        or msg.get('type') != 'message'
+                        or not msg.get('channel')
+                        or not (data := msg.get('data'))
+                    ):
+                        continue
 
-            if scans.update(AnyScanMessageType.validate_json(data)):
-                for scan in scans.get_completed_scans():
-                    log.debug('complete: %r', scan)
-                    log.info('complete: %s', scan.id)
-                    output.write(scan.model_dump_json() + "\n")
-                    output.flush()
-                    await connection.publish(
-                        config.redis.keys.notify,
-                        scan.get_complete().model_dump_json(),
-                    )
+                    if scans.update(AnyScanMessageType.validate_json(data)):
+                        for scan in scans.get_completed_scans():
+                            log.debug('complete: %r', scan)
+                            log.info('complete: %s', scan.id)
+                            output.write(scan.model_dump_json() + "\n")
+                            output.flush()
+                            scan_results = scan.get_complete()
+                            preservation_cleanup_group.start_soon(
+                                preservation_cleanup_scan_artifacts,
+                                scan_results,
+                                preservation_policy,
+                                cleanup_limiter,
+                            )
+                            await connection.publish(
+                                config.redis.keys.notify,
+                                scan_results.model_dump_json(),
+                            )
+            finally:
+                await pubsub.close()
 
-    except anyio.get_cancelled_exc_class():
-        pass
+        except anyio.get_cancelled_exc_class():
+            pass
 
 
 ################################################################################
