@@ -71,25 +71,26 @@ async def preservation_cleanup_scan_artifacts(
     limiter: anyio.CapacityLimiter,
 ) -> None:
     try:
-        log.debug(
-            "cleanup policy=%s file=%s results=%r",
-            policy,
-            scan_file.path.name,
-            scan_results,
-        )
-        if (policy == FilePreservationMode.NONE) or (
-            (policy == FilePreservationMode.QUARANTINED)
-            and not any(result_qualifies_for_preservation(r) for r in scan_results.values())
-        ):
-            log.info('unlinking %s', scan_file.path.name)
-            async with limiter:
-                await anyio.to_thread.run_sync(
-                    safe_unlink,
-                    scan_file.path,
-                    abandon_on_cancel=True,
-                )
-        else:
-            log.info('preserving %s', scan_file.path.name)
+        if isinstance(scan_file, FileEvent) and isinstance(scan_results, dict):
+            log.debug(
+                "cleanup policy=%s file=%r results=%r",
+                policy,
+                scan_file,
+                scan_results,
+            )
+            if (policy == FilePreservationMode.NONE) or (
+                (policy == FilePreservationMode.QUARANTINED)
+                and not any(result_qualifies_for_preservation(r) for r in scan_results.values())
+            ):
+                log.info('unlinking %s', scan_file.path.name)
+                async with limiter:
+                    await anyio.to_thread.run_sync(
+                        safe_unlink,
+                        scan_file.path,
+                        abandon_on_cancel=True,
+                    )
+            else:
+                log.info('preserving %s', scan_file.path.name)
 
     except Exception:
         log.exception("cleanup failed for scan %s", scan_file.path)
