@@ -54,9 +54,12 @@ def safe_unlink(p: PurePosixPath) -> None:
         log.warning("Failed to unlink %s: %s", path, e)
 
 
-def result_qualifies_for_preservation(FileResult) -> bool:
-    # TODO: true, preserve file; false, delete file
-    return False
+def result_qualifies_for_preservation(scan_result: FileResult | None) -> bool:
+    return (
+        isinstance(scan_result, FileResult)
+        and isinstance(scan_result.result, dict)
+        and bool(scan_result.result.get("rules"))
+    )
 
 
 async def preservation_cleanup_scan_artifacts(
@@ -147,7 +150,7 @@ async def watch_pubsub(
                                 scan.get_complete().model_dump_json(),
                             )
             finally:
-                await pubsub.close()
+                await pubsub.aclose()
 
         except anyio.get_cancelled_exc_class():
             pass
