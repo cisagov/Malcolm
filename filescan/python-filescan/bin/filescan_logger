@@ -16,7 +16,7 @@ from datetime import datetime, UTC, timedelta
 from enum import Enum
 from filescan.click import click
 from filescan.config import BaseConfig
-from filescan.model import AnyScanMessageType, FileScanMap
+from filescan.model import AnyScanMessageType, FileScanMap, FileEvent, FileResult
 from pathlib import Path
 from pydantic import BaseModel, Field
 from redis.asyncio import Redis
@@ -45,13 +45,19 @@ class LoggerConfig(BaseConfig, frozen=True):
     preservation: PreservationOptions = PreservationOptions()
 
 
-async def preservation_cleanup_scan_artifacts(scan, policy, limiter):
+async def preservation_cleanup_scan_artifacts(
+    scan_file: FileEvent,
+    scan_results: dict[str, FileResult],
+    policy: FilePreservationMode,
+    limiter: anyio.CapacityLimiter,
+) -> None:
     async with limiter:
         try:
             log.debug(
-                "preservation_cleanup_scan_artifacts %s: %r",
+                "preservation_cleanup_scan_artifacts %s: %r, %r",
                 policy,
-                scan,
+                scan_file,
+                scan_results,
             )
 
             # TODO: logic goes here
@@ -61,7 +67,7 @@ async def preservation_cleanup_scan_artifacts(scan, policy, limiter):
             # )
 
         except Exception:
-            log.exception("cleanup failed for scan %s", scan.id)
+            log.exception("cleanup failed for scan %s", scan_file.path)
 
 
 async def watch_pubsub(
@@ -108,16 +114,16 @@ async def watch_pubsub(
                             log.info('complete: %s', scan.id)
                             output.write(scan.model_dump_json() + "\n")
                             output.flush()
-                            scan_results = scan.get_complete()
                             preservation_cleanup_group.start_soon(
                                 preservation_cleanup_scan_artifacts,
-                                scan_results,
+                                scan.file,
+                                scan.results,
                                 preservation_policy,
                                 cleanup_limiter,
                             )
                             await connection.publish(
                                 config.redis.keys.notify,
-                                scan_results.model_dump_json(),
+                                scan.get_complete().model_dump_json(),
                             )
             finally:
                 await pubsub.close()
