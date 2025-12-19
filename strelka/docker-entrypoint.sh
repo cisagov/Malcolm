@@ -65,7 +65,8 @@ if [[ -f /etc/clamav/clamd.conf ]]; then
 
   [[ -n "${EXTRACTED_FILE_MAX_BYTES:-}" ]] && \
     set_config /etc/clamav/clamd.conf MaxFileSize "${EXTRACTED_FILE_MAX_BYTES}" && \
-    set_config /etc/clamav/clamd.conf MaxScanSize "$(( EXTRACTED_FILE_MAX_BYTES * 4 ))"
+    set_config /etc/clamav/clamd.conf MaxScanSize "$(( EXTRACTED_FILE_MAX_BYTES * 4 ))" && \
+    set_config /etc/clamav/clamd.conf StreamMaxLength "$(( EXTRACTED_FILE_MAX_BYTES + EXTRACTED_FILE_MAX_BYTES / 5 ))"
 
   [[ -n "${CLAMD_MAX_EMBEDDED_PE_SIZE:-}" ]] && \
     set_config /etc/clamav/clamd.conf MaxEmbeddedPE "${CLAMD_MAX_EMBEDDED_PE_SIZE}"

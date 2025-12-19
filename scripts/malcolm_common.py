@@ -1732,6 +1732,7 @@ LOG_IGNORE_REGEX = re.compile(
   | scheduling\s+job\s*id.+opendistro-ism
   | SSL/TLS\s+verifications\s+disabled
   | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+  | Table\s+_SummaryInformation\s+not\s+found
   | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
   | throttling\s+index
   | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)

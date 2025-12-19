@@ -1,11 +1,11 @@
 version: 2025.12.16.01
 logging_cfg: '/etc/strelka/logging.yaml'
 limits:
-  max_files: 5000
-  time_to_live: 900
+  max_files: 10000
+  time_to_live: 1800
   max_depth: 15
-  distribution: 600
-  scanner: 150
+  distribution: 1200
+  scanner: 180
 coordinator:
   addr: 'strelka-coordinator:6379'
   db: 0
@@ -17,7 +17,7 @@ caching:
   scanner: true
 telemetry:
   traces:
-    sampling: 1.0
+    sampling: 0.0
 scanners:
 #  'ScanAntiword':
 #    - positive:
@@ -56,31 +56,32 @@ scanners:
           - 'application/x-bzip2'
           - 'bzip2_file'
       priority: 5
-  'ScanCapa':
-    - positive:
-        flavors:
-          # todo: is this list exhaustive? are there more types that should be included
-          - 'application/bat'
-          - 'application/ecmascript'
-          - 'application/javascript'
-          - 'application/PowerShell'
-          - 'application/vnd.microsoft.portable-executable'
-          - 'application/x-bat'
-          - 'application/x-coredump'
-          - 'application/x-dosexec'
-          - 'application/x-elf'
-          - 'application/x-executable'
-          - 'application/x-msdos-program'
-          - 'application/x-msdownload'
-          - 'application/x-object'
-          - 'application/x-pe-app-32bit-i386'
-          - 'application/x-sh'
-          - 'application/x-sharedlib'
-          - 'text/jscript'
-          - 'text/vbscript'
-          - 'text/x-python'
-          - 'text/x-shellscript'
-      priority: 5
+#  'ScanCapa':
+#    - positive:
+#        flavors:
+#          # todo: is this list exhaustive? are there more types that should be included
+#          - 'application/bat'
+#          - 'application/ecmascript'
+#          - 'application/javascript'
+#          - 'application/PowerShell'
+#          - 'application/vnd.microsoft.portable-executable'
+#          - 'application/x-bat'
+#          - 'application/x-coredump'
+#          - 'application/x-dosexec'
+#          - 'application/x-elf'
+#          - 'application/x-executable'
+#          - 'application/x-msdos-program'
+#          - 'application/x-msdownload'
+#          - 'application/x-object'
+#          - 'application/x-pe-app-32bit-i386'
+#          - 'application/x-sh'
+#          - 'application/x-sharedlib'
+#          - 'text/jscript'
+#          - 'text/vbscript'
+#          - 'text/x-python'
+#          - 'text/x-shellscript'
+#      priority: 5
+#      scanner_timeout: 600
 #  'ScanCart':
 #    - positive:
 #        flavors:
@@ -756,6 +757,7 @@ scanners:
         store_offset: True
         offset_meta_key: "StrelkaHexDump"
         offset_padding: 32
+      scanner_timeout: 300
   'ScanZip':
     - positive:
         flavors:
