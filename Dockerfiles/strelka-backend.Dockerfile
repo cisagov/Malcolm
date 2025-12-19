@@ -43,6 +43,9 @@ ENV EXTRACTED_FILE_MAX_BYTES=$EXTRACTED_FILE_MAX_BYTES
 ENV CLAMD_SOCKET_FILE=/tmp/clamd.ctl
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
 
+ARG STRELKA_BACKEND_PROCS=1
+ENV STRELKA_BACKEND_PROCS=$STRELKA_BACKEND_PROCS
+
 ADD --chmod=755 strelka/*.sh /usr/local/bin/
 ADD --chmod=755 strelka/backend/*.sh /usr/local/bin/
 
