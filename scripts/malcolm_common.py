@@ -1691,6 +1691,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Could\s+not\s+assign\s+group.+to\s+remotely-authenticated\s+user.+Group\s+not\s+found
   | curl.+localhost.+GET\s+/api/status\s+200
   | DB\s+saved\s+on\s+disk
+  | \[DEBUG\]\s+PIL\.
   | DEPRECATION
   | descheduling\s+job\s*id
   | DON'T\s+DO\s+IT.*bad\s+idea
@@ -1734,6 +1735,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
   | Table\s+_SummaryInformation\s+not\s+found
   | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
+  | The\s+directory\s+structure\s+may
   | throttling\s+index
   | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | update_mapping
@@ -1741,6 +1743,7 @@ LOG_IGNORE_REGEX = re.compile(
   | use_field_mapping
   | Using\s+geoip\s+database
   | Warning:\s+app-layer-
+  | Warning:\s+Directory\s+has\s+a\s+target
   | WARNING:\s+This\s+is\s+a\s+development\s+server
   | you\s+may\s+need\s+to\s+run\s+securityadmin
 )
