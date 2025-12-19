@@ -72,8 +72,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       /usr/local/bin/yara_rules_setup.sh -u && \
       rm -rf "${YARA_RULES_SRC_DIR}"/* && \
       find "${YARA_RULES_DIR}" -type l \( ! -exec test -r "{}" \; \) -delete && \
-    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
-      find /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
+    chown -R ${PUSER}:${PGROUP} /var/log/clamav /etc/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+      find /var/log/clamav /etc/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
@@ -81,9 +81,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       sed -i "s/^MaxFileSize .*$/MaxFileSize $EXTRACTED_FILE_MAX_BYTES/g" /etc/clamav/clamd.conf && \
       sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf && \
       echo "TCPSocket 3310" >> /etc/clamav/clamd.conf && \
-    if ! [ -z $HTTPProxyServer ]; then echo "HTTPProxyServer $HTTPProxyServer" >> /etc/clamav/freshclam.conf; fi && \
-      if ! [ -z $HTTPProxyPort   ]; then echo "HTTPProxyPort $HTTPProxyPort" >> /etc/clamav/freshclam.conf; fi && \
-      sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
+    sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
       sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf && \
     echo "0 0 * * * /usr/local/bin/yara_rules_setup.sh -s" > ${SUPERCRONIC_CRONTAB} && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
