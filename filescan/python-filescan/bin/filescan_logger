@@ -17,6 +17,7 @@ from enum import Enum
 from filescan.click import click
 from filescan.config import BaseConfig
 from filescan.model import AnyScanMessageType, FileScanMap, FileEvent, FileResult
+from malcolm_utils import deep_get
 from pathlib import Path, PurePosixPath
 from pydantic import BaseModel, Field
 from redis.asyncio import Redis
@@ -59,8 +60,13 @@ def result_qualifies_for_preservation(scan_result: FileResult | None) -> bool:
     return (
         isinstance(scan_result, FileResult)
         and isinstance(scan_result.result, dict)
-        and (rules := scan_result.result.get("rules"))
-        and isinstance(rules, list)
+        and (
+            ((rules := scan_result.result.get('rules')) and isinstance(rules, list))
+            or (
+                (yara_matches := deep_get(scan_result.result, ['scan', 'yara', 'matches']))
+                and isinstance(yara_matches, list)
+            )
+        )
     )
 
 
