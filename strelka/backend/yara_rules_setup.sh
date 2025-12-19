@@ -216,11 +216,12 @@ if (( ${#YARAC_ARGS[@]} > 0 )); then
   fi
 else
   echo "No valid YARA files found; refusing to generate empty compiled set" >&2
-  YARAC_RESULT=1
+  # if we aren't doing rule updates, this isn't a failure case
+  [[ "${GIT_UPDATE}" == "1" ]] && YARAC_RESULT=1 || YARAC_RESULT=0
 fi
 
 popd >/dev/null
 
-[[ ${STRELKA_RESTART_AFTER_UPDATE} == 1 ]] && [[ ${YARAC_RESULT} == 0 ]] && supervisorctl restart backend
+[[ ${STRELKA_RESTART_AFTER_UPDATE} == 1 ]] && [[ ${YARAC_RESULT} == 0 ]] && supervisorctl restart 'backend:*'
 
 exit ${YARAC_RESULT}

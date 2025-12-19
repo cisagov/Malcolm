@@ -103,7 +103,7 @@ docker compose exec zeek-live supervisorctl restart live-zeek
 New rules files will take effect by either restarting Malcolm (specifically the `file-monitor` container) or when the automatic rule update runs (if automatic rule updates are enabled). This can also be done manually without restarting Malcolm by running the following commands from the Malcolm installation directory:
 
 ```
-docker compose exec -u $(id -u) strelka-backend /usr/local/bin/yara_rules_setup.sh -s
+docker compose exec -u $(id -u) strelka-backend /usr/local/bin/yara_rules_setup.sh
 ```
 
 If the `YARA_CUSTOM_RULES_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`./config/pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env.example) is set to `true`, Malcolm will bypass its default YARA rulesets and use only user-defined rules in `./yara/rules`.

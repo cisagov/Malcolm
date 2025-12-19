@@ -86,7 +86,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       echo "TCPSocket 3310" >> /etc/clamav/clamd.conf && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
       sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf && \
-    echo "0 0 * * * /usr/local/bin/yara_rules_setup.sh -s" > ${SUPERCRONIC_CRONTAB} && \
+    echo "0 0 * * * /usr/local/bin/yara_rules_setup.sh" > ${SUPERCRONIC_CRONTAB} && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
