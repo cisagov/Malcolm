@@ -9,7 +9,7 @@ handlers:
     formatter: simple
     stream: ext://sys.stdout
 root:
-  level: DEBUG
+  level: INFO
   handlers: [console]
 loggers:
   OpenSSL:
