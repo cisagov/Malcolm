@@ -334,6 +334,7 @@ async def watch_pubsub(
                 or not (key := msg.get('channel'))
                 or not (data := msg.get('data'))
             ):
+                await anyio.sleep(0.1)
                 continue
             await handle_zeek_event(
                 config,

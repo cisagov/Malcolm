@@ -139,6 +139,7 @@ async def watch_pubsub(
                         or not msg.get('channel')
                         or not (data := msg.get('data'))
                     ):
+                        await anyio.sleep(0.1)
                         continue
 
                     if scans.update(AnyScanMessageType.validate_json(data)):

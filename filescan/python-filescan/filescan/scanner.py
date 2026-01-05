@@ -98,6 +98,7 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
                     )
                     try:
                         if not msg or msg.get('type') != 'message' or not (data := msg.get('data')):
+                            await anyio.sleep(0.1)
                             continue
                         request = ScanRequest.model_validate_json(data)
                     except:

@@ -391,6 +391,7 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
             msg = await self.pubsub.get_message(timeout=timeout)
             if msg is not None:
                 return msg
+            await anyio.sleep(0.1)
 
     async def dispatch_message(self, message: dict[str, Any]) -> None:
         msg_type, key, data = map(message.get, ('type', 'channel', 'data'))
