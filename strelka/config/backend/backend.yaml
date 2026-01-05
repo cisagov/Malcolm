@@ -684,19 +684,19 @@ scanners:
       priority: 5
       options:
         limit: 1000
-  'ScanX509':
-    - positive:
-        flavors:
-          - 'x509_der_file'
-      priority: 5
-      options:
-        type: 'der'
-    - positive:
-        flavors:
-          - 'x509_pem_file'
-      priority: 5
-      options:
-        type: 'pem'
+#  'ScanX509':
+#    - positive:
+#        flavors:
+#          - 'x509_der_file'
+#      priority: 5
+#      options:
+#        type: 'der'
+#    - positive:
+#        flavors:
+#          - 'x509_pem_file'
+#      priority: 5
+#      options:
+#        type: 'pem'
   'ScanXar':
     - positive:
         flavors:
