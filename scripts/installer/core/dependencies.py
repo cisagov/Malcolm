@@ -984,13 +984,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
-    KEY_CONFIG_ITEM_VTOT_API_KEY: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != FileExtractionMode.NONE.value,
-            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-        )
-    ),
     KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,

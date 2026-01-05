@@ -86,7 +86,6 @@ export EXTRACTED_FILE_SERVER_PASSWORD=infected
 export EXTRACTED_FILE_CLAMAV=true
 export EXTRACTED_FILE_YARA=true
 export EXTRACTED_FILE_CAPA=true
-export VIRUSTOTAL_API_KEY=
 export FILE_SCAN_RULE_UPDATE=true
 export NETBOX=local
 export NETBOX_URL=

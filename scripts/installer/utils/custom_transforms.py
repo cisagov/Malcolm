@@ -107,43 +107,6 @@ def custom_reverse_transform_pipeline_enabled(value: str) -> bool:
     return not _env_str_to_bool(value)
 
 
-def custom_transform_zeek_file_enable_vtot(vtotApiKey: str) -> str:
-    return true_or_false_no_quotes(len(vtotApiKey) > 1)
-
-
-def custom_reverse_transform_zeek_file_enable_vtot(value: str):
-    """When importing FILESCAN_VTOT_ENABLED we cannot reconstruct the actual API key.
-
-    To avoid failing validation on the `vtotApiKey` (expects string), return an
-    empty string regardless of the boolean flag. The flag merely indicates
-    whether a non-empty key exists.
-    """
-    return ""  # leave the API key unset; user can supply later
-
-
-def custom_reverse_transform_zeek_vtot_api2_key(value: str) -> str:
-    """Reverse transform for VTOT_API2_KEY (VirusTotal API key).
-
-    The .env files use '0' as a sentinel default. Treat '0' or empty as unset,
-    otherwise return the raw string. Do not coerce numeric-looking strings to int.
-    """
-    if value is None:
-        return ""
-    v = str(value).strip()
-    return "" if v in ("", "0") else v
-
-
-def custom_transform_zeek_vtot_api2_key(value: str) -> str:
-    """Forward transform for VTOT_API2_KEY.
-
-    Write '0' when unset/empty to match image defaults and examples. Otherwise
-    pass through the provided string.
-    """
-    if value is None or str(value).strip() == "":
-        return "0"
-    return str(value)
-
-
 def custom_transform_filebeat_syslog_tcp_listen(tcp_port: int) -> str:
     return true_or_false_no_quotes(tcp_port is not None and tcp_port > 0)
 

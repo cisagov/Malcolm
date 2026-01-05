@@ -11,12 +11,10 @@ from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT,
     KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN,
     KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT,
-    KEY_ENV_ZEEK_FILE_ENABLE_VTOT,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
     KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
-    KEY_CONFIG_ITEM_VTOT_API_KEY,
 )
 
 
@@ -62,19 +60,6 @@ class TestEnvDerivedNoop(unittest.TestCase):
         cfg2.load_from_env_files(self.temp_dir)
         self.assertEqual(cfg2.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT), 5514)
         self.assertEqual(cfg2.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT), 5514)
-
-    def test_vtot_enable_flag_does_not_set_api_key(self):
-        mapper = self.ref_cfg.get_env_mapper()
-
-        # Present only the derived enable flag -> should not set API key
-        _write_env(mapper, self.temp_dir, KEY_ENV_ZEEK_FILE_ENABLE_VTOT, "true")
-
-        cfg = MalcolmConfig()
-        cfg.load_from_env_files(self.temp_dir)
-
-        # Expect empty/None API key since the flag cannot reconstruct the secret
-        val = cfg.get_value(KEY_CONFIG_ITEM_VTOT_API_KEY)
-        self.assertTrue(val is None or val == "")
 
 
 if __name__ == "__main__":

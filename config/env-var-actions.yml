@@ -38,10 +38,6 @@ copied_environment_variables:
         EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS
       FILESCAN_PRESERVATION:
         EXTRACTED_FILE_PRESERVATION
-      FILESCAN_VTOT_REQUESTS_PER_MINUTE:
-        VTOT_REQUESTS_PER_MINUTE
-      FILESCAN_VTOT_ENABLED:
-        EXTRACTED_FILE_ENABLE_VTOT
   filescan_secret:
     filescan_secret:
       FILESCAN_HTTP_SERVER_KEY:
@@ -239,10 +235,12 @@ removed_environment_variables:
     - EXTRACTED_FILE_WATCHER_POLLING
     - EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC
     - EXTRACTED_FILE_YARA_CUSTOM_ONLY
-    - FILESCAN_VTOT_REQUESTS_PER_MINUTE
+    - VTOT_REQUESTS_PER_MINUTE
     - YARA_MAX_REQUESTS
   zeek_offline:
     - ZEEK_PCAP_PROCESSOR
+  zeek_secret:
+    - VTOT_API2_KEY
 relocated_files:
   # Files/directories to relocate (relative to Malcolm installation directory)
   # Only occurs if Malcolm is not running, source exists, and destination does not.

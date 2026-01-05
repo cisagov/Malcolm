@@ -136,7 +136,6 @@ _base_config +CAPTURE_FLAG:
     | .configuration.traefikOpenSearchHost = "${TRAEFIK_HOST_OPENSEARCH}"
     | .configuration.traefikResolver = "${TRAEFIK_RESOLVER}"
     | .configuration.useDefaultStorageLocations = ${DEFAULT_PATHS}
-    | .configuration.vtotApiKey = "${VIRUSTOTAL_API_KEY}"
     | .configuration.zeekICSBestGuess = ${ZEEK_ICS_BEST_GUESS:-true}
     | .configuration.zeekIntelCronExpression = "${ZEEK_INTEL_CRON_EXPRESSION}"
     | .configuration.zeekIntelFeedSince = "${ZEEK_INTEL_FEED_SINCE:-24 hours ago}"

@@ -27,7 +27,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_FILE_CARVE_MODE,
     KEY_CONFIG_ITEM_FILE_PRESERVE_MODE,
     KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE,
-    KEY_CONFIG_ITEM_VTOT_API_KEY,
 )
 
 
@@ -126,15 +125,6 @@ CONFIG_ITEM_PIPELINE_ENABLED = ConfigItem(
     validator=lambda x: isinstance(x, bool),
     question="Scan extracted files with Strelka?",
     widget_type=WidgetType.CHECKBOX,
-)
-
-CONFIG_ITEM_VTOT_API_KEY = ConfigItem(
-    key=KEY_CONFIG_ITEM_VTOT_API_KEY,
-    label="VirusTotal API Key",
-    default_value="",
-    validator=lambda x: isinstance(x, str),
-    question="API key to scan extracted files with VirusTotal",
-    widget_type=WidgetType.PASSWORD,
 )
 
 CONFIG_ITEM_FILE_SCAN_RULE_UPDATE = ConfigItem(

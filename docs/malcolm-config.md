@@ -160,7 +160,6 @@ Although the configuration script automates many of the following configuration 
     - `FILESCAN_HTTP_SERVER_ZIP` – if to `true`, the Zeek-extracted files will be archived in a ZIP file upon download
     - `FILESCAN_HTTP_SERVER_KEY` – specifies the password for the ZIP archive if `FILESCAN_HTTP_SERVER_ZIP` is `true`; otherwise, this specifies the decryption password for encrypted Zeek-extracted files in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`)
     - `FILESCAN_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction)
-    - `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) to VirusTotal
     - `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
     - `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
     - `ZEEK_JSON` - whether Zeek should generate [JSON format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-json-format-logs) (`true`) or [TSV format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-tsv-format-logs) (`false`)

@@ -151,7 +151,6 @@ _STRING_VARS = [
     KEY_ENV_ZEEK_INTEL_FEED_SINCE,
     KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION,
     KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION,
-    KEY_ENV_ZEEK_VTOT_API2_KEY,
 ]
 
 # 3. List-of-strings transform logic
@@ -232,15 +231,6 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
     KEY_ENV_PIPELINE_ENABLED: TransformHook(
         forward=custom_transform_pipeline_enabled,
         reverse=custom_reverse_transform_pipeline_enabled,
-    ),
-    KEY_ENV_ZEEK_FILE_ENABLE_VTOT: TransformHook(
-        forward=custom_transform_zeek_file_enable_vtot,
-        reverse=custom_reverse_transform_zeek_file_enable_vtot,
-    ),
-    # Preserve secret as string; treat '0' as unset
-    KEY_ENV_ZEEK_VTOT_API2_KEY: TransformHook(
-        forward=custom_transform_zeek_vtot_api2_key,
-        reverse=custom_reverse_transform_zeek_vtot_api2_key,
     ),
     KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN: TransformHook(
         forward=custom_transform_filebeat_syslog_tcp_listen,
@@ -656,9 +646,6 @@ class EnvMapper:
             ]
 
             # Zeek
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_VTOT].config_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
-            # This env var signals presence of a key but cannot reconstruct it; treat as derived
-            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_VTOT].derived_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
             self.env_var_by_map_key[KEY_ENV_ZEEK_EXTRACTOR_MODE].config_items = [KEY_CONFIG_ITEM_FILE_CARVE_MODE]
             self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRESERVATION].config_items = [KEY_CONFIG_ITEM_FILE_PRESERVE_MODE]
             self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
@@ -696,7 +683,6 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION].config_items = [
                 KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION
             ]
-            self.env_var_by_map_key[KEY_ENV_ZEEK_VTOT_API2_KEY].config_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
             self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT].config_items = [
                 KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD
             ]
