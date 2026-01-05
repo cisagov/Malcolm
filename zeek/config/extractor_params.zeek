@@ -14,11 +14,15 @@ export {
   const extractor_max_size_default = 134217728 &redef;
 
   const plain_text_mimes : set[string] = {
+    "application/html",
     "application/json",
     "application/soap+xml",
     "application/x-x509-ca-cert",
     "application/x-x509-user-cert",
+    "application/xhtml+xml",
     "application/xml",
+    "text/css",
+    "text/html",
     "text/json",
     "text/plain",
     "text/x-file",
