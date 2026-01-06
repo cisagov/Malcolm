@@ -37,12 +37,13 @@ event file_sniff(f: fa_file, meta: fa_metadata) {
       ext = extractor_mime_to_ext_map["default"];
     else if (mime_type in extractor_mime_to_ext_map)
       ext = extractor_mime_to_ext_map[mime_type];
-    else
+    else {
       local parts = split_string(mime_type, /\//);
       if (|parts| > 1)
         ext = parts[1];
       else
         ext = extractor_mime_to_ext_map["default"];
+    }
 
     local ftime: time = 0.0;
     if (! f?$last_active)
