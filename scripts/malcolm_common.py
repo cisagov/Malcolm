@@ -1733,6 +1733,7 @@ LOG_IGNORE_REGEX = re.compile(
   | running\s+without\s+any\s+HTTP\s+authentication\s+checking
   | saved_objects
   | scheduling\s+job\s*id.+opendistro-ism
+  | Some\s+characters\s+could\s+not\s+be\s+decoded
   | SSL/TLS\s+verifications\s+disabled
   | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
   | Table\s+_SummaryInformation\s+not\s+found
