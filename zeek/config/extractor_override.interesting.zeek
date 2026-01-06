@@ -101,6 +101,7 @@ export {
     ["application/zip"]= "zip",
     ["text/javascript"]= "js",
     ["text/jscript"]= "jsx",
+    ["text/php"]= "php",
     ["text/rtf"]= "rtf",
     ["text/vbscript"]= "vbs"
   } &default="dat";

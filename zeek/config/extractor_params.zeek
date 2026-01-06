@@ -865,6 +865,7 @@ export {
     ["text/javascript"] = "js",
     ["text/jscript"] = "jsx",
     ["text/n3"] = "n3",
+    ["text/php"] = "php",
     ["text/plain"] = "txt",
     ["text/prs.lines.tag"] = "dsc",
     ["text/richtext"] = "rtx",
