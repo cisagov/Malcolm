@@ -198,16 +198,16 @@ scanners:
           - 'image/heif'
           - "docx_file"
       priority: 5
-  'ScanFooter':
-    - positive:
-        flavors:
-          - '*'
-      priority: 5
-      options:
-        length: 50
-        encodings:
-          - classic
-          - backslash
+#  'ScanFooter':
+#    - positive:
+#        flavors:
+#          - '*'
+#      priority: 5
+#      options:
+#        length: 50
+#        encodings:
+#          - classic
+#          - backslash
 #          - raw
 #          - hex
   'ScanGifEof':
@@ -223,16 +223,16 @@ scanners:
           - 'application/x-gzip'
           - 'gzip_file'
       priority: 5
-  'ScanHeader':
-    - positive:
-        flavors:
-          - '*'
-      priority: 5
-      options:
-        length: 50
-        encodings:
-          - classic
-          - backslash
+#  'ScanHeader':
+#    - positive:
+#        flavors:
+#          - '*'
+#      priority: 5
+#      options:
+#        length: 50
+#        encodings:
+#          - classic
+#          - backslash
 #          - raw
 #          - hex
   'ScanHtml':

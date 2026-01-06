@@ -1713,6 +1713,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Info:\s+pcap:\s+(Starting\s+file\s+run|pcap\s+file)
   | Info:\s+unix-socket:
   | kube-probe/
+  | (libpng|MuPDF)\s+(warning|error):
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)\b
   | No\s+active\s+configuration\s+revision\s+found\s+-\s+falling\s+back\s+to\s+most\s+recent
