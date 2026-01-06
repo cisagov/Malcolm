@@ -14,24 +14,35 @@ redef FileExtract::prefix = (getenv("ZEEK_EXTRACTOR_PATH") == "") ? "./extract_f
 
 event file_sniff(f: fa_file, meta: fa_metadata) {
 
+  local mime_type: string;
+
+  if (meta?$mime_type)
+    mime_type = strip(split_string(meta$mime_type, /;/)[0]);
+  else
+    mime_type = "";
+
       # extract all files OR
   if ((extractor_extract_mode == extractor_extract_all) ||
       # we don't know the mime type and we always want to extract unknowns OR
-      ((! meta?$mime_type) && extractor_always_extract_unknown) ||
+      ((|mime_type| == 0) && extractor_always_extract_unknown) ||
       # we only want to extract knowns and we know the mime type OR
-      ((extractor_extract_mode == extractor_extract_known) && meta?$mime_type) ||
+      ((extractor_extract_mode == extractor_extract_known) && (|mime_type| > 0)) ||
       # we only want to extract mime->extension mapped files, we know the mimetype, and the mime type is mapped OR
-      ((extractor_extract_mode == extractor_extract_mapped) && meta?$mime_type && (meta$mime_type in extractor_mime_to_ext_map)) ||
+      ((extractor_extract_mode == extractor_extract_mapped) && (|mime_type| > 0) && (mime_type in extractor_mime_to_ext_map)) ||
       # we want to extract everything except common plain-text mimes, and either there's no mime type or the mime type isn't one of those
-      ((extractor_extract_mode == extractor_extract_notcommtxt) && ((! meta?$mime_type) || (meta$mime_type !in plain_text_mimes)))) {
+      ((extractor_extract_mode == extractor_extract_notcommtxt) && ((|mime_type| == 0) || (mime_type !in plain_text_mimes)))) {
 
     local ext: string = "";
-    if (! meta?$mime_type)
+    if (|mime_type| == 0)
       ext = extractor_mime_to_ext_map["default"];
-    else if (meta$mime_type in extractor_mime_to_ext_map)
-      ext = extractor_mime_to_ext_map[meta$mime_type];
+    else if (mime_type in extractor_mime_to_ext_map)
+      ext = extractor_mime_to_ext_map[mime_type];
     else
-      ext = split_string(meta$mime_type, /\//)[1];
+      local parts = split_string(mime_type, /\//);
+      if (|parts| > 1)
+        ext = parts[1];
+      else
+        ext = extractor_mime_to_ext_map["default"];
 
     local ftime: time = 0.0;
     if (! f?$last_active)
