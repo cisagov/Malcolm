@@ -97,6 +97,9 @@
           "properties": {
             "source": {
               "type": "keyword"
+            },
+            "entropy": {
+              "type": "float"
             }
           }
         },

@@ -27,6 +27,7 @@
     "custom_suricata",
     "custom_zeek",
     "custom_zeek_ot",
+    "custom_filescan",
     "custom_malcolm_common"
   ],
   "template" :{

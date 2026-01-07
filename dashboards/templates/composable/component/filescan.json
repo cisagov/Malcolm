@@ -4,10 +4,24 @@
       "properties": {
         "filescan": {
           "properties": {
-            "results": {
-              "type": "flat_object"
+            "hits": {
+              "type": "nested",
+              "properties": {
+                "capa": {
+                  "type": "keyword"
+                },
+                "clamav": {
+                  "type": "keyword"
+                },
+                "yara": {
+                  "type": "keyword"
+                }
+              }
             }
           }
+        },
+        "strelka": {
+          "type": "flat_object"
         }
       }
     }
