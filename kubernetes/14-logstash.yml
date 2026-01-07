@@ -83,6 +83,8 @@ spec:
               name: netbox-common-env
           - configMapRef:
               name: netbox-env
+          - configMapRef:
+              name: filescan-env
           - secretRef:
               name: netbox-secret-env
           - configMapRef:

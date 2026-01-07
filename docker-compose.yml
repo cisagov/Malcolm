@@ -197,7 +197,7 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
-    - ./config/redis.env
+    - ./config/filescan.env
     - ./config/beats-common.env
     - ./config/lookup-common.env
     - ./config/logstash.env
