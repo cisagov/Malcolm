@@ -1499,6 +1499,75 @@ def netbox_sites():
 
 
 @app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/redis-keyspace-info",
+    methods=['GET'],
+)
+def redis_keyspace_info():
+    """Query the redis endpoints and return keyspace info
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    keyspace_info
+        Example:
+            {
+              "redis": {
+                "db0": {
+                  "avg_ttl": 92624,
+                  "expires": 4,
+                  "keys": 11,
+                  "subexpiry": 0
+                }
+              },
+              "redis_cache": {
+                "db1": {
+                  "avg_ttl": 2455456,
+                  "expires": 6901,
+                  "keys": 6902,
+                  "subexpiry": 0
+                },
+                "db2": {
+                  "avg_ttl": 2916254,
+                  "expires": 3289,
+                  "keys": 3289,
+                  "subexpiry": 0
+                }
+              }
+            }
+
+    """
+
+    def keyspace_info(host, port, password=None, timeout=2):
+        try:
+            r = redis.Redis(
+                host=host,
+                port=port,
+                password=password,
+                socket_connect_timeout=timeout,
+                decode_responses=True,
+            )
+            return r.info("keyspace")
+        except Exception:
+            return {}
+
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
+    try:
+        result = {
+            "redis": keyspace_info(redisHost, redisPort, redisPassword),
+            "redis_cache": keyspace_info(redisCacheHost, redisCachePort, redisPassword),
+        }
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: \"{str(e)}\" getting Redis keyspace info")
+
+    return jsonify(result)
+
+
+@app.route(
     f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/ping", methods=['GET']
 )
 def ping():

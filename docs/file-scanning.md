@@ -8,11 +8,11 @@ Malcolm can leverage Zeek's knowledge of network protocols to automatically dete
 To specify which files should be extracted, the following values are acceptable in `ZEEK_EXTRACTOR_MODE`:
 
 * `none`: no file extraction
-* `interesting`: extraction of files with mime types of common attack vectors
+* `interesting`: extraction of files with mime types of common attack vectors (recommended)
 * `notcommtxt`: extraction of all files except common plain text files
+* `all`: extract all files
 * `mapped`: extraction of files with recognized mime types
 * `known`: extraction of files for which any mime type can be determined
-* `all`: extract all files
 
 Extracted files are scanned by [Strelka](https://target.github.io/strelka/#/), an [open-source](https://github.com/target/strelka) "real-time, container-based file scanning system used for threat hunting, threat detection, and incident response."
 
