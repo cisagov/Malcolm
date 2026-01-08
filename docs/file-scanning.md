@@ -50,7 +50,7 @@ scanners:
   ⋯
 ```
 
-It's recommended to validate this configuration file after making changes to it. While how to do this depends on available tools, some examples include:
+It's recommended to validate this configuration file after making changes to it. This could be done using an [online YAML validator](https://www.yamllint.com/) or locally depending on available tools:
 
 * `python3 -c 'import sys, yaml; yaml.safe_load(sys.stdin)' < ./strelka/config/backend/backend.yaml`
 * `ruby -ryaml -e "YAML.load_file('./strelka/config/backend/backend.yaml')"`
