@@ -141,6 +141,7 @@ _STRING_VARS = [
     KEY_ENV_PCAP_IFACE,
     KEY_ENV_PCAP_NODE_NAME,
     KEY_ENV_PGID,
+    KEY_ENV_PIPELINE_WORKERS,
     KEY_ENV_PROFILE_KEY,
     KEY_ENV_PUID,
     KEY_ENV_ZEEK_EXTRACTOR_MODE,
@@ -699,6 +700,7 @@ class EnvMapper:
                 KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY
             ]
             self.env_var_by_map_key[KEY_ENV_PIPELINE_ENABLED].config_items = [KEY_CONFIG_ITEM_PIPELINE_ENABLED]
+            self.env_var_by_map_key[KEY_ENV_PIPELINE_WORKERS].config_items = [KEY_CONFIG_ITEM_PIPELINE_WORKERS]
 
             self.env_var_by_map_key[KEY_ENV_PIPELINE_RULES_UPDATE].config_items = [
                 KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE

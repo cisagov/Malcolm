@@ -19,8 +19,8 @@ from scripts.installer.configs.constants.enums import (
 )
 from scripts.malcolm_constants import WidgetType
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
     KEY_CONFIG_ITEM_PIPELINE_ENABLED,
+    KEY_CONFIG_ITEM_PIPELINE_WORKERS,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP,
@@ -59,15 +59,6 @@ def validate_file_preservation(value: str) -> Tuple[bool, str]:
         return False, f"File preservation mode must be one of: {', '.join(valid_modes)}"
     return True, ""
 
-
-CONFIG_ITEM_FILE_CARVE_ENABLED = ConfigItem(
-    key=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
-    label="Enable Zeek File Extraction",
-    default_value=False,
-    validator=lambda x: isinstance(x, bool),
-    question="Enable file extraction with Zeek?",
-    widget_type=WidgetType.CHECKBOX,
-)
 
 # File Extraction Configuration
 CONFIG_ITEM_FILE_EXTRACTION_MODE = ConfigItem(
@@ -125,6 +116,15 @@ CONFIG_ITEM_PIPELINE_ENABLED = ConfigItem(
     validator=lambda x: isinstance(x, bool),
     question="Scan extracted files with Strelka?",
     widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_PIPELINE_WORKERS = ConfigItem(
+    key=KEY_CONFIG_ITEM_PIPELINE_WORKERS,
+    label="File scanning workers",
+    default_value=1,
+    validator=lambda x: isinstance(x, int) and x > 0,
+    question="Number of Strelka file scanning workers (e.g., 1, 4, etc.)",
+    widget_type=WidgetType.NUMBER,
 )
 
 CONFIG_ITEM_FILE_SCAN_RULE_UPDATE = ConfigItem(

@@ -161,6 +161,7 @@ KEY_ENV_PIPELINE_RULES_UPDATE = "RULES_UPDATE_ENABLED"  # file scanning rule/sig
 KEY_ENV_PIPELINE_ENABLED = (
     "PIPELINE_DISABLED"  # Pipeline DISABLED (note that this is boolean is reversed from the installer logic)
 )
+KEY_ENV_PIPELINE_WORKERS = "STRELKA_BACKEND_PROCS"
 
 
 def get_env_key_dict():

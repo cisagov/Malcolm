@@ -591,13 +591,13 @@ function InstallMalcolm {
           | .configuration.zeekICSBestGuess = true
           | .configuration.autoOui = true
           | .configuration.autoFreq = true
-          | .configuration.fileCarveEnabled = true
           | .configuration.fileCarveMode = \"notcommtxt\"
           | .configuration.filePreserveMode = \"quarantined\"
           | .configuration.fileCarveHttpServer = true
           | .configuration.fileCarveHttpServerZip = true
           | .configuration.fileCarveHttpServeEncryptKey = \"infected\"
           | .configuration.pipelineEnabled = true
+          | .configuration.pipelineWorkers = 1
           | .configuration.netboxMode = \"local\"
           | .configuration.netboxSiteName = \"$(hostname -s)\"
           | .configuration.netboxLogstashEnrich = true

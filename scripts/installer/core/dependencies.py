@@ -902,32 +902,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     # FILE CARVING DEPENDENCIES
     # -------------------------------------------------------------------------
-    KEY_CONFIG_ITEM_FILE_CARVE_ENABLED: DependencySpec(
+    KEY_CONFIG_ITEM_FILE_CARVE_MODE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
             condition=lambda auto, live: bool(auto) or bool(live),
             ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
-        ),
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=True,
-            default_value=lambda mode: mode != FileExtractionMode.NONE.value,
-        ),
-    ),
-    KEY_CONFIG_ITEM_FILE_CARVE_MODE: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
-            condition=lambda enabled: bool(enabled),
-            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
-        ),
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
-            condition=True,
-            default_value=lambda enabled: (
-                FileExtractionMode.INTERESTING.value if enabled else FileExtractionMode.NONE.value
-            ),
-            only_if_unmodified=False,
-        ),
+        )
     ),
     KEY_CONFIG_ITEM_FILE_PRESERVE_MODE: DependencySpec(
         visibility=VisibilityRule(
@@ -981,6 +961,16 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
             condition=lambda mode: mode != FileExtractionMode.NONE.value,
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_PIPELINE_WORKERS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_PIPELINE_ENABLED,
+                KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            ],
+            condition=lambda enabled, mode: bool(enabled) and (mode != FileExtractionMode.NONE.value),
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),

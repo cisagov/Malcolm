@@ -78,6 +78,7 @@ export REVERSE_DNS=false
 export AUTO_OUI=true
 export AUTO_FREQ=true
 export PIPELINE_ENABLED=true
+export PIPELINE_WORKERS=1
 export FILE_EXTRACTION=interesting
 export FILE_PRESERVATION=quarantined
 export EXTRACTED_FILE_SERVER=true

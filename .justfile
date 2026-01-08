@@ -82,7 +82,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.extractedFileMaxSizeThreshold = "${EXTRACTED_FILE_MAX_SIZE_THRESHOLD:-1T}"
     | .configuration.filebeatTcpDefaults = ${FILEBEAT_TCP_EXPOSE:-false}
     | .configuration.pipelineEnabled = ${PIPELINE_ENABLED:-true}
-    | .configuration.fileCarveEnabled = ${PIPELINE_ENABLED:-true}
+    | .configuration.pipelineWorkers = ${PIPELINE_WORKERS:-1}
     | .configuration.fileCarveHttpServeEncryptKey = "${EXTRACTED_FILE_SERVER_PASSWORD:-infected}"
     | .configuration.fileCarveHttpServer = ${EXTRACTED_FILE_SERVER:-true}
     | .configuration.fileCarveHttpServerZip = ${EXTRACTED_FILE_SERVER_ZIP:-true}
