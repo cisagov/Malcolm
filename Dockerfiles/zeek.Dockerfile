@@ -41,8 +41,8 @@ ENV PATH="${ZEEK_DIR}/bin:${PATH}"
 ENV CCACHE_DIR="/var/spool/ccache"
 ENV CCACHE_COMPRESS=1
 
-ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
-ADD --chmod=755 shared/bin/zeek_iana_lookup_generator.py /usr/local/bin/
+ADD --chmod=755 zeek/scripts/zeek_install_plugins.sh /usr/local/bin/
+ADD --chmod=755 zeek/scripts/zeek_iana_lookup_generator.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
@@ -155,12 +155,9 @@ ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/zeek.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 shared/bin/netdev-json.sh /usr/local/bin/
-ADD --chmod=755 shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
-ADD --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
 ADD zeek/scripts /usr/local/bin
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
-ADD --chmod=755 shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD --chmod=644 zeek/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
@@ -180,7 +177,10 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
     ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py && \
-    ln -sfr /usr/local/bin/malcolm_constants.py "${ZEEK_DIR}"/bin/malcolm_constants.py
+    ln -sfr /usr/local/bin/malcolm_constants.py "${ZEEK_DIR}"/bin/malcolm_constants.py && \
+    ln -sfr /usr/local/bin/zeek_intel_setup.sh "${ZEEK_DIR}"/bin/zeek_intel_setup.sh && \
+    ln -sfr /usr/local/bin/zeekdeploy.sh "${ZEEK_DIR}"/bin/zeekdeploy.sh && \
+    ln -sfr /usr/local/bin/zeek*threat*.py "${ZEEK_DIR}"/bin/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh

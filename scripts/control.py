@@ -1637,11 +1637,11 @@ def authSetup():
     if (pyPlatform != PLATFORM_WINDOWS) and which("croc"):
         txRxScript = 'tx-rx-secure.sh' if which('tx-rx-secure.sh') else None
         if not txRxScript:
-            txRxScript = os.path.join(GetMalcolmPath(), os.path.join('shared', os.path.join('bin', 'tx-rx-secure.sh')))
+            txRxScript = os.path.join(GetMalcolmPath(), os.path.join('scripts', 'tx-rx-secure.sh'))
             txRxScript = (
                 txRxScript
                 if (txRxScript and os.path.isfile(txRxScript))
-                else os.path.join(GetMalcolmPath(), os.path.join('scripts', 'tx-rx-secure.sh'))
+                else os.path.join(GetMalcolmPath(), os.path.join('shared', os.path.join('bin', 'tx-rx-secure.sh')))
             )
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/local/bin/tx-rx-secure.sh'
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'

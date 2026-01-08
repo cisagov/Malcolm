@@ -76,7 +76,7 @@ ADD nginx/landingpage/css "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 docs/images/logo/Malcolm_background.png "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
 ADD --chmod=644 docs/images/icon/favicon.ico "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
-ADD --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
+ADD --chmod=755 filescan/scripts/web-ui-asset-download.sh /usr/local/bin/
 
 RUN set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
@@ -147,13 +147,13 @@ RUN set -e ; \
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 container-health-scripts/filescan.sh /usr/local/bin/container_health.sh
-ADD --chmod=755 filescan/docker-entrypoint.sh /docker-entrypoint.sh
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/prune_files.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=644 filescan/filescan-config.yml /filescan/filescan-config.yml
 ADD --chmod=644 filescan/supervisord.conf /etc/supervisord.conf
-ADD --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
+ADD --chmod=755 filescan/scripts/*.py /usr/local/bin/
+ADD --chmod=755 filescan/scripts/*.sh /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
@@ -172,7 +172,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "filescan", \
-            "/docker-entrypoint.sh"]
+            "/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

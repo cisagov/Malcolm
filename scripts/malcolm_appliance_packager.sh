@@ -119,7 +119,7 @@ if mkdir "$DESTDIR"; then
   git ls-files ./netbox/config | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
   git ls-files -z ./netbox/preload/*.yml | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/netbox/preload/"
   git ls-files ./strelka/config | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
-  cp $VERBOSE ./shared/bin/tx-rx-secure.sh "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/tx-rx-secure.sh "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
 
   # these scripts go in both the tarball and the run path

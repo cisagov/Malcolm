@@ -14,7 +14,6 @@ on:
       - 'scripts/malcolm_utils.py'
       - 'shared/bin/docker-uid-gid-setup.sh'
       - 'shared/bin/service_check_passthrough.sh'
-      - 'shared/bin/maxmind-mmdb-download.sh'
       - 'shared/bin/nic-capture-setup.sh'
       - 'shared/bin/opensearch_status.sh'
       - 'shared/bin/pcap_processor.py'

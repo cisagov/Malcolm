@@ -17,7 +17,6 @@ on:
       - 'shared/bin/pcap_processor.py'
       - 'shared/bin/pcap_utils.py'
       - 'shared/bin/service_check_passthrough.sh'
-      - 'shared/bin/zeek*'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:

@@ -166,7 +166,6 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
-ADD --chmod=755 shared/bin/maxmind-mmdb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
