@@ -15,9 +15,10 @@ Malcolm leverages the following excellent open source tools, among others:
 * [Zeek](https://www.zeek.org) - a network analysis framework and IDS
 * [Suricata](https://suricata.io/) - an IDS and threat detection engine
 * [netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/) - for simpler capture-only deployments where initial traffic parsing and metadata forwarding are not required
-* [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples (used for scanning files [extracted by Zeek](file-scanning.md#ZeekFileExtraction))
-* [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files (used for scanning files [extracted by Zeek](file-scanning.md#ZeekFileExtraction))
-* [ClamAV](https://www.clamav.net/) - an antivirus engine (used for scanning files [extracted by Zeek](file-scanning.md#ZeekFileExtraction))
+* [Strelka](https://target.github.io/strelka/#/) - a real-time, container-based file scanning system used for threat hunting, threat detection, and incident response (used for scanning files [extracted by Zeek](file-scanning.md#ZeekFileExtraction))
+    - [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
+    - [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files
+    - [ClamAV](https://www.clamav.net/) - an antivirus engine
 * [Threat intelligence feeds](zeek-intel.md) - indicators of compromise can be pulled from [MISP](zeek-intel.md#ZeekIntelMISP), [TAXII](zeek-intel.md#ZeekIntelSTIX), [Google](zeek-intel.md#ZeekIntelGoogle), and [Mandiant](zeek-intel.md#ZeekIntelMandiant) for use with the [Zeek intelligence framework](zeek-intel.md#ZeekIntel)
 * [CyberChef](https://github.com/gchq/CyberChef) - a "Swiss Army Knife" data conversion tool
 * [evtx](https://github.com/omerbenamram/evtx) - a fast and safe parser for the Windows XML Event Log (EVTX) format

@@ -14,23 +14,62 @@ To specify which files should be extracted, the following values are acceptable 
 * `known`: extraction of files for which any mime type can be determined
 * `all`: extract all files
 
-Extracted files can be examined through any of the following methods:
+Extracted files are scanned by [Strelka](https://target.github.io/strelka/#/), an [open-source](https://github.com/target/strelka) "real-time, container-based file scanning system used for threat hunting, threat detection, and incident response."
 
-# TODO: THIS NEEDS TO BE UPDATED FOR PIPELINE
+Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be toggled or configured by editing [`strelka/config/backend/backend.yaml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/backend/backend.yaml). To disable a scanner, comment it out by adding `#` to each line of its section under `scanners:`, including the scanner's name:
 
-* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, set the `EXTRACTED_FILE_ENABLE_CLAMAV` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) to `true`
-* scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, set the `EXTRACTED_FILE_ENABLE_YARA` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) to `true`
-* scanning PE (portable executable) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, set the `EXTRACTED_FILE_ENABLE_CAPA` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) to `true`
+```yaml
+⋯
+scanners:
+  ⋯
+#  'ScanDocx':
+#    - positive:
+#        flavors:
+#          - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+#          - "docx_file"
+#      priority: 5
+#      options:
+#        extract_text: False
+  ⋯
+```
 
-Files flagged via any of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in OpenSearch Dashboards.
+To enable a scanner, uncomment its section:
 
-The `FILESCAN_PRESERVATION` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) determines the behavior for preservation of Zeek-extracted files:
+```yaml
+⋯
+scanners:
+  ⋯
+  'ScanDocx':
+    - positive:
+        flavors:
+          - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          - "docx_file"
+      priority: 5
+      options:
+        extract_text: False
+  ⋯
+```
 
-* `quarantined`: preserve only flagged files in `./zeek-logs/extract_files`
+It's recommended to validate this configuration file after making changes to it. While how to do this depends on available tools, some examples include:
+
+* `python3 -c 'import sys, yaml; yaml.safe_load(sys.stdin)' < ./strelka/config/backend/backend.yaml`
+* `ruby -ryaml -e "YAML.load_file('./strelka/config/backend/backend.yaml')"`
+
+Each scanner may have configurable options; see the [scanner list](https://target.github.io/strelka/#/?id=scanner-list) for more details. Other Strelka-related configuration files can be found under [`strelka/config/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/). Consult the [Strelka documentation](https://target.github.io/strelka/#/?id=configuration-files) for more details.
+
+For the [**YARA**](https://github.com/VirusTotal/yara) scanner, Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh) and/or [user-defined custom YARA rules](custom-rules.md#YARA) are used for scanning.
+
+The `RULES_UPDATE_ENABLED` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env) controls whether or not to regularly pull signature/rule definitions from the internet for file scanning engines, including [**ClamAV**](https://www.clamav.net/) signatures and Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh).
+
+File scanning results can be viewed in the **File Scanning** dashboard in OpenSearch Dashboards.
+
+The `FILESCAN_PRESERVATION` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`filescan.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/filescan.env) determines the behavior for preservation of scanned files:
+
+* `quarantined`: preserve only files in `./zeek-logs/extract_files` that are flagged by the YARA, ClamAV, or [**Capa**](https://github.com/fireeye/capa) scanners
 * `all`: preserve all extracted files  files in `./zeek-logs/extract_files`
 * `none`: preserve no extracted files
 
-The `FILESCAN_HTTP_SERVER_…` [environment variables in `zeek.env` and `zeek-secret.env`](malcolm-config.md#MalcolmConfigEnvVars) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server accessible at **https://localhost/extracted-files/** if connecting locally. Beware that Zeek-extracted files may contain malware. As such, these files may be optionally ZIP archived (without a password or password-protected according to the [WinZip AES encryption specification](https://www.winzip.com/en/support/aes-encryption/)) or encrypted (to be decrypted using `openssl`, e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`) upon download. In other words:
+The `FILESCAN_HTTP_SERVER_…` [environment variables](malcolm-config.md#MalcolmConfigEnvVars) in [`filescan.env` and `filescan-secret.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/) configure browsing and download access to the scanned files through the means of a simple HTTPS directory server accessible at **https://localhost/extracted-files/** if connecting locally. Beware that these files may contain malware. As such, these files may be optionally ZIP archived (without a password or password-protected according to the [WinZip AES encryption specification](https://www.winzip.com/en/support/aes-encryption/)) or encrypted (to be decrypted using `openssl`, e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`) upon download. In other words:
 
 * to disable the extracted files server:
     - `FILESCAN_HTTP_SERVER_ENABLE=false`

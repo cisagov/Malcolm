@@ -67,7 +67,6 @@ filebeat.inputs:
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
   close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  # TODO: is this right?
   close_renamed: false
   close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
   close_eof: false
