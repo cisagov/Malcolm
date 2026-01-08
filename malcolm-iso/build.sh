@@ -220,6 +220,7 @@ PYCODE
   cp ./scripts/malcolm_constants.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_kubernetes.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/package_zeek_logs.sh "$MALCOLM_DEST_DIR/scripts/"
   cp ./arkime/etc/wise.ini.example "$MALCOLM_DEST_DIR/arkime/etc/"
   cp ./arkime/rules/*.yml "$MALCOLM_DEST_DIR/arkime/rules/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"

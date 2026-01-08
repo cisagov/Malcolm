@@ -139,6 +139,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/malcolm_kubernetes.py "$RUN_PATH/"
   cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_utils.py "$RUN_PATH/"
+  cp $VERBOSE ./scripts/package_zeek_logs.sh "$DESTDIR/scripts/"
 
 
   pushd "$DESTDIR" >/dev/null 2>&1
