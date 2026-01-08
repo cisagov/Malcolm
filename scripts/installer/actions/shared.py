@@ -416,8 +416,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
     # reachback request ACL for hedgehog Linux run profile
 
     # remove previously exposed ports from compose
-    # TODO: file-monitor is now filescan
-    for hh_profile_service in ('arkime', 'arkime-live'):
+    for hh_profile_service in ('arkime', 'arkime-live', 'filescan'):
         if hh_profile_service in data['services']:
             data['services'][hh_profile_service].pop('ports', None)
 
@@ -439,8 +438,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
             ],
             reachback_request_acl,
         )
-        # TODO: file-monitor is now filescan
-        # aclPorts = {'file-monitor': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES}
+        aclPorts = {'filescan': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES}
         if any((pcap_cap_arkime_live, pcap_cap_netsniff, pcap_cap_tcpdump)):
             # expose 8005 for arkime-live or arkime depending on where Arkime viewer will be running
             aclPorts['arkime-live' if pcap_cap_arkime_live else 'arkime'] = SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER
