@@ -284,9 +284,9 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
 
   # wait for Malcolm to become ready
   if [[ -n "$NETBOX_BACKUP_FILE" ]] && [[ -f "$NETBOX_BACKUP_FILE" ]]; then
-    JQ_READY_FILTER='if (.arkime and .logstash_lumberjack and .logstash_pipelines and .netbox and .opensearch and .pcap_monitor and .zeek_extracted_file_logger and .zeek_extracted_file_monitor) then 1 else 0 end'
+    JQ_READY_FILTER='if (.arkime and .logstash_lumberjack and .logstash_pipelines and .netbox and .opensearch and .pcap_monitor) then 1 else 0 end'
   else
-    JQ_READY_FILTER='if (.arkime and .logstash_lumberjack and .logstash_pipelines and .opensearch and .pcap_monitor and .zeek_extracted_file_logger and .zeek_extracted_file_monitor) then 1 else 0 end'
+    JQ_READY_FILTER='if (.arkime and .logstash_lumberjack and .logstash_pipelines and .opensearch and .pcap_monitor) then 1 else 0 end'
   fi
   CURRENT_TIME=$(date -u +%s)
   FIRST_READY_INIT_CHECK_TIME=$CURRENT_TIME

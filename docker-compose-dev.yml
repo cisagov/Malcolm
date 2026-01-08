@@ -1465,6 +1465,7 @@ services:
     - ./config/auth-common.env
     - ./config/dashboards.env
     - ./config/arkime.env
+    - ./config/redis.env
     - ./config/netbox-common.env
     - ./config/netbox-secret.env
     - ./config/opensearch.env

@@ -70,6 +70,8 @@ spec:
               name: netbox-common-env
           - secretRef:
               name: netbox-secret-env
+          - secretRef:
+              name: redis-env
           - configMapRef:
               name: opensearch-env
         livenessProbe:

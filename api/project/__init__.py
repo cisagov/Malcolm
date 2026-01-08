@@ -5,6 +5,7 @@ import platform
 import psutil
 import random
 import re
+import redis
 import requests
 import string
 import traceback
@@ -178,33 +179,37 @@ app.config.from_object("project.config.Config")
 
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
-arkimeSsl = malcolm_utils.str2bool(app.config["ARKIME_SSL"])
 arkimeHost = app.config["ARKIME_HOST"]
 arkimePort = app.config["ARKIME_PORT"]
+arkimeSsl = malcolm_utils.str2bool(app.config["ARKIME_SSL"])
 arkimeStatusUrl = f'http{"s" if arkimeSsl else ""}://{arkimeHost}:{arkimePort}/_ns_/nstest.html'
-dashboardsUrl = app.config["DASHBOARDS_URL"]
 dashboardsHelperHost = app.config["DASHBOARDS_HELPER_HOST"]
 dashboardsMapsPort = app.config["DASHBOARDS_MAPS_PORT"]
+dashboardsUrl = app.config["DASHBOARDS_URL"]
 databaseMode = malcolm_utils.DatabaseModeStrToEnum(app.config["OPENSEARCH_PRIMARY"])
 filebeatHost = app.config["FILEBEAT_HOST"]
 filebeatTcpJsonPort = app.config["FILEBEAT_TCP_JSON_PORT"]
+filescanHost = app.config["FILESCAN_HOST"]
+filescanHealthPort = app.config["FILESCAN_HEALTH_PORT"]
+filescanHttpServerPort = app.config["FILESCAN_HTTP_SERVER_PORT"]
 freqUrl = app.config["FREQ_URL"]
 logstashApiPort = app.config["LOGSTASH_API_PORT"]
 logstashHost = app.config["LOGSTASH_HOST"]
 logstashLJPort = app.config["LOGSTASH_LJ_PORT"]
 logstashMapsPort = app.config["LOGSTASH_LJ_PORT"]
 logstashUrl = f'http://{logstashHost}:{logstashApiPort}'
-netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(app.config["NETBOX_URL"], '/'), '/api')
 netboxToken = app.config["NETBOX_TOKEN"]
+netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(app.config["NETBOX_URL"], '/'), '/api')
 opensearchUrl = app.config["OPENSEARCH_URL"]
 pcapMonitorHost = app.config["PCAP_MONITOR_HOST"]
 pcapTopicPort = app.config["PCAP_TOPIC_PORT"]
-
-# TODO: filescan/strelka
-# zeekExtractedFileLoggerHost = app.config["ZEEK_EXTRACTED_FILE_LOGGER_HOST"]
-# zeekExtractedFileLoggerTopicPort = app.config["ZEEK_EXTRACTED_FILE_LOGGER_TOPIC_PORT"]
-# zeekExtractedFileMonitorHost = app.config["ZEEK_EXTRACTED_FILE_MONITOR_HOST"]
-# zeekExtractedFileTopicPort = app.config["ZEEK_EXTRACTED_FILE_TOPIC_PORT"]
+redisCacheHost = app.config["REDIS_CACHE_HOST"]
+redisCachePort = app.config["REDIS_CACHE_PORT"]
+redisHost = app.config["REDIS_HOST"]
+redisPort = app.config["REDIS_PORT"]
+redisPassword = app.config["REDIS_PASSWORD"]
+strelkaHost = app.config["STRELKA_HOST"]
+strelkaPort = app.config["STRELKA_PORT"]
 
 opensearchLocal = (databaseMode == DatabaseMode.OpenSearchLocal) or (opensearchUrl == 'https://opensearch:9200')
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
@@ -1091,8 +1096,12 @@ def ready():
         true or false, the ready status of Dashboards (or Kibana)
     dashboards_maps
         true or false, the ready status of the dashboards-helper offline map server
+    extracted_files
+        true or false, the ready status of the extracted files server
     filebeat_tcp
         true or false, the ready status of Filebeat's JSON-OVER-TCP
+    filescan
+        true or false, the health status of the filescan process
     freq
         true or false, the ready status of freq
     logstash_lumberjack
@@ -1105,14 +1114,62 @@ def ready():
         true or false, the ready status of OpenSearch (or Elasticsearch)
     pcap_monitor
         true or false, the ready status of the PCAP monitoring process
-    # TODO: strelka/filescan
-    zeek_extracted_file_logger
-        true or false, the ready status of the Zeek extracted file results logging process
-    zeek_extracted_file_monitor
-        true or false, the ready status of the Zeek extracted file monitoring process
+    redis
+        true or false, the ready status of the redis process
+    redis_cache
+        true or false, the ready status of the redis cache process
+    strelka:
+        true or false, the ready status of the strelka-frontend container
     """
     if not check_roles(request):
         raise PermissionError("Not authorized to perform this action")
+
+    def redis_accessible(host, port, password=None, timeout=2):
+        try:
+            r = redis.Redis(
+                host=host,
+                port=port,
+                password=password,
+                socket_connect_timeout=timeout,
+            )
+            return r.ping()
+        except Exception:
+            return False
+
+    def filescan_healthy(host, port, timeout=2):
+        """
+        Returns True if:
+          - top-level state == "running"
+          - all programs[*][*].healthy is True
+          - all programs[*][*].state == "running"
+        Otherwise returns False.
+        """
+        url = f"http://{host}:{port}/health"
+        try:
+            resp = requests.get(url, timeout=timeout)
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception:
+            return False
+
+        if data.get("state") != "running":
+            return False
+
+        programs = data.get("programs", {})
+        if not isinstance(programs, dict):
+            return False
+
+        try:
+            for group in programs.values():
+                for p in group:
+                    if p.get("healthy") is not True:
+                        return False
+                    if p.get("state") != "running":
+                        return False
+        except Exception:
+            return False
+
+        return True
 
     def safe_check(name, func, default=False):
         """Run a check safely, returning `default` if it fails."""
@@ -1135,7 +1192,9 @@ def ready():
             {},
         ),
         "dashboards_maps": (lambda: malcolm_utils.check_socket(dashboardsHelperHost, dashboardsMapsPort), False),
+        "extracted_files": (lambda: malcolm_utils.check_socket(filescanHost, filescanHttpServerPort), False),
         "filebeat_tcp": (lambda: malcolm_utils.check_socket(filebeatHost, filebeatTcpJsonPort), False),
+        "filescan": (lambda: filescan_healthy(filescanHost, filescanHealthPort), False),
         "freq": (lambda: requests.get(freqUrl).raise_for_status() or True, False),
         "logstash_health": (lambda: requests.get(f"{logstashUrl}/_health_report").json(), {}),
         "logstash_lumberjack": (lambda: malcolm_utils.check_socket(logstashHost, logstashLJPort), False),
@@ -1149,15 +1208,9 @@ def ready():
         ),
         "opensearch": (lambda: dict(databaseClient.cluster.health()), {}),
         "pcap_monitor": (lambda: malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort), False),
-        # TODO: strelka/filescan
-        # "zeek_extracted_file_monitor": (
-        #     lambda: malcolm_utils.check_socket(zeekExtractedFileMonitorHost, zeekExtractedFileTopicPort),
-        #     False,
-        # ),
-        # "zeek_extracted_file_logger": (
-        #     lambda: malcolm_utils.check_socket(zeekExtractedFileLoggerHost, zeekExtractedFileLoggerTopicPort),
-        #     False,
-        # ),
+        "redis": (lambda: redis_accessible(redisHost, redisPort, redisPassword), False),
+        "redis_cache": (lambda: redis_accessible(redisCacheHost, redisCachePort, redisPassword), False),
+        "strelka": (lambda: malcolm_utils.check_socket(strelkaHost, strelkaPort), False),
     }
 
     results = {name: safe_check(name, func, default) for name, (func, default) in checks.items()}
@@ -1177,8 +1230,10 @@ def ready():
             != "red"
         ),
         dashboards_maps=results["dashboards_maps"],
+        extracted_files=results["extracted_files"],
         filebeat_tcp=results["filebeat_tcp"],
         freq=results["freq"],
+        filescan=results["filescan"],
         logstash_lumberjack=results["logstash_lumberjack"],
         logstash_pipelines=(
             malcolm_utils.deep_get(results["logstash_health"], ["status"], "red") != "red"
@@ -1188,9 +1243,9 @@ def ready():
         netbox=isinstance(results["netbox"], dict) and bool(results["netbox"].get("core")),
         opensearch=malcolm_utils.deep_get(results["opensearch"], ["status"], "red") != "red",
         pcap_monitor=results["pcap_monitor"],
-        # TODO: strelka/filescan
-        # zeek_extracted_file_logger=results["zeek_extracted_file_logger"],
-        # zeek_extracted_file_monitor=results["zeek_extracted_file_monitor"],
+        redis=results["redis"],
+        redis_cache=results["redis_cache"],
+        strelka=results["strelka"],
     )
 
 
