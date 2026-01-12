@@ -6,17 +6,23 @@
           "properties": {
             "hits": {
               "type": "nested",
+              "dynamic": false,
+              "include_in_parent": false,
+              "include_in_root": false,
               "properties": {
-                "capa": {
+                "scanner": {
                   "type": "keyword"
                 },
-                "clamav": {
-                  "type": "keyword"
-                },
-                "yara": {
+                "name": {
                   "type": "keyword"
                 }
               }
+            },
+            "hits_scanner": {
+              "type": "keyword"
+            },
+            "hits_name": {
+              "type": "keyword"
             }
           }
         },
