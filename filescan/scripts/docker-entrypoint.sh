@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 FILESCAN_HTTP_SERVER_ASSETS_DIR=${FILESCAN_HTTP_SERVER_ASSETS_DIR:-/assets}
 FILESCAN_HTTP_SERVER_ASSETS_DIR_REQ_REPLACER=${FILESCAN_HTTP_SERVER_ASSETS_DIR_REQ_REPLACER:-/assets}

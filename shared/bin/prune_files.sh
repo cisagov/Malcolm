@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 function UsagePercentagePwd {
   df -k . 2>/dev/null | awk '{gsub("%",""); capacity=$5}; END {print capacity}'

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # hack: https://github.com/hashicorp/vagrant/issues/8878#issuecomment-345112810
 class VagrantPlugins::ProviderVirtualBox::Action::Network

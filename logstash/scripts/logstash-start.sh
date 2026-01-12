@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 set -e
 

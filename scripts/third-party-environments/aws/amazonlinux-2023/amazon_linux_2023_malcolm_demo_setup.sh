@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################
 # for setting up a Malcolm demo instance on an Amazon Linux 2023 instance from scratch

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ####################################################################################
 # first build documentation with jekyll

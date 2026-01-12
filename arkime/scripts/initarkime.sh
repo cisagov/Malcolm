@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL=${OPENSEARCH_URL:-"https://opensearch:9200"}

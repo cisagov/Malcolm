@@ -9,7 +9,7 @@
 #
 # Any additional arguments besides the above are passed as-is to Zeek.
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 set -uo pipefail
 

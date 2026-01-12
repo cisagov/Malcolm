@@ -1,6 +1,6 @@
 FROM ghcr.io/mmguero/qemu-live-iso:latest
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ARG QEMU_CPU=4
 ARG QEMU_RAM=4096

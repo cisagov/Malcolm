@@ -1,6 +1,6 @@
 FROM debian:13-slim AS npmget
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND=noninteractive
 

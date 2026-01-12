@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 AUTH_URL="https://localhost"
 if [[ -d "$HOME"/Malcolm ]] && [[ -f "$HOME"/Malcolm/.configured ]] && [[ -f "$HOME"/Malcolm/config/auth-common.env ]]; then

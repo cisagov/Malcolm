@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [[ ! ${LOGSTASH_HOST+x} ]]; then
   # variable does not exist at all, use default
