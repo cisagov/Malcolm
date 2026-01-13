@@ -5,6 +5,9 @@
         "filescan": {
           "properties": {
             "hits": {
+              "type": "short"
+            },
+            "rules": {
               "type": "nested",
               "dynamic": false,
               "include_in_parent": false,
@@ -17,12 +20,6 @@
                   "type": "keyword"
                 }
               }
-            },
-            "hits_scanner": {
-              "type": "keyword"
-            },
-            "hits_name": {
-              "type": "keyword"
             }
           }
         },
