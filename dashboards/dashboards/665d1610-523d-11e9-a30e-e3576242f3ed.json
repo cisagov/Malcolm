@@ -1,314 +1,308 @@
 {
-  "version": "1.3.1",
   "objects": [
     {
-      "id": "665d1610-523d-11e9-a30e-e3576242f3ed",
-      "type": "dashboard",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-04-29T15:49:16.000Z",
-      "version": "WzExNTEsMV0=",
       "attributes": {
-        "title": "Signatures",
-        "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":48,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":8,\"y\":8,\"w\":20,\"h\":27,\"i\":\"9670ac8c-687e-4c2f-a286-ce60d1976764\"},\"panelIndex\":\"9670ac8c-687e-4c2f-a286-ce60d1976764\",\"embeddableConfig\":{\"title\":\"Signatures - Engine\",\"hidePanelTitles\":false},\"title\":\"Signatures - Engine\",\"panelRefName\":\"panel_4\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":28,\"y\":8,\"w\":20,\"h\":27,\"i\":\"9a91a175-49c6-4874-9dd0-1694eb4a4460\"},\"panelIndex\":\"9a91a175-49c6-4874-9dd0-1694eb4a4460\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":35,\"w\":31,\"h\":27,\"i\":\"22d706d6-533a-461b-88f4-aee0cc45b5ce\"},\"panelIndex\":\"22d706d6-533a-461b-88f4-aee0cc45b5ce\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":31,\"y\":35,\"w\":17,\"h\":27,\"i\":\"93ed203d-187e-4e7e-9299-c115cba775fd\"},\"panelIndex\":\"93ed203d-187e-4e7e-9299-c115cba775fd\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"}]",
-        "optionsJSON": "{\"useMargins\":true}",
-        "version": 1,
-        "timeRestore": false,
+        "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
-        }
+        },
+        "optionsJSON": "{\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":39,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":16,\"y\":4,\"w\":32,\"h\":8,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":4,\"w\":8,\"h\":8,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":39,\"w\":48,\"h\":29,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":4,\"i\":\"cb246a32-8573-422e-96a3-61d99dbfe873\"},\"panelIndex\":\"cb246a32-8573-422e-96a3-61d99dbfe873\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_4\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":12,\"w\":20,\"h\":27,\"i\":\"9a91a175-49c6-4874-9dd0-1694eb4a4460\"},\"panelIndex\":\"9a91a175-49c6-4874-9dd0-1694eb4a4460\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":28,\"y\":12,\"w\":10,\"h\":27,\"i\":\"be1ce624-86bb-49cd-bc8d-d44c1f4319cc\"},\"panelIndex\":\"be1ce624-86bb-49cd-bc8d-d44c1f4319cc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":38,\"y\":12,\"w\":10,\"h\":27,\"i\":\"95a14f16-2fc1-4871-a71e-c5b163f1d634\"},\"panelIndex\":\"95a14f16-2fc1-4871-a71e-c5b163f1d634\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"}]",
+        "timeRestore": false,
+        "title": "Signatures",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "panel_0",
-          "type": "visualization",
-          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3"
-        },
-        {
-          "name": "panel_1",
-          "type": "visualization",
-          "id": "0927a2fa-f94e-4f68-a23b-5054ed2e171a"
-        },
-        {
-          "name": "panel_2",
-          "type": "visualization",
-          "id": "8356c570-523f-11e9-a30e-e3576242f3ed"
-        },
-        {
-          "name": "panel_3",
-          "type": "search",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
-        },
-        {
-          "name": "panel_4",
-          "type": "visualization",
-          "id": "baa9f5b0-cb22-11ec-ae74-a92fc0e09cde"
-        },
-        {
-          "name": "panel_5",
-          "type": "visualization",
-          "id": "02ae9d40-cb21-11ec-ae74-a92fc0e09cde"
-        },
-        {
-          "name": "panel_6",
-          "type": "visualization",
-          "id": "0e9b1a00-525e-11e9-9bd7-13d6d1bafa75"
-        },
-        {
-          "name": "panel_7",
-          "type": "visualization",
-          "id": "2b389b60-cbd7-11ec-a50a-5fedd672f5c5"
-        }
-      ],
+      "id": "665d1610-523d-11e9-a30e-e3576242f3ed",
       "migrationVersion": {
         "dashboard": "7.9.3"
-      }
-    },
-    {
-      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T17:53:15.100Z",
-      "version": "Wzc4NCwxXQ==",
-      "attributes": {
-        "title": "Navigation",
-        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
-        "uiStateJSON": "{}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
-        }
-      },
-      "references": [],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "0927a2fa-f94e-4f68-a23b-5054ed2e171a",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-05-04T17:52:37.808Z",
-      "version": "WzM2NSwxXQ==",
-      "attributes": {
-        "title": "Signatures - Log Count Over Time",
-        "visState": "{\"title\":\"Signatures - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"type\":\"histogram\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"useNormalizedEsInterval\":true,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}}]}",
-        "uiStateJSON": "{}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"event.provider:zeek AND event.dataset:signatures\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
       "references": [
         {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "0927a2fa-f94e-4f68-a23b-5054ed2e171a",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "8356c570-523f-11e9-a30e-e3576242f3ed",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
+          "name": "panel_3",
+          "type": "search"
+        },
+        {
+          "id": "912f24c0-f0b8-11f0-850c-2f1050a51d60",
+          "name": "panel_4",
+          "type": "visualization"
+        },
+        {
+          "id": "02ae9d40-cb21-11ec-ae74-a92fc0e09cde",
+          "name": "panel_5",
+          "type": "visualization"
+        },
+        {
+          "id": "902eb9d0-f0ba-11f0-850c-2f1050a51d60",
+          "name": "panel_6",
+          "type": "visualization"
+        },
+        {
+          "id": "a3fee660-f0ba-11f0-850c-2f1050a51d60",
+          "name": "panel_7",
+          "type": "visualization"
         }
       ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
+      "type": "dashboard",
+      "updated_at": "2026-01-13T20:04:21.776Z",
+      "version": "WzEzMzQsMV0="
     },
     {
-      "id": "8356c570-523f-11e9-a30e-e3576242f3ed",
-      "type": "visualization",
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "Navigation",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}"
+      },
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T17:52:37.808Z",
-      "version": "WzM2NiwxXQ==",
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2026-01-13T18:00:12.492Z",
+      "version": "WzEyNzMsMV0="
+    },
+    {
       "attributes": {
-        "title": "Signatures - Log Count",
-        "visState": "{\"title\":\"Signatures - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":false},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":60}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"\"}}]}",
-        "uiStateJSON": "{}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"event.provider:zeek AND event.dataset:signatures\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "title": "Signatures - Log Count Over Time",
+        "uiStateJSON": "{}",
         "version": 1,
+        "visState": "{\"title\":\"Signatures - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"type\":\"histogram\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"useNormalizedEsInterval\":true,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}}]}"
+      },
+      "id": "0927a2fa-f94e-4f68-a23b-5054ed2e171a",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-13T17:59:23.978Z",
+      "version": "WzcxMiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "Signatures - Log Count",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Signatures - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":false},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":60}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"\"}}]}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
-        }
-      ],
+      "id": "8356c570-523f-11e9-a30e-e3576242f3ed",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T17:52:47.890Z",
-      "version": "WzQ5NCwxXQ==",
+      "references": [
+        {
+          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-13T17:59:23.978Z",
+      "version": "WzcxMywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "Signatures - Logs",
-        "description": "",
-        "hits": 0,
         "columns": [
-          "event.module",
-          "rule.category",
+          "source.ip",
+          "destination.ip",
           "rule.name",
-          "rule.id",
+          "event.original",
+          "rule.category",
           "event.id"
         ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":\"event.provider:zeek AND event.dataset:signatures\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
         "sort": [
           [
             "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":\"event.provider:zeek AND event.dataset:signatures\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        "title": "Signatures - Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
       "migrationVersion": {
         "search": "7.9.3"
-      }
-    },
-    {
-      "id": "baa9f5b0-cb22-11ec-ae74-a92fc0e09cde",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T17:52:37.808Z",
-      "version": "WzM2OCwxXQ==",
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-01-13T17:59:23.978Z",
+      "version": "WzcxNCwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "Signatures - Engine Cloud",
-        "visState": "{\"title\":\"Signatures - Engine Cloud\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.module\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":72,\"showLabel\":false}}",
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "title": "Signatures - File Scanning Moved Note",
         "uiStateJSON": "{}",
-        "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"Signatures - File Scanning Moved Note\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"Note: File scanning results (e.g., from ClamAV, YARA, etc.) are now found on the [File Scanning](#/dashboard/248cae60-eff9-11f0-b83f-8f35d6995138) dashboard. This dashboard now summarizes Zeek's [`signatures.log`](https://docs.zeek.org/en/master/frameworks/signatures.html) only.\"}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
-        }
-      ],
+      "id": "912f24c0-f0b8-11f0-850c-2f1050a51d60",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "02ae9d40-cb21-11ec-ae74-a92fc0e09cde",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T17:52:37.808Z",
-      "version": "WzM3MCwxXQ==",
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2026-01-13T19:46:34.891Z",
+      "version": "WzEzMjQsMV0="
+    },
+    {
       "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "Signatures - Name",
-        "visState": "{\"title\":\"Signatures - Name\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Signature\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}}",
-        "description": "",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
         "version": 1,
+        "visState": "{\"title\":\"Signatures - Name\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Signature\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Note\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "02ae9d40-cb21-11ec-ae74-a92fc0e09cde",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-13T19:57:58.211Z",
+      "version": "WzEzMjcsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "Signatures - Source IP",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Signatures - Source IP\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
-        }
-      ],
+      "id": "902eb9d0-f0ba-11f0-850c-2f1050a51d60",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "0e9b1a00-525e-11e9-9bd7-13d6d1bafa75",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T18:08:23.728Z",
-      "version": "WzEwNzksMV0=",
-      "attributes": {
-        "title": "Signatures - Category",
-        "visState": "{\"title\":\"Signatures - Category\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\" \"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\" \"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":40},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":20},\"title\":{\"text\":\" \"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\" \",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Signature ID\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}}}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
       "references": [
         {
+          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
           "name": "search_0",
-          "type": "search",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
+          "type": "search"
         }
       ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
+      "type": "visualization",
+      "updated_at": "2026-01-13T20:03:13.159Z",
+      "version": "WzEzMzIsMV0="
     },
     {
-      "id": "2b389b60-cbd7-11ec-a50a-5fedd672f5c5",
-      "type": "visualization",
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "Signatures - Destination IP",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Signatures - Destination IP\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "a3fee660-f0ba-11f0-850c-2f1050a51d60",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-05-04T18:22:34.518Z",
-      "version": "WzExMTEsMV0=",
-      "attributes": {
-        "title": "Signatures - Tactic and Technique",
-        "visState": "{\"title\":\"Signatures - Tactic and Technique\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Tactic\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.technique.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Technique\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"threat.technique.name:* OR threat.tactic.name:*\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
       "references": [
         {
+          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
           "name": "search_0",
-          "type": "search",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
+          "type": "search"
         }
       ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
+      "type": "visualization",
+      "updated_at": "2026-01-13T20:03:33.627Z",
+      "version": "WzEzMzMsMV0="
     }
-  ]
+  ],
+  "version": "3.4.0"
 }
