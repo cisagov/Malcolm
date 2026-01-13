@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.19.2
+FROM docker.elastic.co/beats/filebeat-oss:9.2.4
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -28,10 +28,10 @@ ENV PUSER_CHOWN="/usr/share/filebeat-logs/data;/usr/share/filebeat-nginx/data;/u
 ENV PUSER_PRIV_DROP=false
 USER root
 
-ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PIP_ROOT_USER_ACTION=ignore
 
 ARG AUTO_TAG=true
 ARG FILEBEAT_SCAN_FREQUENCY=10s
@@ -74,6 +74,9 @@ ENV SUPERCRONIC_VERSION="0.2.41"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
+ENV TINI_VERSION=v0.19.0
+ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
+
 ENV YQ_VERSION="4.50.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
@@ -86,44 +89,43 @@ ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
 
 RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
-    apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
-    apt-get -y --no-install-recommends install \
+    microdnf -y install curl-minimal && \
+        curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+        rpm -i /tmp/epel-release.rpm && \
+    microdnf -y update && \
+    microdnf -y upgrade && \
+    microdnf -y install \
         bzip2 \
+        ca-certificates \
         cpio \
-        curl \
         file \
-        git \
         gzip \
         inotify-tools \
-        lzma \
-        jq \
         jo \
+        jq \
         openssl \
         p7zip \
-        p7zip-full \
-        p7zip-rar \
         psmisc \
+        python3 \
         python3-pip \
         python3-setuptools \
-        python3 \
         rsync \
         tar \
-        tini \
-        unar \
         unzip \
-        xz-utils && \
-    python3 -m pip install --no-compile --no-cache-dir --break-system-packages -r /usr/local/src/requirements.txt && \
+        xz \
+        xz-devel && \
+    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
+        chmod +x /usr/bin/tini && \
+    python3 -m pip install --upgrade pip setuptools wheel && \
+    python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/local/bin/yq && \
     curl -fsSL -o /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" && \
         chmod 755 /usr/local/bin/evtx && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
-        apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
-        apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    microdnf clean all && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
