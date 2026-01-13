@@ -483,7 +483,7 @@
           "filescan.hits",
           "rule.ruleset",
           "rule.name",
-          "file.entropy"
+          "file.entropy",
           "file.source",
           "event.id"
         ],
