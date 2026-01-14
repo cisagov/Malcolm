@@ -13,7 +13,7 @@ mastodon:
 reddit:
   id:
   url:
- umami:
+umami:
   id:
   url:
 docs_uri: docs/
