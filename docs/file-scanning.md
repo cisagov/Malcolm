@@ -14,6 +14,8 @@ To specify which files should be extracted, the following values are acceptable 
 * `mapped`: extraction of files with recognized mime types
 * `known`: extraction of files for which any mime type can be determined
 
+Depending on the volume of files extracted from network traffic, file scanning can be resource-intensive. When enabled, it is recommended to select `interesting` or `notcommtxt` unless running on a high-performance system.
+
 Extracted files are scanned by [Strelka](https://target.github.io/strelka/#/), an [open-source](https://github.com/target/strelka) "real-time, container-based file scanning system used for threat hunting, threat detection, and incident response."
 
 Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be toggled or configured by editing [`strelka/config/backend/backend.yaml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/backend/backend.yaml). To disable a scanner, comment it out by adding `#` to each line of its section under `scanners:`, including the scanner's name:
