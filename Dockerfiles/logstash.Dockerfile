@@ -73,13 +73,13 @@ RUN set -x && \
                                        logstash-filter-fingerprint logstash-filter-useragent \
                                        logstash-input-beats logstash-output-elasticsearch logstash-output-opensearch && \
     microdnf clean all && \
-    rm -rf /tmp/* /var/tmp/* /usr/bin/jruby /root/.cache /root/.gem /root/.bundle /usr/share/logstash/pipeline/logstash.conf /usr/share/logstash/pipeline && \
-    rsync -a --chown=${PUSER}:${PGROUP} /usr/share/logstash.build/ /usr/share/logstash && \
+    rm -rf /tmp/* /var/tmp/* /usr/bin/jruby /root/.cache /root/.gem /root/.bundle /usr/share/logstash/pipeline && \
+    rsync -a --chown=${PUSER}:${PGROUP} /usr/share/logstash.build/ /usr/share/logstash/ && \
     rm -rf /usr/share/logstash.build/ && \
     mkdir -p /logstash-persistent-queue /usr/share/logstash/config/bootstrap /usr/share/logstash/config/persist && \
     usermod -a -G tty ${PUSER} && \
     chown -R ${PUSER}:root /usr/share/logstash /logstash-persistent-queue && \
-    chmod -R o-w /usr/share/logstash && \
+    chmod -R u+rwX,go+rX /usr/share/logstash && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Complete."

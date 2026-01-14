@@ -8,34 +8,48 @@ logging.metrics.enabled: false
 
 #-------------------------- JSON-formatted files.log ---------------------------
 filebeat.inputs:
-- type: log
+- type: filestream
+  id: zeek-json-streaming-files-upload
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/json_streaming_files*.log
-  symlinks: true
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: ${FILEBEAT_CLOSE_EOF:true}
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
-- type: log
+- type: filestream
+  id: zeek-json-streaming-files-live
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/spool/logger-*/json_streaming_files*.log
-  symlinks: true
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  tags: ["_filebeat_zeek_malcolm_live"]
+  exclude_lines: ['^\s*#']
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: false
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #=============================== Processors ===================================

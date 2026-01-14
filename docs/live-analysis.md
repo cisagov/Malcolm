@@ -46,20 +46,25 @@ Malcolm's Logstash instance can also be configured to accept logs from a [remote
 Configuring Filebeat to forward Zeek logs to Malcolm might look something like this example [`filebeat.yml`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html):
 ```
 filebeat.inputs:
-- type: log
+- type: filestream
+  id: zeek-live
   paths:
     - /var/zeek/*.log
+  prospector:
+    scanner:
+      check_interval: 10s
   fields_under_root: true
-  compression_level: 0
+  tags: ["_filebeat_zeek_malcolm_live"]
   exclude_lines: ['^\s*#']
-  scan_frequency: 10s
   clean_inactive: 180m
   ignore_older: 120m
-  close_inactive: 90m
-  close_renamed: true
-  close_removed: true
-  close_eof: false
-  clean_renamed: true
+  close:
+    on_state_change:
+      inactive: 90m
+      renamed: true
+      removed: true
+    reader:
+      on_eof: false
   clean_removed: true
 
 output.logstash:

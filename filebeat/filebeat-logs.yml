@@ -6,144 +6,188 @@ logging.metrics.enabled: false
 
 #================================ Inputs =======================================
 
-#-------------------------- "Real" Zeek logs -----------------------------------
 filebeat.inputs:
-- type: log
+
+#-------------------------- "Real" Zeek logs -----------------------------------
+- type: filestream
+  id: zeek-upload
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/*.log
-  exclude_files: ['json_streaming_.+\.log$']
-  symlinks: true
+  prospector:
+    scanner:
+      exclude_files: ['json_streaming_.+\.log$']
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
   tags: ["_filebeat_zeek_malcolm_upload"]
-  compression_level: 0
   exclude_lines: ['^\s*#']
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: ${FILEBEAT_CLOSE_EOF:true}
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
-- type: log
+- type: filestream
+  id: zeek-live
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/spool/logger-*/*.log
-  exclude_files: ['json_streaming_.+\.log$']
-  symlinks: true
+  prospector:
+    scanner:
+      exclude_files: ['json_streaming_.+\.log$']
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
   tags: ["_filebeat_zeek_malcolm_live"]
-  compression_level: 0
   exclude_lines: ['^\s*#']
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: false
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #-------------------------- File scanning/pipeline result log ------------------
 # (c.f. comments regarding settings from previous section)
-- type: log
+- type: filestream
+  id: filescan
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_FILESCAN_LOG_PATH:/filescan}/*.log
-  symlinks: true
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
-  json:
-    expand_keys: true
-    add_error_key: false
-    ignore_decoding_error: true
-    keys_under_root: true
+  parsers:
+    - ndjson:
+        expand_keys: true
+        add_error_key: false
+        ignore_decoding_error: true
+        target: ""
   processors:
     - rename:
         fields:
           - from: "source"
             to: "service.type"
   tags: ["_filebeat_filescan"]
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  close_renamed: false
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: false
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+      renamed: false
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #-------------------------- Suricata EVE JSON logs -----------------------------
-- type: log
+- type: filestream
+  id: eve-upload
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/suricata-*/eve*.json
-  symlinks: true
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_upload"]
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  # We're now submitting uploaded PCAP to Suricata over a socket,
-  #   but Suricata doesn't let us know when processing is complete.
-  #   Reaching EOF doesn't necessarily mean the file is done
-  #   being written to. We need to treat the results more like "live"
-  #   even though the traffic itself isn't.
-  close_eof: false
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      # We're now submitting uploaded PCAP to Suricata over a socket,
+      #   but Suricata doesn't let us know when processing is complete.
+      #   Reaching EOF doesn't necessarily mean the file is done
+      #   being written to. We need to treat the results more like "live"
+      #   even though the traffic itself isn't.
+      on_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
-- type: log
+- type: filestream
+  id: eve-live
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/live/eve*.json
-  symlinks: true
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_live"]
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: false
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #-------------------------- Uploaded Windows EVTX Logs (as JSON) ---------------
 #                           (see evtx_to_jsonl.sh)
-- type: log
+- type: filestream
+  id: evtx
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/*.evtx.json
-  symlinks: true
-  json:
-    expand_keys: true
-    add_error_key: false
-    ignore_decoding_error: true
-    keys_under_root: false
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  parsers:
+    - ndjson:
+        expand_keys: true
+        add_error_key: false
+        ignore_decoding_error: true
+        target: "json"
   tags: ["_evtx_to_json"]
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
-  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
-  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: ${FILEBEAT_CLOSE_EOF:true}
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #-------------------------- network interface stats (as JSON) ---------------
 #                           (see netdev-json.sh)
-- type: log
+- type: filestream
+  id: netdev-stats
+  take_over.enabled: true
   paths:
     - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/netdev-stats*.json
-  symlinks: true
-  json:
-    expand_keys: false
-    add_error_key: false
-    ignore_decoding_error: true
-    keys_under_root: false
-    target: miscbeat.network
+  prospector:
+    scanner:
+      symlinks: true
+      check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  parsers:
+    - ndjson:
+        expand_keys: false
+        add_error_key: false
+        ignore_decoding_error: true
+        target: miscbeat.network
   fields:
     miscbeat.module: network
   processors:
@@ -154,15 +198,16 @@ filebeat.inputs:
           - from: "json"
             to: "miscbeat.network"
   tags: ["_malcolm_beats", "_malcolm_miscbeat"]
-  compression_level: 0
-  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
-  close_renamed: true
-  close_removed: true
-  close_eof: true
-  clean_removed: true
+  close:
+    on_state_change:
+      inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+      renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+      removed: ${FILEBEAT_CLOSE_REMOVED:true}
+    reader:
+      on_eof: true
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #================================ Outputs ======================================
 

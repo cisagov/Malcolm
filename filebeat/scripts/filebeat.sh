@@ -80,7 +80,7 @@ else
   # add the extra tags to all logs
   if [[ -n "${EXTRA_TAGS}" ]]; then
     readarray -td '' EXTRA_TAGS_ARRAY < <(awk '{ gsub(/,/,"\0"); print; }' <<<"${EXTRA_TAGS},"); unset 'EXTRA_TAGS_ARRAY[-1]';
-    yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" -i "${TMP_CONFIG_FILE}"
+    yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"filestream\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" -i "${TMP_CONFIG_FILE}"
   fi
 
   # for hedgehog profile, add `_filebeat_zeek_hedgehog` to the Zeek logs and
@@ -89,7 +89,7 @@ else
       (
         .["filebeat.inputs"][]
         | select(
-            (.type | test("(?i)log")) and
+            (.type | test("(?i)filestream")) and
             (.tags[] | test("^_filebeat_zeek"))
           )
       ).tags += ["_filebeat_zeek_hedgehog"]
@@ -98,7 +98,7 @@ else
       (
         .["filebeat.inputs"][]
         | select(
-            (.type | test("(?i)log")) and
+            (.type | test("(?i)filestream")) and
             (.tags[] | test("^_filebeat_filescan"))
           )
       ).tags += ["_filebeat_filescan_hedgehog"]
