@@ -1789,7 +1789,14 @@
                   "type": "long"
                 },
                 "message_packet_bytes": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 128,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
                 },
                 "read_audit_log_last_security_change": {
                   "type": "date"

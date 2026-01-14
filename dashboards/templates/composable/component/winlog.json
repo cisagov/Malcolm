@@ -567,7 +567,8 @@
                   "type": "keyword"
                 },
                 "Data": {
-                  "type": "keyword"
+                  "type": "object",
+                  "dynamic": false
                 },
                 "DatabaseID": {
                   "type": "keyword"

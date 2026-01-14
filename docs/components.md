@@ -53,7 +53,6 @@ Malcolm leverages the following excellent open source tools, among others:
     * [ICS protocol analyzers](https://github.com/cisagov/ICSNPP) for Zeek published by Idaho National Lab and DHS CISA
     * Numerous packages from [Corelight, Inc.](https://github.com/corelight)
     * FoxIO's [JA4+](https://blog.foxio.io/ja4%2B-network-fingerprinting) network fingerprinting plugin
-    * J-Gras's [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) scripts

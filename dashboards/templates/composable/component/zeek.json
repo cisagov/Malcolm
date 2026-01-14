@@ -183,6 +183,18 @@
                   "type": "keyword"
                 },
                 "answers": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "opcode": {
+                  "type": "short"
+                },
+                "opcode_name": {
                   "type": "keyword"
                 },
                 "qclass": {
@@ -668,6 +680,12 @@
                   "type": "keyword"
                 },
                 "client_cert_subject": {
+                  "type": "keyword"
+                },
+                "auth_ticket_sha256": {
+                  "type": "keyword"
+                },
+                "new_ticket_sha256": {
                   "type": "keyword"
                 },
                 "cname": {
@@ -1962,6 +1980,9 @@
                   "type": "keyword"
                 },
                 "host_key": {
+                  "type": "keyword"
+                },
+                "host_key_fingerprint": {
                   "type": "keyword"
                 },
                 "host_key_alg": {
