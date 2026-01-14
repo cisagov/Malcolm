@@ -396,31 +396,31 @@ scanners:
 #        source:
 #          - 'ScanTranscode'
 #      priority: 5
-  'ScanOcr':
-    - positive:
-        flavors:
-          - 'image/jpeg'
-          - 'jpeg_file'
-          - 'image/png'
-          - 'png_file'
-          - 'image/tiff'
-          - 'type_is_tiff'
-          - 'image/x-ms-bmp'
-          - 'bmp_file'
-          - 'image/webp'
-          - 'application/pdf'
-          - 'pdf_file'
-          - "image/gif"
-          - "gif_file"
-      priority: 5
-      options:
-        extract_text: False
-        tmp_directory: "/dev/shm/"
-        pdf_to_png: True
-        remove_formatting: False
-        split_words: True
-        create_thumbnail: True
-        thumbnail_size: [250, 250]
+#  'ScanOcr':
+#    - positive:
+#        flavors:
+#          - 'image/jpeg'
+#          - 'jpeg_file'
+#          - 'image/png'
+#          - 'png_file'
+#          - 'image/tiff'
+#          - 'type_is_tiff'
+#          - 'image/x-ms-bmp'
+#          - 'bmp_file'
+#          - 'image/webp'
+#          - 'application/pdf'
+#          - 'pdf_file'
+#          - "image/gif"
+#          - "gif_file"
+#      priority: 5
+#      options:
+#        extract_text: False
+#        tmp_directory: "/dev/shm/"
+#        pdf_to_png: True
+#        remove_formatting: False
+#        split_words: True
+#        create_thumbnail: True
+#        thumbnail_size: [250, 250]
   'ScanOle':
     - positive:
         flavors:
