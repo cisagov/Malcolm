@@ -60,7 +60,7 @@ Inspiration for many of Malcolm's prebuilt visualizations for Zeek logs was orig
 
 ![The Zeek Notices dashboard highlights things which Zeek determine are potentially bad](./images/screenshots/dashboards_notices.png)
 
-![The Zeek Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./images/screenshots/dashboards_signatures.png)
+![The File Scanning dashboard displays the results of file scans performed by Strelka on files extracted from network traffic](./images/screenshots/dashboards_file_scanning.png)
 
 ![The Software dashboard displays the type, name, and version of software seen communicating on the network](./images/screenshots/dashboards_software.png)
 

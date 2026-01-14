@@ -63,8 +63,6 @@ For the [**YARA**](https://github.com/VirusTotal/yara) scanner, Malcolm's [defau
 
 The `RULES_UPDATE_ENABLED` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env) controls whether or not to regularly pull signature/rule definitions from the internet for file scanning engines, including [**ClamAV**](https://www.clamav.net/) signatures and Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh).
 
-File scanning results can be viewed in the **File Scanning** dashboard in OpenSearch Dashboards.
-
 The `FILESCAN_PRESERVATION` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`filescan.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/filescan.env) determines the behavior for preservation of scanned files:
 
 * `quarantined`: preserve only files in `./zeek-logs/extract_files` that are flagged by the YARA, ClamAV, or [**Capa**](https://github.com/fireeye/capa) scanners
@@ -94,11 +92,19 @@ The `FILESCAN_HTTP_SERVER_…` [environment variables](malcolm-config.md#Malcolm
 
 The files extracted by Zeek and the data about those files can be accessed through several of Malcolm's user interfaces.
 
-* The [Files dashboard](dashboards.md#PrebuiltVisualizations) summarizes the file transfers observed in network traffic. The **Extracted File Downloads** table provides download links for the extracted files matching the currently applied filters. Note that the presence of these links don't necessarily imply that the files they represent are available: depending on factors such as file preservation settings (above) and retention policies, files that were extracted and scanned may no longer be available. When this is the case, clicking one of the file download links will result in a "file not found" error. If one of these links refers to a file that was extracted and scanned on a [Hedgehog Linux](hedgehog.md) network sensor, Malcolm must be able to communicate with that sensor in order to retrieve and download the file.
+* The [**File Scanning** dashboard](dashboards.md#PrebuiltVisualizations) summarizes the results of the file scans performed by Strelka.
+    * Click a `zeek.files.extracted_uri` value  in the **File Scanning - Logs** table to download the associated file, if available. Note that the presence of these links don't necessarily imply that the files they represent are available: depending on factors such as file preservation settings (above) and retention policies, files that were extracted and scanned may no longer be available. When this is the case, clicking one of the file download links will result in a "file not found" error. If one of these links refers to a file that was extracted and scanned on a [Hedgehog Linux](hedgehog.md) network sensor, Malcolm must be able to communicate with that sensor in order to retrieve and download the file.
+    * Some scan result fields aren't indexed. Expand a document and click **JSON** to view the full scan result's data in the `strelka` field.
+
+
+![The File Scanning dashboard displays the results of file scans performed by Strelka on files extracted from network traffic](./images/screenshots/dashboards_file_scanning.png)
+
+* The [Files dashboard](dashboards.md#PrebuiltVisualizations) summarizes the file transfers observed in network traffic.
+    * The **Extracted File Downloads** table provides download links for the extracted files matching the currently applied filters, if it was preserved as described above.
 
 ![The files dashboard displays metrics about the files transferred over the network](./images/screenshots/dashboards_files_source.png)
 
-* Viewing logs from Zeek's `files.log` (e.g., `event.provider == zeek && event.dataset == files`), the Arkime [session](arkime.md#ArkimeSessions) detail's **Extracted Filename URL** field can be clicked for a context menu item to download the extracted file, if it was preserved as described above.
+* Viewing logs from Zeek's `files.log` (e.g., `event.provider == zeek && event.dataset == files`) or the file scan results (e.g., `event.provider == filescan`), the Arkime [session](arkime.md#ArkimeSessions) detail's **Extracted Filename URL** field can be clicked for a context menu item to download the extracted file, if it was preserved as described above.
 
 ![Arkime's session details for files.log entries](./images/screenshots/arkime_sessions_files_log_dl.png)
 
