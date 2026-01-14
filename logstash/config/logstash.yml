@@ -1,2 +1,4 @@
-http.host: "0.0.0.0"
-
+api.enabled: true
+api.http.host: "0.0.0.0"
+api.auth.type: "none"
+api.ssl.enabled: false

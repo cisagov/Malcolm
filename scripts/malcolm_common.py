@@ -1702,6 +1702,8 @@ LOG_IGNORE_REGEX = re.compile(
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
   | Failure\s+no\s+such\s+index\s+\[\.opendistro_security\]
   | Falling\s+back\s+to\s+single\s+shard\s+assignment
+  | Filebeat\s+is\s+unable\s+to\s+load\s+the\s+ingest\s+pipelines\s+
+  | files?\s+(is|are)\s+too\s+small\s+to\s+be\s+ingested
   | Fork\s+CoW\s+for\s+RDB
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker

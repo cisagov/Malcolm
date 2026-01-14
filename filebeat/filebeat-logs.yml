@@ -19,6 +19,10 @@ filebeat.inputs:
       exclude_files: ['json_streaming_.+\.log$']
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   fields_under_root: true
   tags: ["_filebeat_zeek_malcolm_upload"]
   exclude_lines: ['^\s*#']
@@ -43,6 +47,10 @@ filebeat.inputs:
       exclude_files: ['json_streaming_.+\.log$']
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   fields_under_root: true
   tags: ["_filebeat_zeek_malcolm_live"]
   exclude_lines: ['^\s*#']
@@ -68,6 +76,10 @@ filebeat.inputs:
     scanner:
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   fields_under_root: true
   parsers:
     - ndjson:
@@ -102,6 +114,10 @@ filebeat.inputs:
     scanner:
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_upload"]
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
@@ -129,6 +145,10 @@ filebeat.inputs:
     scanner:
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_live"]
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
@@ -153,6 +173,10 @@ filebeat.inputs:
     scanner:
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   parsers:
     - ndjson:
         expand_keys: true
@@ -182,6 +206,10 @@ filebeat.inputs:
     scanner:
       symlinks: true
       check_interval: ${FILEBEAT_SCAN_FREQUENCY:10s}
+      fingerprint:
+        enabled: false
+        offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
   parsers:
     - ndjson:
         expand_keys: false
