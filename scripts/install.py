@@ -150,7 +150,6 @@ def handle_artifact_path_preseed_file(malcolm_config):
     )
     if malcolm_config and os.path.isfile(disk_format_info_file):
         try:
-            InstallerLogger.debug("here")
             with open(disk_format_info_file) as f:
                 disk_format_info = LoadFileIfJson(f)
 
