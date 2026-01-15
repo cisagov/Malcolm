@@ -27,6 +27,7 @@ from taxii2client.v20 import Server as TaxiiServer_v20
 from taxii2client.v21 import as_pages as TaxiiAsPages_v21
 from taxii2client.v21 import Collection as TaxiiCollection_v21
 from taxii2client.v21 import Server as TaxiiServer_v21
+from taxii2client.common import _HTTPConnection as TaxiiHTTPConn
 from threading import Lock
 from time import sleep, mktime
 from types import GeneratorType, FunctionType, LambdaType
@@ -168,6 +169,27 @@ GOOGLE_ZEEK_INTEL_TYPE_MAP = {
 }
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# monkeypatch content-type check to accept generic JSON
+original_taxii_valid_content_type = TaxiiHTTPConn.valid_content_type
+
+
+def patched_taxii_valid_content_type(self, content_type, accept):
+    if original_taxii_valid_content_type(self, content_type, accept):
+        return True
+    content_type_main = content_type.split(';')[0].strip().lower()
+    if content_type_main in (
+        'text/json',
+        'application/json',
+        'application/taxii+json',
+        'application/vnd.oasis.stix+json',
+        'application/vnd.oasis.taxii+json',
+    ):
+        return True
+    return False
+
+
+TaxiiHTTPConn.valid_content_type = patched_taxii_valid_content_type
 
 
 # get URL directory listing
@@ -1333,11 +1355,7 @@ def UpdateFromGoogle(
     # allow an individual feed source to override the global "since" value passed in
     since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
 
-    ctypes = [
-        s.strip()
-        for s in connInfo.get('collection_type', 'threat-actor,malware-family').split(",")
-        if s.strip()
-    ]
+    ctypes = [s.strip() for s in connInfo.get('collection_type', 'threat-actor,malware-family').split(",") if s.strip()]
     filters = connInfo.get('filters')
 
     try:
