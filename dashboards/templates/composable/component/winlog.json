@@ -2249,6 +2249,9 @@
                 "SessionID": {
                   "type": "keyword"
                 },
+                "SessionId": {
+                  "type": "keyword"
+                },
                 "SessionName": {
                   "type": "keyword"
                 },
