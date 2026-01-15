@@ -347,7 +347,7 @@ async def watch_pubsub(
         pass
 
 
-def remap_path(config: WatcherConfig, path: Path) -> tuple[PurePosixPath, Path]:
+def remap_path(config: WatcherConfig, path: Path) -> tuple[PurePosixPath, Path] | None:
     for base, real in config.path_maps.items():
         if path.is_relative_to(base):
             if (new := real / path.relative_to(base)).exists():
@@ -363,7 +363,8 @@ def remap_path(config: WatcherConfig, path: Path) -> tuple[PurePosixPath, Path]:
     if path.exists():
         log.warning('file exists, but not in search path: %s', path)
         return PurePosixPath(path), path
-    raise FileNotFoundError(path)
+    log.warning('file does not exist: %s', path)
+    return None
 
 
 def get_item(obj: Any, path: str, default: Any = None) -> Any:
@@ -396,24 +397,25 @@ async def handle_zeek_event(
 ) -> None:
     # https://docs.zeek.org/en/master/logs/files.html
     # https://docs.zeek.org/en/lts/scripts/base/frameworks/files/main.zeek.html#type-Files::Info
-    path, real = remap_path(config, Path(get_single(record, 'file.extracted')))
-    await handle_file_event(
-        config=config,
-        conn=output,
-        source=(watch.source or key),
-        event=FileEvent.model_validate(
-            {
-                'path': path,
-                'local_path': real,
-                'size': get_single(record, 'file.extracted_size'),
-                'sha256': get_single(record, 'file.sha256'),
-                'mime_type': get_single(record, 'file.mime_type'),
-            }
-        ),
-        metadata={
-            'record': json.dumps(record, separators=(',', ':')),
-        },
-    )
+    if remapped := remap_path(config, Path(get_single(record, 'file.extracted'))):
+        path, real = remapped
+        await handle_file_event(
+            config=config,
+            conn=output,
+            source=(watch.source or key),
+            event=FileEvent.model_validate(
+                {
+                    'path': path,
+                    'local_path': real,
+                    'size': get_single(record, 'file.extracted_size'),
+                    'sha256': get_single(record, 'file.sha256'),
+                    'mime_type': get_single(record, 'file.mime_type'),
+                }
+            ),
+            metadata={
+                'record': json.dumps(record, separators=(',', ':')),
+            },
+        )
 
 
 ################################################################################

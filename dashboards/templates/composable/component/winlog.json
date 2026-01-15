@@ -567,8 +567,13 @@
                   "type": "keyword"
                 },
                 "Data": {
-                  "type": "object",
-                  "dynamic": false
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  },
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "DatabaseID": {
                   "type": "keyword"
@@ -1054,6 +1059,9 @@
                   "type": "keyword"
                 },
                 "HexInt3": {
+                  "type": "keyword"
+                },
+                "HighLatencyArray": {
                   "type": "keyword"
                 },
                 "HighLatencyStr": {
