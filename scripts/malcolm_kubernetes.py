@@ -146,6 +146,24 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(GetMalcolmPath(), os.path.join('suricata', 'include-configs')),
         },
     ],
+    'strelka-backend-configs': [
+        {
+            'secret': False,
+            'path': os.path.join(GetMalcolmPath(), os.path.join('strelka', os.path.join('config', 'backend'))),
+        },
+    ],
+    'strelka-frontend-configs': [
+        {
+            'secret': False,
+            'path': os.path.join(GetMalcolmPath(), os.path.join('strelka', os.path.join('config', 'frontend'))),
+        },
+    ],
+    'strelka-manager-configs': [
+        {
+            'secret': False,
+            'path': os.path.join(GetMalcolmPath(), os.path.join('strelka', os.path.join('config', 'manager'))),
+        },
+    ],
     'filebeat-certs': [
         {
             'secret': True,
@@ -233,7 +251,7 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
     'redis-cache',
     'strelka-backend',
     'strelka-frontend',
-    'strelka-manaager',
+    'strelka-manager',
     'suricata-live',
     'suricata-offline',
     'upload',
@@ -251,7 +269,7 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
     'redis-cache',
     'strelka-backend',
     'strelka-frontend',
-    'strelka-manaager',
+    'strelka-manager',
     'suricata-live',
     'suricata-offline',
     'zeek-live',

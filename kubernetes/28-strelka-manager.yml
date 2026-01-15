@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strelka-manager-deployment
+  namespace: malcolm
+  labels:
+    app: strelka-manager
+    role: file-scanning
+spec:
+  selector:
+    matchLabels:
+      app: strelka-manager
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: strelka-manager
+        role: file-scanning
+    spec:
+      containers:
+      - name: strelka-manager-container
+        image: ghcr.io/idaholab/malcolm/strelka-manager:26.01.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - secretRef:
+              name: redis-env
+          - configMapRef:
+              name: pipeline-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: strelka-manager-var-local-catrust-volume
+          - mountPath: "/etc/strelka/configmap"
+            name: strelka-manager-config-volume
+      volumes:
+        - name: strelka-manager-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: strelka-manager-config-volume
+          configMap:
+            name: strelka-manager-configs

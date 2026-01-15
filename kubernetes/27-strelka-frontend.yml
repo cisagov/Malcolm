@@ -1,0 +1,103 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: strelka-frontend
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 57314
+      protocol: TCP
+      name: enqueue
+  selector:
+    app: strelka-frontend
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strelka-frontend-deployment
+  namespace: malcolm
+  labels:
+    app: strelka-frontend
+    role: file-scanning
+spec:
+  selector:
+    matchLabels:
+      app: strelka-frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: strelka-frontend
+        role: file-scanning
+    spec:
+      containers:
+      - name: strelka-frontend-container
+        image: ghcr.io/idaholab/malcolm/strelka-frontend:26.01.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: enqueue
+            protocol: TCP
+            containerPort: 57314
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - secretRef:
+              name: redis-env
+          - configMapRef:
+              name: pipeline-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: strelka-frontend-var-local-catrust-volume
+          - mountPath: "/etc/strelka/configmap"
+            name: strelka-frontend-config-volume
+          - mountPath: /var/log/strelka
+            name: strelka-frontend-runtime-logs-volume
+            subPath: "strelka-frontend"
+      initContainers:
+      - name: strelka-frontend-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:26.01.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/runtime-logs:strelka-frontend"
+        volumeMounts:
+          - name: strelka-frontend-runtime-logs-volume
+            mountPath: "/data/runtime-logs"
+      volumes:
+        - name: strelka-frontend-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: strelka-frontend-config-volume
+          configMap:
+            name: strelka-frontend-configs
+        - name: strelka-frontend-runtime-logs-volume
+          persistentVolumeClaim:
+            claimName: runtime-logs-claim

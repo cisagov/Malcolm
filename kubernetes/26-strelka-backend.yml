@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strelka-backend-deployment
+  namespace: malcolm
+  labels:
+    app: strelka-backend
+    role: file-scanning
+spec:
+  selector:
+    matchLabels:
+      app: strelka-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: strelka-backend
+        role: file-scanning
+    spec:
+      containers:
+      - name: strelka-backend-container
+        image: ghcr.io/idaholab/malcolm/strelka-backend:26.01.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - secretRef:
+              name: redis-env
+          - configMapRef:
+              name: pipeline-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: strelka-backend-var-local-catrust-volume
+          - mountPath: "/etc/strelka/configmap"
+            name: strelka-backend-config-volume
+          - mountPath: "/yara-rules/custom/configmap"
+            name: strelka-backend-yara-rules-custom-volume
+      volumes:
+        - name: strelka-backend-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: strelka-backend-config-volume
+          configMap:
+            name: strelka-backend-configs
+        - name: strelka-backend-yara-rules-custom-volume
+          configMap:
+            name: yara-rules

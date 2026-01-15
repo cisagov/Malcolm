@@ -23,12 +23,11 @@ dashboards-helper:
       requests:
         cpu: "0.5"
         memory: "512Mi"
-# TODO: strelka/filescan
-# file-monitor:
-#     resources:
-#       requests:
-#         cpu: "2"
-#         memory: "4Gi"
+filescan:
+   resources:
+     requests:
+       cpu: "2"
+       memory: "2Gi"
 filebeat:
     resources:
       requests:
@@ -94,6 +93,21 @@ redis:
       requests:
         cpu: "0.5"
         memory: "1Gi"
+strelka-backend:
+   resources:
+     requests:
+       cpu: "2"
+       memory: "4Gi"
+strelka-frontend:
+   resources:
+     requests:
+       cpu: "1"
+       memory: "1Gi"
+strelka-manager:
+   resources:
+     requests:
+       cpu: "1"
+       memory: "1Gi"
 suricata-live:
     resources:
       requests:

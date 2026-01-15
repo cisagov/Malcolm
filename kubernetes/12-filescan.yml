@@ -1,0 +1,122 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: filescan
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8001
+      protocol: TCP
+      name: health
+    - port: 8006
+      protocol: TCP
+      name: files
+  selector:
+    app: filescan
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filescan-deployment
+  namespace: malcolm
+  labels:
+    app: filescan
+    role: file-scanning
+spec:
+  selector:
+    matchLabels:
+      app: filescan
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: filescan
+        role: file-scanning
+    spec:
+      containers:
+      - name: filescan-container
+        image: ghcr.io/idaholab/malcolm/filescan:26.01.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: health
+            protocol: TCP
+            containerPort: 8001
+          - name: files
+            protocol: TCP
+            containerPort: 8006
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: auth-common-env
+          - configMapRef:
+              name: zeek-env
+          - configMapRef:
+              name: pipeline-env
+          - secretRef:
+              name: redis-env
+          - secretRef:
+              name: filescan-secret-env
+          - configMapRef:
+              name: filescan-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: filescan-var-local-catrust-volume
+          - mountPath: "/zeek/extract_files"
+            name: filescan-zeek-volume
+            subPath: "extract_files"
+          - mountPath: "/filescan/data/logs"
+            name: filescan-logs-volume
+          - mountPath: "/filescan/data/files"
+            name: filescan-zeek-volume
+            subPath: "extract_files/filescan"
+            readOnly: true
+      initContainers:
+      - name: filescan-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:26.01.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/zeek:extract_files/filescan"
+        volumeMounts:
+          - name: filescan-zeek-volume
+            mountPath: "/zeek"
+      volumes:
+        - name: filescan-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: filescan-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: filescan-logs-volume
+          persistentVolumeClaim:
+            claimName: filescan-claim
+

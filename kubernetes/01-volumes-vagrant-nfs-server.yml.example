@@ -128,6 +128,48 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
+  name: filescan-volume
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 25Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/filescan-logs
+    server: 192.168.56.13
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filescan-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+  volumeName: filescan-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
   name: config-volume
   labels:
     namespace: malcolm

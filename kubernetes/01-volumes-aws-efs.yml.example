@@ -107,6 +107,41 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
+  name: filescan-volume
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 25Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_FILESCAN_LOGS_ID}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filescan-claim
+  namespace: malcolm
+spec:
+  storageClassName: efs-sc
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+  volumeName: filescan-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
   name: config-volume
   labels:
     namespace: malcolm
