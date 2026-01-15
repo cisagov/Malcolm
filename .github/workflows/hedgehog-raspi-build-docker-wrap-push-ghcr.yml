@@ -36,7 +36,7 @@ jobs:
     steps:
       -
         name: Cancel previous run in progress
-        uses: styfle/cancel-workflow-action@0.12.1
+        uses: styfle/cancel-workflow-action@0.13.0
         with:
           ignore_sha: true
           all_but_latest: true
