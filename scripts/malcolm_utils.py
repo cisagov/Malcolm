@@ -1212,14 +1212,39 @@ def true_or_false_quotes(v):
         return str(v)
 
 
-###################################################################################################
-# tablify
-def tablify(matrix, file=sys.stdout):
-    colMaxLen = {i: max(map(len, inner)) for i, inner in enumerate(zip(*matrix))}
-    for row in matrix:
+def tablify(matrix, file=sys.stdout, do_sort=False, first_row_is_header=False, do_header_divider=False):
+    # If the matrix is empty, there's nothing to do
+    if not matrix:
+        return
+
+    # 1. Handle Header vs Data logic
+    if first_row_is_header:
+        header = matrix[0]
+        rows = list(matrix[1:])  # Copy remaining rows to avoid mutating original
+    else:
+        header = None
+        rows = list(matrix)
+
+    # 2. Sort the rows if requested
+    if do_sort:
+        rows.sort()
+
+    # 3. Reconstruct the display list
+    final_matrix = [header] + rows if header else rows
+
+    # 4. Calculate column widths
+    colMaxLen = {i: max(map(len, inner)) for i, inner in enumerate(zip(*final_matrix))}
+
+    # 5. Print the table
+    for i, row in enumerate(final_matrix):
         for col, data in enumerate(row):
             print(f"{data:{colMaxLen[col]}}", end=" | ", file=file)
         print(file=file)
+
+        # Print a divider line under the header
+        if do_header_divider and first_row_is_header and i == 0:
+            divider = "-+-".join("-" * colMaxLen[c] for c in range(len(row)))
+            print(f"{divider}-|", file=file)
 
 
 ###################################################################################################

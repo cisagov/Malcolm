@@ -676,7 +676,7 @@ def PrintNodeStatus():
     for node in node_summary:
         statusRows.append([str(x) for x in node_summary[node]])
 
-    tablify(statusRows)
+    tablify(statusRows, do_sort=True, first_row_is_header=True, do_header_divider=True)
 
 
 def PrintPodStatus(namespace=None):
@@ -710,7 +710,7 @@ def PrintPodStatus(namespace=None):
     for pod in pod_summary:
         statusRows.append([str(x) for x in pod_summary[pod]])
 
-    tablify(statusRows)
+    tablify(statusRows, do_sort=True, first_row_is_header=True, do_header_divider=True)
 
 
 def StartMalcolm(
