@@ -6,6 +6,7 @@ import fcntl
 import logging
 import magic
 import os
+import re
 import subprocess
 import sys
 import time
@@ -50,6 +51,7 @@ now_time = time.time()
 _LOG_MIME_TYPES = (
     "application/json",
     "application/x-ndjson",
+    "text/html",
     "text/plain",
     "text/x-file",
 )
@@ -68,6 +70,15 @@ _ARCHIVE_MIME_TYPES = (
     "application/x-xz",
     "application/zip",
 )
+
+_LOG_FILE_TYPE_PATTERNS = [
+    re.compile(r'^MS\s+Windows.*Event\s+Log', re.IGNORECASE),
+    re.compile(r'\b(JSON|ASCII)\s+text\b', re.IGNORECASE),
+]
+
+_ARCHIVE_FILE_TYPE_PATTERNS = [
+    re.compile(r'\b(archive|compressed)\s+data\b', re.IGNORECASE),
+]
 
 # --------------------------------------------------------------------
 # Helper functions
@@ -112,20 +123,34 @@ def check_file(
             return
 
         # get the file type (treat zero-length files as log files)
-        file_type = magic.from_file(filename, mime=True)
-        if check_logs and clean_log_seconds > 0 and (file_stat.st_size == 0 or file_type in _LOG_MIME_TYPES):
+        clean_seconds = 0
+        do_log_check = check_logs and clean_log_seconds > 0
+        do_archive_check = check_archives and clean_zip_seconds > 0
+        file_mime_type = magic.from_file(filename, mime=True)
+        file_type = None
+        if do_log_check and ((file_stat.st_size == 0) or (file_mime_type in _LOG_MIME_TYPES)):
             clean_seconds = clean_log_seconds
-        elif check_archives and clean_zip_seconds > 0 and file_type in _ARCHIVE_MIME_TYPES:
+        elif do_archive_check and (file_mime_type in _ARCHIVE_MIME_TYPES):
             clean_seconds = clean_zip_seconds
         else:
-            # not a file we're going to be messing with
-            logging.debug(f"Ignoring {filename} due to {file_type=}")
-            return
+            # mime type didn't match, fall back to the non-MIME file magic description
+            # e.g., "application/octet-stream" vs "MS Windows Vista Event Log""
+            file_type = magic.from_file(filename, mime=False)
+            if do_log_check and any(p.search(file_type) for p in _LOG_FILE_TYPE_PATTERNS):
+                clean_seconds = clean_log_seconds
+            elif do_archive_check and any(p.search(file_type) for p in _ARCHIVE_FILE_TYPE_PATTERNS):
+                clean_seconds = clean_zip_seconds
+            else:
+                # not a file we're going to be messing with
+                logging.debug(f"Ignoring {filename} of type {file_type} ({file_mime_type})")
+                return
 
-        if clean_seconds > 0 and last_use_time >= clean_seconds:
+        if (clean_seconds > 0) and (last_use_time >= clean_seconds):
             # this is a closed file that is old, so delete it
             silent_remove(filename)
-            logging.info(f'Removed old file "{filename}" ({file_type}, used {last_use_time:.0f} seconds ago)')
+            logging.info(
+                f'Removed old file "{filename}" ({file_type or file_mime_type}, used {last_use_time:.0f} seconds ago)'
+            )
 
     except FileNotFoundError:
         # file's already gone, oh well
@@ -135,11 +160,12 @@ def check_file(
         logging.error(f"{type(e).__name__} for '{filename}': {e}")
 
 
-def list_files_in_dir(base_dir: str) -> List[str]:
+def list_files_in_dir(base_dir: str, sort_by_age: bool = False) -> List[str]:
     """Recursively list all files in a directory."""
     if not os.path.isdir(base_dir):
         return []
-    return [os.path.join(root, f) for root, _, files in os.walk(base_dir) for f in files]
+    files = [os.path.join(root, f) for root, _, filenames in os.walk(base_dir) for f in filenames]
+    return sorted(files, key=os.path.getmtime) if sort_by_age else files
 
 
 def load_filebeat_registries(registry_paths: List[str]) -> List[Tuple[int, int]]:
@@ -248,7 +274,10 @@ def prune_files() -> None:
     process_files(suricata_files, fb_files, check_logs=True, check_archives=False, label="Suricata")
 
     # check the filescan logs
-    filescan_files = list_files_in_dir(filescan_dir)
+    filescan_files = list_files_in_dir(filescan_dir, sort_by_age=True)
+    if filescan_files:
+        # filescan_files is sorted sorted oldest to newest; don't consider the newest file for deletion
+        filescan_files.pop()
     logging.debug(f"Found {len(filescan_files)} filescan files to consider.")
     process_files(filescan_files, fb_files, check_logs=True, check_archives=False, label="Filescan")
 

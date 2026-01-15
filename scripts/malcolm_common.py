@@ -1696,6 +1696,7 @@ LOG_IGNORE_REGEX = re.compile(
   | descheduling\s+job\s*id
   | DON'T\s+DO\s+IT.*bad\s+idea
   | Error\s+during\s+file\s+comparison:.*no\s+such\s+file
+  | Error\s+while\s+removing\s+state\s+from\s+statestore:\s+resource\s+.*\s+not\s+found
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
@@ -1703,6 +1704,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Failure\s+no\s+such\s+index\s+\[\.opendistro_security\]
   | Falling\s+back\s+to\s+single\s+shard\s+assignment
   | Filebeat\s+is\s+unable\s+to\s+load\s+the\s+ingest\s+pipelines\s+
+  | File\s+was\s+truncated\.\s+Reading\s+file\s+from\s+offset\s+0\.
   | files?\s+(is|are)\s+too\s+small\s+to\s+be\s+ingested
   | Fork\s+CoW\s+for\s+RDB
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
