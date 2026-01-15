@@ -265,33 +265,52 @@ After a few moments, users can check the status of the deployment:
 
 ```
 $ ./scripts/status -f /path/to/kubeconfig.yml
-Node Name | Hostname | IP            | Provider ID | Instance Type | Total CPU | CPU Usage | Percent CPU | Total Memory | Memory Usage | Total Storage | Current Pods |
-server    | server   | 192.168.56.10 | server      | k3s           | 4000m     | 30.37m    | 0.76%       | 7.77Gi       | 1.2Gi        | 61.28Gi       | 7            |
-agent2    | agent2   | 192.168.56.12 | agent2      | k3s           | 6000m     | 156.42m   | 2.61%       | 19.55Gi      | 14.47Gi      | 61.28Gi       | 13           |
-agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     | 861.34m   | 14.36%      | 19.55Gi      | 9.29Gi       | 61.28Gi       | 11           |
+Node Name        | Hostname         | IP              | Provider ID      | Instance Type | Total CPU | CPU Usage | Percent CPU | Total Memory | Memory Usage | Total Storage | Current Pods |
+-----------------+------------------+-----------------+------------------+---------------+-----------+-----------+-------------+--------------+--------------+---------------+--------------|
+malcolm-462510   | malcolm-462510   | 192.168.122.37  | malcolm-462510   | k3s           | 16000m    | 17.57m    | 0.11%       | 23.49Gi      | 476.8Mi      | 58.37Gi       | 1            |
+malcolm-463728   | malcolm-463728   | 192.168.122.40  | malcolm-463728   | k3s           | 24000m    | 439.55m   | 1.83%       | 94.33Gi      | 6.18Gi       | 109.44Gi      | 6            |
+malcolm-651135   | malcolm-651135   | 192.168.122.226 | malcolm-651135   | k3s           | 48000m    | 3525.39m  | 7.34%       | 62.79Gi      | 7.58Gi       | 91.11Gi       | 10           |
+malcolm-651420   | malcolm-651420   | 192.168.122.30  | malcolm-651420   | k3s           | 40000m    | 384.83m   | 0.96%       | 125.79Gi     | 20.68Gi      | 91.11Gi       | 4            |
+malcolm-651490   | malcolm-651490   | 192.168.122.227 | malcolm-651490   | k3s           | 32000m    | 620.71m   | 1.94%       | 47.04Gi      | 2.88Gi       | 182.28Gi      | 5            |
+malcolm-651492   | malcolm-651492   | 192.168.122.44  | malcolm-651492   | k3s           | 32000m    | 669.12m   | 2.09%       | 62.79Gi      | 2.09Gi       | 109.44Gi      | 6            |
+malcolm-651493   | malcolm-651493   | 192.168.122.222 | malcolm-651493   | k3s           | 32000m    | 3609.89m  | 11.28%      | 62.79Gi      | 6.22Gi       | 182.28Gi      | 6            |
+malcolm-651525   | malcolm-651525   | 192.168.122.221 | malcolm-651525   | k3s           | 16000m    | 122.93m   | 0.77%       | 46.83Gi      | 1.96Gi       | 182.28Gi      | 3            |
+malcolm-655079   | malcolm-655079   | 192.168.122.32  | malcolm-655079   | k3s           | 24000m    | 237.0m    | 0.99%       | 94.32Gi      | 7.49Gi       | 109.44Gi      | 4            |
+malcolm-655103   | malcolm-655103   | 192.168.122.36  | malcolm-655103   | k3s           | 24000m    | 222.27m   | 0.93%       | 94.32Gi      | 1.24Gi       | 109.44Gi      | 4            |
+malcolm-655119   | malcolm-655119   | 192.168.122.43  | malcolm-655119   | k3s           | 24000m    | 1098.66m  | 4.58%       | 94.32Gi      | 18.92Gi      | 109.44Gi      | 5            |
+malcolm-655152   | malcolm-655152   | 192.168.122.46  | malcolm-655152   | k3s           | 12000m    | 67.06m    | 0.56%       | 46.82Gi      | 689.14Mi     | 3665.02Gi     | 2            |
+malcolm-655153   | malcolm-655153   | 192.168.122.34  | malcolm-655153   | k3s           | 12000m    | 85.8m     | 0.71%       | 46.82Gi      | 1.05Gi       | 455.95Gi      | 4            |
+malcolm-655154   | malcolm-655154   | 192.168.122.38  | malcolm-655154   | k3s           | 12000m    | 76.03m    | 0.63%       | 46.82Gi      | 2.01Gi       | 109.44Gi      | 3            |
+malcolm-655155   | malcolm-655155   | 192.168.122.42  | malcolm-655155   | k3s           | 12000m    | 40.7m     | 0.34%       | 46.82Gi      | 698.82Mi     | 109.44Gi      | 3            |
+malcolm-655160   | malcolm-655160   | 192.168.122.35  | malcolm-655160   | k3s           | 12000m    | 22.76m    | 0.19%       | 46.82Gi      | 582.74Mi     | 109.44Gi      | 2            |
+malcolm-673112   | malcolm-673112   | 192.168.122.41  | malcolm-673112   | k3s           | 12000m    | 24.96m    | 0.21%       | 30.72Gi      | 532.43Mi     | 455.95Gi      | 2            |
+malcolm-681270   | malcolm-681270   | 192.168.122.47  | malcolm-681270   | k3s           | 12000m    | 70.45m    | 0.59%       | 30.72Gi      | 596.16Mi     | 455.95Gi      | 2            |
 
-Pod Name                                       | State   | Pod IP     | Pod Kind   | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts        | Container Image              |
-api-deployment-6f4686cf59-bn286                | Running | 10.42.2.14 | ReplicaSet | agent1      | 0.11m     | 59.62Mi      | api-container:0                | api:{{ site.malcolm.version }}               |
-zeek-live-deployment-64b69d4b6f-947vr          | Running | 10.42.2.17 | ReplicaSet | agent1      | 0.02m     | 12.44Mi      | zeek-live-container:0          | zeek:{{ site.malcolm.version }}              |
-dashboards-helper-deployment-69dc54f6b6-ln4sq  | Running | 10.42.2.15 | ReplicaSet | agent1      | 10.77m    | 38.43Mi      | dashboards-helper-container:0  | dashboards-helper:{{ site.malcolm.version }} |
-upload-deployment-586568844b-4jnk9             | Running | 10.42.2.18 | ReplicaSet | agent1      | 0.15m     | 29.78Mi      | upload-container:0             | file-upload:{{ site.malcolm.version }}       |
-filebeat-deployment-6ff8bc444f-t7h49           | Running | 10.42.2.20 | ReplicaSet | agent1      | 2.84m     | 70.71Mi      | filebeat-container:0           | filebeat-oss:{{ site.malcolm.version }}      |
-zeek-offline-deployment-844f4865bd-g2sdm       | Running | 10.42.2.21 | ReplicaSet | agent1      | 0.17m     | 41.92Mi      | zeek-offline-container:0       | zeek:{{ site.malcolm.version }}              |
-logstash-deployment-6fbc9fdcd5-hwx8s           | Running | 10.42.2.22 | ReplicaSet | agent1      | 85.55m    | 2.91Gi       | logstash-container:0           | logstash-oss:{{ site.malcolm.version }}      |
-netbox-deployment-cdcff4977-hbbw5              | Running | 10.42.2.23 | ReplicaSet | agent1      | 807.64m   | 702.86Mi     | netbox-container:0             | netbox:{{ site.malcolm.version }}            |
-suricata-offline-deployment-6ccdb89478-z5696   | Running | 10.42.2.19 | ReplicaSet | agent1      | 0.22m     | 34.88Mi      | suricata-offline-container:0   | suricata:{{ site.malcolm.version }}          |
-dashboards-deployment-69b5465db-vz88g          | Running | 10.42.1.14 | ReplicaSet | agent2      | 0.94m     | 100.12Mi     | dashboards-container:0         | dashboards:{{ site.malcolm.version }}        |
-redis-cache-deployment-5f77d47b8b-z7t2z        | Running | 10.42.1.15 | ReplicaSet | agent2      | 3.57m     | 7.36Mi       | redis-cache-container:0        | redis:{{ site.malcolm.version }}             |
-suricata-live-deployment-6494c77759-9rlnt      | Running | 10.42.1.16 | ReplicaSet | agent2      | 0.02m     | 9.69Mi       | suricata-live-container:0      | suricata:{{ site.malcolm.version }}          |
-freq-deployment-cfd84fd97-dnngf                | Running | 10.42.1.17 | ReplicaSet | agent2      | 0.2m      | 26.36Mi      | freq-container:0               | freq:{{ site.malcolm.version }}              |
-arkime-deployment-56999cdd66-s98pp             | Running | 10.42.1.18 | ReplicaSet | agent2      | 4.15m     | 113.07Mi     | arkime-container:0             | arkime:{{ site.malcolm.version }}            |
-pcap-monitor-deployment-594ff674c4-fsm7m       | Running | 10.42.1.19 | ReplicaSet | agent2      | 1.24m     | 48.44Mi      | pcap-monitor-container:0       | pcap-monitor:{{ site.malcolm.version }}      |
-pcap-capture-deployment-7c8bf6957-jzpzn        | Running | 10.42.1.20 | ReplicaSet | agent2      | 0.02m     | 9.64Mi       | pcap-capture-container:0       | pcap-capture:{{ site.malcolm.version }}      |
-postgres-deployment-5879b8dffc-kkt56           | Running | 10.42.1.21 | ReplicaSet | agent2      | 70.91m    | 33.02Mi      | postgres-container:0           | postgresql:{{ site.malcolm.version }}        |
-htadmin-deployment-6fc46888b9-sq6ln            | Running | 10.42.1.23 | ReplicaSet | agent2      | 0.14m     | 30.53Mi      | htadmin-container:0            | htadmin:{{ site.malcolm.version }}           |
-redis-deployment-5bcd8f6c96-j5xpf              | Running | 10.42.1.24 | ReplicaSet | agent2      | 1.46m     | 7.34Mi       | redis-container:0              | redis:{{ site.malcolm.version }}             |
-nginx-proxy-deployment-69fcc4968d-f68tq        | Running | 10.42.1.22 | ReplicaSet | agent2      | 0.31m     | 22.63Mi      | nginx-proxy-container:0        | nginx-proxy:{{ site.malcolm.version }}       |
-opensearch-deployment-75498799f6-4zmwd         | Running | 10.42.1.25 | ReplicaSet | agent2      | 89.8m     | 11.03Gi      | opensearch-container:0         | opensearch:{{ site.malcolm.version }}        |
+Pod Name                                      | State   | Pod IP       | Pod Kind   | Worker Node      | CPU Usage | Memory Usage | Container Name:Restarts       | Container Image                                        |
+----------------------------------------------+---------+--------------+------------+------------------+-----------+--------------+-------------------------------+--------------------------------------------------------|
+api-deployment-7fff7bf884-84prz               | Running | 10.42.2.226  | ReplicaSet | malcolm-651525   | 0.12m     | 68.89Mi      | api-container:0               | ghcr.io/mmguero-dev/malcolm/api:{{ site.malcolm.version }}                   |
+arkime-deployment-68946dffcb-fx8nl            | Running | 10.42.13.42  | ReplicaSet | malcolm-651490   | 309.86m   | 1.01Gi       | arkime-container:0            | ghcr.io/mmguero-dev/malcolm/arkime:{{ site.malcolm.version }}                |
+dashboards-deployment-6456f67fb4-jhnqf        | Running | 10.42.11.184 | ReplicaSet | malcolm-463728   | 85.4m     | 215.95Mi     | dashboards-container:0        | ghcr.io/mmguero-dev/malcolm/dashboards:{{ site.malcolm.version }}            |
+dashboards-helper-deployment-7d5d8c5ddf-tphbx | Running | 10.42.17.23  | ReplicaSet | malcolm-655152   | 8.56m     | 47.26Mi      | dashboards-helper-container:0 | ghcr.io/mmguero-dev/malcolm/dashboards-helper:{{ site.malcolm.version }}     |
+filebeat-deployment-855578fd56-wxz5t          | Running | 10.42.16.223 | ReplicaSet | malcolm-651135   | 5.77m     | 278.45Mi     | filebeat-container:0          | ghcr.io/mmguero-dev/malcolm/filebeat-oss:{{ site.malcolm.version }}          |
+filescan-deployment-7b675999dd-m7sx8          | Running | 10.42.2.227  | ReplicaSet | malcolm-651525   | 4.32m     | 204.33Mi     | filescan-container:0          | ghcr.io/mmguero-dev/malcolm/filescan:{{ site.malcolm.version }}              |
+freq-deployment-5dbf7fd958-xdm4j              | Running | 10.42.9.23   | ReplicaSet | malcolm-655155   | 1.13m     | 36.59Mi      | freq-container:0              | ghcr.io/mmguero-dev/malcolm/freq:{{ site.malcolm.version }}                  |
+htadmin-deployment-6779876475-h5wwh           | Running | 10.42.10.48  | ReplicaSet | malcolm-651493   | 0.26m     | 43.36Mi      | htadmin-container:0           | ghcr.io/mmguero-dev/malcolm/htadmin:{{ site.malcolm.version }}               |
+keycloak-deployment-7fd4bdff5c-fkzxs          | Running | 10.42.9.24   | ReplicaSet | malcolm-655155   | 0.03m     | 11.07Mi      | keycloak-container:0          | ghcr.io/mmguero-dev/malcolm/keycloak:{{ site.malcolm.version }}              |
+logstash-deployment-5bbcc5b775-bjk59          | Running | 10.42.11.185 | ReplicaSet | malcolm-463728   | 68.84m    | 3.97Gi       | logstash-container:0          | ghcr.io/mmguero-dev/malcolm/logstash-oss:{{ site.malcolm.version }}          |
+netbox-deployment-987476c89-6vznb             | Running | 10.42.16.224 | ReplicaSet | malcolm-651135   | 428.2m    | 1.09Gi       | netbox-container:0            | ghcr.io/mmguero-dev/malcolm/netbox:{{ site.malcolm.version }}                |
+nginx-proxy-deployment-6d9b9858fd-q9w5z       | Running | 10.42.3.140  | ReplicaSet | malcolm-655079   | 13.07m    | 25.78Mi      | nginx-proxy-container:0       | ghcr.io/mmguero-dev/malcolm/nginx-proxy:{{ site.malcolm.version }}           |
+opensearch-deployment-6c546f45b9-n4czl        | Running | 10.42.7.165  | ReplicaSet | malcolm-655119   | 887.36m   | 17.8Gi       | opensearch-container:0        | ghcr.io/mmguero-dev/malcolm/opensearch:{{ site.malcolm.version }}            |
+pcap-monitor-deployment-66dbd9c68f-22tkm      | Running | 10.42.10.46  | ReplicaSet | malcolm-651493   | 183.31m   | 867.33Mi     | pcap-monitor-container:0      | ghcr.io/mmguero-dev/malcolm/pcap-monitor:{{ site.malcolm.version }}          |
+postgres-deployment-5c78f478fb-nl4zn          | Running | 10.42.15.210 | ReplicaSet | malcolm-651492   | 472.87m   | 85.33Mi      | postgres-container:0          | ghcr.io/mmguero-dev/malcolm/postgresql:{{ site.malcolm.version }}            |
+redis-cache-deployment-5c776698fc-dvbp2       | Running | 10.42.5.20   | ReplicaSet | malcolm-655154   | 9.58m     | 10.18Mi      | redis-cache-container:0       | ghcr.io/mmguero-dev/malcolm/redis:{{ site.malcolm.version }}                 |
+redis-deployment-75486865c5-4xscs             | Running | 10.42.15.209 | ReplicaSet | malcolm-651492   | 9.66m     | 10.04Mi      | redis-container:0             | ghcr.io/mmguero-dev/malcolm/redis:{{ site.malcolm.version }}                 |
+strelka-backend-deployment-6dcf7ccdcc-xjbxx   | Running | 10.42.5.21   | ReplicaSet | malcolm-655154   | 4.72m     | 1.18Gi       | strelka-backend-container:0   | ghcr.io/mmguero-dev/malcolm/strelka-backend:{{ site.malcolm.version }}       |
+strelka-frontend-deployment-6988c75f8c-gmf8c  | Running | 10.42.6.23   | ReplicaSet | malcolm-655160   | 0.03m     | 8.02Mi       | strelka-frontend-container:0  | ghcr.io/mmguero-dev/malcolm/strelka-frontend:{{ site.malcolm.version }}      |
+strelka-manager-deployment-f578ccc7-2vw7l     | Running | 10.42.12.15  | ReplicaSet | malcolm-681270   | 2.41m     | 7.57Mi       | strelka-manager-container:0   | ghcr.io/mmguero-dev/malcolm/strelka-manager:{{ site.malcolm.version }}       |
+suricata-offline-deployment-86d4796bf7-wpzq5  | Running | 10.42.16.222 | ReplicaSet | malcolm-651135   | 2882.76m  | 4.11Gi       | suricata-offline-container:0  | ghcr.io/mmguero-dev/malcolm/suricata:{{ site.malcolm.version }}              |
+upload-deployment-7d8886d86b-qnncd            | Running | 10.42.4.174  | ReplicaSet | malcolm-655103   | 78.27m    | 226.11Mi     | upload-container:0            | ghcr.io/mmguero-dev/malcolm/file-upload:{{ site.malcolm.version }}           |
+zeek-offline-deployment-fb7847b9b-jvtcj       | Running | 10.42.10.47  | ReplicaSet | malcolm-651493   | 3016.28m  | 3.14Gi       | zeek-offline-container:0      | ghcr.io/mmguero-dev/malcolm/zeek:{{ site.malcolm.version }}                  |
 ```
 
 The other control scripts (`stop`, `restart`, `logs`, etc.) work in a similar manner as in a Docker-based deployment. One notable difference is the `wipe` script: data on PersistentVolume storage cannot be deleted by `wipe`. It must be deleted manually on the storage media underlying the PersistentVolumes.
@@ -328,13 +347,16 @@ drwxr-xr-x 7 user user     85 Apr 24 14:35 zeek-logs
 Even before starting Malcolm, the `status` script can verify communication with the Kubernetes cluster:
 
 ```
-$ ./scripts/status -f /path/to/kubeconfig.yaml
-Node Name | Hostname | IP            | Provider ID | Instance Type | Total CPU | CPU Usage | Percent CPU | Total Memory | Memory Usage | Total Storage | Current Pods |
-agent2    | agent2   | 192.168.56.12 | agent2      | k3s           | 6000m     | 32.06m    | 0.53%       | 19.55Gi      | 346.3Mi      | 61.28Gi       | 1            |
-agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     | 26.7m     | 0.45%       | 19.55Gi      | 353.2Mi      | 61.28Gi       | 1            |
-server    | server   | 192.168.56.10 | server      | k3s           | 4000m     | 290.15m   | 7.25%       | 7.77Gi       | 1.04Gi       | 61.28Gi       | 7            |
+./scripts/status -f /path/to/kubeconfig.yml
+Node Name        | Hostname         | IP              | Provider ID      | Instance Type | Total CPU | CPU Usage | Percent CPU | Total Memory | Memory Usage | Total Storage | Current Pods |
+-----------------+------------------+-----------------+------------------+---------------+-----------+-----------+-------------+--------------+--------------+---------------+--------------|
+malcolm-462510   | malcolm-462510   | 192.168.122.37  | malcolm-462510   | k3s           | 16000m    | 17.57m    | 0.11%       | 23.49Gi      | 476.8Mi      | 58.37Gi       | 0            |
+malcolm-463728   | malcolm-463728   | 192.168.122.40  | malcolm-463728   | k3s           | 24000m    | 439.55m   | 1.83%       | 94.33Gi      | 6.18Gi       | 109.44Gi      | 0            |
+malcolm-651135   | malcolm-651135   | 192.168.122.226 | malcolm-651135   | k3s           | 48000m    | 3525.39m  | 7.34%       | 62.79Gi      | 7.58Gi       | 91.11Gi       | 0            |
+…
 
-Pod Name | State | Pod IP | Pod Kind | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts | Container Image |
+Pod Name                                      | State   | Pod IP       | Pod Kind   | Worker Node      | CPU Usage | Memory Usage | Container Name:Restarts       | Container Image                                        |
+----------------------------------------------+---------+--------------+------------+------------------+-----------+--------------+-------------------------------+--------------------------------------------------------|
 ```
 
 Run `./scripts/configure` to configure Malcolm. For an in-depth treatment of the configuration options, see the **Malcolm Configuration Menu Items** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems)**.:
@@ -553,33 +575,52 @@ Check the status of the Malcolm deployment with `./scripts/status`:
 ```
 $ ./scripts/status -f /path/to/kubeconfig.yaml
 
-Node Name | Hostname | IP            | Provider ID | Instance Type | Total CPU | CPU Usage | Percent CPU | Total Memory | Memory Usage | Total Storage | Current Pods |
-server    | server   | 192.168.56.10 | server      | k3s           | 4000m     | 47.03m    | 1.18%       | 7.77Gi       | 1.14Gi       | 61.28Gi       | 7            |
-agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     | 3677.42m  | 61.29%      | 19.55Gi      | 4.95Gi       | 61.28Gi       | 12           |
-agent2    | agent2   | 192.168.56.12 | agent2      | k3s           | 6000m     | 552.71m   | 9.21%       | 19.55Gi      | 13.27Gi      | 61.28Gi       | 12           |
+Node Name        | Hostname         | IP              | Provider ID      | Instance Type | Total CPU | CPU Usage | Percent CPU | Total Memory | Memory Usage | Total Storage | Current Pods |
+-----------------+------------------+-----------------+------------------+---------------+-----------+-----------+-------------+--------------+--------------+---------------+--------------|
+malcolm-462510   | malcolm-462510   | 192.168.122.37  | malcolm-462510   | k3s           | 16000m    | 17.57m    | 0.11%       | 23.49Gi      | 476.8Mi      | 58.37Gi       | 1            |
+malcolm-463728   | malcolm-463728   | 192.168.122.40  | malcolm-463728   | k3s           | 24000m    | 439.55m   | 1.83%       | 94.33Gi      | 6.18Gi       | 109.44Gi      | 6            |
+malcolm-651135   | malcolm-651135   | 192.168.122.226 | malcolm-651135   | k3s           | 48000m    | 3525.39m  | 7.34%       | 62.79Gi      | 7.58Gi       | 91.11Gi       | 10           |
+malcolm-651420   | malcolm-651420   | 192.168.122.30  | malcolm-651420   | k3s           | 40000m    | 384.83m   | 0.96%       | 125.79Gi     | 20.68Gi      | 91.11Gi       | 4            |
+malcolm-651490   | malcolm-651490   | 192.168.122.227 | malcolm-651490   | k3s           | 32000m    | 620.71m   | 1.94%       | 47.04Gi      | 2.88Gi       | 182.28Gi      | 5            |
+malcolm-651492   | malcolm-651492   | 192.168.122.44  | malcolm-651492   | k3s           | 32000m    | 669.12m   | 2.09%       | 62.79Gi      | 2.09Gi       | 109.44Gi      | 6            |
+malcolm-651493   | malcolm-651493   | 192.168.122.222 | malcolm-651493   | k3s           | 32000m    | 3609.89m  | 11.28%      | 62.79Gi      | 6.22Gi       | 182.28Gi      | 6            |
+malcolm-651525   | malcolm-651525   | 192.168.122.221 | malcolm-651525   | k3s           | 16000m    | 122.93m   | 0.77%       | 46.83Gi      | 1.96Gi       | 182.28Gi      | 3            |
+malcolm-655079   | malcolm-655079   | 192.168.122.32  | malcolm-655079   | k3s           | 24000m    | 237.0m    | 0.99%       | 94.32Gi      | 7.49Gi       | 109.44Gi      | 4            |
+malcolm-655103   | malcolm-655103   | 192.168.122.36  | malcolm-655103   | k3s           | 24000m    | 222.27m   | 0.93%       | 94.32Gi      | 1.24Gi       | 109.44Gi      | 4            |
+malcolm-655119   | malcolm-655119   | 192.168.122.43  | malcolm-655119   | k3s           | 24000m    | 1098.66m  | 4.58%       | 94.32Gi      | 18.92Gi      | 109.44Gi      | 5            |
+malcolm-655152   | malcolm-655152   | 192.168.122.46  | malcolm-655152   | k3s           | 12000m    | 67.06m    | 0.56%       | 46.82Gi      | 689.14Mi     | 3665.02Gi     | 2            |
+malcolm-655153   | malcolm-655153   | 192.168.122.34  | malcolm-655153   | k3s           | 12000m    | 85.8m     | 0.71%       | 46.82Gi      | 1.05Gi       | 455.95Gi      | 4            |
+malcolm-655154   | malcolm-655154   | 192.168.122.38  | malcolm-655154   | k3s           | 12000m    | 76.03m    | 0.63%       | 46.82Gi      | 2.01Gi       | 109.44Gi      | 3            |
+malcolm-655155   | malcolm-655155   | 192.168.122.42  | malcolm-655155   | k3s           | 12000m    | 40.7m     | 0.34%       | 46.82Gi      | 698.82Mi     | 109.44Gi      | 3            |
+malcolm-655160   | malcolm-655160   | 192.168.122.35  | malcolm-655160   | k3s           | 12000m    | 22.76m    | 0.19%       | 46.82Gi      | 582.74Mi     | 109.44Gi      | 2            |
+malcolm-673112   | malcolm-673112   | 192.168.122.41  | malcolm-673112   | k3s           | 12000m    | 24.96m    | 0.21%       | 30.72Gi      | 532.43Mi     | 455.95Gi      | 2            |
+malcolm-681270   | malcolm-681270   | 192.168.122.47  | malcolm-681270   | k3s           | 12000m    | 70.45m    | 0.59%       | 30.72Gi      | 596.16Mi     | 455.95Gi      | 2            |
 
-Pod Name                                       | State   | Pod IP     | Pod Kind   | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts        | Container Image              |
-redis-cache-deployment-5f77d47b8b-jr9nt        | Running | 10.42.2.6  | ReplicaSet | agent2      | 1.89m     | 7.24Mi       | redis-cache-container:0        | redis:{{ site.malcolm.version }}             |
-redis-deployment-5bcd8f6c96-bkzmh              | Running | 10.42.2.5  | ReplicaSet | agent2      | 1.62m     | 7.52Mi       | redis-container:0              | redis:{{ site.malcolm.version }}             |
-dashboards-helper-deployment-69dc54f6b6-ks7ps  | Running | 10.42.2.4  | ReplicaSet | agent2      | 12.95m    | 40.75Mi      | dashboards-helper-container:0  | dashboards-helper:{{ site.malcolm.version }} |
-freq-deployment-cfd84fd97-5bwp6                | Running | 10.42.2.8  | ReplicaSet | agent2      | 0.11m     | 26.33Mi      | freq-container:0               | freq:{{ site.malcolm.version }}              |
-pcap-capture-deployment-7c8bf6957-hkvkn        | Running | 10.42.2.12 | ReplicaSet | agent2      | 0.02m     | 9.21Mi       | pcap-capture-container:0       | pcap-capture:{{ site.malcolm.version }}      |
-nginx-proxy-deployment-69fcc4968d-m57rz        | Running | 10.42.2.10 | ReplicaSet | agent2      | 0.91m     | 22.72Mi      | nginx-proxy-container:0        | nginx-proxy:{{ site.malcolm.version }}       |
-htadmin-deployment-6fc46888b9-vpt7l            | Running | 10.42.2.7  | ReplicaSet | agent2      | 0.16m     | 30.21Mi      | htadmin-container:0            | htadmin:{{ site.malcolm.version }}           |
-opensearch-deployment-75498799f6-5v92w         | Running | 10.42.2.13 | ReplicaSet | agent2      | 139.2m    | 10.86Gi      | opensearch-container:0         | opensearch:{{ site.malcolm.version }}        |
-zeek-live-deployment-64b69d4b6f-fcb6n          | Running | 10.42.2.9  | ReplicaSet | agent2      | 0.02m     | 109.55Mi     | zeek-live-container:0          | zeek:{{ site.malcolm.version }}              |
-dashboards-deployment-69b5465db-kgsqk          | Running | 10.42.2.3  | ReplicaSet | agent2      | 14.98m    | 108.85Mi     | dashboards-container:0         | dashboards:{{ site.malcolm.version }}        |
-arkime-deployment-56999cdd66-xxpw9             | Running | 10.42.2.11 | ReplicaSet | agent2      | 208.95m   | 78.42Mi      | arkime-container:0             | arkime:{{ site.malcolm.version }}            |
-api-deployment-6f4686cf59-xt9md                | Running | 10.42.1.3  | ReplicaSet | agent1      | 0.14m     | 56.88Mi      | api-container:0                | api:{{ site.malcolm.version }}               |
-postgres-deployment-5879b8dffc-lb4qm           | Running | 10.42.1.6  | ReplicaSet | agent1      | 141.2m    | 48.02Mi      | postgres-container:0           | postgresql:{{ site.malcolm.version }}        |
-pcap-monitor-deployment-594ff674c4-fwq7g       | Running | 10.42.1.12 | ReplicaSet | agent1      | 3.93m     | 46.44Mi      | pcap-monitor-container:0       | pcap-monitor:{{ site.malcolm.version }}      |
-suricata-offline-deployment-6ccdb89478-j5fgj   | Running | 10.42.1.10 | ReplicaSet | agent1      | 10.42m    | 35.12Mi      | suricata-offline-container:0   | suricata:{{ site.malcolm.version }}          |
-suricata-live-deployment-6494c77759-rpt48      | Running | 10.42.1.8  | ReplicaSet | agent1      | 0.01m     | 9.62Mi       | suricata-live-container:0      | suricata:{{ site.malcolm.version }}          |
-netbox-deployment-cdcff4977-7ns2q              | Running | 10.42.1.7  | ReplicaSet | agent1      | 830.47m   | 530.7Mi      | netbox-container:0             | netbox:{{ site.malcolm.version }}            |
-zeek-offline-deployment-844f4865bd-7x68b       | Running | 10.42.1.9  | ReplicaSet | agent1      | 1.44m     | 43.66Mi      | zeek-offline-container:0       | zeek:{{ site.malcolm.version }}              |
-filebeat-deployment-6ff8bc444f-pdgzj           | Running | 10.42.1.11 | ReplicaSet | agent1      | 0.78m     | 75.25Mi      | filebeat-container:0           | filebeat-oss:{{ site.malcolm.version }}      |
-upload-deployment-586568844b-9s7f5             | Running | 10.42.1.13 | ReplicaSet | agent1      | 0.14m     | 29.62Mi      | upload-container:0             | file-upload:{{ site.malcolm.version }}       |
-logstash-deployment-6fbc9fdcd5-2hhx8           | Running | 10.42.1.5  | ReplicaSet | agent1      | 3236.29m  | 357.36Mi     | logstash-container:0           | logstash-oss:{{ site.malcolm.version }}      |
+Pod Name                                      | State   | Pod IP       | Pod Kind   | Worker Node      | CPU Usage | Memory Usage | Container Name:Restarts       | Container Image                                        |
+----------------------------------------------+---------+--------------+------------+------------------+-----------+--------------+-------------------------------+--------------------------------------------------------|
+api-deployment-7fff7bf884-84prz               | Running | 10.42.2.226  | ReplicaSet | malcolm-651525   | 0.12m     | 68.89Mi      | api-container:0               | ghcr.io/mmguero-dev/malcolm/api:{{ site.malcolm.version }}                   |
+arkime-deployment-68946dffcb-fx8nl            | Running | 10.42.13.42  | ReplicaSet | malcolm-651490   | 309.86m   | 1.01Gi       | arkime-container:0            | ghcr.io/mmguero-dev/malcolm/arkime:{{ site.malcolm.version }}                |
+dashboards-deployment-6456f67fb4-jhnqf        | Running | 10.42.11.184 | ReplicaSet | malcolm-463728   | 85.4m     | 215.95Mi     | dashboards-container:0        | ghcr.io/mmguero-dev/malcolm/dashboards:{{ site.malcolm.version }}            |
+dashboards-helper-deployment-7d5d8c5ddf-tphbx | Running | 10.42.17.23  | ReplicaSet | malcolm-655152   | 8.56m     | 47.26Mi      | dashboards-helper-container:0 | ghcr.io/mmguero-dev/malcolm/dashboards-helper:{{ site.malcolm.version }}     |
+filebeat-deployment-855578fd56-wxz5t          | Running | 10.42.16.223 | ReplicaSet | malcolm-651135   | 5.77m     | 278.45Mi     | filebeat-container:0          | ghcr.io/mmguero-dev/malcolm/filebeat-oss:{{ site.malcolm.version }}          |
+filescan-deployment-7b675999dd-m7sx8          | Running | 10.42.2.227  | ReplicaSet | malcolm-651525   | 4.32m     | 204.33Mi     | filescan-container:0          | ghcr.io/mmguero-dev/malcolm/filescan:{{ site.malcolm.version }}              |
+freq-deployment-5dbf7fd958-xdm4j              | Running | 10.42.9.23   | ReplicaSet | malcolm-655155   | 1.13m     | 36.59Mi      | freq-container:0              | ghcr.io/mmguero-dev/malcolm/freq:{{ site.malcolm.version }}                  |
+htadmin-deployment-6779876475-h5wwh           | Running | 10.42.10.48  | ReplicaSet | malcolm-651493   | 0.26m     | 43.36Mi      | htadmin-container:0           | ghcr.io/mmguero-dev/malcolm/htadmin:{{ site.malcolm.version }}               |
+keycloak-deployment-7fd4bdff5c-fkzxs          | Running | 10.42.9.24   | ReplicaSet | malcolm-655155   | 0.03m     | 11.07Mi      | keycloak-container:0          | ghcr.io/mmguero-dev/malcolm/keycloak:{{ site.malcolm.version }}              |
+logstash-deployment-5bbcc5b775-bjk59          | Running | 10.42.11.185 | ReplicaSet | malcolm-463728   | 68.84m    | 3.97Gi       | logstash-container:0          | ghcr.io/mmguero-dev/malcolm/logstash-oss:{{ site.malcolm.version }}          |
+netbox-deployment-987476c89-6vznb             | Running | 10.42.16.224 | ReplicaSet | malcolm-651135   | 428.2m    | 1.09Gi       | netbox-container:0            | ghcr.io/mmguero-dev/malcolm/netbox:{{ site.malcolm.version }}                |
+nginx-proxy-deployment-6d9b9858fd-q9w5z       | Running | 10.42.3.140  | ReplicaSet | malcolm-655079   | 13.07m    | 25.78Mi      | nginx-proxy-container:0       | ghcr.io/mmguero-dev/malcolm/nginx-proxy:{{ site.malcolm.version }}           |
+opensearch-deployment-6c546f45b9-n4czl        | Running | 10.42.7.165  | ReplicaSet | malcolm-655119   | 887.36m   | 17.8Gi       | opensearch-container:0        | ghcr.io/mmguero-dev/malcolm/opensearch:{{ site.malcolm.version }}            |
+pcap-monitor-deployment-66dbd9c68f-22tkm      | Running | 10.42.10.46  | ReplicaSet | malcolm-651493   | 183.31m   | 867.33Mi     | pcap-monitor-container:0      | ghcr.io/mmguero-dev/malcolm/pcap-monitor:{{ site.malcolm.version }}          |
+postgres-deployment-5c78f478fb-nl4zn          | Running | 10.42.15.210 | ReplicaSet | malcolm-651492   | 472.87m   | 85.33Mi      | postgres-container:0          | ghcr.io/mmguero-dev/malcolm/postgresql:{{ site.malcolm.version }}            |
+redis-cache-deployment-5c776698fc-dvbp2       | Running | 10.42.5.20   | ReplicaSet | malcolm-655154   | 9.58m     | 10.18Mi      | redis-cache-container:0       | ghcr.io/mmguero-dev/malcolm/redis:{{ site.malcolm.version }}                 |
+redis-deployment-75486865c5-4xscs             | Running | 10.42.15.209 | ReplicaSet | malcolm-651492   | 9.66m     | 10.04Mi      | redis-container:0             | ghcr.io/mmguero-dev/malcolm/redis:{{ site.malcolm.version }}                 |
+strelka-backend-deployment-6dcf7ccdcc-xjbxx   | Running | 10.42.5.21   | ReplicaSet | malcolm-655154   | 4.72m     | 1.18Gi       | strelka-backend-container:0   | ghcr.io/mmguero-dev/malcolm/strelka-backend:{{ site.malcolm.version }}       |
+strelka-frontend-deployment-6988c75f8c-gmf8c  | Running | 10.42.6.23   | ReplicaSet | malcolm-655160   | 0.03m     | 8.02Mi       | strelka-frontend-container:0  | ghcr.io/mmguero-dev/malcolm/strelka-frontend:{{ site.malcolm.version }}      |
+strelka-manager-deployment-f578ccc7-2vw7l     | Running | 10.42.12.15  | ReplicaSet | malcolm-681270   | 2.41m     | 7.57Mi       | strelka-manager-container:0   | ghcr.io/mmguero-dev/malcolm/strelka-manager:{{ site.malcolm.version }}       |
+suricata-offline-deployment-86d4796bf7-wpzq5  | Running | 10.42.16.222 | ReplicaSet | malcolm-651135   | 2882.76m  | 4.11Gi       | suricata-offline-container:0  | ghcr.io/mmguero-dev/malcolm/suricata:{{ site.malcolm.version }}              |
+upload-deployment-7d8886d86b-qnncd            | Running | 10.42.4.174  | ReplicaSet | malcolm-655103   | 78.27m    | 226.11Mi     | upload-container:0            | ghcr.io/mmguero-dev/malcolm/file-upload:{{ site.malcolm.version }}           |
+zeek-offline-deployment-fb7847b9b-jvtcj       | Running | 10.42.10.47  | ReplicaSet | malcolm-651493   | 3016.28m  | 3.14Gi       | zeek-offline-container:0      | ghcr.io/mmguero-dev/malcolm/zeek:{{ site.malcolm.version }}                  |
 ```
 
 View container logs for the Malcolm deployment with `./scripts/logs` (if **[stern](https://github.com/stern/stern)** present in `$PATH`):
