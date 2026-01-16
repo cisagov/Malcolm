@@ -156,7 +156,7 @@ if [[ -d "$PIPELINES_DIR"/input ]]; then
         CONDITIONAL="else if"
       fi
 
-      PIPELINE_ID="route_to_$(printf '%s' "${PIPELINE}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')"
+      PIPELINE_ID="route_input_to_$(printf '%s' "${PIPELINE}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')"
       cat <<EOF
   ${CONDITIONAL} ${CONDITIONS} {
     pipeline {

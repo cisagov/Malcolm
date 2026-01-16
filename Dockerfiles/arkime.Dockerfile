@@ -106,7 +106,6 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       curl \
       ethtool \
       file \
-      geoip-bin \
       git \
       gzip \
       inotify-tools \
@@ -129,6 +128,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       libzmq5 \
       lua5.4 \
       lzma \
+      mmdb-bin \
       p7zip-full \
       procps \
       psmisc \
