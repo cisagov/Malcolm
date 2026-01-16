@@ -150,6 +150,11 @@ services:
       - type: bind
         bind:
           create_host_path: false
+        source: ./filescan-logs
+        target: /filescan
+      - type: bind
+        bind:
+          create_host_path: false
         source: ./filebeat/certs/ca.crt
         target: /certs/ca.crt
         read_only: true
@@ -184,13 +189,18 @@ services:
           create_host_path: false
         source: ./arkime/lua
         target: /opt/arkime/lua
-        read_only: true        
+        read_only: true
       - type: bind
         bind:
           create_host_path: false
         source: ./arkime/rules
         target: /opt/arkime/rules
         read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./arkime/etc/wise.ini
+        target: /opt/arkime/wiseini/wise.ini
       - type: bind
         bind:
           create_host_path: false
@@ -215,12 +225,18 @@ services:
           create_host_path: false
         source: ./arkime/lua
         target: /opt/arkime/lua
-        read_only: true        
+        read_only: true
       - type: bind
         bind:
           create_host_path: false
         source: ./arkime/rules
         target: /opt/arkime/rules
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./arkime/etc/wise.ini
+        target: /opt/arkime/wiseini/wise.ini
         read_only: true
       - type: bind
         bind:
@@ -345,6 +361,79 @@ services:
         source: ./suricata/include-configs
         target: /opt/suricata/include-configs
         read_only: true
+  filescan:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/extract_files
+        target: /zeek/extract_files
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./filescan-logs
+        target: /filescan/data/logs
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/extract_files/filescan
+        target: /filescan/data/files
+        read_only: true
+  strelka-backend:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./strelka/config/backend/
+        target: /etc/strelka/configmap
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./yara/rules
+        target: /yara-rules/custom
+        read_only: true
+  strelka-frontend:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./strelka/config/frontend/
+        target: /etc/strelka/configmap
+        read_only: true
+      - strelka-logs:/var/log/strelka/
+  strelka-manager:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./strelka/config/manager/
+        target: /etc/strelka/configmap
+        read_only: true
   pcap-capture:
     volumes:
       - type: bind
@@ -433,7 +522,7 @@ services:
         bind:
           create_host_path: false
         source: ./netbox/config
-        target: /etc/netbox/config
+        target: /etc/netbox/config/configmap
         read_only: true
       - type: bind
         bind:
@@ -499,6 +588,14 @@ services:
           create_host_path: false
         source: ./.opensearch.primary.curlrc
         target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+  keycloak:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
         read_only: true
   nginx-proxy:
     volumes:

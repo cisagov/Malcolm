@@ -630,7 +630,7 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
 --- Malcolm Configuration Menu ---
 …
 │   ├── 18. Logstash Host (current: malcolm.home.arpa:5044)
-│   ├── 19. Malcolm Reachback ACL (current: ['192.168.122.1', '192.168.122.5', '10.9.0.215'])
+│   ├── 19. Malcolm Reachback ACL (current: ['192.168.122.1', '192.168.122.5', '10.0.0.130'])
 │   └── 20. Primary Document Store (current: opensearch-remote)
 │       ├── 21. Primary OpenSearch/Elasticsearch URL (current: https://malcolm.home.arpa:9200)
 …

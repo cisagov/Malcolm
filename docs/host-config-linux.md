@@ -546,56 +546,33 @@ Note that the first time Podman Malcolm starts the Malcolm containers it may tak
 Once Malcolm has started, the `./scripts/status` and/or `podman ps` commands will show its containers running under Podman:
 
 ```bash
-$ podman ps -a
-CONTAINER ID  IMAGE                                               COMMAND               CREATED         STATUS                   PORTS                                   NAMES
-6bd2db077d68  ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}            /usr/bin/supervis...  16 minutes ago  Up 3 minutes (healthy)   80/tcp                                  malcolm-htadmin-1
-3a4dc9176d1f  ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}               /usr/local/bin/su...  16 minutes ago  Up 3 minutes (healthy)   10004/tcp                               malcolm-freq-1
-f2e8ea0dea61  ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}       /usr/local/bin/su...  16 minutes ago  Up 3 minutes (healthy)                                           malcolm-pcap-capture-1
-18b0fda0d0b6  ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}              sh -c redis-serve...  16 minutes ago  Up 3 minutes (healthy)   6379/tcp                                malcolm-redis-1
-1c973d038a5a  ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}         /usr/bin/docker-e...  16 minutes ago  Up 3 minutes (healthy)   5432/tcp                                malcolm-postgres-1
-8b5f0dfddb38  ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}              sh -c redis-serve...  16 minutes ago  Up 3 minutes (healthy)   6379/tcp                                malcolm-redis-cache-1
-1554d34dfa81  ghcr.io/idaholab/malcolm/keycloak:{{ site.malcolm.version }}           /opt/keycloak/bin...  16 minutes ago  Up 3 minutes (healthy)   8080/tcp, 8443/tcp, 9000/tcp            malcolm-keycloak-1
-9a84d9417554  ghcr.io/idaholab/malcolm/api:{{ site.malcolm.version }}                gunicorn --bind 0...  16 minutes ago  Up 3 minutes (healthy)   5000/tcp                                malcolm-api-1
-0b531d4255c4  ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}           /usr/local/bin/su...  16 minutes ago  Up 3 minutes (healthy)                                           malcolm-suricata-live-1
-de2d8b986c95  ghcr.io/idaholab/malcolm/file-upload:{{ site.malcolm.version }}        /usr/local/bin/su...  16 minutes ago  Up 3 minutes (healthy)   22/tcp, 80/tcp                          malcolm-upload-1
-e774e99c3364  ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}           /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)                                           malcolm-suricata-1
-e4607af64749  ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}         /usr/share/opense...  15 minutes ago  Up 3 minutes (healthy)   9200/tcp, 9300/tcp, 9600/tcp, 9650/tcp  malcolm-opensearch-1
-48aa56016aef  ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}             /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)   8000/tcp, 8005/tcp, 8081/tcp            malcolm-arkime-live-1
-f7e7ab1c457b  ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}               /usr/local/bin/su...  15 minutes ago  Up 3 minutes (healthy)                                           malcolm-zeek-live-1
-cf7fc1c029a1  ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}       /usr/local/bin/su...  14 minutes ago  Up 3 minutes (healthy)                                           malcolm-filebeat-1
-f96db0e5bf67  ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}               /usr/local/bin/su...  13 minutes ago  Up 3 minutes (healthy)                                           malcolm-zeek-1
-42f8aab398a9  ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}       /usr/local/bin/su...  13 minutes ago  Up 3 minutes (starting)  5044/tcp, 9001/tcp, 9600/tcp            malcolm-logstash-1
-f9e59777bb96  ghcr.io/idaholab/malcolm/netbox:{{ site.malcolm.version }}             /opt/netbox/docke...  13 minutes ago  Up 3 minutes (healthy)   9001/tcp                                malcolm-netbox-1
-f88d6aed3d41  ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}             /usr/local/bin/su...  13 minutes ago  Up 3 minutes (healthy)   8000/tcp, 8005/tcp, 8081/tcp            malcolm-arkime-1
-a10f00dc1618  ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}       /usr/local/bin/su...  13 minutes ago  Up 3 minutes (healthy)   30441/tcp                               malcolm-pcap-monitor-1
-f9f50b87005e  ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}  /usr/local/bin/su...  13 minutes ago  Up 3 minutes (healthy)   28991/tcp                               malcolm-dashboards-helper-1
-5d7329c4f689  ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}         /usr/share/opense...  10 minutes ago  Up 3 minutes (healthy)   5601/tcp                                malcolm-dashboards-1
-be14c59880ef  ghcr.io/idaholab/malcolm/nginx-proxy:{{ site.malcolm.version }}        /usr/bin/supervis...  3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:443->443/tcp                    malcolm-nginx-proxy-1
-
 $ ./scripts/status
-NAME                          IMAGE                                                COMMAND                  SERVICE             CREATED          STATUS         PORTS
-malcolm-api-1                 ghcr.io/idaholab/malcolm/api:{{ site.malcolm.version }}                 "gunicorn --bind 0:5…"   api                 16 minutes ago   Up 3 minutes   5000/tcp
-malcolm-arkime-1              ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}              "/usr/local/bin/supe…"   arkime              13 minutes ago   Up 3 minutes   8000/tcp, 8005/tcp, 8081/tcp
-malcolm-arkime-live-1         ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}              "/usr/local/bin/supe…"   arkime-live         15 minutes ago   Up 3 minutes
-malcolm-dashboards-1          ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}          "/usr/share/opensear…"   dashboards          10 minutes ago   Up 3 minutes   5601/tcp
-malcolm-dashboards-helper-1   ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}   "/usr/local/bin/supe…"   dashboards-helper   13 minutes ago   Up 3 minutes   28991/tcp
-malcolm-file-monitor-1        ghcr.io/idaholab/malcolm/file-monitor:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   file-monitor        15 minutes ago   Up 3 minutes   3310/tcp, 8006/tcp
-malcolm-filebeat-1            ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   filebeat            14 minutes ago   Up 3 minutes
-malcolm-freq-1                ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}                "/usr/local/bin/supe…"   freq                17 minutes ago   Up 3 minutes   10004/tcp
-malcolm-htadmin-1             ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}             "/usr/bin/supervisor…"   htadmin             17 minutes ago   Up 3 minutes   80/tcp
-malcolm-keycloak-1            ghcr.io/idaholab/malcolm/keycloak:{{ site.malcolm.version }}            "/opt/keycloak/bin/k…"   keycloak            16 minutes ago   Up 3 minutes   8080/tcp, 8443/tcp, 9000/tcp
-malcolm-logstash-1            ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   logstash            13 minutes ago   Up 3 minutes   5044/tcp, 9001/tcp, 9600/tcp
-malcolm-netbox-1              ghcr.io/idaholab/malcolm/netbox:{{ site.malcolm.version }}              "/opt/netbox/docker-…"   netbox              13 minutes ago   Up 3 minutes   9001/tcp
-malcolm-nginx-proxy-1         ghcr.io/idaholab/malcolm/nginx-proxy:{{ site.malcolm.version }}         "/usr/bin/supervisor…"   nginx-proxy         3 minutes ago    Up 3 minutes   0.0.0.0:443->443/tcp
-malcolm-opensearch-1          ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}          "/usr/share/opensear…"   opensearch          16 minutes ago   Up 3 minutes   9200/tcp, 9300/tcp, 9600/tcp, 9650/tcp
-malcolm-pcap-capture-1        ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   pcap-capture        16 minutes ago   Up 3 minutes
-malcolm-pcap-monitor-1        ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}        "/usr/local/bin/supe…"   pcap-monitor        13 minutes ago   Up 3 minutes   30441/tcp
-malcolm-postgres-1            ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}          "/usr/bin/docker-ent…"   postgres            16 minutes ago   Up 3 minutes   5432/tcp
-malcolm-redis-1               ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}               "sh -c redis-server …"   redis               16 minutes ago   Up 3 minutes   6379/tcp
-malcolm-redis-cache-1         ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}               "sh -c redis-server …"   redis-cache         16 minutes ago   Up 3 minutes   6379/tcp
-malcolm-suricata-1            ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}            "/usr/local/bin/supe…"   suricata            16 minutes ago   Up 3 minutes
-malcolm-suricata-live-1       ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}            "/usr/local/bin/supe…"   suricata-live       16 minutes ago   Up 3 minutes
-malcolm-upload-1              ghcr.io/idaholab/malcolm/file-upload:{{ site.malcolm.version }}         "/usr/local/bin/supe…"   upload              16 minutes ago   Up 3 minutes   22/tcp, 80/tcp
-malcolm-zeek-1                ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}                "/usr/local/bin/supe…"   zeek                13 minutes ago   Up 3 minutes
-malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}                "/usr/local/bin/supe…"   zeek-live           15 minutes ago   Up 3 minutes
+NAME                                   IMAGE                                                COMMAND                  SERVICE             CREATED         STATUS                   PORTS
+malcolm-pipeline-api-1                 ghcr.io/idaholab/malcolm/api:{{ site.malcolm.version }}                 "/usr/bin/tini -- /u…"   api                 8 minutes ago   Up 8 minutes (healthy)   5000/tcp
+malcolm-pipeline-arkime-1              ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}              "/usr/bin/tini -- /u…"   arkime              8 minutes ago   Up 8 minutes (healthy)   8000/tcp, 8005/tcp, 8081/tcp
+malcolm-pipeline-arkime-live-1         ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}              "/usr/bin/tini -- /u…"   arkime-live         8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-dashboards-1          ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}          "/usr/bin/tini -- /u…"   dashboards          8 minutes ago   Up 8 minutes (healthy)   5601/tcp
+malcolm-pipeline-dashboards-helper-1   ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}   "/usr/bin/tini -- /u…"   dashboards-helper   8 minutes ago   Up 8 minutes (healthy)   28991/tcp
+malcolm-pipeline-filebeat-1            ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}        "/usr/bin/tini -- /u…"   filebeat            8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-filescan-1            ghcr.io/idaholab/malcolm/filescan:{{ site.malcolm.version }}            "/usr/bin/tini -- /u…"   filescan            8 minutes ago   Up 8 minutes (healthy)   8001/tcp, 8006/tcp
+malcolm-pipeline-freq-1                ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}                "/usr/bin/tini -- /u…"   freq                8 minutes ago   Up 8 minutes (healthy)   10004/tcp
+malcolm-pipeline-htadmin-1             ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}             "/usr/bin/tini -- /u…"   htadmin             8 minutes ago   Up 8 minutes (healthy)   80/tcp
+malcolm-pipeline-keycloak-1            ghcr.io/idaholab/malcolm/keycloak:{{ site.malcolm.version }}            "/usr/bin/tini -- /u…"   keycloak            8 minutes ago   Up 8 minutes (healthy)   8080/tcp, 8443/tcp, 9000/tcp
+malcolm-pipeline-logstash-1            ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}        "/usr/bin/tini -- /u…"   logstash            8 minutes ago   Up 8 minutes (healthy)   5044/tcp, 9001/tcp, 9600/tcp
+malcolm-pipeline-netbox-1              ghcr.io/idaholab/malcolm/netbox:{{ site.malcolm.version }}              "/usr/bin/tini -- /u…"   netbox              8 minutes ago   Up 8 minutes (healthy)   9001/tcp
+malcolm-pipeline-nginx-proxy-1         ghcr.io/idaholab/malcolm/nginx-proxy:{{ site.malcolm.version }}         "/sbin/tini -- /usr/…"   nginx-proxy         8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-opensearch-1          ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}          "/usr/bin/tini -- /u…"   opensearch          8 minutes ago   Up 8 minutes (healthy)   9200/tcp, 9300/tcp, 9600/tcp, 9650/tcp
+malcolm-pipeline-pcap-capture-1        ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}        "/usr/bin/tini -- /u…"   pcap-capture        8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-pcap-monitor-1        ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}        "/usr/bin/tini -- /u…"   pcap-monitor        8 minutes ago   Up 8 minutes (healthy)   30441/tcp
+malcolm-pipeline-postgres-1            ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}          "/sbin/tini -- /usr/…"   postgres            8 minutes ago   Up 8 minutes (healthy)   5432/tcp
+malcolm-pipeline-redis-1               ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}               "/sbin/tini -- /usr/…"   redis               8 minutes ago   Up 8 minutes (healthy)   6379/tcp
+malcolm-pipeline-redis-cache-1         ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}               "/sbin/tini -- /usr/…"   redis-cache         8 minutes ago   Up 8 minutes (healthy)   6379/tcp
+malcolm-pipeline-strelka-backend-1     ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}     "/usr/bin/tini -- /u…"   strelka-backend     8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-strelka-frontend-1    ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}    "/sbin/tini -- /usr/…"   strelka-frontend    8 minutes ago   Up 8 minutes (healthy)   57314/tcp
+malcolm-pipeline-strelka-manager-1     ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}     "/sbin/tini -- /usr/…"   strelka-manager     8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-suricata-1            ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}            "/usr/bin/tini -- /u…"   suricata            8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-suricata-live-1       ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}            "/usr/bin/tini -- /u…"   suricata-live       8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-upload-1              ghcr.io/idaholab/malcolm/file-upload:{{ site.malcolm.version }}         "/usr/bin/tini -- /u…"   upload              8 minutes ago   Up 8 minutes (healthy)   22/tcp, 80/tcp
+malcolm-pipeline-zeek-1                ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}                "/usr/bin/tini -- /u…"   zeek                8 minutes ago   Up 8 minutes (healthy)
+malcolm-pipeline-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}                "/usr/bin/tini -- /u…"   zeek-live           8 minutes ago   Up 8 minutes (healthy)
 ```

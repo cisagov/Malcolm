@@ -56,7 +56,7 @@ Forward Logstash logs to a secondary remote document store? (y / N): y
 2: elasticsearch-remote - remote Elasticsearch
 Select secondary Malcolm document store: 1
 
-Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200) (): https://10.9.0.216:9200
+Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200) (): https://10.0.0.130:9200
 
 Require SSL certificate validation for communication with secondary remote OpenSearch instance? (y / N): n
 

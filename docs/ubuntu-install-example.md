@@ -275,92 +275,80 @@ As an alternative to manually copying the files to the sensor, Malcolm can facil
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) by running `docker compose --profile malcolm pull` or the [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) convenience script.
 ```
 user@host:~/Malcolm$ docker compose --profile malcolm pull
-[+] Pulling 23/23
- ✔ suricata Skipped - Image is already being pulled by suricata-live
- ✔ netbox-redis Skipped - Image is already being pulled by netbox-redis-cache
- ✔ arkime-live Skipped - Image is already being pulled by arkime
- ✔ zeek-live Skipped - Image is already being pulled by zeek
+[+] Pulling 27/27
  ✔ api Pulled
  ✔ arkime Pulled
+ ✔ arkime-live Pulled
  ✔ dashboards Pulled
  ✔ dashboards-helper Pulled
  ✔ filebeat Pulled
+ ✔ filescan Pulled
  ✔ freq Pulled
  ✔ htadmin Pulled
  ✔ keycloak Pulled
  ✔ logstash Pulled
  ✔ netbox Pulled
- ✔ netbox-redis-cache Pulled
  ✔ nginx-proxy Pulled
  ✔ opensearch Pulled
  ✔ pcap-capture Pulled
  ✔ pcap-monitor Pulled
  ✔ postgres Pulled
+ ✔ redis Pulled
+ ✔ redis-cache Pulled
+ ✔ strelka-backend Pulled
+ ✔ strelka-frontend Pulled
+ ✔ strelka-manager Pulled
+ ✔ suricata Pulled
  ✔ suricata-live Pulled
  ✔ upload Pulled
  ✔ zeek Pulled
+ ✔ zeek-live Pulled
+
 
 user@host:~/Malcolm$ docker images
-REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-ghcr.io/idaholab/malcolm/api                 {{ site.malcolm.version }}   ed92d05a5485   5 weeks ago   165MB
-ghcr.io/idaholab/malcolm/arkime              {{ site.malcolm.version }}   8c6bc6d79e1b   4 weeks ago   835MB
-ghcr.io/idaholab/malcolm/dashboards          {{ site.malcolm.version }}   a35265cbde35   4 weeks ago   1.55GB
-ghcr.io/idaholab/malcolm/dashboards-helper   {{ site.malcolm.version }}   7ca0c53c745f   4 weeks ago   253MB
-ghcr.io/idaholab/malcolm/file-upload         {{ site.malcolm.version }}   40468de667cf   5 weeks ago   250MB
-ghcr.io/idaholab/malcolm/filebeat-oss        {{ site.malcolm.version }}   6e08f4a8621e   4 weeks ago   433MB
-ghcr.io/idaholab/malcolm/freq                {{ site.malcolm.version }}   7a64594a7c6b   5 weeks ago   155MB
-ghcr.io/idaholab/malcolm/htadmin             {{ site.malcolm.version }}   098e5a4d1974   5 weeks ago   247MB
-ghcr.io/idaholab/malcolm/keycloak            {{ site.malcolm.version }}   22696a0e27ea   5 weeks ago   533MB
-ghcr.io/idaholab/malcolm/logstash-oss        {{ site.malcolm.version }}   ef10cbc5053f   4 weeks ago   1.57GB
-ghcr.io/idaholab/malcolm/netbox              {{ site.malcolm.version }}   8dcbc152a9b9   4 weeks ago   1.78GB
-ghcr.io/idaholab/malcolm/nginx-proxy         {{ site.malcolm.version }}   ee2dac715efc   4 weeks ago   157MB
-ghcr.io/idaholab/malcolm/opensearch          {{ site.malcolm.version }}   b66dd0922d21   5 weeks ago   1.54GB
-ghcr.io/idaholab/malcolm/pcap-capture        {{ site.malcolm.version }}   830b7d682693   5 weeks ago   139MB
-ghcr.io/idaholab/malcolm/pcap-monitor        {{ site.malcolm.version }}   ff3fa6dec5da   5 weeks ago   178MB
-ghcr.io/idaholab/malcolm/postgresql          {{ site.malcolm.version }}   11fd6170d5d5   5 weeks ago   335MB
-ghcr.io/idaholab/malcolm/redis               {{ site.malcolm.version }}   f876b484bf9d   5 weeks ago   51.1MB
-ghcr.io/idaholab/malcolm/suricata            {{ site.malcolm.version }}   0c40ac0d8005   5 weeks ago   353MB
-ghcr.io/idaholab/malcolm/zeek                {{ site.malcolm.version }}   1ccdbea08109   4 weeks ago   1.35GB
+IMAGE                                                       ID             DISK USAGE   CONTENT SIZE   EXTRA
+ghcr.io/idaholab/malcolm/api:{{ site.malcolm.version }}                        0ba697568f70        201MB             0B   U
+ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}                     54a12ceafb40        861MB             0B   U
+ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}          0bef31d3d258        233MB             0B   U
+ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}                 1cdc4634a78a        1.8GB             0B   U
+ghcr.io/idaholab/malcolm/file-upload:{{ site.malcolm.version }}                8f0cf3fbb34e        309MB             0B   U
+ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}               681c3b86c47b        470MB             0B   U
+ghcr.io/idaholab/malcolm/filescan:{{ site.malcolm.version }}                   f7d43d90d09a        363MB             0B   U
+ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}                       12cb29c77aae        167MB             0B   U
+ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}                    7fabfc1d8671        247MB             0B   U
+ghcr.io/idaholab/malcolm/keycloak:{{ site.malcolm.version }}                   9e61d35dcec9        549MB             0B   U
+ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}               687504dbda6d       1.54GB             0B   U
+ghcr.io/idaholab/malcolm/netbox:{{ site.malcolm.version }}                     9486029468ec       2.18GB             0B   U
+ghcr.io/idaholab/malcolm/nginx-proxy:{{ site.malcolm.version }}                a9835ddbc2a5        180MB             0B   U
+ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}                 75f2c09f0447       1.91GB             0B   U
+ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}               672a7e07d8b7        174MB             0B   U
+ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}               2bf4908adc58        198MB             0B   U
+ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}                 a65a70c670d7        336MB             0B   U
+ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                      5f6dcf55d0d2       52.5MB             0B   U
+ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}            17087ff5ee30       3.63GB             0B   U
+ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}           0f871f660102       81.8MB             0B   U
+ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}            a582a74cdb87       54.8MB             0B   U
+ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}                   11f1f4b74f1d        362MB             0B   U
+ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}                       ccbcc3bb894d       1.56GB             0B   U
 ```
 
 ## <a name="StartMalcolm"></a>Starting Malcolm
 
-Finally, [start Malcolm](running.md#Starting). When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing.
+Finally, [start Malcolm](running.md#Starting). When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing. It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes.
+
+Users will know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this, after which the `start` will return to the command line prompt.
 ```
 user@host:~/Malcolm$ ./scripts/start
-Malcolm services can be accessed at https://localhost/
+…
+logstash | [2026-01-16T17:58:33,274][INFO ][logstash.agent           ] Pipelines running {:count=>7, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-filescan", :"malcolm-suricata", :"malcolm-enrichment", :"malcolm-beats", :"malcolm-zeek"], :non_running_pipelines=>[]}
+
+Started Malcolm
+
+
+Malcolm services can be accessed at https://#.#.#.#/
 ------------------------------------------------------------------------------
 
-NAME                           COMMAND                  SERVICE              STATUS               PORTS
-malcolm-api-1                  "/usr/local/bin/dock…"   api                  running (starting)   …
-malcolm-arkime-1               "/usr/local/bin/dock…"   arkime               running (starting)   …
-malcolm-dashboards-1           "/usr/local/bin/dock…"   dashboards           running (starting)   …
-malcolm-dashboards-helper-1    "/usr/local/bin/dock…"   dashboards-helper    running (starting)   …
-malcolm-filebeat-1             "/usr/local/bin/dock…"   filebeat             running (starting)   …
-malcolm-freq-1                 "/usr/local/bin/dock…"   freq                 running (starting)   …
-malcolm-htadmin-1              "/usr/local/bin/dock…"   htadmin              running (starting)   …
-malcolm-logstash-1             "/usr/local/bin/dock…"   logstash             running (starting)   …
-malcolm-netbox-1               "/usr/bin/tini -- /u…"   netbox               running (starting)   …
-malcolm-postgres-1             "/usr/bin/docker-uid…"   postgres             running (starting)   …
-malcolm-redis-1                "/sbin/tini -- /usr/…"   redis                running (starting)   …
-malcolm-redis-cache-1          "/sbin/tini -- /usr/…"   redis-cache          running (starting)   …
-malcolm-nginx-proxy-1          "/usr/local/bin/dock…"   nginx-proxy          running (starting)   …
-malcolm-opensearch-1           "/usr/local/bin/dock…"   opensearch           running (starting)   …
-malcolm-pcap-capture-1         "/usr/local/bin/dock…"   pcap-capture         running              …
-malcolm-pcap-monitor-1         "/usr/local/bin/dock…"   pcap-monitor         running (starting)   …
-malcolm-suricata-1             "/usr/local/bin/dock…"   suricata             running (starting)   …
-malcolm-suricata-live-1        "/usr/local/bin/dock…"   suricata-live        running              …
-malcolm-upload-1               "/usr/local/bin/dock…"   upload               running (starting)   …
-malcolm-zeek-1                 "/usr/local/bin/dock…"   zeek                 running (starting)   …
-malcolm-zeek-live-1            "/usr/local/bin/dock…"   zeek-live            running              …
-…
-```
-
-It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes. Users will know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
-```
-…
-malcolm-logstash-1  | [2022-07-27T20:27:52,056][INFO ][logstash.agent           ] Pipelines running {:count=>6, :running_pipelines=>[:"malcolm-input", :"malcolm-output", :"malcolm-beats", :"malcolm-suricata", :"malcolm-enrichment", :"malcolm-zeek"], :non_running_pipelines=>[]}
-…
+user@host:~/Malcolm$
 ```
 
 The [Malcolm user interfaces](quickstart.md#UserInterfaceURLs) may be accessed via a web browser.

@@ -198,43 +198,51 @@ xxxxxxxxxxxx: Pull complete
 Verify that the images were pulled. Note that users will see two tags for each image: one tagged with the username and branch (e.g., `ghcr.io/romeogdetlevjr/malcolm/api:main`) and another tagged with `ghcr.io/idaholab` and the Malcolm version (e.g., `ghcr.io/idaholab/malcolm/api:{{ site.malcolm.version }}`).
 
 ```bash
-$ docker images | grep romeogdetlevjr/malcolm
-ghcr.io/idaholab/malcolm/zeek                   {{ site.malcolm.version }}       xxxxxxxxxxxx   10 minutes ago   1.39GB
-ghcr.io/romeogdetlevjr/malcolm/zeek             main          xxxxxxxxxxxx   10 minutes ago   1.39GB
-ghcr.io/idaholab/malcolm/dashboards             {{ site.malcolm.version }}       xxxxxxxxxxxx   13 minutes ago   1.55GB
-ghcr.io/romeogdetlevjr/malcolm/dashboards       main          xxxxxxxxxxxx   13 minutes ago   1.55GB
-ghcr.io/idaholab/malcolm/suricata               {{ site.malcolm.version }}       xxxxxxxxxxxx   14 minutes ago   339MB
-ghcr.io/romeogdetlevjr/malcolm/suricata         main          xxxxxxxxxxxx   14 minutes ago   339MB
-ghcr.io/idaholab/malcolm/redis                  {{ site.malcolm.version }}       xxxxxxxxxxxx   15 minutes ago   55.4MB
-ghcr.io/romeogdetlevjr/malcolm/redis            main          xxxxxxxxxxxx   15 minutes ago   55.4MB
-ghcr.io/idaholab/malcolm/nginx-proxy            {{ site.malcolm.version }}       xxxxxxxxxxxx   16 minutes ago   160MB
-ghcr.io/romeogdetlevjr/malcolm/nginx-proxy      main          xxxxxxxxxxxx   16 minutes ago   160MB
-ghcr.io/idaholab/malcolm/pcap-capture           {{ site.malcolm.version }}       xxxxxxxxxxxx   16 minutes ago   137MB
-ghcr.io/romeogdetlevjr/malcolm/pcap-capture     main          xxxxxxxxxxxx   16 minutes ago   137MB
-ghcr.io/idaholab/malcolm/htadmin                {{ site.malcolm.version }}       xxxxxxxxxxxx   16 minutes ago   246MB
-ghcr.io/romeogdetlevjr/malcolm/htadmin          main          xxxxxxxxxxxx   16 minutes ago   246MB
-ghcr.io/romeogdetlevjr/malcolm/file-upload      main          xxxxxxxxxxxx   16 minutes ago   250MB
-ghcr.io/idaholab/malcolm/file-upload            {{ site.malcolm.version }}       xxxxxxxxxxxx   16 minutes ago   250MB
-ghcr.io/idaholab/malcolm/logstash-oss           {{ site.malcolm.version }}       xxxxxxxxxxxx   16 minutes ago   1.49GB
-ghcr.io/romeogdetlevjr/malcolm/logstash-oss     main          xxxxxxxxxxxx   16 minutes ago   1.49GB
-ghcr.io/idaholab/malcolm/netbox                 {{ site.malcolm.version }}       xxxxxxxxxxxx   17 minutes ago   1.66GB
-ghcr.io/romeogdetlevjr/malcolm/netbox           main          xxxxxxxxxxxx   17 minutes ago   1.66GB
-ghcr.io/romeogdetlevjr/malcolm/filebeat-oss     main          xxxxxxxxxxxx   18 minutes ago   405MB
-ghcr.io/idaholab/malcolm/filebeat-oss           {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   405MB
-ghcr.io/romeogdetlevjr/malcolm/postgresql       main          xxxxxxxxxxxx   18 minutes ago   303MB
-ghcr.io/idaholab/malcolm/postgresql             {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   303MB
-ghcr.io/idaholab/malcolm/arkime                 {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   802MB
-ghcr.io/romeogdetlevjr/malcolm/arkime           main          xxxxxxxxxxxx   18 minutes ago   802MB
-ghcr.io/idaholab/malcolm/opensearch             {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   1.42GB
-ghcr.io/romeogdetlevjr/malcolm/opensearch       main          xxxxxxxxxxxx   18 minutes ago   1.42GB
-ghcr.io/idaholab/malcolm/pcap-monitor           {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   176MB
-ghcr.io/romeogdetlevjr/malcolm/pcap-monitor     main          xxxxxxxxxxxx   18 minutes ago   176MB
-ghcr.io/idaholab/malcolm/dashboards-helper      {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   233MB
-ghcr.io/romeogdetlevjr/malcolm/dashboards-helpermain          xxxxxxxxxxxx   18 minutes ago   233MB
-ghcr.io/idaholab/malcolm/freq                   {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   153MB
-ghcr.io/romeogdetlevjr/malcolm/freq             main          xxxxxxxxxxxx   18 minutes ago   153MB
-ghcr.io/idaholab/malcolm/api                    {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   169MB
-ghcr.io/romeogdetlevjr/malcolm/api              main          xxxxxxxxxxxx   18 minutes ago   169MB
-ghcr.io/idaholab/malcolm/keycloak               {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   533MB
-ghcr.io/romeogdetlevjr/malcolm/keycloak         main          xxxxxxxxxxxx   18 minutes ago   533MB
+$ docker images 2>&1 | grep -P '(idaholab|romeogdetlevjr)/malcolm' | sort -k2,2n
+ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}                       0aba0739d0b2       1.56GB
+ghcr.io/romeogdetlevjr/malcolm/zeek:main                       0aba0739d0b2       1.56GB
+ghcr.io/idaholab/malcolm/logstash-oss:{{ site.malcolm.version }}               1c8ef521a9ad       1.54GB
+ghcr.io/romeogdetlevjr/malcolm/logstash-oss:main               1c8ef521a9ad       1.54GB
+ghcr.io/idaholab/malcolm/netbox:{{ site.malcolm.version }}                     22b7c2384bbe       2.18GB
+ghcr.io/romeogdetlevjr/malcolm/netbox:main                     22b7c2384bbe       2.18GB
+ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}           232931103da0       81.8MB
+ghcr.io/romeogdetlevjr/malcolm/strelka-frontend:main           232931103da0       81.8MB
+ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}                 27059b27daf2        336MB
+ghcr.io/romeogdetlevjr/malcolm/postgresql:main                 27059b27daf2        336MB
+ghcr.io/idaholab/malcolm/api:{{ site.malcolm.version }}                        29d428204f4a        201MB
+ghcr.io/romeogdetlevjr/malcolm/api:main                        29d428204f4a        201MB
+ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}               582fff4cdb4e        198MB
+ghcr.io/romeogdetlevjr/malcolm/pcap-monitor:main               582fff4cdb4e        198MB
+ghcr.io/idaholab/malcolm/dashboards-helper:{{ site.malcolm.version }}          75b420a83536        233MB
+ghcr.io/romeogdetlevjr/malcolm/dashboards-helper:main          75b420a83536        233MB
+ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}                    7e5a804dc944        247MB
+ghcr.io/romeogdetlevjr/malcolm/htadmin:main                    7e5a804dc944        247MB
+ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}               93b9d4ad4320        156MB
+ghcr.io/romeogdetlevjr/malcolm/pcap-capture:main               93b9d4ad4320        156MB
+ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                      98f21df2e899       52.5MB
+ghcr.io/romeogdetlevjr/malcolm/redis:main                      98f21df2e899       52.5MB
+ghcr.io/idaholab/malcolm/file-upload:{{ site.malcolm.version }}                9c5527615eba        290MB
+ghcr.io/romeogdetlevjr/malcolm/file-upload:main                9c5527615eba        290MB
+ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}                 a634739450dd       1.91GB
+ghcr.io/romeogdetlevjr/malcolm/opensearch:main                 a634739450dd       1.91GB
+ghcr.io/idaholab/malcolm/freq:{{ site.malcolm.version }}                       acfae2f99ce6        149MB
+ghcr.io/romeogdetlevjr/malcolm/freq:main                       acfae2f99ce6        149MB
+ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}            b6a1f19907e5       54.8MB
+ghcr.io/romeogdetlevjr/malcolm/strelka-manager:main            b6a1f19907e5       54.8MB
+ghcr.io/idaholab/malcolm/arkime:{{ site.malcolm.version }}                     b87bff629400        861MB
+ghcr.io/romeogdetlevjr/malcolm/arkime:main                     b87bff629400        861MB
+ghcr.io/idaholab/malcolm/keycloak:{{ site.malcolm.version }}                   d0990b40102f        549MB
+ghcr.io/romeogdetlevjr/malcolm/keycloak:main                   d0990b40102f        549MB
+ghcr.io/idaholab/malcolm/suricata:{{ site.malcolm.version }}                   dd2ead05629b        362MB
+ghcr.io/romeogdetlevjr/malcolm/suricata:main                   dd2ead05629b        362MB
+ghcr.io/idaholab/malcolm/dashboards:{{ site.malcolm.version }}                 e83df099698b        1.8GB
+ghcr.io/romeogdetlevjr/malcolm/dashboards:main                 e83df099698b        1.8GB
+ghcr.io/idaholab/malcolm/filescan:{{ site.malcolm.version }}                   ea26f1388898        363MB
+ghcr.io/romeogdetlevjr/malcolm/filescan:main                   ea26f1388898        363MB
+ghcr.io/idaholab/malcolm/filebeat-oss:{{ site.malcolm.version }}               f27b54760c87        470MB
+ghcr.io/romeogdetlevjr/malcolm/filebeat-oss:main               f27b54760c87        470MB
+ghcr.io/idaholab/malcolm/nginx-proxy:{{ site.malcolm.version }}                fbda54260ff4        180MB
+ghcr.io/romeogdetlevjr/malcolm/nginx-proxy:main                fbda54260ff4        180MB
+ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}            fce1c85a5c73       3.63GB
+ghcr.io/romeogdetlevjr/malcolm/strelka-backend:main            fce1c85a5c73       3.63GB
 ```
