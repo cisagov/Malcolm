@@ -22,17 +22,27 @@ INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
 INTEL_PRESEED_DIR=${INTEL_PRESEED_DIR:-"${ZEEK_DIR}/share/zeek/site/intel-preseed"}
 THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_intel_from_threat_feed.py"}
 LOCK_DIR="${INTEL_DIR}/lock"
+LOCK_DIR_STALE_AGE_SEC=86400
 INSTANCE_UID="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 16; echo)"
 (( ${#INSTANCE_UID} == 16 )) || INSTANCE_UID=$RANDOM
 
 # make sure only one instance of the intel update runs at a time
 function finish {
-    rmdir -- "${LOCK_DIR}" || echo "Failed to remove lock directory '${LOCK_DIR}'" >&2
+    [[ -n "${ZEEK_INTEL_DISABLE_LOCKING:-}" ]] || \
+        rmdir -- "${LOCK_DIR}" 2>/dev/null || echo "Failed to remove lock directory '${LOCK_DIR}'" >&2
     [[ -n "${INSTANCE_UID}" ]] && find "${INTEL_DIR}"/ -type f -name "*${INSTANCE_UID}*" -delete
 }
 
 mkdir -p -- "$(dirname "$LOCK_DIR")"
-if mkdir -- "$LOCK_DIR" 2>/dev/null; then
+
+if [[ -z "${ZEEK_INTEL_DISABLE_LOCKING:-}" ]] && \
+   [[ -d "$LOCK_DIR" ]] && \
+   (( $(date +%s) - $(stat -c %Y "$LOCK_DIR") > $LOCK_DIR_STALE_AGE_SEC )); then
+    echo "Removing stale lock directory '${LOCK_DIR}'" >&2
+    rmdir -- "${LOCK_DIR}" 2>/dev/null || echo "Failed to remove stale lock directory '${LOCK_DIR}'" >&2
+fi
+
+if [[ -n "${ZEEK_INTEL_DISABLE_LOCKING:-}" ]] || mkdir -- "$LOCK_DIR" 2>/dev/null; then
     trap finish EXIT
 
     # if we have a directory to seed the intel config for the first time, start from a blank slate with just its contents
