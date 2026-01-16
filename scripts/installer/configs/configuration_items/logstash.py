@@ -34,10 +34,10 @@ CONFIG_ITEM_LS_MEMORY = ConfigItem(
 # Default value handled in MalcolmConfig based on DOCKER_ORCHESTRATION_MODE
 CONFIG_ITEM_LS_WORKERS = ConfigItem(
     key=KEY_CONFIG_ITEM_LS_WORKERS,
-    label="Logstash Workers",
+    label="Logstash Workers (per pipeline)",
     default_value=SYSTEM_INFO.get("suggested_ls_workers", LOGSTASH_WORKERS_DOCKER_COMPOSE),
     validator=lambda x: isinstance(x, int) and x > 0,
-    question="Number of Logstash pipeline workers (e.g., 4, 8, etc.)",
+    question="Number of Logstash pipeline workers",
     widget_type=WidgetType.NUMBER,
 )
 

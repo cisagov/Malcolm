@@ -458,7 +458,7 @@ class SystemController(BaseController):
 
     def set_logstash_workers(self, workers: int) -> Tuple[bool, str]:
         """
-        Set the number of Logstash workers
+        Set the number of Logstash workers (per pipeline)
 
         Args:
             workers: Number of worker threads

@@ -25,6 +25,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_ROOT_USER_ACTION=ignore
 
+ENV YQ_VERSION="4.50.1"
+ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
@@ -40,6 +43,7 @@ ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 RUN set -x && \
+    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     microdnf -y update && \
     microdnf -y upgrade && \
     microdnf -y install \
@@ -54,8 +58,10 @@ RUN set -x && \
         python3-requests \
         python3-setuptools \
         rsync && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
+    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
         chmod +x /usr/bin/tini && \
+    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
+        chmod 755 /usr/local/bin/yq && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
@@ -95,13 +101,11 @@ ADD --chmod=644 logstash/maps/*.yaml /etc/
 ADD --chmod=644 logstash/supervisord.conf /etc/supervisord.conf
 
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
-ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse,beats-parse,filescan-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-os
 ARG LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-os,external-os
 
 ENV LOGSTASH_ENRICHMENT_PIPELINE=$LOGSTASH_ENRICHMENT_PIPELINE
-ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES=$LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=$LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=$LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=$LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES

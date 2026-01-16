@@ -61,7 +61,7 @@ KEY_ENV_FILEBEAT_WATCHER_POLLING = "FILEBEAT_WATCHER_POLLING"  # Use polling for
 
 KEY_ENV_FREQ_LOOKUP = "FREQ_LOOKUP"  # freq.py string randomness calculations
 
-KEY_ENV_LOGSTASH_PIPELINE_WORKERS = "pipeline.workers"  # logstash pipeline workers
+KEY_ENV_LOGSTASH_PIPELINE_WORKERS = "pipeline.workers"  # logstash workers (per pipeline)
 KEY_ENV_LOGSTASH_HOST = "LOGSTASH_HOST"  # Logstash host and port
 KEY_ENV_LOGSTASH_REVERSE_DNS = "LOGSTASH_REVERSE_DNS"  # automatic local reverse dns lookup
 KEY_ENV_LOGSTASH_OUI_LOOKUP = "LOGSTASH_OUI_LOOKUP"  # automatic MAC OUI lookup

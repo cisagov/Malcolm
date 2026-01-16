@@ -228,8 +228,8 @@ Select an item number to configure, or an action:
 │   ├── 17. Forward Network Activity (current: No)
 │   ├── 18. Forward Systemd Journal Logs (current: No)
 │   ├── 19. Forward Thermal Readings (current: No)
-│   ├── 20. Logstash Memory (current: 7g)
-│   ├── 21. Logstash Workers (current: 6)
+│   ├── 20. Logstash Memory (current: 3g)
+│   ├── 21. Logstash Workers (current: 3)
 │   ├── 22. OpenSearch Memory (current: 31g)
 │   └── 23. Primary Document Store (current: opensearch-local)
 ├── 24. Require HTTPS Connections (current: Yes)
@@ -404,7 +404,7 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - **OpenSearch Memory** and **Logstash Memory**
         + Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 24 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
     - **Logstash Workers**
-        + This setting is used to tune the performance and resource utilization of the the `logstash` container. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
+        + This setting is used to tune the performance and resource utilization of the the `logstash` container: it represents the number of worker threads for each parsing/enrichment pipeline used by Logstash for log processing. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
 * **Require HTTPS Connections**
     - Malcolm uses [TLS](authsetup.md#TLSCerts) encryption for its web browser-accessible user interfaces. Setting **Y** for this option is almost always preferred. The only situation where **N** would be appropriate would be when running Malcolm behind a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates automatically and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm. Users should ensure they understand these implications and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying the local firewall configuration, when setting this to **N**.
 * **IPv4 for nginx Resolver Directive** and **IPv6 for nginx Resolver Directive**

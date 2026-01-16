@@ -335,8 +335,8 @@ class SystemView(BaseView):
         # Logstash Workers
         ls_workers_container, ls_workers_entry = InputField.create(
             container,
-            "Logstash Workers:",
-            placeholder="4",
+            "Logstash Workers (per pipeline):",
+            placeholder="2",
             row=section_row,
             validation_func=self.controller.set_logstash_workers,
             nesting_level=1,

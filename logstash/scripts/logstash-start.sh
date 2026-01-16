@@ -13,15 +13,15 @@ export PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines"
 # runtime pipelines configuration file
 export PIPELINES_CFG="/usr/share/logstash/config/pipelines.yml"
 
+# tags-to-parse pipeline map configuration file for routing from input to parse pipelines
+TAGS_TO_PARSE_PIPELINE_CFG="/etc/parse_pipelines.yaml"
+
 # for each pipeline in /usr/share/logstash/malcolm-pipelines, append the contents of this file to the dynamically-generated
 # pipeline section in pipelines.yml (then delete 00_config.conf before starting)
 export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
 
 # the name of the enrichment pipeline subdirectory under $PIPELINES_DIR
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
-
-# the name of the pipeline(s) to which input will send logs for parsing (comma-separated list, no quotes)
-PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse,suricata-parse,beats-parse,filescan-parse"}
 
 # pipeline addresses for forwarding from Logstash to OpenSearch (both "internal" and "external" pipelines)
 export OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-os"}
@@ -77,8 +77,7 @@ if [[ -z "$OPENSEARCH_SECONDARY_URL" ]]; then
   OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES="$(echo "$OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES" | sed "s/,[[:blank:]]*$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL//")"
 fi
 
-# insert quotes around the OpenSearch parsing and output pipeline list
-MALCOLM_PARSE_PIPELINE_ADDRESSES=$(printf '"%s"\n' "${PARSE_PIPELINE_ADDRESSES//,/\",\"}")
+# insert quotes around the OpenSearch output pipeline list
 MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
 
 # get the username/password for opensearch from the curlrf file(s) for both primary and secondary outputs
@@ -110,7 +109,6 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec grep -H -P "_MALCOLM_LOGSTASH
 
 # do a manual global replace on these particular values in the config files, as Logstash doesn't like the environment variables with quotes in them
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_OPENSEARCH_OUTPUT_PIPELINES_/${MALCOLM_OPENSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
-find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SSL_VERIFICATION_/${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_USER_/${OPENSEARCH_USER}/g" "{}" \; 2>/dev/null
@@ -129,9 +127,53 @@ if [[ -d "$PIPELINES_DIR"/zeek ]]; then
   sed -i -E 's/\s\s*(%\{\[zeek_cols\]\[)/\t\1/g' "$PIPELINES_DIR"/zeek/*.conf
 fi
 
-# if SSL is disabled, remove references to it in the input (as cert files might not even exist but logstash will still gripe about it)
-if [[ "${BEATS_SSL:-true}" == "false" ]] && [[ -d "$PIPELINES_DIR"/input ]]; then
-  sed -i -E '/^[[:space:]]*ssl_/d' "$PIPELINES_DIR"/input/*.conf
+if [[ -d "$PIPELINES_DIR"/input ]]; then
+  # dynamically generate the routing (output) for the input pipeline
+  INPUT_ROUTING_CONF="$PIPELINES_DIR"/input/99_route_input.conf
+  {
+    echo "output {"
+    FIRST=1
+
+    yq e 'to_entries[].key' "${TAGS_TO_PARSE_PIPELINE_CFG}" | while read -r PIPELINE; do
+
+      CONDITIONS=$(
+        yq e ".\"${PIPELINE}\"[]" "${TAGS_TO_PARSE_PIPELINE_CFG}" \
+          | awk '
+              NR == 1 {
+                printf "\"%s\" in [tags]", $0
+                next
+              }
+              {
+                printf " or \"%s\" in [tags]", $0
+              }
+            '
+      )
+
+      if [[ ${FIRST} -eq 1 ]]; then
+        CONDITIONAL="if"
+        FIRST=0
+      else
+        CONDITIONAL="else if"
+      fi
+
+      PIPELINE_ID="route_to_$(printf '%s' "${PIPELINE}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_]/_/g')"
+      cat <<EOF
+  ${CONDITIONAL} ${CONDITIONS} {
+    pipeline {
+      send_to => "${PIPELINE}"
+      id => "${PIPELINE_ID}"
+    }
+  }
+EOF
+    done
+
+    echo "}"
+  } > "${INPUT_ROUTING_CONF}"
+
+  # if SSL is disabled, remove references to it in the input (as cert files might not even exist but logstash will still gripe about it)
+  if [[ "${BEATS_SSL:-true}" == "false" ]]; then
+    sed -i -E '/^[[:space:]]*ssl_/d' "$PIPELINES_DIR"/input/*.conf
+  fi
 fi
 
 # import trusted CA certificates if necessary

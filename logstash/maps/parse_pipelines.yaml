@@ -1,0 +1,25 @@
+zeek-parse:
+  - _filebeat_zeek
+  - _filebeat_zeek_live
+  - _filebeat_zeek_upload
+  - _filebeat_zeek_hedgehog
+  - _filebeat_zeek_malcolm_live
+  - _filebeat_zeek_malcolm_upload
+suricata-parse:
+  - _filebeat_suricata
+  - _filebeat_suricata_live
+  - _filebeat_suricata_upload
+  - _filebeat_suricata_hedgehog_live
+  - _filebeat_suricata_malcolm_live
+  - _filebeat_suricata_malcolm_upload
+beats-parse:
+  - _malcolm_beats
+  - _zeekdiagnostic
+  - _suricatastats
+  - _evtx_to_json
+filescan-parse:
+  - _filebeat_filescan
+  - _filebeat_filescan_upload
+  - _filebeat_filescan_hedgehog
+  - _filebeat_filescan_malcolm_live
+  - _filebeat_filescan_malcolm_upload

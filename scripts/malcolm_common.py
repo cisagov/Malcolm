@@ -2114,17 +2114,22 @@ def suggest_ls_memory(total_gb: Optional[int] = None) -> str:
     """Return Logstash heap suggestion (e.g., "3g")."""
     if total_gb is None:
         total_gb = total_memory_gb()
-    # Rough rule: 1/8th of RAM, capped at 8 GiB, min 1 GiB, rounded.
-    heap_gb = max(1, min(8, max(1, total_gb // 8)))
+    if total_gb <= 16:
+        heap = total_gb // 8
+    elif total_gb <= 32:
+        heap = total_gb // 6
+    else:
+        heap = total_gb // 4
+    heap_gb = min(max(heap, 2), 4)
     return f"{heap_gb}g"
 
 
 def suggest_ls_workers(cores: Optional[int] = None) -> int:
-    """Return recommended Logstash worker count."""
+    """Return recommended Logstash per-pipeline worker count."""
     if cores is None:
         cores = cpu_cores()
-    # Legacy rule: half the logical cores, capped at 6, min 1
-    return max(1, min(6, cores // 2))
+    # half the logical cores, capped at 3, min 1
+    return max(1, min(3, cores // 2))
 
 
 # ------------------------------------------------------------------

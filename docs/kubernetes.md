@@ -372,7 +372,7 @@ Select an item number to configure, or an action:
 │   ├── 6. Extra Tags (current: [])
 │   ├── 7. Forward Logs to Remote Secondary Store (current: No)
 │   ├── 8. Logstash Memory (current: 4g)
-│   ├── 9. Logstash Workers (current: 6)
+│   ├── 9. Logstash Workers (current: 3)
 │   ├── 10. OpenSearch Memory (current: 31g)
 │   └── 11. Primary Document Store (current: opensearch-local)
 ├── 12. Require HTTPS Connections (current: Yes)

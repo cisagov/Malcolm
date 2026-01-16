@@ -18,7 +18,7 @@ $ grep -P "^(      - ./zeek-logs|  [\w-]+:)" docker-compose.yml | grep -B1 "zeek
 
 Access to the `cooltool` logs must be provided in a similar fashion.
 
-Next, tweak [`filebeat-logs.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/filebeat/filebeat-logs.yml) by adding a new log input path pointing to the `cooltool` logs to send them along to the `logstash` container. This modified `filebeat-logs.yml` will need to be reflected in the `filebeat` container via [bind mount](contributing-local-modifications.md#Bind) or by [rebuilding](development.md#Build) it.
+Next, tweak [`filebeat-logs.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/filebeat/filebeat-logs.yml) by adding a new log input path pointing to the `cooltool` logs to send them along to the `logstash` container. Ensure you add a unique tag to this new input: it will be used by Logstash to route the logs to the correct parse pipeline (e.g., `tags: ["_cooltool"]`; see `tags` in the existing inputs for examples). This modified `filebeat-logs.yml` will need to be reflected in the `filebeat` container via [bind mount](contributing-local-modifications.md#Bind) or by [rebuilding](development.md#Build) it.
 
 Logstash can then be easily extended to add more [`logstash/pipelines`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines). At the time of this writing (as of the [v5.0.0 release]({{ site.github.repository_url }}/releases/tag/v5.0.0)), the Logstash pipelines basically look like this:
 
@@ -26,9 +26,16 @@ Logstash can then be easily extended to add more [`logstash/pipelines`]({{ site.
 * each **parse pipeline** does what it needs to do to parse its logs then sends them to the [**enrichment pipeline**](#LogstashEnrichments)
 * the [**enrichment pipeline**]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment) performs common lookups to the fields that have been normalized and indexes the logs into the OpenSearch data store
 
-In order to add a new **parse pipeline** for `cooltool` after tweaking [`filebeat-logs.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/filebeat/filebeat-logs.yml) as described above, create a `cooltool` directory under [`logstash/pipelines`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines) that follows the same pattern as the `zeek` parse pipeline. This directory will have an input file (tiny), a filter file (possibly large), and an output file (tiny). In the filter file, be sure to set the field [`event.hash`](https://www.elastic.co/guide/en/ecs/master/ecs-event.html#field-event-hash) to a unique value to identify indexed documents in OpenSearch; the [fingerprint filter](https://www.elastic.co/guide/en/logstash/current/plugins-filters-fingerprint.html) may be useful for this.
+In order to add a new **parse pipeline** for `cooltool` after tweaking [`filebeat-logs.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/filebeat/filebeat-logs.yml) as described above, create a `cooltool` directory under [`logstash/pipelines`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines) that follows the same pattern as the `zeek` parse pipeline. This directory will have an input file (tiny; minimally it should include the parse pipeline name, e.g., `pipeline { address => "cooltool-parse" }`), a filter file (possibly large), and an output file (tiny). In the filter file, be sure to set the field [`event.hash`](https://www.elastic.co/guide/en/ecs/master/ecs-event.html#field-event-hash) to a unique value to identify indexed documents in OpenSearch; the [fingerprint filter](https://www.elastic.co/guide/en/logstash/current/plugins-filters-fingerprint.html) may be useful for this.
 
-Finally, in the [`./config/logstash.env` file](malcolm-config.md#MalcolmConfigEnvVars), set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable to `cooltool-parse,zeek-parse,suricata-parse,beats-parse,filescan-parse` (assuming the pipeline address from the previous step was named `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to all parse pipelines.
+Finally, in [`./logstash/maps/parse_pipelines.yaml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/maps/parse_pipelines.yaml), add a new `cooltool` mapping which maps the new parse pipeline name to the unique tag associated with the logs in the FileBeat configuration as described above, e.g.:
+
+```yaml
+cooltool-parse:
+  - _cooltool
+```
+
+This modified `parse_pipelines.yaml` will need to be reflected in the `logstash` container via [bind mount](contributing-local-modifications.md#Bind) (similar to the bind for `malcolm_severity.yaml` in the `docker-compose` files) or by [rebuilding](development.md#Build) it.
 
 ## <a name="LogstashZeek"></a>Parsing new Zeek logs
 
