@@ -1716,6 +1716,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
   | Info:\s+pcap:\s+(Starting\s+file\s+run|pcap\s+file)
   | Info:\s+unix-socket:
+  | is\s+configured\s+with\s+.pipeline.ecs_compatibility:\s+disabled
   | kube-probe/
   | (libpng|MuPDF)\s+(warning|error):
   | loaded\s+config\s+'/etc/netbox/config/
