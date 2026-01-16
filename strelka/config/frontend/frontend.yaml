@@ -5,7 +5,6 @@ coordinator:
   password: null
   pool: 100
   read: 10s
-#  blockingpoptime: 5s
 gatekeeper:
   addr: 'strelka-gatekeeper:6379'
   db: 0
@@ -22,7 +21,6 @@ broker:
   keylocation: "path to key location"
   calocation: "path to target ca bundle"
   topic: "topic name here"
-  # pipe logs to S3 if kafka connection interrupted
   s3redundancy: false
 s3:
   accesskey: "S3 Access Key"
