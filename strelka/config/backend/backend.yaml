@@ -154,7 +154,7 @@ scanners:
         scanner_timeout: 150
         log_pws: True
         password_file: "/etc/strelka/passwords.dat"
-        # brute_force: True
+#        brute_force: True
   'ScanEncryptedZip':
     - positive:
         flavors:
@@ -165,7 +165,7 @@ scanners:
         scanner_timeout: 150
         log_pws: True
         password_file: '/etc/strelka/passwords.dat'
-        # brute_force: True
+#        brute_force: True
   'ScanEntropy':
     - positive:
         flavors:
@@ -626,7 +626,8 @@ scanners:
           - 'image/x-icon'
           - 'image/vnd.microsoft.icon'
       options:
-        output_format: jpeg  # "gif", "webp", "jpeg", "bmp", "png", "tiff"
+#        "gif", "webp", "jpeg", "bmp", "png", "tiff"
+        output_format: jpeg
   'ScanUdf':
     - positive:
         flavors:
