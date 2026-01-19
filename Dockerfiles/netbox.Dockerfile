@@ -136,7 +136,10 @@ ENTRYPOINT ["/usr/bin/tini", \
 CMD ["/opt/netbox/docker-entrypoint.sh", "supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 # to be populated at build-time:
-ARG BUILD_DATE=ARG MALCOLM_VERSION=ARG VCS_REVISION=ENV BUILD_DATE=$BUILD_DATE
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+ENV BUILD_DATE=$BUILD_DATE
 ENV MALCOLM_VERSION=$MALCOLM_VERSION
 ENV VCS_REVISION=$VCS_REVISION
 
