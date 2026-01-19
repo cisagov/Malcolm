@@ -56,12 +56,10 @@ _base_config +CAPTURE_FLAG:
 
   tee "${JQ_FILE}" >/dev/null <<EOF
     .configuration.runtimeBin = "${MALCOLM_CONTAINER_RUNTIME:-docker}"
-    | .configuration.processUserId = ${PUID:-$(id -u)}
-    | .configuration.processGroupId = ${PGID:-$(id -g)}
+    | .configuration.arkimeAllowWiseConfig = ${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}
+    | .configuration.arkimeExposeWise = ${ARKIME_EXPOSE_WISE_GUI:-false}
     | .configuration.arkimeFreeSpaceG = "${DELETE_PCAP_THRESHOLD:-1%}"
     | .configuration.arkimeManagePCAP = ${DELETE_OLD_PCAP:-false}
-    | .configuration.arkimeExposeWise = ${ARKIME_EXPOSE_WISE_GUI:-false}
-    | .configuration.arkimeAllowWiseConfig = ${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}
     | .configuration.arkimeWiseUrl = "${ARKIME_WISE_SERVICE_URL:-http://arkime:8081}"
     | .configuration.autoArkime = ${AUTO_ARKIME:-true}
     | .configuration.autoFreq = ${AUTO_FREQ:-true}
@@ -69,6 +67,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.autoSuricata = ${AUTO_SURICATA:-true}
     | .configuration.autoZeek = ${AUTO_ZEEK:-true}
     | .configuration.captureLiveNetworkTraffic = ${CAPTURE_LIVE}
+    | .configuration.captureStats = ${CAPTURE_STATS}
     | .configuration.containerNetworkName = "${NETWORK_NAME}"
     | .configuration.dashboardsDarkMode = ${DARK_MODE:-true}
     | .configuration.dashboardsUrl = "${DASHBOARDS_URL:-http://dashboards:5601/dashboards}"
@@ -77,12 +76,10 @@ _base_config +CAPTURE_FLAG:
     | .configuration.exposeLogstash = ${LOGSTASH_EXPOSE:-false}
     | .configuration.exposeOpenSearch = ${OPENSEARCH_EXPOSE:-false}
     | .configuration.exposeSFTP = ${SFTP_EXPOSE:-false}
-    | .configuration.extraTags = "${EXTRA_TAGS:-}"
     | .configuration.extractedFileMaxPercentThreshold = ${EXTRACTED_FILE_TOTAL_DISK_USAGE_PERCENT_THRESHOLD:-100}
     | .configuration.extractedFileMaxSizeThreshold = "${EXTRACTED_FILE_MAX_SIZE_THRESHOLD:-1T}"
+    | .configuration.extraTags = "${EXTRA_TAGS:-}"
     | .configuration.filebeatTcpDefaults = ${FILEBEAT_TCP_EXPOSE:-false}
-    | .configuration.pipelineEnabled = ${PIPELINE_ENABLED:-true}
-    | .configuration.pipelineWorkers = ${PIPELINE_WORKERS:-1}
     | .configuration.fileCarveHttpServeEncryptKey = "${EXTRACTED_FILE_SERVER_PASSWORD:-infected}"
     | .configuration.fileCarveHttpServer = ${EXTRACTED_FILE_SERVER:-true}
     | .configuration.fileCarveHttpServerZip = ${EXTRACTED_FILE_SERVER_ZIP:-true}
@@ -100,6 +97,12 @@ _base_config +CAPTURE_FLAG:
     | .configuration.indexManagementSpiDataRetention = "${INDEX_MANAGEMENT_SPI_DATA_RETENTION}"
     | .configuration.indexPruneThreshold = "${DELETE_INDEX_THRESHOLD:-10T}"
     | .configuration.indexSnapshotDir = "${OPENSEARCH_SNAPSHOT_PATH}"
+    | .configuration.liveArkime = ${CAPTURE_ARKIME}
+    | .configuration.liveArkimeCompressionLevel = ${LIVE_CAPTURE_ARKIME_COMPRESSION_LEVEL:-0}
+    | .configuration.liveArkimeCompressionType = "${LIVE_CAPTURE_ARKIME_COMPRESSION:-none}"
+    | .configuration.liveArkimeNodeHost = "${CAPTURE_ARKIME_NODE_HOST}"
+    | .configuration.liveSuricata = ${CAPTURE_SURICATA}
+    | .configuration.liveZeek = ${CAPTURE_ZEEK}
     | .configuration.logstashHost = "${LOGSTASH_HOST:-logstash:5044}"
     | .configuration.lsMemory = "${LOGSTASH_MEMORY}"
     | .configuration.lsWorkers = ${LOGSTASH_WORKERS}
@@ -107,8 +110,8 @@ _base_config +CAPTURE_FLAG:
     | .configuration.malcolmProfile = "${MALCOLM_PROFILE:-malcolm}"
     | .configuration.malcolmRestartPolicy = "${RESTART_MALCOLM:-no}"
     | .configuration.netboxAutoPopulate = ${NETBOX_AUTOPOPULATE:-false}
-    | .configuration.netboxLogstashAutoCreatePrefix = ${NETBOX_AUTO_PREFIXES:-false}
     | .configuration.netboxAutoPopulateSubnetFilter = "${NETBOX_AUTO_POPULATE_SUBNETS}"
+    | .configuration.netboxLogstashAutoCreatePrefix = ${NETBOX_AUTO_PREFIXES:-false}
     | .configuration.netboxLogstashEnrich = ${NETBOX_ENRICH:-true}
     | .configuration.netboxMode = "${NETBOX:-local}"
     | .configuration.netboxSiteName = "${NETBOX_SITE_NAME:-Malcolm}"
@@ -124,7 +127,15 @@ _base_config +CAPTURE_FLAG:
     | .configuration.opensearchSecondaryUrl = "${OPENSEARCH_SECONDARY_URL}"
     | .configuration.osMemory = "${OPENSEARCH_MEMORY}"
     | .configuration.pcapDir = "${PCAP_PATH}"
+    | .configuration.pcapFilter = "${CAPTURE_FILTER}"
+    | .configuration.pcapIface = "${CAPTURE_IFACE}"
+    | .configuration.pcapNetSniff = ${CAPTURE_NETSNIFF}
     | .configuration.pcapNodeName = "${NODE_NAME:-$(hostname -s)}"
+    | .configuration.pcapTcpDump = ${CAPTURE_TCPDUMP}
+    | .configuration.pipelineEnabled = ${PIPELINE_ENABLED:-true}
+    | .configuration.pipelineWorkers = ${PIPELINE_WORKERS:-1}
+    | .configuration.processGroupId = ${PGID:-$(id -g)}
+    | .configuration.processUserId = ${PUID:-$(id -u)}
     | .configuration.reverseDns = ${REVERSE_DNS:-false}
     | .configuration.suricataLogDir = "${SURICATA_PATH}"
     | .configuration.suricataRuleUpdate = ${SURICATA_RULE_UPDATE:-false}
@@ -135,26 +146,15 @@ _base_config +CAPTURE_FLAG:
     | .configuration.traefikLabels = ${REVERSE_PROXIED:-false}
     | .configuration.traefikOpenSearchHost = "${TRAEFIK_HOST_OPENSEARCH}"
     | .configuration.traefikResolver = "${TRAEFIK_RESOLVER}"
+    | .configuration.tweakIface = ${CAPTURE_IFACE_TWEAK}
     | .configuration.useDefaultStorageLocations = ${DEFAULT_PATHS}
     | .configuration.zeekICSBestGuess = ${ZEEK_ICS_BEST_GUESS:-true}
     | .configuration.zeekIntelCronExpression = "${ZEEK_INTEL_CRON_EXPRESSION}"
     | .configuration.zeekIntelFeedSince = "${ZEEK_INTEL_FEED_SINCE:-24 hours ago}"
     | .configuration.zeekIntelItemExpiration = "${ZEEK_INTEL_ITEM_EXPIRATION:-1min}"
     | .configuration.zeekIntelOnStartup = ${ZEEK_INTEL_ON_STARTUP}
-    | .configuration.zeekPullIntelligenceFeeds = ${ZEEK_INTEL}
     | .configuration.zeekLogDir = "${ZEEK_PATH}"
-    | .configuration.pcapIface = "${CAPTURE_IFACE}"
-    | .configuration.pcapFilter = "${CAPTURE_FILTER}"
-    | .configuration.tweakIface = ${CAPTURE_IFACE_TWEAK}
-    | .configuration.captureStats = ${CAPTURE_STATS}
-    | .configuration.pcapNetSniff = ${CAPTURE_NETSNIFF}
-    | .configuration.pcapTcpDump = ${CAPTURE_TCPDUMP}
-    | .configuration.liveArkime = ${CAPTURE_ARKIME}
-    | .configuration.liveArkimeCompressionType = "${LIVE_CAPTURE_ARKIME_COMPRESSION:-none}"
-    | .configuration.liveArkimeCompressionLevel = ${LIVE_CAPTURE_ARKIME_COMPRESSION_LEVEL:-0}
-    | .configuration.liveArkimeNodeHost = "${CAPTURE_ARKIME_NODE_HOST}"
-    | .configuration.liveZeek = ${CAPTURE_ZEEK}
-    | .configuration.liveSuricata = ${CAPTURE_SURICATA}
+    | .configuration.zeekPullIntelligenceFeeds = ${ZEEK_INTEL}
   EOF
 
   jq -f "${JQ_FILE}" "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
