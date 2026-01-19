@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2025 Battelle Energy Alliance, LLC. All rights reserved.
+# Copyright (c) 2026 Battelle Energy Alliance, LLC. All rights reserved.
 
 import fcntl
 import logging
 import magic
 import os
+import re
 import subprocess
 import sys
 import time
@@ -21,9 +22,10 @@ from malcolm_utils import LoadFileIfJson, deep_get, set_logging, get_verbosity_e
 
 lock_filename = os.path.join(gettempdir(), f'{os.path.basename(__file__)}.lock')
 
-filebeat_registry_filename = os.getenv(
-    'FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json"
-)
+filebeat_registry_filenames = [
+    os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json"),
+    os.getenv('FILEBEAT_REDIS_REGISTRY_FILE', "/usr/share/filebeat-zeek-files-logs/data/registry/filebeat/log.json"),
+]
 
 zeek_dir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
 zeek_live_dir = os.path.join(zeek_dir, "live/logs/")
@@ -31,6 +33,8 @@ zeek_current_dir = os.path.join(zeek_dir, "current/")
 zeek_processed_dir = os.path.join(zeek_dir, "processed/")
 
 suricata_dir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/"), '')
+
+filescan_dir = os.path.join(os.getenv('FILEBEAT_FILESCAN_LOG_PATH', "/filescan/"), '')
 
 # We're only able to do this pruning because we're forwarding the logs along to Logstash
 #   so they're not needed here anymore. If we're *not* forwarding, we can't delete them
@@ -47,6 +51,7 @@ now_time = time.time()
 _LOG_MIME_TYPES = (
     "application/json",
     "application/x-ndjson",
+    "text/html",
     "text/plain",
     "text/x-file",
 )
@@ -65,6 +70,15 @@ _ARCHIVE_MIME_TYPES = (
     "application/x-xz",
     "application/zip",
 )
+
+_LOG_FILE_TYPE_PATTERNS = [
+    re.compile(r'^MS\s+Windows.*Event\s+Log', re.IGNORECASE),
+    re.compile(r'\b(JSON|ASCII)\s+text\b', re.IGNORECASE),
+]
+
+_ARCHIVE_FILE_TYPE_PATTERNS = [
+    re.compile(r'\b(archive|compressed)\s+data\b', re.IGNORECASE),
+]
 
 # --------------------------------------------------------------------
 # Helper functions
@@ -109,20 +123,34 @@ def check_file(
             return
 
         # get the file type (treat zero-length files as log files)
-        file_type = magic.from_file(filename, mime=True)
-        if check_logs and clean_log_seconds > 0 and (file_stat.st_size == 0 or file_type in _LOG_MIME_TYPES):
+        clean_seconds = 0
+        do_log_check = check_logs and clean_log_seconds > 0
+        do_archive_check = check_archives and clean_zip_seconds > 0
+        file_mime_type = magic.from_file(filename, mime=True)
+        file_type = None
+        if do_log_check and ((file_stat.st_size == 0) or (file_mime_type in _LOG_MIME_TYPES)):
             clean_seconds = clean_log_seconds
-        elif check_archives and clean_zip_seconds > 0 and file_type in _ARCHIVE_MIME_TYPES:
+        elif do_archive_check and (file_mime_type in _ARCHIVE_MIME_TYPES):
             clean_seconds = clean_zip_seconds
         else:
-            # not a file we're going to be messing with
-            logging.debug(f"Ignoring {filename} due to {file_type=}")
-            return
+            # mime type didn't match, fall back to the non-MIME file magic description
+            # e.g., "application/octet-stream" vs "MS Windows Vista Event Log""
+            file_type = magic.from_file(filename, mime=False)
+            if do_log_check and any(p.search(file_type) for p in _LOG_FILE_TYPE_PATTERNS):
+                clean_seconds = clean_log_seconds
+            elif do_archive_check and any(p.search(file_type) for p in _ARCHIVE_FILE_TYPE_PATTERNS):
+                clean_seconds = clean_zip_seconds
+            else:
+                # not a file we're going to be messing with
+                logging.debug(f"Ignoring {filename} of type {file_type} ({file_mime_type})")
+                return
 
-        if clean_seconds > 0 and last_use_time >= clean_seconds:
+        if (clean_seconds > 0) and (last_use_time >= clean_seconds):
             # this is a closed file that is old, so delete it
             silent_remove(filename)
-            logging.info(f'Removed old file "{filename}" ({file_type}, used {last_use_time:.0f} seconds ago)')
+            logging.info(
+                f'Removed old file "{filename}" ({file_type or file_mime_type}, used {last_use_time:.0f} seconds ago)'
+            )
 
     except FileNotFoundError:
         # file's already gone, oh well
@@ -132,30 +160,35 @@ def check_file(
         logging.error(f"{type(e).__name__} for '{filename}': {e}")
 
 
-def list_files_in_dir(base_dir: str) -> List[str]:
+def list_files_in_dir(base_dir: str, sort_by_age: bool = False) -> List[str]:
     """Recursively list all files in a directory."""
     if not os.path.isdir(base_dir):
         return []
-    return [os.path.join(root, f) for root, _, files in os.walk(base_dir) for f in files]
+    files = [os.path.join(root, f) for root, _, filenames in os.walk(base_dir) for f in filenames]
+    return sorted(files, key=os.path.getmtime) if sort_by_age else files
 
 
-def load_filebeat_registry(registry_path: str) -> List[Tuple[int, int]]:
-    """Load the filebeat registry file and extract (device, inode) tuples."""
-    if not os.path.isfile(registry_path):
-        return []
-    try:
-        with open(registry_path) as f:
-            fb_reg = LoadFileIfJson(f, attemptLines=True)
-    except Exception as e:
-        logging.error(f"Failed to load filebeat registry: {e}")
-        return []
-
+def load_filebeat_registries(registry_paths: List[str]) -> List[Tuple[int, int]]:
+    """Load the filebeat registry file(s) and extract (device, inode) tuples."""
     fb_files = []
-    for entry in fb_reg:
-        device = deep_get(entry, ['v', 'FileStateOS', 'device'])
-        inode = deep_get(entry, ['v', 'FileStateOS', 'inode'])
-        if device is not None and inode is not None:
-            fb_files.append((int(device), int(inode)))
+
+    for registry_path in registry_paths:
+        if not os.path.isfile(registry_path):
+            continue
+        try:
+            with open(registry_path) as f:
+                fb_reg = LoadFileIfJson(f, attemptLines=True)
+        except Exception as e:
+            logging.error(f"Failed to load filebeat registry: {e}")
+            continue
+
+        if fb_reg:
+            for entry in fb_reg:
+                device = deep_get(entry, ['v', 'FileStateOS', 'device'])
+                inode = deep_get(entry, ['v', 'FileStateOS', 'inode'])
+                if device is not None and inode is not None:
+                    fb_files.append((int(device), int(inode)))
+
     return fb_files
 
 
@@ -219,7 +252,7 @@ def prune_files() -> None:
     if (clean_log_seconds <= 0) and (clean_zip_seconds <= 0):
         return
 
-    fb_files = load_filebeat_registry(filebeat_registry_filename)
+    fb_files = load_filebeat_registries(filebeat_registry_filenames)
 
     # look for regular Zeek files in the processed/ directory
     zeek_found = list_files_in_dir(zeek_processed_dir)
@@ -240,9 +273,17 @@ def prune_files() -> None:
     logging.debug(f"Found {len(suricata_files)} Suricata files to consider.")
     process_files(suricata_files, fb_files, check_logs=True, check_archives=False, label="Suricata")
 
+    # check the filescan logs
+    filescan_files = list_files_in_dir(filescan_dir, sort_by_age=True)
+    if filescan_files:
+        # filescan_files is sorted sorted oldest to newest; don't consider the newest file for deletion
+        filescan_files.pop()
+    logging.debug(f"Found {len(filescan_files)} filescan files to consider.")
+    process_files(filescan_files, fb_files, check_logs=True, check_archives=False, label="Filescan")
+
     # clean up any old and empty directories in Zeek processed/ and suricata non-live directories
     clean_dir_seconds = min(i for i in (clean_log_seconds, clean_zip_seconds) if i > 0)
-    cleanup_empty_dirs([zeek_processed_dir, suricata_dir], clean_dir_seconds)
+    cleanup_empty_dirs([zeek_processed_dir, filescan_dir, suricata_dir], clean_dir_seconds)
 
     logging.debug("Finished pruning files.")
 
