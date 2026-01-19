@@ -144,6 +144,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/FoxIO-LLC/ja4|main"
+  "https://github.com/mmguero-dev/zeek-fuzzy-hashing|master"
   "https://github.com/mitre-attack/bzar"
   "https://github.com/mmguero-dev/json-streaming-logs|master"
   "https://github.com/ncsa/bro-is-darknet"

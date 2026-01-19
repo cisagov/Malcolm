@@ -306,7 +306,13 @@
                 "sha256": {
                   "type": "keyword"
                 },
+                "ssdeep": {
+                  "type": "keyword"
+                },
                 "timedout": {
+                  "type": "keyword"
+                },
+                "tlsh": {
                   "type": "keyword"
                 },
                 "total_bytes": {
@@ -1483,20 +1489,6 @@
             },
             "signatures": {
               "properties": {
-                "hits": {
-                  "type": "nested",
-                  "properties": {
-                    "Capa": {
-                      "type": "keyword"
-                    },
-                    "ClamAV": {
-                      "type": "keyword"
-                    },
-                    "Yara": {
-                      "type": "keyword"
-                    }
-                  }
-                },
                 "host_count": {
                   "type": "integer"
                 },

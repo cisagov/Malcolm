@@ -83,7 +83,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load protocols/ftp/detect
 @load protocols/ftp/detect-bruteforcing.zeek
 @load protocols/ftp/software
-@load protocols/http/detect-sqli
+@load protocols/http/detect-sql-injection
 @load protocols/http/detect-webapps
 @load protocols/http/header-names
 @load protocols/http/software
@@ -106,6 +106,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @endif
 @load base/files/hash
 @load frameworks/files/hash-all-files
+@load fuzzy-hash-all-files
 @if (!disable_stats)
   @load policy/misc/stats
   @load policy/misc/capture-loss

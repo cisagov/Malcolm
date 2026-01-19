@@ -603,14 +603,14 @@ scanners:
       priority: 5
       options:
         limit: 1000
-  'ScanTlsh':
-    - positive:
-        flavors:
-          - '*'
-      priority: 5
-      options:
-        location: '/etc/strelka/tlsh/'
-        score: 30
+#  'ScanTlsh':
+#    - positive:
+#        flavors:
+#          - '*'
+#      priority: 5
+#      options:
+#        location: '/etc/strelka/tlsh/'
+#        score: 30
   'ScanTnef':
     - positive:
         flavors:

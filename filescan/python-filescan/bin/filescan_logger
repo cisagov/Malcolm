@@ -60,13 +60,8 @@ def result_qualifies_for_preservation(scan_result: FileResult | None) -> bool:
     return (
         isinstance(scan_result, FileResult)
         and isinstance(scan_result.result, dict)
-        and (
-            ((rules := scan_result.result.get('rules')) and isinstance(rules, list))
-            or (
-                (yara_matches := deep_get(scan_result.result, ['scan', 'yara', 'matches']))
-                and isinstance(yara_matches, list)
-            )
-        )
+        and (rules := scan_result.result.get('rules'))
+        and isinstance(rules, list)
     )
 
 
