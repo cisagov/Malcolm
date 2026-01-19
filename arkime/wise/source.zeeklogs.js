@@ -3342,7 +3342,7 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_websearch_port_arkime", { name: "Port Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category: "port" });
 
     // add right-click for searching VirusTotal for hash signatures
-    var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
+    var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|ssdeep|tlsh|sha(1|256|384|512))\b/i.test(value)).join(',');
     this.api.addValueAction("malcolm_vt_fields_hash", { name: "VirusTotal Hash", url: "/dashboards/app/refred/https://www.virustotal.com/gui/file/%TEXT%/detection", fields: hashFieldsStr });
     this.api.addValueAction("malcolm_vt_fields_hash_arkime", { name: "VirusTotal Hash", url: "/dashboards/app/refred/https://www.virustotal.com/gui/file/%TEXT%/detection", category: "md5" });
 
