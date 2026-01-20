@@ -6,7 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 RUN    apt-get update -q \
-    && apt-get -y -q upgrade \
     && apt-get install -y gcc \
     && python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
     && python3 -m pip install --break-system-packages --no-cache-dir flake8==7.2.0
@@ -69,7 +68,6 @@ ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/api.sh /usr/local/bin/container_health.sh
 
 RUN    apt-get -q update \
-    && apt-get -y -q --no-install-recommends upgrade \
     && apt-get -y -q --no-install-recommends install curl jq netcat-openbsd rsync tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \

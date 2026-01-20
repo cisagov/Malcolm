@@ -1,3 +1,21 @@
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS manuf-builder
+
+COPY logstash/requirements.txt /work/
+COPY scripts/malcolm_utils.py /work/
+COPY scripts/malcolm_constants.py /work/
+COPY logstash/scripts/manuf-oui-parse.py /work/
+
+WORKDIR /work
+
+RUN microdnf -y install \
+        python3 \
+        python3-pip \
+        python3-requests \
+        ca-certificates && \
+    microdnf clean all && \
+    python3 -m pip install --no-cache-dir -r requirements.txt && \
+    python3 manuf-oui-parse.py -o vendor_macs.yaml
+
 FROM docker.elastic.co/logstash/logstash-oss:9.2.4
 
 LABEL maintainer="malcolm@inl.gov"
@@ -31,7 +49,6 @@ ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ADD --chmod=644 logstash/requirements.txt /usr/local/src/
 ADD --chmod=644 logstash/config/log4j2.properties /usr/share/logstash.build/config/
 ADD --chmod=644 logstash/config/logstash.yml /usr/share/logstash.build/config/logstash.orig.yml
 ADD logstash/pipelines/ /usr/share/logstash.build/malcolm-pipelines/
@@ -44,52 +61,54 @@ ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 RUN set -x && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
-    microdnf -y update && \
-    microdnf -y upgrade && \
+    microdnf -y install curl-minimal && \
+        curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+        rpm -i /tmp/epel-release.rpm && \
     microdnf -y install \
         bash \
         ca-certificates \
-        curl-minimal \
         gettext \
         git \
         jq \
         patch \
-        python3-pip \
-        python3-requests \
-        python3-setuptools \
+        supervisor \
         rsync && \
     curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
         chmod +x /usr/bin/tini && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/local/bin/yq && \
-    python3 -m pip install --upgrade pip setuptools wheel && \
-    python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
-    /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
-        echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
-        echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
-        echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
-        echo "gem 'lru_reredux', git: 'https://github.com/mmguero-dev/lru_reredux'" >> /usr/share/logstash/Gemfile && \
-        echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
-        /usr/share/logstash/bin/ruby -S bundle install && \
-    logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
-                                       logstash-filter-json logstash-filter-prune logstash-filter-http \
-                                       logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
-                                       logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
-                                       logstash-filter-fingerprint logstash-filter-useragent \
-                                       logstash-input-beats logstash-output-elasticsearch logstash-output-opensearch && \
+    /usr/share/logstash/vendor/jruby/bin/jruby -S gem install --no-document \
+        concurrent-ruby \
+        deep_merge \
+        fuzzy-string-match \
+        stringex && \
+    git clone --depth=1 https://github.com/mmguero-dev/lru_reredux /tmp/lru_reredux && \
+        cd /tmp/lru_reredux && \
+        /usr/share/logstash/vendor/jruby/bin/jruby -S gem build lru_reredux.gemspec && \
+        /usr/share/logstash/vendor/jruby/bin/jruby -S gem install --no-document lru_reredux-*.gem && \
+        cd / && rm -rf /tmp/lru_reredux && \
+    logstash-plugin install --preserve logstash-output-opensearch && \
     microdnf clean all && \
-    rm -rf /tmp/* /var/tmp/* /usr/bin/jruby /root/.cache /root/.gem /root/.bundle /usr/share/logstash/pipeline && \
+    rm -rf \
+        /root/.bundle \
+        /root/.cache \
+        /root/.gem \
+        /tmp/* \
+        /usr/bin/jruby \
+        /usr/share/logstash/pipeline \
+        /var/lib/rpm \
+        /var/lib/dnf \
+        /var/tmp/* && \
+    find /usr/share/logstash -name '*.jsa' -delete && \
     rsync -a --chown=${PUSER}:${PGROUP} /usr/share/logstash.build/ /usr/share/logstash/ && \
     rm -rf /usr/share/logstash.build/ && \
     mkdir -p /logstash-persistent-queue /usr/share/logstash/config/bootstrap /usr/share/logstash/config/persist && \
     usermod -a -G tty ${PUSER} && \
     chown -R ${PUSER}:root /usr/share/logstash /logstash-persistent-queue && \
-    chmod -R u+rwX,go+rX /usr/share/logstash && \
-    echo "Retrieving and parsing Wireshark manufacturer database..." && \
-    python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
-    echo "Complete."
+    chmod -R u+rwX,go+rX /usr/share/logstash
 
+COPY --from=manuf-builder --chmod=644 /work/vendor_macs.yaml /etc/vendor_macs.yaml
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
@@ -116,7 +135,7 @@ VOLUME ["/logstash-persistent-queue"]
 EXPOSE 5044 9001 9600
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh", "-s", "logstash"]
-CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 ARG BUILD_DATE
 ARG MALCOLM_VERSION

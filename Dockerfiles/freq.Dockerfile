@@ -33,7 +33,6 @@ ENV FREQ_URL="https://codeload.github.com/markbaggett/freq/tar.gz/master"
 ADD --chmod=644 freq-server/requirements.txt /usr/local/src/
 
 RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
       curl \
       git \

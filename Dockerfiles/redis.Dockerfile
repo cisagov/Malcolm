@@ -27,7 +27,6 @@ ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/redis.sh /usr/local/bin/container_health.sh
 
 RUN apk update --no-cache && \
-    apk upgrade --no-cache && \
     apk --no-cache add bash jq psmisc rsync shadow tini && \
     addgroup ${PUSER} tty
 

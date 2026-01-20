@@ -51,7 +51,6 @@ ADD --chmod=755 strelka/backend/*.sh /usr/local/bin/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
       bc \
       clamav \

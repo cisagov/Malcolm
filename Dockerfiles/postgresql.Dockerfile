@@ -31,7 +31,6 @@ ADD --chmod=755 postgres-scripts/docker-entrypoint-startdb.d/*.sh /docker-entryp
 ADD --chmod=755 postgres-scripts/*.sh /usr/local/bin/
 
 RUN apk update --no-cache && \
-    apk upgrade --no-cache && \
     apk add --no-cache bash jq procps psmisc rsync shadow tini && \
     apk add --no-cache --virtual .build-deps rsync && \
     rsync -a /usr/local/bin/ /usr/bin/ && \

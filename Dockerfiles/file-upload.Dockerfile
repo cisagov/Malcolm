@@ -5,7 +5,6 @@ FROM debian:13-slim AS npmget
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends npm node-encoding git ca-certificates && \
     npm install -g \
       filepond \
@@ -70,7 +69,6 @@ ADD --chmod=644 file-upload/requirements.txt /usr/local/src/requirements.txt
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       ca-certificates \
       curl \

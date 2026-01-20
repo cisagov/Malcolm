@@ -61,7 +61,6 @@ ADD --chmod=644 suricata/requirements.txt /usr/local/src/requirements.txt
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
         bc \
         curl \

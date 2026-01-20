@@ -56,7 +56,6 @@ ENV ZEEK_PATH_UPLOAD_SUBDIR=$ZEEK_PATH_UPLOAD_SUBDIR
 ADD --chmod=644 pcap-monitor/requirements.txt /usr/local/src/requirements.txt
 
 RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
       git \
       file \

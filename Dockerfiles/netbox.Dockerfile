@@ -60,7 +60,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor > /usr/share/keyrings/nginx-keyring.gpg && \
       mv /tmp/unit.list /etc/apt/sources.list.d/unit.list && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       gcc \
       file \

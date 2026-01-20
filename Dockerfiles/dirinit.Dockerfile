@@ -24,7 +24,6 @@ ENV TERM=xterm
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
 RUN apk update --no-cache && \
-    apk upgrade --no-cache && \
     apk --no-cache add bash jq psmisc rsync shadow tini && \
     addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \

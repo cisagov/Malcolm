@@ -99,7 +99,6 @@ ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 RUN export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       bc \
       bzip2 \

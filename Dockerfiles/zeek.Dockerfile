@@ -57,7 +57,6 @@ ENV SUPERCRONIC_CRONTAB="${ZEEK_DIR}/crontab"
 # build and install system packages, zeek, spicy and plugins
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       bc \
       binutils \

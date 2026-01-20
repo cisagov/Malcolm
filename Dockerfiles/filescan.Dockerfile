@@ -85,7 +85,6 @@ RUN set -e ; \
     # fix our package lists, upgrade, and install a few minimal dependencies
     sed -i /etc/apt/sources.list.d/debian.sources -e 's/main$/main contrib non-free/' ; \
     apt-get update -q ; \
-    apt-get upgrade -y -q --no-install-recommends ; \
     apt-get install -y -q --no-install-recommends \
       automake \
       build-essential \

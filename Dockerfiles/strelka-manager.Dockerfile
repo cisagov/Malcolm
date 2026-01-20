@@ -25,7 +25,6 @@ ENV YQ_VERSION="4.50.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 RUN apk update --no-cache && \
-    apk upgrade --no-cache && \
     apk --no-cache add bash curl jq psmisc rsync shadow tini && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
       chmod 755 /usr/local/bin/yq && \

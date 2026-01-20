@@ -36,7 +36,6 @@ ENV BOOTSTRAP_VERSION=$BOOTSTRAP_VERSION
 ENV HTADMIN_URL="https://codeload.github.com/mmguero-dev/htadmin/tar.gz/master"
 
 RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
       ca-certificates \
       curl \

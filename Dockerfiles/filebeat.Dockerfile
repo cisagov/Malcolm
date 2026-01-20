@@ -93,7 +93,6 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
         rpm -i /tmp/epel-release.rpm && \
     microdnf -y update && \
-    microdnf -y upgrade && \
     microdnf -y install \
         bzip2 \
         ca-certificates \

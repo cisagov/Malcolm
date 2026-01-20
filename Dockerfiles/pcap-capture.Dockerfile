@@ -66,7 +66,6 @@ ADD --chmod=644 pcap-capture/templates/*.template /etc/supervisor.d/
 ADD --chmod=644 pcap-capture/requirements.txt /usr/local/src/requirements.txt
 
 RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
       bc \
       ethtool \

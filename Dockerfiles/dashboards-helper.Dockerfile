@@ -73,7 +73,6 @@ ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       bash \
       bc \
