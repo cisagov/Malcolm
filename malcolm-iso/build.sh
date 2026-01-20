@@ -108,6 +108,9 @@ PYCODE
   done
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_base_crypto.cfg
+
+  [[ "$IMAGE_NAME" == "hedgehog" ]] && VAR_PAR_SIZES="32000 48000 64000" || VAR_PAR_SIZES="48000 64000 72000"
+  sed -i "s/MALCOLM_VAR_PAR_SIZES/$VAR_PAR_SIZES/g" ./config/includes.binary/install/preseed_multipar.cfg
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_nolvm.cfg
   cp ./config/includes.binary/install/preseed_vmware.cfg ./config/includes.binary/install/preseed_vmware_nolvm.cfg
