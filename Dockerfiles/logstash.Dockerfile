@@ -78,16 +78,13 @@ RUN set -x && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/local/bin/yq && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
-    /usr/share/logstash/vendor/jruby/bin/jruby -S gem install --no-document \
-        concurrent-ruby \
-        deep_merge \
-        fuzzy-string-match \
-        stringex && \
-    git clone --depth=1 https://github.com/mmguero-dev/lru_reredux /tmp/lru_reredux && \
-        cd /tmp/lru_reredux && \
-        /usr/share/logstash/vendor/jruby/bin/jruby -S gem build lru_reredux.gemspec && \
-        /usr/share/logstash/vendor/jruby/bin/jruby -S gem install --no-document lru_reredux-*.gem && \
-        cd / && rm -rf /tmp/lru_reredux && \
+    /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
+        echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
+        echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
+        echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
+        echo "gem 'lru_reredux', git: 'https://github.com/mmguero-dev/lru_reredux'" >> /usr/share/logstash/Gemfile && \
+        echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
+        /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-output-opensearch && \
     microdnf clean all && \
     rm -rf \
