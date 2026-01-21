@@ -40,6 +40,7 @@ from malcolm_utils import (
     ParseCurlFile,
     remove_prefix,
     set_logging,
+    sizeof_fmt,
     get_verbosity_env_var_count,
     touch,
 )
@@ -57,8 +58,11 @@ from watchdog.observers.polling import PollingObserver
 from watchdog.utils import WatchdogShutdownError
 
 ###################################################################################################
-MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
-MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 32 * 1024 * 1024 * 1024
+MINIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES = 24
+try:
+    MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES = int(os.getenv('PCAP_UPLOAD_MAX_FILE_GB', '50')) * 1024 * 1024 * 1024
+except:
+    MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES = 50 * 1024 * 1024 * 1024
 
 ###################################################################################################
 # for querying the Arkime's "arkime_files" OpenSearch index to avoid re-processing (duplicating sessions for)
@@ -249,7 +253,9 @@ class EventWatcher:
 
             else:
                 # too small/big to care about, or the wrong type, ignore it
-                self.logger.info(f"{scriptName}:\t✋\t{pathname}")
+                self.logger.error(
+                    f"{scriptName}:\t✋\t{pathname} ({sizeof_fmt(fileSize)}, {fileMime}, {fileType}) invalid file type or unacceptable file size, ignoring"
+                )
 
 
 def file_processor(pathname, **kwargs):
@@ -298,16 +304,16 @@ def main():
         help="Minimum size for checked files",
         metavar='<bytes>',
         type=int,
-        default=MINIMUM_CHECKED_FILE_SIZE_DEFAULT,
+        default=MINIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES,
         required=False,
     )
     parser.add_argument(
         '--max-bytes',
         dest='maxBytes',
-        help="Maximum size for checked files",
+        help="Maximum size for checked files, in bytes",
         metavar='<bytes>',
         type=int,
-        default=MAXIMUM_CHECKED_FILE_SIZE_DEFAULT,
+        default=MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES,
         required=False,
     )
     parser.add_argument(

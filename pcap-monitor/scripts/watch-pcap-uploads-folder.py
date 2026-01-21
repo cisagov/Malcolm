@@ -22,7 +22,8 @@ import sys
 import time
 
 import malcolm_utils
-from malcolm_utils import str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
+from malcolm_utils import sizeof_fmt, str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
+from pcap_utils import PCAP_MIME_TYPES
 import watch_common
 
 ###################################################################################################
@@ -30,6 +31,13 @@ scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = [False]
+
+###################################################################################################
+MINIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES = 24
+try:
+    MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES = int(os.getenv('PCAP_UPLOAD_MAX_FILE_GB', '50')) * 1024 * 1024 * 1024
+except:
+    MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES = 50 * 1024 * 1024 * 1024
 
 
 ###################################################################################################
@@ -41,11 +49,13 @@ def shutdown_handler(signum, frame):
 
 ###################################################################################################
 def file_processor(pathname, **kwargs):
-    uid = kwargs["uid"]
-    gid = kwargs["gid"]
-    pcapDir = kwargs["destination"]
-    zeekDir = kwargs["zeek"]
-    logger = kwargs["logger"] if "logger" in kwargs and kwargs["logger"] else logging
+    uid = kwargs.get("uid")
+    gid = kwargs.get("gid")
+    pcapDir = kwargs.get("destination")
+    zeekDir = kwargs.get("zeek")
+    minBytes = kwargs.get("minBytes") or MINIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES
+    maxBytes = kwargs.get("maxBytes") or MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES
+    logger = kwargs.get("logger") or logging
 
     logger.info(f"{scriptName}:\t👓\t{pathname}")
 
@@ -57,43 +67,52 @@ def file_processor(pathname, **kwargs):
             # get the file magic mime type
             fileMime = magic.from_file(pathname, mime=True)
             fileType = magic.from_file(pathname)
+            fileSize = os.path.getsize(pathname)
 
-            if os.path.isdir(pcapDir) and (
-                (fileMime in ('application/vnd.tcpdump.pcap', 'application/x-pcapng'))
-                or re.search(r'pcap-?ng', fileType, re.IGNORECASE)
-            ):
-                # a pcap file to be processed by dropping it into pcapDir
-                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {pcapDir}")
-                shutil.move(pathname, os.path.join(pcapDir, os.path.basename(pathname)))
+            if minBytes <= fileSize <= maxBytes:
+                if os.path.isdir(pcapDir) and (
+                    (fileMime in PCAP_MIME_TYPES) or re.search(r'pcap-?ng', fileType, re.IGNORECASE)
+                ):
+                    # a pcap file to be processed by dropping it into pcapDir
+                    logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {pcapDir}")
+                    shutil.move(pathname, os.path.join(pcapDir, os.path.basename(pathname)))
 
-            elif os.path.isdir(zeekDir) and (
-                fileMime
-                in [
-                    'application/gzip',
-                    'application/x-gzip',
-                    'application/x-7z-compressed',
-                    'application/x-bzip2',
-                    'application/x-cpio',
-                    'application/x-lzip',
-                    'application/x-lzma',
-                    'application/x-rar-compressed',
-                    'application/x-tar',
-                    'application/x-xz',
-                    'application/zip',
-                    # windows event logs (idaholab/Malcolm#465) will be handled here as well, as they
-                    # may be uploaded either as-is or compressed
-                    'application/x-ms-evtx',
-                ]
-            ):
-                # looks like this is a compressed file (or evtx file), we're assuming it's:
-                #  * a zeek log archive to be processed by filebeat
-                #  * a windows event log archive to be processed into JSON and then also sent through filebeat
-                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {zeekDir}")
-                shutil.move(pathname, os.path.join(zeekDir, os.path.basename(pathname)))
+                elif os.path.isdir(zeekDir) and (
+                    fileMime
+                    in [
+                        'application/gzip',
+                        'application/x-gzip',
+                        'application/x-7z-compressed',
+                        'application/x-bzip2',
+                        'application/x-cpio',
+                        'application/x-lzip',
+                        'application/x-lzma',
+                        'application/x-rar-compressed',
+                        'application/x-tar',
+                        'application/x-xz',
+                        'application/zip',
+                        # windows event logs (idaholab/Malcolm#465) will be handled here as well, as they
+                        # may be uploaded either as-is or compressed
+                        'application/x-ms-evtx',
+                    ]
+                ):
+                    # looks like this is a compressed file (or evtx file), we're assuming it's:
+                    #  * a zeek log archive to be processed by filebeat
+                    #  * a windows event log archive to be processed into JSON and then also sent through filebeat
+                    logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {zeekDir}")
+                    shutil.move(pathname, os.path.join(zeekDir, os.path.basename(pathname)))
 
+                else:
+                    # unhandled file type uploaded, delete it
+                    logger.error(
+                        f"{scriptName}:\t🗑\t{pathname} ({sizeof_fmt(fileSize)}, {fileMime}, {fileType}) invalid file type, deleting"
+                    )
+                    os.unlink(pathname)
             else:
-                # unhandled file type uploaded, delete it
-                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime}/{fileType} unsupported file type, deleted)")
+                # file size not in acceptable range, delete it
+                logger.error(
+                    f"{scriptName}:\t🗑\t{pathname} ({sizeof_fmt(fileSize)}, {fileMime}, {fileType}) unacceptable file size, deleting"
+                )
                 os.unlink(pathname)
 
         except Exception as genericError:
@@ -196,6 +215,24 @@ def main():
         required=False,
     )
     parser.add_argument(
+        '--min-bytes',
+        dest='minBytes',
+        help="Minimum size for checked files",
+        metavar='<bytes>',
+        type=int,
+        default=MINIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES,
+        required=False,
+    )
+    parser.add_argument(
+        '--max-bytes',
+        dest='maxBytes',
+        help="Maximum size for checked files, in bytes",
+        metavar='<bytes>',
+        type=int,
+        default=MAXIMUM_CHECKED_FILE_SIZE_DEFAULT_BYTES,
+        required=False,
+    )
+    parser.add_argument(
         '-u',
         '--uid',
         dest='chownUid',
@@ -275,6 +312,8 @@ def main():
             "zeek": args.zeekDir,
             "uid": args.chownUid,
             "gid": args.chownGid,
+            "minBytes": args.minBytes,
+            "maxBytes": args.maxBytes,
         },
         args.assumeClosedSec,
         shuttingDown,
