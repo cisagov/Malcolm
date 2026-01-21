@@ -1,22 +1,32 @@
 #!/usr/bin/env python3
 """
-AWS Cloud Logs Collector for Malcolm
-Collects VPC Flow Logs, CloudTrail, and other AWS logs from S3
-
-Author: Bhaskar
-Related: GitHub Issue #232 - Cloud Infrastructure Logs Integration
+AWS and Azure Cloud Logs Collector
+Collects logs from S3 buckets and Azure Blob Storage for ingestion into Malcolm
+Supports: VPC Flow Logs, CloudTrail, ELB/ALB, S3 Access, Route 53, Azure NSG, Azure Activity
 """
 
+import argparse
+import boto3
+import gzip
+import json
+import logging
 import os
 import sys
-import json
-import gzip
-import boto3
-import argparse
-import logging
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional
+
+# Supported log types and their dataset identifiers
+LOG_TYPES = {
+    'vpc-flow': 'aws.vpcflowlogs',
+    'cloudtrail': 'aws.cloudtrail',
+    'elb': 'aws.elb',
+    's3-access': 'aws.s3access',
+    'route53': 'aws.route53',
+    'azure-nsg': 'azure.nsgflowlogs',
+    'azure-activity': 'azure.activitylogs'
+}
 
 # Configure logging
 logging.basicConfig(
@@ -193,7 +203,7 @@ def main():
     )
     parser.add_argument('--bucket', required=True, help='S3 bucket name')
     parser.add_argument('--log-type', required=True, 
-                       choices=['vpc-flow', 'cloudtrail', 'elb', 's3-access'],
+                       choices=['vpc-flow', 'cloudtrail', 'elb', 's3-access', 'route53', 'azure-nsg', 'azure-activity'],
                        help='Type of logs to collect')
     parser.add_argument('--output-dir', required=True, 
                        help='Output directory for logs')
