@@ -93,8 +93,9 @@ filebeat.inputs:
           - from: "source"
             to: "service.type"
   tags: ["_filebeat_filescan"]
-  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
-  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  # these files can be long-lived
+  clean_inactive: 7d
+  ignore_older: 0
   close:
     on_state_change:
       inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
