@@ -13,4 +13,4 @@ python-slugify==8.0.4
 randomcolor==0.4.4.6
 setuptools==80.9.0
 supervisor==4.3.0
-wheel==0.45.1
+wheel==0.46.2
