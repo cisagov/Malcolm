@@ -19,6 +19,12 @@ ENV DEFAULT_UID=$DEFAULT_UID
 ENV DEFAULT_GID=$DEFAULT_GID
 ENV PUSER="scan"
 ENV PGROUP="scan"
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN="/filescan/data"
 ENV PUSER_PRIV_DROP=true
 ENV PUSER_RLIMIT_UNLOCK=true
 USER root
@@ -159,6 +165,7 @@ ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 
 ################################################################################
 
+# see PUSER_CHOWN comment above
 VOLUME ["/filescan/data"]
 
 EXPOSE $FILESCAN_HTTP_SERVER_PORT

@@ -33,9 +33,14 @@ ENV DEFAULT_UID=$DEFAULT_UID
 ENV DEFAULT_GID=$DEFAULT_GID
 ENV PUSER="logstash"
 ENV PGROUP="logstash"
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN="/logstash-persistent-queue"
 ENV PUSER_PRIV_DROP=true
 ENV PUSER_RLIMIT_UNLOCK=true
-ENV PUSER_CHOWN="/logstash-persistent-queue"
 USER root
 
 ENV TERM=xterm
@@ -127,6 +132,8 @@ ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=$LOGSTASH_OPENSEARCH_PIPELINE_
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=$LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES
 
 ENV LOGSTASH_KEYSTORE_PASS="a410a267b1404c949284dee25518a917"
+
+# see PUSER_CHOWN comment above
 VOLUME ["/logstash-persistent-queue"]
 
 EXPOSE 5044 9001 9600

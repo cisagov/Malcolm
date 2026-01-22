@@ -42,6 +42,13 @@ ADD --chmod=755 container-health-scripts/strelka-frontend.sh /usr/local/bin/cont
 
 EXPOSE 57314
 
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN="/var/log/strelka"
+
 VOLUME [ "/var/log/strelka" ]
 
 ENTRYPOINT ["/sbin/tini", \

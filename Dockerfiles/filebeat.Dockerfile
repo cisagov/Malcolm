@@ -21,7 +21,7 @@ ENV PGROUP="filebeat"
 #   in the Dockerfile is getting set with an ownership of 999:999.
 #   This is to override that, although I'm not yet sure if there are
 #   other implications. See containers/podman#23347.
-ENV PUSER_CHOWN="/usr/share/filebeat-logs/data;/usr/share/filebeat-nginx/data;/usr/share/filebeat-tcp/data"
+ENV PUSER_CHOWN="/usr/share/filebeat-logs/data;/usr/share/filebeat-nginx/data;/usr/share/filebeat-syslog-tcp/data;/usr/share/filebeat-syslog-udp/data;/usr/share/filebeat-tcp/data;/usr/share/filebeat-zeek-files-logs/data"
 # not dropping privileges globally: supervisord will take care of it
 # on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.py)
 # can chown uploaded files
@@ -198,7 +198,7 @@ ENV FILEBEAT_ZEEK_UPLOAD_SUBDIR="upload"
 ENV PCAP_NODE_NAME=$PCAP_NODE_NAME
 
 # see PUSER_CHOWN comment above
-VOLUME ["/usr/share/filebeat-logs/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
+VOLUME ["/usr/share/filebeat-logs/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-syslog-tcp/data", "/usr/share/filebeat-syslog-udp/data", "/usr/share/filebeat-tcp/data", "/usr/share/filebeat-zeek-files-logs/data"]
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \

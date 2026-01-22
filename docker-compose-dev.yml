@@ -106,6 +106,7 @@ services:
     depends_on:
     - opensearch
     volumes:
+    - dashboards-helper-data-init:/data/init
     - type: bind
       bind:
         create_host_path: false
@@ -218,6 +219,7 @@ services:
     ports:
     - 127.0.0.1:5044:5044
     volumes:
+    - logstash-persistent-queue:/logstash-persistent-queue
     - type: bind
       bind:
         create_host_path: false
@@ -323,6 +325,12 @@ services:
     - 127.0.0.1:5045:5045
     volumes:
     - nginx-log-path:/nginx:ro
+    - filebeat-logs-registry:/usr/share/filebeat-logs/data
+    - filebeat-nginx-registry:/usr/share/filebeat-nginx/data
+    - filebeat-syslog-tcp-registry:/usr/share/filebeat-syslog-tcp/data
+    - filebeat-syslog-udp-registry:/usr/share/filebeat-syslog-udp/data
+    - filebeat-tcp-registry:/usr/share/filebeat-tcp/data
+    - filebeat-zeek-files-logs-registry:/usr/share/filebeat-zeek-files-logs/data
     - type: bind
       bind:
         create_host_path: false
@@ -723,6 +731,9 @@ services:
     - ./config/suricata.env
     - ./config/suricata-offline.env
     volumes:
+    - suricata-config:/etc/suricata
+    - suricata-managed:/var/lib/suricata
+    - suricata-run:/var/run/suricata
     - type: bind
       bind:
         create_host_path: false
@@ -791,6 +802,9 @@ services:
     - ./config/suricata.env
     - ./config/suricata-live.env
     volumes:
+    - suricata-live-config:/etc/suricata
+    - suricata-live-managed:/var/lib/suricata
+    - suricata-live-run:/var/run/suricata
     - type: bind
       bind:
         create_host_path: false
@@ -849,6 +863,7 @@ services:
     - ./config/filescan-secret.env
     - ./config/filescan.env
     volumes:
+    - filescan-data:/filescan/data
     - type: bind
       bind:
         create_host_path: false
@@ -904,6 +919,9 @@ services:
     - ./config/pipeline.env
     shm_size: 512mb
     volumes:
+    - strelka-backend-clamav-rules:/var/lib/clamav
+    - strelka-backend-yara-rules-src:/yara-rules-src
+    - strelka-backend-yara-rules:/yara-rules
     - type: bind
       bind:
         create_host_path: false
@@ -954,6 +972,7 @@ services:
     - ./config/redis.env
     - ./config/pipeline.env
     volumes:
+    - strelka-frontend-logs:/var/log/strelka
     - type: bind
       bind:
         create_host_path: false
@@ -966,7 +985,6 @@ services:
       source: ./strelka/config/frontend/
       target: /etc/strelka/configmap
       read_only: true
-    - strelka-logs:/var/log/strelka/
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
@@ -1611,9 +1629,26 @@ services:
       traefik.enable: false
 
 volumes:
-  # shared named volume so filebeat can access nginx access logs
+  dashboards-helper-data-init:
+  filebeat-logs-registry:
+  filebeat-nginx-registry:
+  filebeat-syslog-tcp-registry:
+  filebeat-syslog-udp-registry:
+  filebeat-tcp-registry:
+  filebeat-zeek-files-logs-registry:
+  filescan-data:
+  logstash-persistent-queue:
   nginx-log-path:
-  strelka-logs:
+  strelka-backend-clamav-rules:
+  strelka-backend-yara-rules-src:
+  strelka-backend-yara-rules:
+  strelka-frontend-logs:
+  suricata-config:
+  suricata-live-config:
+  suricata-live-managed:
+  suricata-live-run:
+  suricata-managed:
+  suricata-run:
 
 networks:
   default:
