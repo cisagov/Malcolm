@@ -10,8 +10,8 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/strelka-backend'
 LABEL org.opencontainers.image.description='Malcolm container for the Strelka backend'
 
-ARG DEFAULT_UID=1001
-ARG DEFAULT_GID=1001
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
 ENV DEFAULT_UID=$DEFAULT_UID
 ENV DEFAULT_GID=$DEFAULT_GID
 ENV PUSER="strelka"
