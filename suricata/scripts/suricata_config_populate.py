@@ -856,6 +856,9 @@ def main():
 
             # while we're here, configure the eve-log section of outputs
             if name == 'eve-log':
+                # enable output of ethernet header in events
+                cfg['outputs'][outputIdx][name]['ethernet'] = True
+
                 # enable community-id for easier cross-referencing and pcap-file for
                 # tying back to the original PCAP filename
                 cfg['outputs'][outputIdx][name]['community-id'] = True
