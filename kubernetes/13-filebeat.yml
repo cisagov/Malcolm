@@ -84,6 +84,8 @@ spec:
             name: filebeat-zeek-volume
           - mountPath: "/suricata"
             name: filebeat-suricata-volume
+          - mountPath: "/filescan"
+            name: filebeat-filescan-volume
           - name: filebeat-nginx-runtime-logs-volume
             mountPath: /nginx
             subPath: "nginx"
@@ -125,6 +127,9 @@ spec:
         - name: filebeat-suricata-volume
           persistentVolumeClaim:
             claimName: suricata-claim
+        - name: filebeat-filescan-volume
+          persistentVolumeClaim:
+            claimName: filescan-claim
         - name: filebeat-nginx-runtime-logs-volume
           persistentVolumeClaim:
             claimName: runtime-logs-claim
