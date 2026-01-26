@@ -173,25 +173,25 @@ function SystemConfig {
 kernel.dmesg_restrict=0
 
 # the maximum number of open file handles
-fs.file-max=518144
+fs.file-max=2097152
 
 # the maximum number of user inotify watches
 fs.inotify.max_user_watches=131072
 
-# the maximum number of memory map areas a process may have
-vm.max_map_count=262144
-
 # the maximum number of incoming connections
 net.core.somaxconn=65535
+
+# the maximum number of memory map areas a process may have
+vm.max_map_count=524288
 
 # decrease "swappiness" (swapping out runtime memory vs. dropping pages)
 vm.swappiness=1
 
 # the % of system memory fillable with "dirty" pages before flushing
-vm.dirty_background_ratio=40
+vm.dirty_background_ratio=5
 
 # maximum % of dirty system memory before committing everything
-vm.dirty_ratio=80
+vm.dirty_ratio=10
 
 # virtual memory accounting mode: always overcommit, never check
 vm.overcommit_memory=1
