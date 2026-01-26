@@ -1,389 +1,427 @@
 {
-  "version": "7.10.0",
   "objects": [
     {
-      "id": "2d98bb8e-214c-4374-837b-20e1bcd63a5e",
-      "type": "dashboard",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2024-04-29T15:49:16.000Z",
-      "version": "WzMyOCwxXQ==",
       "attributes": {
-        "title": "DHCP",
-        "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":10,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":28,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":36,\"y\":28,\"w\":12,\"h\":18,\"i\":\"6\"},\"panelIndex\":\"6\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":24,\"y\":28,\"w\":12,\"h\":18,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":40,\"y\":10,\"w\":8,\"h\":18,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":10,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":10,\"w\":32,\"h\":18,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":28,\"w\":12,\"h\":18,\"i\":\"3bf94579-f6ba-4a29-a969-27a3d095271e\"},\"panelIndex\":\"3bf94579-f6ba-4a29-a969-27a3d095271e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":12,\"y\":28,\"w\":12,\"h\":18,\"i\":\"b5afee68-07b2-416c-a5a5-d913efd76095\"},\"panelIndex\":\"b5afee68-07b2-416c-a5a5-d913efd76095\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":46,\"w\":48,\"h\":32,\"i\":\"6c78964f-d1c8-4790-bda7-8802a7ea8986\"},\"panelIndex\":\"6c78964f-d1c8-4790-bda7-8802a7ea8986\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"}]",
-        "optionsJSON": "{\"useMargins\":true}",
-        "version": 1,
-        "timeRestore": false,
+        "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\"}}}}"
-        }
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\",\"time_zone\":\"Africa/Abidjan\"}}},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"3.4.0\",\"gridData\":{\"x\":14,\"y\":0,\"w\":34,\"h\":12,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_0\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":30,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":40,\"y\":30,\"w\":8,\"h\":18,\"i\":\"6\"},\"panelIndex\":\"6\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_2\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":32,\"y\":30,\"w\":8,\"h\":18,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":40,\"y\":12,\"w\":8,\"h\":18,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_4\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":6,\"h\":12,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":12,\"w\":32,\"h\":18,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_6\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":30,\"w\":8,\"h\":18,\"i\":\"3bf94579-f6ba-4a29-a969-27a3d095271e\"},\"panelIndex\":\"3bf94579-f6ba-4a29-a969-27a3d095271e\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":30,\"w\":8,\"h\":18,\"i\":\"b5afee68-07b2-416c-a5a5-d913efd76095\"},\"panelIndex\":\"b5afee68-07b2-416c-a5a5-d913efd76095\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_8\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":16,\"y\":30,\"w\":16,\"h\":18,\"i\":\"d8745400-2a5e-499f-886d-3cf3e03d41bd\"},\"panelIndex\":\"d8745400-2a5e-499f-886d-3cf3e03d41bd\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":48,\"w\":48,\"h\":32,\"i\":\"6c78964f-d1c8-4790-bda7-8802a7ea8986\"},\"panelIndex\":\"6c78964f-d1c8-4790-bda7-8802a7ea8986\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"}]",
+        "timeRestore": false,
+        "title": "DHCP",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "panel_0",
-          "type": "visualization",
-          "id": "1c337cf4-8030-4760-9828-7c0f5305c5bb"
-        },
-        {
-          "name": "panel_1",
-          "type": "visualization",
-          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3"
-        },
-        {
-          "name": "panel_2",
-          "type": "visualization",
-          "id": "82fff513-b971-452e-a0fb-492c3091b771"
-        },
-        {
-          "name": "panel_3",
-          "type": "visualization",
-          "id": "78b8c460-7dc9-4b76-9bc4-ea831c0d7802"
-        },
-        {
-          "name": "panel_4",
-          "type": "visualization",
-          "id": "23975603-24ed-40f6-bb45-0780f4645d92"
-        },
-        {
-          "name": "panel_5",
-          "type": "visualization",
-          "id": "AWDG80RwxQT5EBNmq38x"
-        },
-        {
-          "name": "panel_6",
-          "type": "visualization",
-          "id": "1d178ca4-f067-4f46-bbc7-777a3fd69d47"
-        },
-        {
-          "name": "panel_7",
-          "type": "visualization",
-          "id": "5ac2f8e0-a0ea-11ea-9a51-fddbbdf2f26e"
-        },
-        {
-          "name": "panel_8",
-          "type": "visualization",
-          "id": "6ced64b0-a0ea-11ea-9a51-fddbbdf2f26e"
-        },
-        {
-          "name": "panel_9",
-          "type": "search",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "2d98bb8e-214c-4374-837b-20e1bcd63a5e",
       "migrationVersion": {
         "dashboard": "7.9.3"
-      }
-    },
-    {
-      "id": "1c337cf4-8030-4760-9828-7c0f5305c5bb",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMyOSwxXQ==",
+      "references": [
+        {
+          "id": "1c337cf4-8030-4760-9828-7c0f5305c5bb",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "82fff513-b971-452e-a0fb-492c3091b771",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "78b8c460-7dc9-4b76-9bc4-ea831c0d7802",
+          "name": "panel_3",
+          "type": "visualization"
+        },
+        {
+          "id": "23975603-24ed-40f6-bb45-0780f4645d92",
+          "name": "panel_4",
+          "type": "visualization"
+        },
+        {
+          "id": "AWDG80RwxQT5EBNmq38x",
+          "name": "panel_5",
+          "type": "visualization"
+        },
+        {
+          "id": "1d178ca4-f067-4f46-bbc7-777a3fd69d47",
+          "name": "panel_6",
+          "type": "visualization"
+        },
+        {
+          "id": "5ac2f8e0-a0ea-11ea-9a51-fddbbdf2f26e",
+          "name": "panel_7",
+          "type": "visualization"
+        },
+        {
+          "id": "6ced64b0-a0ea-11ea-9a51-fddbbdf2f26e",
+          "name": "panel_8",
+          "type": "visualization"
+        },
+        {
+          "id": "0a1ff780-fae4-11f0-a91b-af9666b29d9b",
+          "name": "panel_9",
+          "type": "visualization"
+        },
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "panel_10",
+          "type": "search"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2026-01-26T18:24:15.779Z",
+      "version": "WzEzMjksMV0="
+    },
+    {
       "attributes": {
-        "visState": "{\"title\":\"DHCP - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}}],\"listeners\":{}}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "DHCP - Log Count Over Time",
         "uiStateJSON": "{}",
         "version": 1,
+        "visState": "{\"title\":\"DHCP - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}}],\"listeners\":{}}"
+      },
+      "id": "1c337cf4-8030-4760-9828-7c0f5305c5bb",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUyNSwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "Navigation",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}"
+      },
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:36:15.532Z",
+      "version": "WzEyODIsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-02-10T21:25:09.616Z",
-      "version": "Wzg3MiwxXQ==",
-      "attributes": {
-        "title": "Navigation",
-        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
-        "uiStateJSON": "{}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
-        }
-      },
-      "references": [],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "82fff513-b971-452e-a0fb-492c3091b771",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzMSwxXQ==",
-      "attributes": {
-        "visState": "{\"title\":\"DHCP - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
-        "description": "",
+        "savedSearchRefName": "search_0",
         "title": "DHCP - Destination IP Address",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"DHCP - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "82fff513-b971-452e-a0fb-492c3091b771",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "78b8c460-7dc9-4b76-9bc4-ea831c0d7802",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzMiwxXQ==",
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUyNywxXQ=="
+    },
+    {
       "attributes": {
-        "visState": "{\"title\":\"DHCP - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "DHCP - Source IP Address",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"DHCP - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "78b8c460-7dc9-4b76-9bc4-ea831c0d7802",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "23975603-24ed-40f6-bb45-0780f4645d92",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzMywxXQ==",
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUyOCwxXQ=="
+    },
+    {
       "attributes": {
-        "visState": "{\"title\":\"DHCP - Destination Port\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.port\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Port\"}}],\"listeners\":{}}",
         "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "DHCP - Destination Port",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"DHCP - Destination Port\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.port\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Port\"}}],\"listeners\":{}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "23975603-24ed-40f6-bb45-0780f4645d92",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "AWDG80RwxQT5EBNmq38x",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzNCwxXQ==",
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUyOSwxXQ=="
+    },
+    {
       "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "DHCP - Log Count",
-        "visState": "{\"title\":\"DHCP - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
         "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
-        "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"DHCP - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"\"},\"schema\":\"group\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"colorSchema\":\"Green to Red\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":true,\"color\":\"black\"},\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"},\"metricColorMode\":\"None\"}}}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "AWDG80RwxQT5EBNmq38x",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "1d178ca4-f067-4f46-bbc7-777a3fd69d47",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzNSwxXQ==",
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T18:20:10.786Z",
+      "version": "WzEzMjcsMV0="
+    },
+    {
       "attributes": {
-        "title": "DHCP - IP to MAC Assignment",
-        "visState": "{\"title\":\"DHCP - IP to MAC Assignment\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.assigned_ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Assigned IP Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.mac\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"MAC Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Source IP Address\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Destination IP Address\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "DHCP - IP to MAC Assignment",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"DHCP - IP to MAC Assignment\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.assigned_ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Assigned IP Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.mac\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"MAC Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Source IP Address\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Destination IP Address\"}}]}"
       },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "1d178ca4-f067-4f46-bbc7-777a3fd69d47",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "5ac2f8e0-a0ea-11ea-9a51-fddbbdf2f26e",
-      "type": "visualization",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzNiwxXQ==",
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUzMSwxXQ=="
+    },
+    {
       "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0",
         "title": "DHCP - Client Software",
-        "visState": "{\"title\":\"DHCP - Client Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}],\"splitColumn\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Server Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.client_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Client Software\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{}"
-        },
-        "savedSearchRefName": "search_0"
+        "visState": "{\"title\":\"DHCP - Client Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}],\"splitColumn\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Server Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.client_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Client Software\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "5ac2f8e0-a0ea-11ea-9a51-fddbbdf2f26e",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "6ced64b0-a0ea-11ea-9a51-fddbbdf2f26e",
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
       "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzNywxXQ==",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUzMiwxXQ=="
+    },
+    {
       "attributes": {
-        "title": "DHCP - Server Software",
-        "visState": "{\"title\":\"DHCP - Server Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.server_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Server Software\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
-        "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{}"
         },
-        "savedSearchRefName": "search_0"
+        "savedSearchRefName": "search_0",
+        "title": "DHCP - Server Software",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"DHCP - Server Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.server_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Server Software\"}}]}"
       },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "20ff62a1-06d6-4738-b611-945628d80305"
-        }
-      ],
+      "id": "6ced64b0-a0ea-11ea-9a51-fddbbdf2f26e",
       "migrationVersion": {
         "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "20ff62a1-06d6-4738-b611-945628d80305",
-      "type": "search",
+      },
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:21.144Z",
-      "version": "WzMzOCwxXQ==",
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T17:35:10.588Z",
+      "version": "WzUzMywxXQ=="
+    },
+    {
       "attributes": {
-        "title": "DHCP - Logs",
         "description": "",
-        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:ja4d\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "DHCP - JA4D Fingerprint",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"DHCP - JA4D Fingerprint\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"dhcp.ja4d\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"JA4D Fingerprint\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.dhcp.vendor_class_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Vendor Class ID\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "0a1ff780-fae4-11f0-a91b-af9666b29d9b",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "20ff62a1-06d6-4738-b611-945628d80305",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-01-26T18:22:57.777Z",
+      "version": "WzEzMjgsMV0="
+    },
+    {
+      "attributes": {
         "columns": [
+          "event.dataset",
           "source.mac",
           "zeek.dhcp.assigned_ip",
+          "source.ip",
           "destination.ip",
           "zeek.dhcp.host_name",
           "zeek.dhcp.domain",
           "zeek.dhcp.msg_types",
           "zeek.dhcp.client_software",
           "zeek.dhcp.server_software",
+          "dhcp.ja4d",
           "event.id"
         ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:dhcp OR event.dataset:ja4d\",\"language\":\"lucene\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"time_zone\":\"Africa/Abidjan\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
         "sort": [
           [
             "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"event.dataset:dhcp\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
+        "title": "DHCP - Logs",
+        "version": 1
       },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-        }
-      ],
+      "id": "20ff62a1-06d6-4738-b611-945628d80305",
       "migrationVersion": {
         "search": "7.9.3"
-      }
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-01-26T18:18:39.621Z",
+      "version": "WzEzMjYsMV0="
     }
-  ]
+  ],
+  "version": "3.4.0"
 }

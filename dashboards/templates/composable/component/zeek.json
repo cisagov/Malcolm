@@ -154,6 +154,9 @@
                 "host_name": {
                   "type": "keyword"
                 },
+                "ja4d": {
+                  "type": "keyword"
+                },
                 "lease_time": {
                   "type": "float"
                 },
@@ -173,6 +176,9 @@
                   "type": "keyword"
                 },
                 "trans_id": {
+                  "type": "keyword"
+                },
+                "vendor_class_id": {
                   "type": "keyword"
                 }
               }

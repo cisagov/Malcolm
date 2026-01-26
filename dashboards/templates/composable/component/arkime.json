@@ -179,6 +179,9 @@
             "idCnt": {
               "type": "long"
             },
+            "ja4d": {
+              "type": "keyword"
+            },
             "mac": {
               "type": "keyword"
             },
