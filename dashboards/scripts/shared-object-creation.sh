@@ -116,6 +116,14 @@ function DoReplacersInFile() {
       REFRESH_WITH_UNITS="${ARKIME_INIT_REFRESH_SEC:-60}s" && \
       jq --arg refresh "$REFRESH_WITH_UNITS" 'if has("template") then .template.settings.index.refresh_interval = $refresh else . end' \
         "${REPLFILE}" | sponge "${REPLFILE}"
+
+      if [[ -n "${MALCOLM_INDEX_MAX_RESULT_WINDOW:-}" ]]; then
+        jq --argjson window "$MALCOLM_INDEX_MAX_RESULT_WINDOW" 'if has("template") then .template.settings.index.max_result_window = $window else . end' \
+          "${REPLFILE}" | sponge "${REPLFILE}"
+      else
+        jq 'if has("template") then del(.template.settings.index.max_result_window) else . end' \
+          "${REPLFILE}" | sponge "${REPLFILE}"
+      fi
     fi
 
     [[ "$FILE_TYPE" == "template" ]] && \
