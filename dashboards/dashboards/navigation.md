@@ -4,7 +4,7 @@
 [ICS/IoT Security Overview](#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)
 [Severity](#/dashboard/d2dd0180-06b1-11ec-8c6b-353266ade330)
 [Connections](#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)
-[Connections Tree](#/dashboard/89714140-a2d5-11f0-b5ae-e139a66d2205)
+[IP Connections Tree](#/dashboard/89714140-a2d5-11f0-b5ae-e139a66d2205)
 [Actions and Results](#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)
 [Threat Intelligence](#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)
 [Files](#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)

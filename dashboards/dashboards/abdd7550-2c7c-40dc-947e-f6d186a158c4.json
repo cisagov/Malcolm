@@ -937,6 +937,7 @@
           "destination.ip",
           "destination.port",
           "network.bytes",
+          "network.community_id",
           "event.id"
         ],
         "description": "",
