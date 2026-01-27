@@ -11,7 +11,7 @@
             * [Modbus](#Modbus)
             * [DNP3](#DNP3)
     - [Dashboards](#Dashboards)
-        + [Connections Tree Dashboard](#ConnTreeDash)
+        + [IP Connections Tree Dashboard](#ConnTreeDash)
 
 
 The Analytics described here are developed by the internal Malcolm Analytics team to assist in highlighting aspects of a network. The purpose of this page is to explain aspects of visualizations or dashboards that may not be intuitive or that would benefit from more in-depth explanation of features.
@@ -35,11 +35,11 @@ All Trees share similar functionality and features.
 ### <a name="ConnTree"></a>Connections Tree
 ![Example Connections Tree Screenshot](./images/screenshots/analytics-conn-tree-1.png)
 
-The IP Connections Tree purpose is to help identify potential avenues for lateral movement within a network, it allows you to visually focus in on Cyber Key Terrain (CKTs) and IP addresses that the user-defined root node communicates with. 
+The purpose of the Connections Tree visualization is to help identify potential avenues for lateral movement within a network, it allows you to visually focus in on Cyber Key Terrain (CKTs) and IP addresses that the user-defined root node communicates with.
 
 Communications between nodes __A → B → C__ implies that lateral movement could potentially happen from node __A → C__
 
-In Connections Tree, the root node is only ever the source IP. In Connections Tree (Mirrored), the root node is only ever a destination IP. The dashboard displaying these visualizations side-by-side is [Connections Tree](https://training.malcolm.fyi/dashboards/app/dashboards#/view/89714140-a2d5-11f0-b5ae-e139a66d2205) (see documentation below at [Connections Tree Dashboard](#ConnTreeDash)). 
+In Connections Tree, the root node is only ever the source IP. In Connections Tree (Mirrored), the root node is only ever a destination IP. The dashboard displaying these visualizations side-by-side is named **IP Connections Tree** (see documentation below at [Connections Tree Dashboard](#ConnTreeDash)).
 
 An example use case is if an Engineering Workstation of interest is identified, or an unknown device, entering the IP address as the root node will visualize observed communications between the source device of interest and any other devices/IP addresses.
 
@@ -157,13 +157,13 @@ The Modbus Trends graph plots the __write_single_coil__, __write_single_register
 No known issues at this time. If you encounter a bug, please submit a bug report or an issue to the Malcolm repository.
 
 ## <a name="Dashboards"></a>Dashboards
-* [Connections Tree Dashboard](#ConnTreeDash)
+* [IP Connections Tree Dashboard](#ConnTreeDash)
 <!-- Include other Links to dashboards here -->
 
-### <a name="ConnTreeDash"></a>Connections Tree Dashboard
-![Example Connections Tree Screenshot](./images/screenshots/analytics-conn-tree-dashboard.png)
+### <a name="ConnTreeDash"></a>IP Connections Tree Dashboard
+![Example IP Connections Tree Screenshot](./images/screenshots/analytics-conn-tree-dashboard.png)
 
-The [IP Connections Tree](https://training.malcolm.fyi/dashboards/app/dashboards#/view/89714140-a2d5-11f0-b5ae-e139a66d2205) purpose is to help identify potential avenues for lateral movement within a network, it allowsd you to visually focus in on Cyber Key Terrain (CKTs) and IP addresses that the user-defined root node communicates with. 
+The IP Connections Tree dashboard's purpose is to help identify potential avenues for lateral movement within a network, it allowsd you to visually focus in on Cyber Key Terrain (CKTs) and IP addresses that the user-defined root node communicates with.
 
 The root node exhibits different behaviors in the two visuals. On the left, the root node is only ever the source of communications. On the right, the root node is only ever a destination for communications.
 

@@ -1345,7 +1345,7 @@
           }
         },
         "title": {
-          "text": "IP Connections Tree Hierarchy From Source",
+          "text": "IP Connections Tree Hierarchy",
           "orient": "top",
           "align": "center"
         },
