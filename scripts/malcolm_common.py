@@ -1724,6 +1724,7 @@ LOG_IGNORE_REGEX = re.compile(
   | No\s+active\s+configuration\s+revision\s+found\s+-\s+falling\s+back\s+to\s+most\s+recent
   | Notice:\s+pcap:\s+read\s+(\d+)\s+file
   | opensearch.*has\s+insecure\s+file\s+permissions
+  | points\s+to\s+an\s+already\s+known\s+ingest\s+target
   | (POST|PUT)\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
