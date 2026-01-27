@@ -40,7 +40,7 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV YQ_VERSION="4.50.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV SURICATA_VERSION_PATTERN="1:7.0.*"
+ENV SURICATA_VERSION_PATTERN="1:8.0.*"
 
 ENV SURICATA_CONFIG_DIR=/etc/suricata
 ENV SURICATA_CONFIG_FILE="$SURICATA_CONFIG_DIR"/suricata.yaml
@@ -60,6 +60,7 @@ ADD --chmod=644 suricata/requirements.txt /usr/local/src/requirements.txt
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+    echo "deb http://deb.debian.org/debian trixie-backports main contrib non-free" | tee /etc/apt/sources.list.d/trixie-backports.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
         bc \
@@ -76,7 +77,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         libevent-pthreads-2.1-7 \
         libgeoip1 \
         libhiredis1.1.0 \
-        libhtp2 \
         libhtp2 \
         libhyperscan5 \
         libjansson4 \
@@ -102,11 +102,12 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         python3-wheel \
         python3-zmq \
         rsync \
-        suricata=${SURICATA_VERSION_PATTERN} \
-        suricata-update \
         tini \
         vim-tiny \
         zlib1g && \
+    apt-get install -q -y --no-install-recommends -t trixie-backports \
+        suricata=${SURICATA_VERSION_PATTERN} \
+        suricata-update && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \

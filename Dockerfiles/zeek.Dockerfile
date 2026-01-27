@@ -138,6 +138,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
       ( find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded || true ) && \
       ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
+      ( find "${ZEEK_DIR}"/var/lib/zkg/clones -mindepth 3 -maxdepth 3 -type d \( -iname 'test*' -o -iname 'pcap*' -o -iname "trace*" \) -exec rm -rf "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/Google && \
