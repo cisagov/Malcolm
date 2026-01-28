@@ -1594,8 +1594,10 @@ def start():
                 imageSource=args.imageSource,
                 imageTag=args.imageTag,
                 injectResources=args.injectResources,
+                preferHeavyWorkloadSeparation=args.preferHeavyWorkloadSeparation,
                 startCapturePods=not args.noCapturePodsStart,
                 noCapabilities=args.noCapabilities,
+                dryrun=args.dryRun,
             )
 
             if dictsearch(startResults, 'error'):
@@ -1603,7 +1605,8 @@ def start():
                     f"Starting the {args.namespace} namespace and creating its underlying resources returned the following error(s):\n"
                 )
                 logging.error(startResults)
-
+            elif args.dryRun:
+                logging.info(json.dumps(startResults))
             else:
                 logging.debug(startResults)
 
@@ -3070,6 +3073,15 @@ def main():
         help='Inject container resources from kubernetes-container-resources.yml (only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
+        '--separate-heavy-workloads',
+        dest='preferHeavyWorkloadSeparation',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Attempt to schedule "workload-group: heavy" deployments on different nodes (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
         '--image-source',
         required=False,
         dest='imageSource',
@@ -3095,6 +3107,15 @@ def main():
         const=True,
         default=False,
         help='Delete Kubernetes namespace (only for "wipe" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--dry-run',
+        dest='dryRun',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Dry run, don't actually deploy (only for \"start\" operation with Kubernetes)",
     )
 
     authSetupGroup = parser.add_argument_group('Authentication Setup')

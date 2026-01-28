@@ -32,6 +32,7 @@ spec:
       labels:
         app: opensearch
         role: log-store
+        workload-group: heavy
     spec:
       containers:
       - name: opensearch-container

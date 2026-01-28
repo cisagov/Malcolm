@@ -17,6 +17,7 @@ spec:
       labels:
         app: strelka-backend
         role: file-scanning
+        workload-group: heavy
     spec:
       containers:
       - name: strelka-backend-container

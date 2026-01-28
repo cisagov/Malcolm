@@ -17,6 +17,7 @@ spec:
       labels:
         app: suricata-live
         role: capture
+        workload-group: heavy
     spec:
       containers:
       - name: suricata-live-container

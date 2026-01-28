@@ -17,6 +17,7 @@ spec:
       labels:
         app: zeek-live
         role: capture
+        workload-group: heavy
     spec:
       containers:
       - name: zeek-live-container

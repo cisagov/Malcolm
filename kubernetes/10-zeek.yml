@@ -17,6 +17,7 @@ spec:
       labels:
         app: zeek-offline
         role: ingest
+        workload-group: heavy
     spec:
       containers:
       - name: zeek-offline-container

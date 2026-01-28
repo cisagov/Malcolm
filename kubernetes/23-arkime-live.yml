@@ -17,6 +17,7 @@ spec:
       labels:
         app: arkime-live
         role: capture
+        workload-group: heavy
     spec:
       containers:
       - name: arkime-live-container

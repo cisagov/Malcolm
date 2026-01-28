@@ -17,6 +17,7 @@ spec:
       labels:
         app: suricata-offline
         role: ingest
+        workload-group: heavy
     spec:
       containers:
       - name: suricata-offline-container

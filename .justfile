@@ -291,6 +291,8 @@ start:
     --inject-resources "${MALCOLM_K8S_INJECT_RESOURCES:-false}" \
     --no-capabilities "${MALCOLM_K8S_NO_CAPABILITIES:-false}" \
     --no-capture-pods "${MALCOLM_K8S_NO_CAPTURE_PODS:-true}" \
+    --dry-run "${MALCOLM_K8S_DRY_RUN:-false}" \
+    --separate-heavy-workloads "${MALCOLM_K8S_SEPARATE_HEAVY_WORKLOADS:-false}" \
     --skip-persistent-volume-checks "${MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS:-false}"
 
 restart *SERVICES:

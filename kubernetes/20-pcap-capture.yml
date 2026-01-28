@@ -17,6 +17,7 @@ spec:
       labels:
         app: pcap-capture
         role: capture
+        workload-group: heavy
     spec:
       containers:
       - name: pcap-capture-container

@@ -35,6 +35,7 @@ spec:
       labels:
         app: arkime
         role: analysis
+        workload-group: heavy
     spec:
       containers:
       - name: arkime-container
