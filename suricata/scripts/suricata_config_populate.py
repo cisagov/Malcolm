@@ -100,6 +100,7 @@ DEFAULT_VARS.update(
         'DEFRAG_PREALLOC': True,
         'DEFRAG_TIMEOUT': 60,
         'DEFRAG_TRACKERS': 65535,
+        'GUESS_APPLAYER_TX': False,
         'DHCP_ENABLED': True,
         'DHCP_EVE_ENABLED': False,
         'DHCP_EXTENDED': False,
@@ -163,6 +164,12 @@ DEFAULT_VARS.update(
         'LIVE_CAPTURE': False,
         'MANAGED_RULES_DIR': '/var/lib/suricata/rules',
         'MAX_PENDING_PACKETS': 10000,
+        'METADATA_TOP_EVE_ENABLED': False,
+        'METADATA_ALERT_APP_LAYER_EVE_ENABLED': True,
+        'METADATA_ALERT_FLOW_EVE_ENABLED': True,
+        'METADATA_ALERT_RULE_EVE_ENABLED': True,
+        'METADATA_ALERT_RULE_RAW_EVE_ENABLED': False,
+        'METADATA_ALERT_RULE_REFERENCE_EVE_ENABLED': False,
         'MDNS_ENABLED': True,
         'MDNS_EVE_ENABLED': False,
         'MODBUS_ENABLED': True,
@@ -260,6 +267,7 @@ DEFAULT_VARS.update(
         'TLS_JA4': 'auto',
         'TLS_PORTS': 443,
         'TLS_SESSION_RESUMPTION': False,
+        'VERSION_EVE_ENABLED': False,
         'VLAN_USE_FOR_TRACKING': True,
         'VXLAN_ENABLED': True,
         'VXLAN_EVE_ENABLED': False,
@@ -909,6 +917,12 @@ def main():
 
             # while we're here, configure the eve-log section of outputs
             if name == 'eve-log':
+                # output suricata version in events
+                cfg['outputs'][outputIdx][name]['suricata-version'] = val2bool(DEFAULT_VARS['VERSION_EVE_ENABLED'])
+
+                # top-level metadata
+                cfg['outputs'][outputIdx][name]['metadata'] = val2bool(DEFAULT_VARS['METADATA_TOP_EVE_ENABLED'])
+
                 # enable output of ethernet header in events
                 cfg['outputs'][outputIdx][name]['ethernet'] = True
 
@@ -945,6 +959,19 @@ def main():
                                 )
 
                                 if dumperName == 'alert':
+                                    # make sure alert metadata is enabled
+                                    cfg['outputs'][outputIdx][name]['types'][dumperIdx][dumperName]['metadata'] = {
+                                        'app-layer': val2bool(DEFAULT_VARS['METADATA_ALERT_APP_LAYER_EVE_ENABLED']),
+                                        'flow': val2bool(DEFAULT_VARS['METADATA_ALERT_FLOW_EVE_ENABLED']),
+                                        'rule': {
+                                            'metadata': val2bool(DEFAULT_VARS['METADATA_ALERT_RULE_EVE_ENABLED']),
+                                            'raw': val2bool(DEFAULT_VARS['METADATA_ALERT_RULE_RAW_EVE_ENABLED']),
+                                            'reference': val2bool(
+                                                DEFAULT_VARS['METADATA_ALERT_RULE_REFERENCE_EVE_ENABLED']
+                                            ),
+                                        },
+                                    }
+
                                     # don't dump payload, we can pivot to the payload with Arkime via community-id
                                     for alertParam in (
                                         'payload',
@@ -952,6 +979,9 @@ def main():
                                         'packet',
                                         'http-body',
                                         'http-body-printable',
+                                        'tagged-packets',
+                                        'websocket-payload',
+                                        'websocket-payload-printable',
                                     ):
                                         cfg['outputs'][outputIdx][name]['types'][dumperIdx][dumperName][
                                             alertParam
@@ -1272,6 +1302,7 @@ def main():
         ['defrag', 'prealloc', 'DEFRAG_PREALLOC'],
         ['defrag', 'timeout', 'DEFRAG_TIMEOUT'],
         ['defrag', 'trackers', 'DEFRAG_TRACKERS'],
+        ['detect', 'guess-applayer-tx', 'GUESS_APPLAYER_TX'],
         ['flow', 'emergency-recovery', 'FLOW_EMERGENCY_RECOVERY'],
         ['flow', 'hash-size', 'FLOW_HASH_SIZE'],
         ['flow', 'memcap', 'FLOW_MEMCAP'],
