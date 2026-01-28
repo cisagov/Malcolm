@@ -11,6 +11,9 @@
                 },
                 "metadata": {
                   "properties": {
+                    "confidence": {
+                      "type": "keyword"
+                    },
                     "created_at": {
                       "type": "keyword"
                     },
@@ -18,6 +21,9 @@
                       "type": "keyword"
                     },
                     "performance_impact": {
+                      "type": "keyword"
+                    },
+                    "reviewed_at": {
                       "type": "keyword"
                     },
                     "signature_severity": {
@@ -850,7 +856,7 @@
                 "qr": {
                   "type": "keyword"
                 },
-                "query": {
+                "queries": {
                   "properties": {
                     "id": {
                       "type": "integer"
@@ -878,6 +884,9 @@
                 "rd": {
                   "type": "keyword"
                 },
+                "rcode": {
+                  "type": "keyword"
+                },
                 "rrname": {
                   "type": "keyword"
                 },
@@ -888,6 +897,9 @@
                   "type": "keyword"
                 },
                 "tx_id": {
+                  "type": "keyword"
+                },
+                "type": {
                   "type": "keyword"
                 },
                 "version": {
