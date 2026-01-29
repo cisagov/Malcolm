@@ -204,6 +204,7 @@ PYCODE
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp -r ./scripts/installer/ "$MALCOLM_DEST_DIR/scripts/"
   rm -rf "$MALCOLM_DEST_DIR/scripts/installer/tests" "$MALCOLM_DEST_DIR/scripts/installer/ui/gui"
+  cp ./scripts/tx-rx-secure.sh "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
   ln -s ./control.py auth_setup
