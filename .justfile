@@ -286,7 +286,7 @@ start:
     --runtime "${MALCOLM_CONTAINER_RUNTIME:-docker}" \
     --namespace "${MALCOLM_K8S_NAMESPACE:-malcolm}" \
     --profile "${MALCOLM_PROFILE:-malcolm}" \
-    --image-source "${MALCOLM_K8S_IMAGE_SOURCE:-ghcr.io/mmguero-dev/Malcolm}" \
+    --image-source "${MALCOLM_K8S_IMAGE_SOURCE:-ghcr.io/idaholab/Malcolm}" \
     --image-tag "${MALCOLM_K8S_IMAGE_TAG:-main}" \
     --inject-resources "${MALCOLM_K8S_INJECT_RESOURCES:-false}" \
     --no-capabilities "${MALCOLM_K8S_NO_CAPABILITIES:-false}" \
@@ -305,7 +305,7 @@ restart *SERVICES:
     --runtime "${MALCOLM_CONTAINER_RUNTIME:-docker}" \
     --namespace "${MALCOLM_K8S_NAMESPACE:-malcolm}" \
     --profile "${MALCOLM_PROFILE:-malcolm}" \
-    --image-source "${MALCOLM_K8S_IMAGE_SOURCE:-ghcr.io/mmguero-dev/Malcolm}" \
+    --image-source "${MALCOLM_K8S_IMAGE_SOURCE:-ghcr.io/idaholab/Malcolm}" \
     --image-tag "${MALCOLM_K8S_IMAGE_TAG:-main}" \
     --inject-resources "${MALCOLM_K8S_INJECT_RESOURCES:-false}" \
     --no-capabilities "${MALCOLM_K8S_NO_CAPABILITIES:-false}" \
