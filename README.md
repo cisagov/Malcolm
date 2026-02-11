@@ -1,4 +1,5 @@
 # Malcolm
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/cisagov/Malcolm)
 
 ![](./docs/images/logo/Malcolm_outline_banner_dark.png)
 
