@@ -887,6 +887,84 @@ def main():
 
 
 ###################################################################################################
+
+
+def automate_openeox_script(netbox_venv_py, manage_script):
+    import logging
+    import malcolm_utils
+    success = False
+    logging.info("Automating Hardware Lifecycle Script Registration")
+
+    script_code = """
+import os
+import shutil
+import hashlib
+from django.utils import timezone
+from core.models import DataSource, DataFile
+from extras.models import ScriptModule
+
+try:
+    src_path = '/usr/local/bin/hardware_lifecycle_auditor.py'
+    dest_dir = '/opt/netbox/netbox/scripts/'
+    dest_path = os.path.join(dest_dir, 'hardware_lifecycle_auditor.py')
+
+    # 1. Safely copy the script to NetBox's writable directory
+    if os.path.exists(src_path):
+        shutil.copy2(src_path, dest_path)
+
+    if os.path.exists(dest_path):
+        # 2. Register Local Data Source
+        ds, _ = DataSource.objects.update_or_create(
+            name='Hardware Lifecycle',
+            defaults={
+                'type': 'local',
+                'parameters': {'path': dest_dir},
+                'enabled': True
+            }
+        )
+
+        with open(dest_path, 'rb') as f:
+            data = f.read()
+
+        df, _ = DataFile.objects.update_or_create(
+            source=ds,
+            path='hardware_lifecycle_auditor.py',
+            defaults={
+                'size': len(data),
+                'hash': hashlib.sha256(data).hexdigest(),
+                'last_updated': timezone.now()
+            }
+        )
+
+        sm, _ = ScriptModule.objects.update_or_create(
+            data_file=df,
+            defaults={
+                'data_source': ds,
+                'file_path': df.path,
+                'auto_sync_enabled': True
+            }
+        )
+        print("SUCCESS: Hardware Lifecycle script is fully automated.")
+    else:
+        print(f"WARNING: {src_path} not found in container.")
+except Exception as e:
+    print(f"WARNING: Failed to automate script: {e}")
+"""
+
+    cmd = [netbox_venv_py, manage_script, "nbshell", "-c", script_code]
+    err, results = malcolm_utils.run_process(cmd, logger=logging)
+
+    if err == 0:
+        logging.debug(f"automate_openeox_script: {results}")
+        success = True
+    else:
+        logging.error(f"{err} automating script: {results}")
+
+    return success
+
+
+##########################################################################################
+
 if __name__ == '__main__':
     try:
         main()
