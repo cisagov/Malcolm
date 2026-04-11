@@ -202,7 +202,9 @@ def get_url_paths_from_response(response_text, parent_url='', ext=''):
     ]
 
 
-def get_url_paths(url, session=None, ssl_verify=False, ext='', params={}):
+def get_url_paths(url, session=None, ssl_verify=False, ext='', params=None):
+    if params is None:
+        params = {}
     response = (
         requests.get(url, params=params, allow_redirects=True, verify=ssl_verify)
         if session is None
@@ -242,7 +244,9 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, s
         return None
 
 
-def mandiant_indicator_as_json_str(indicator, skip_attr_map={}):
+def mandiant_indicator_as_json_str(indicator, skip_attr_map=None):
+    if skip_attr_map is None:
+        skip_attr_map = {}
     if indicator and indicator._api_response:
         return json.dumps(indicator._api_response)
     else:
@@ -251,7 +255,7 @@ def mandiant_indicator_as_json_str(indicator, skip_attr_map={}):
 
 def map_mandiant_indicator_to_zeek(
     indicator: mandiant_threatintel.APIResponse,
-    skip_attr_map={},
+    skip_attr_map=None,
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
     """
@@ -768,7 +772,9 @@ class FeedParserZeekPrinter(object):
                     print('\t'.join(['#fields'] + self.fields), file=self.outFile)
                     self.printedHeader = True
 
-    def ProcessMandiant(self, indicator, skip_attr_map={}):
+    def ProcessMandiant(self, indicator, skip_attr_map=None):
+        if skip_attr_map is None:
+            skip_attr_map = {}
         result = False
         try:
             if isinstance(indicator, mandiant_threatintel.APIResponse):
