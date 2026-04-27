@@ -16,7 +16,7 @@ from filescan.config import BaseConfig
 from filescan.model import ScanRequest
 from filescan.scanner import ScannerOptions, Scanner, scanner_main
 from filescan import strelka
-from typing import ClassVar
+from typing import AsyncIterator, ClassVar
 
 
 ################################################################################
@@ -28,7 +28,7 @@ class StrelkaOptions(ScannerOptions, frozen=True):
     gatekeeper: bool = True
     cert: Path | None = None
     secure: bool = True
-    timeout: float = 3600.0
+    timeout: float = 5400.0
     chunksize: int = 128 * 1024
 
 
@@ -57,7 +57,7 @@ class StrelkaScanner(Scanner[StrelkaConfig, StrelkaOptions]):
             chunksize=sc.chunksize,
         )
 
-    async def scan(self, request: ScanRequest) -> strelka.Event:
+    async def scan(self, request: ScanRequest) -> AsyncIterator[strelka.Event]:
         fe_req = self.frontend.request_for_path(
             request.file.resolve_path(self.global_config.path_maps),
             uid=request.id,
@@ -65,8 +65,7 @@ class StrelkaScanner(Scanner[StrelkaConfig, StrelkaOptions]):
             metadata=request.metadata,
         )
         async for result in self.frontend.scan(fe_req):
-            return result
-        raise RuntimeError('recieved no response from Strelka?')
+            yield result
 
 
 ################################################################################

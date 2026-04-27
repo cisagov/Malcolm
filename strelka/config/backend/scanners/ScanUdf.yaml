@@ -1,0 +1,7 @@
+ScanUdf:
+  - positive:
+      flavors:
+        - 'udf_file'
+    priority: 5
+    options:
+      limit: 50

@@ -30,7 +30,7 @@ Malcolm leverages the following excellent open source tools, among others:
 * For distributed or cloud deployment, Malcolm can be deployed using [Kubernetes](kubernetes.md#Kubernetes) (on-prem or, for example, on [AWS](aws.md#AWS)) via standard manifests or, for scalable deployments, the [Malcolm Helm chart](github.com/idaholab/Malcolm-Helm) (currently in beta)
 * [NetBox](https://netbox.dev/) - a suite for modeling and documenting modern networks; used to [enrich](asset-interaction-analysis.md#AssetInteractionAnalysis) network log data with asset inventory information
 * [PostgreSQL](https://www.postgresql.org/) - a relational database used for storing configuration and state for several Malcolm components
-* [Redis](https://redis.io/) - an in-memory data store for caching session information for various Malcolm components
+* [Valkey](https://valkey.io/) - an in-memory data store for caching session information for various Malcolm components
 * [Keycloak](https://www.keycloak.org/) - an identity and access management (IAM) tool
 * [OpenResty](https://openresty.org/) - a dynamic web platform based on [Nginx](https://nginx.org/) and [LuaJIT](http://luajit.org/) for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for Nginx

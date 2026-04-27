@@ -1,0 +1,8 @@
+ScanSave:
+  - positive:
+      flavors:
+        - '*'
+    priority: 5
+    options:
+      compression: 'gzip'
+      encoding: 'base64'

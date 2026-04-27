@@ -1,0 +1,22 @@
+ScanXml:
+  - positive:
+      flavors:
+        - 'application/xml'
+        - 'text/xml'
+        - 'xml_file'
+        - 'mso_file'
+        - 'soap_file'
+    priority: 5
+    options:
+      extract_tags:
+        - "target"
+        - "script"
+        - "embeddedfile"
+        - "cipherdata"
+        - "data"
+        - "signedinfo"
+        - "encrypteddata"
+      metadata_tags:
+        - "type"
+        - "description"
+        - "maintainer"

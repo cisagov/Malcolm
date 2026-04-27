@@ -1,0 +1,7 @@
+ScanVb:
+  - positive:
+      flavors:
+        - 'vb_file'
+        - 'vbscript'
+        - 'hta_file'
+    priority: 5

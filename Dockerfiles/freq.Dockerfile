@@ -53,7 +53,7 @@ RUN apt-get -q update && \
       awk '/Remember:/ {gsub(/\\&/, "\\\\&")} {print}' /opt/freq_server/freq_server.py > /tmp/freq_server.py && \
         mv /tmp/freq_server.py /opt/freq_server/freq_server.py && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
-      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistent ${PUSER} && \
       chown -R ${PUSER}:${PGROUP} /opt/freq_server && \
       usermod -a -G tty ${PUSER} && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git python3-dev build-essential && \

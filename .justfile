@@ -212,7 +212,7 @@ auth-setup:
     --auth-method "${AUTH_METHOD:-basic}" \
     --auth-generate-opensearch-internal-creds "${AUTH_GENERATE_OPENSEARCH_CREDS}" \
     --auth-generate-netbox-passwords "${AUTH_GENERATE_NETBOX_PASSWORDS:-false}" \
-    --auth-generate-redis-password "${AUTH_GENERATE_REDIS_PASSWORD:-true}" \
+    --auth-generate-valkey-password "${AUTH_GENERATE_VALKEY_PASSWORD:-true}" \
     --auth-generate-postgres-password "${AUTH_GENERATE_POSTGRES_PASSWORD:-false}" \
     --auth-generate-keycloak-db-password "${AUTH_GENERATE_KEYCLOAK_DB_PASSWORD:-true}" \
     --auth-admin-username "${AUTH_ADMIN_USERNAME}" \
@@ -268,6 +268,7 @@ wipe:
 nuke:
   {{call_recipe}} wipe
   rm -rf ./postgres/*
+  rm -rf ./valkey/*
 
 stop:
   #!/usr/bin/env bash

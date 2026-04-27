@@ -203,11 +203,11 @@ netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(app.config["
 opensearchUrl = app.config["OPENSEARCH_URL"]
 pcapMonitorHost = app.config["PCAP_MONITOR_HOST"]
 pcapTopicPort = app.config["PCAP_TOPIC_PORT"]
-redisCacheHost = app.config["REDIS_CACHE_HOST"]
-redisCachePort = app.config["REDIS_CACHE_PORT"]
-redisHost = app.config["REDIS_HOST"]
-redisPort = app.config["REDIS_PORT"]
-redisPassword = app.config["REDIS_PASSWORD"]
+redisCacheHost = app.config["VALKEY_CACHE_HOST"]
+redisCachePort = app.config["VALKEY_CACHE_PORT"]
+redisHost = app.config["VALKEY_HOST"]
+redisPort = app.config["VALKEY_PORT"]
+redisPassword = app.config["VALKEY_PASSWORD"]
 strelkaHost = app.config["STRELKA_HOST"]
 strelkaPort = app.config["STRELKA_PORT"]
 
@@ -259,14 +259,26 @@ def random_id(length=20):
 
 def get_request_arguments(req):
     arguments = {}
-    if 'POST' in malcolm_utils.get_iterable(req.method):
-        if (data := req.get_json() if req.is_json else None) and isinstance(data, dict):
-            arguments.update(data)
     if 'GET' in malcolm_utils.get_iterable(req.method):
-        arguments.update(request.args)
+        arguments.update(req.args)
+    if 'POST' in malcolm_utils.get_iterable(req.method):
+        data = req.get_json(silent=True)
+        if isinstance(data, dict):
+            arguments.update(data)
+        elif data is not None:
+            arguments["_contents"] = data
+        elif raw := (req.get_data(as_text=True) or "").strip():
+            arguments["_raw"] = raw
     if debugApi:
-        print(f"{req.method} {req.path} arguments: {json.dumps(arguments)}")
+        print(f"{req.method} {req.path} arguments: {json.dumps(arguments, default=str)}")
     return arguments
+
+
+def is_internal_request(req):
+    # heuristic for determining "internal" calls within Malcolm (e.g., from Dashboards Alerting)
+    host = (req.headers.get("Host") or "").strip().lower()
+    has_xff = "X-Forwarded-For" in req.headers
+    return (host == f"api:{req.environ.get('SERVER_PORT', '5000')}") and (not has_xff)
 
 
 def translate_roles(req):
@@ -666,7 +678,7 @@ def filtervalues(search, args):
                     s = s.filter('bool', must_not=DatabaseImport.helpers.query.Q('exists', field=fieldname))
 
     if debugApi:
-        print(f'filtervalues: {json.dumps(s.to_dict())}')
+        print(f'filtervalues: {json.dumps(s.to_dict(), default=str)}')
     return (filters, s)
 
 
@@ -1502,6 +1514,10 @@ def netbox_sites():
     f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/redis-keyspace-info",
     methods=['GET'],
 )
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/valkey-keyspace-info",
+    methods=['GET'],
+)
 def redis_keyspace_info():
     """Query the redis endpoints and return keyspace info
 
@@ -1648,14 +1664,14 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
-    if not check_roles(request):
+    if (not is_internal_request(request)) and (not check_roles(request)):
         raise PermissionError("Not authorized to perform this action")
 
     alert = {}
     idxResponse = {}
     data = get_request_arguments(request)
     nowTimeStr = datetime.now().astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
-    if 'alert' in data:
+    if any(s in data for s in {'alert', '_raw', '_contents'}):
         alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]] = malcolm_utils.deep_get(
             data,
             [
@@ -1694,14 +1710,15 @@ def event():
             ],
         )
         alert['event']['id'] = alertId if alertId else random_id()
-        if alertBody := malcolm_utils.deep_get(
-            data,
-            [
-                'alert',
-                'body',
-            ],
-        ):
+
+        alertBody = malcolm_utils.deep_get(data, ['alert', 'body'])
+        if (not alertBody) and '_contents' in data:
+            alertBody = data.get('_contents')
+        if (not alertBody) and '_raw' in data:
+            alertBody = data.get('_raw')
+        if alertBody:
             alert['event']['original'] = alertBody
+
         if triggerName := malcolm_utils.deep_get(
             data,
             [
@@ -1755,9 +1772,9 @@ def event():
         )
 
     if debugApi:
-        print(json.dumps(data))
-        print(json.dumps(alert))
-        print(json.dumps(idxResponse))
+        print(json.dumps(data, default=str))
+        print(json.dumps(alert, default=str))
+        print(json.dumps(idxResponse, default=str))
     return jsonify(result=idxResponse)
 
 

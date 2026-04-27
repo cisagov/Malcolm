@@ -26,7 +26,7 @@ Usually, Hedgehog Linux is configured to [communicate with a Malcolm aggregator]
 4. Edit the `./config/opensearch.env` file and set `OPENSEARCH_URL` to empty (e.g., `OPENSEARCH_URL=`).
 5. Run [`./scripts/auth_setup`](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) and select **all**.
     * Select **Yes** for **Store username/password for OpenSearch/Elasticsearch instance** and provide values for both username and password. The values themselves do not matter and will not be used, but for now, there are certain startup checks that require them to be present.
-    * Select **Yes** for **Regenerate internal passwords for Redis**.
+    * Select **Yes** for **Regenerate internal passwords for Valkey**.
     * Select **No** for **Store password hash secret for Arkime viewer cluster**.
     * Select **No** for **Receive client certificates from Malcolm**.
 6. Open a terminal and run `touch ~/Malcolm/filebeat/certs/{ca.crt,client.crt,client.key}`. The contents of these files do not matter, but for now, they must exist for Malcolm to start.

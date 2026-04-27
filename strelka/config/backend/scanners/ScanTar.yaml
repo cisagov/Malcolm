@@ -1,0 +1,8 @@
+ScanTar:
+  - positive:
+      flavors:
+        - 'application/x-tar'
+        - 'tar_file'
+    priority: 5
+    options:
+      limit: 1000

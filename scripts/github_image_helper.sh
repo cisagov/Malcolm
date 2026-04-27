@@ -228,7 +228,7 @@ trap "_cleanup" EXIT
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 
 # get a list of all the "public" functions (not starting with _)
-FUNCTIONS=($(declare -F | awk '{print $NF}' | sort -f | egrep -v "^_"))
+FUNCTIONS=($(declare -F | awk '{print $NF}' | sort -f | grep -Ev "^_"))
 
 # present the menu to our customer and get their selection
 printf "%s\t%s\n" "0" "pull and extract everything"

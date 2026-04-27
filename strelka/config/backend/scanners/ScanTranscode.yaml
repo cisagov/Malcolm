@@ -1,0 +1,11 @@
+ScanTranscode:
+  - positive:
+      flavors:
+        - 'image/avif'
+        - 'image/heic'
+        - 'image/heif'
+        - 'image/x-icon'
+        - 'image/vnd.microsoft.icon'
+    options:
+      # "gif", "webp", "jpeg", "bmp", "png", "tiff"
+      output_format: jpeg

@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":7,\"h\":12,\"i\":\"43ec104c-1a98-4fd3-9bef-650531cfc571\"},\"panelIndex\":\"43ec104c-1a98-4fd3-9bef-650531cfc571\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":33,\"h\":12,\"i\":\"2b13101f-b6ed-4d05-8670-93c967560fed\"},\"panelIndex\":\"2b13101f-b6ed-4d05-8670-93c967560fed\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":12,\"w\":13,\"h\":19,\"i\":\"c44c352c-c532-47c8-9548-58d0289dc754\"},\"panelIndex\":\"c44c352c-c532-47c8-9548-58d0289dc754\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"colors\":{\"capa\":\"#795d99\",\"clamav\":\"#b05070\",\"yara\":\"#b29f49\"},\"legendOpen\":true}},\"panelRefName\":\"panel_3\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":21,\"y\":12,\"w\":14,\"h\":19,\"i\":\"ba9eb0a3-8b52-415d-9aaa-955dc49709fa\"},\"panelIndex\":\"ba9eb0a3-8b52-415d-9aaa-955dc49709fa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":35,\"y\":12,\"w\":13,\"h\":38,\"i\":\"0f688cdf-c723-46d8-ade1-fb6a110b966f\"},\"panelIndex\":\"0f688cdf-c723-46d8-ade1-fb6a110b966f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":31,\"w\":13,\"h\":19,\"i\":\"97a72869-4e52-47da-9570-65a080d05503\"},\"panelIndex\":\"97a72869-4e52-47da-9570-65a080d05503\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":21,\"y\":31,\"w\":14,\"h\":19,\"i\":\"9c560712-add6-47b3-9c9e-7cbc726e63bf\"},\"panelIndex\":\"9c560712-add6-47b3-9c9e-7cbc726e63bf\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":471.5}],\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":8,\"h\":25,\"i\":\"b4b59e66-7fc5-4be0-9d67-e22470f81f2a\"},\"panelIndex\":\"b4b59e66-7fc5-4be0-9d67-e22470f81f2a\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":237.5}],\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_8\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":8,\"y\":50,\"w\":13,\"h\":19,\"i\":\"444a7d44-b64a-4924-9c87-1cccc9f80ec6\"},\"panelIndex\":\"444a7d44-b64a-4924-9c87-1cccc9f80ec6\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":21,\"y\":50,\"w\":13,\"h\":19,\"i\":\"ddaf0db4-b628-43ec-8253-5bcf990b2b4d\"},\"panelIndex\":\"ddaf0db4-b628-43ec-8253-5bcf990b2b4d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":34,\"y\":50,\"w\":14,\"h\":19,\"i\":\"634c8010-1c6f-4d5f-b177-31a75e047f1b\"},\"panelIndex\":\"634c8010-1c6f-4d5f-b177-31a75e047f1b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":69,\"w\":48,\"h\":39,\"i\":\"e402ba8c-b844-49a0-85a2-b804e74626d2\"},\"panelIndex\":\"e402ba8c-b844-49a0-85a2-b804e74626d2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"3.4.0\",\"gridData\":{\"x\":0,\"y\":60,\"w\":8,\"h\":9,\"i\":\"fe232c6f-74e1-4971-8185-7e1d66d79b15\"},\"panelIndex\":\"fe232c6f-74e1-4971-8185-7e1d66d79b15\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_13\"}]",
+        "panelsJSON": "[{\"version\":\"3.5.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":7,\"h\":12,\"i\":\"43ec104c-1a98-4fd3-9bef-650531cfc571\"},\"panelIndex\":\"43ec104c-1a98-4fd3-9bef-650531cfc571\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":20,\"h\":12,\"i\":\"2b13101f-b6ed-4d05-8670-93c967560fed\"},\"panelIndex\":\"2b13101f-b6ed-4d05-8670-93c967560fed\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":35,\"y\":0,\"w\":13,\"h\":31,\"i\":\"0f688cdf-c723-46d8-ade1-fb6a110b966f\"},\"panelIndex\":\"0f688cdf-c723-46d8-ade1-fb6a110b966f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":8,\"y\":12,\"w\":13,\"h\":19,\"i\":\"c44c352c-c532-47c8-9548-58d0289dc754\"},\"panelIndex\":\"c44c352c-c532-47c8-9548-58d0289dc754\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"colors\":{\"capa\":\"#795d99\",\"clamav\":\"#b05070\",\"yara\":\"#b29f49\"},\"legendOpen\":true}},\"panelRefName\":\"panel_4\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":21,\"y\":12,\"w\":14,\"h\":19,\"i\":\"ba9eb0a3-8b52-415d-9aaa-955dc49709fa\"},\"panelIndex\":\"ba9eb0a3-8b52-415d-9aaa-955dc49709fa\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"},\"columnsWidth\":[{\"colIndex\":1,\"width\":99}]},\"table\":null},\"panelRefName\":\"panel_5\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":8,\"y\":31,\"w\":13,\"h\":19,\"i\":\"97a72869-4e52-47da-9570-65a080d05503\"},\"panelIndex\":\"97a72869-4e52-47da-9570-65a080d05503\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"},\"columnsWidth\":[{\"colIndex\":2,\"width\":166}]},\"table\":null},\"panelRefName\":\"panel_6\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":21,\"y\":31,\"w\":13,\"h\":19,\"i\":\"9c560712-add6-47b3-9c9e-7cbc726e63bf\"},\"panelIndex\":\"9c560712-add6-47b3-9c9e-7cbc726e63bf\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":471.5},{\"colIndex\":1,\"width\":99}],\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}},\"table\":null},\"panelRefName\":\"panel_7\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":34,\"y\":31,\"w\":14,\"h\":19,\"i\":\"634c8010-1c6f-4d5f-b177-31a75e047f1b\"},\"panelIndex\":\"634c8010-1c6f-4d5f-b177-31a75e047f1b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":8,\"h\":25,\"i\":\"b4b59e66-7fc5-4be0-9d67-e22470f81f2a\"},\"panelIndex\":\"b4b59e66-7fc5-4be0-9d67-e22470f81f2a\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":237.5},{\"colIndex\":1,\"width\":99}],\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}},\"table\":null},\"panelRefName\":\"panel_9\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":8,\"y\":50,\"w\":18,\"h\":20,\"i\":\"a1cfad7e-2d94-4001-bfa9-aba538d69a15\"},\"panelIndex\":\"a1cfad7e-2d94-4001-bfa9-aba538d69a15\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":26,\"y\":50,\"w\":11,\"h\":20,\"i\":\"444a7d44-b64a-4924-9c87-1cccc9f80ec6\"},\"panelIndex\":\"444a7d44-b64a-4924-9c87-1cccc9f80ec6\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":37,\"y\":50,\"w\":11,\"h\":20,\"i\":\"ddaf0db4-b628-43ec-8253-5bcf990b2b4d\"},\"panelIndex\":\"ddaf0db4-b628-43ec-8253-5bcf990b2b4d\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_12\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":0,\"y\":60,\"w\":8,\"h\":10,\"i\":\"fe232c6f-74e1-4971-8185-7e1d66d79b15\"},\"panelIndex\":\"fe232c6f-74e1-4971-8185-7e1d66d79b15\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_13\"},{\"version\":\"3.5.0\",\"gridData\":{\"x\":0,\"y\":70,\"w\":48,\"h\":39,\"i\":\"e402ba8c-b844-49a0-85a2-b804e74626d2\"},\"panelIndex\":\"e402ba8c-b844-49a0-85a2-b804e74626d2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"}]",
         "timeRestore": false,
         "title": "File Scanning",
         "version": 1
@@ -37,17 +37,17 @@
           "type": "visualization"
         },
         {
-          "id": "52eca680-f00c-11f0-a54d-0fd88ef4958b",
+          "id": "a17b6640-f0ae-11f0-850c-2f1050a51d60",
           "name": "panel_3",
           "type": "visualization"
         },
         {
-          "id": "1d4743e0-f0b2-11f0-850c-2f1050a51d60",
+          "id": "52eca680-f00c-11f0-a54d-0fd88ef4958b",
           "name": "panel_4",
           "type": "visualization"
         },
         {
-          "id": "a17b6640-f0ae-11f0-850c-2f1050a51d60",
+          "id": "1d4743e0-f0b2-11f0-850c-2f1050a51d60",
           "name": "panel_5",
           "type": "visualization"
         },
@@ -62,39 +62,44 @@
           "type": "visualization"
         },
         {
-          "id": "5028a770-f0af-11f0-850c-2f1050a51d60",
+          "id": "d9600c70-f0b6-11f0-850c-2f1050a51d60",
           "name": "panel_8",
           "type": "visualization"
         },
         {
-          "id": "13d68970-f0b1-11f0-850c-2f1050a51d60",
+          "id": "5028a770-f0af-11f0-850c-2f1050a51d60",
           "name": "panel_9",
           "type": "visualization"
         },
         {
-          "id": "327a2a30-f0b1-11f0-850c-2f1050a51d60",
+          "id": "b926f1b0-23c6-11f1-b19c-052e50c3b82c",
           "name": "panel_10",
           "type": "visualization"
         },
         {
-          "id": "d9600c70-f0b6-11f0-850c-2f1050a51d60",
+          "id": "13d68970-f0b1-11f0-850c-2f1050a51d60",
           "name": "panel_11",
           "type": "visualization"
         },
         {
-          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
+          "id": "327a2a30-f0b1-11f0-850c-2f1050a51d60",
           "name": "panel_12",
-          "type": "search"
+          "type": "visualization"
         },
         {
           "id": "4e569bf0-f172-11f0-b0d6-07bf055ac2bc",
           "name": "panel_13",
           "type": "visualization"
+        },
+        {
+          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
+          "name": "panel_14",
+          "type": "search"
         }
       ],
       "type": "dashboard",
-      "updated_at": "2026-01-14T18:21:07.575Z",
-      "version": "WzEzMDMsMV0="
+      "updated_at": "2026-03-19T19:12:18.472Z",
+      "version": "WzEzMDcsMV0="
     },
     {
       "attributes": {
@@ -116,8 +121,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:20:12.325Z",
-      "version": "WzEyODIsMV0="
+      "updated_at": "2026-03-19T17:40:29.860Z",
+      "version": "WzEyODQsMV0="
     },
     {
       "attributes": {
@@ -146,7 +151,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0MSwxXQ=="
     },
     {
@@ -176,8 +181,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0MiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "File Scanning - File Source",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "version": 1,
+        "visState": "{\"title\":\"File Scanning - File Source\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.source\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"File Source\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.source\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Source\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}"
+      },
+      "id": "a17b6640-f0ae-11f0-850c-2f1050a51d60",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-03-19T17:39:20.877Z",
+      "version": "WzQ0NSwxXQ=="
     },
     {
       "attributes": {
@@ -206,7 +241,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0MywxXQ=="
     },
     {
@@ -236,38 +271,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0NCwxXQ=="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0",
-        "title": "File Scanning - File Source",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
-        "version": 1,
-        "visState": "{\"title\":\"File Scanning - File Source\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.source\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"File Source\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.source\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Source\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}"
-      },
-      "id": "a17b6640-f0ae-11f0-850c-2f1050a51d60",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
-      "version": "WzQ0NSwxXQ=="
     },
     {
       "attributes": {
@@ -296,7 +301,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0NiwxXQ=="
     },
     {
@@ -326,8 +331,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0NywxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"threat.technique.name:* OR threat.tactic.name:*\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "File Scanning - Tactic and Technique",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"File Scanning - Tactic and Technique\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Tactic\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.technique.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Technique\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "d9600c70-f0b6-11f0-850c-2f1050a51d60",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-03-19T17:39:20.877Z",
+      "version": "WzQ1MSwxXQ=="
     },
     {
       "attributes": {
@@ -356,8 +391,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0OCwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "Files Scanned by Nesting Depth",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "version": 1,
+        "visState": "{\"title\":\"Files Scanned by Nesting Depth\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"filescan.tree.depth\",\"orderBy\":\"_key\",\"order\":\"asc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Nesting Depth\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"filescan.tree.depth\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Nesting Depth\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"valueAxis\":\"ValueAxis-1\"},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":true},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}"
+      },
+      "id": "b926f1b0-23c6-11f1-b19c-052e50c3b82c",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-03-19T19:06:24.202Z",
+      "version": "WzEzMDUsMV0="
     },
     {
       "attributes": {
@@ -386,7 +451,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ0OSwxXQ=="
     },
     {
@@ -416,52 +481,46 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ1MCwxXQ=="
     },
     {
       "attributes": {
         "description": "",
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"threat.technique.name:* OR threat.tactic.name:*\",\"language\":\"kuery\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
-        "savedSearchRefName": "search_0",
-        "title": "File Scanning - Tactic and Technique",
-        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "title": "File Scanning - Logs Note",
+        "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"File Scanning - Tactic and Technique\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.tactic.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Tactic\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.technique.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Technique\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"File Scanning - Logs Note\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"#### Extracted File Downloads\\n\\nClick the `zeek.files.extracted_uri` value to download the file, if available.\\n\\n#### Complete Scan Results\\n\\nSome scan result fields aren't indexed. Expand a document and click **JSON** to view the full data in the `strelka` field.\"}}"
       },
-      "id": "d9600c70-f0b6-11f0-850c-2f1050a51d60",
+      "id": "4e569bf0-f172-11f0-b0d6-07bf055ac2bc",
       "migrationVersion": {
         "visualization": "7.10.0"
       },
       "namespaces": [
         "default"
       ],
-      "references": [
-        {
-          "id": "fdee9820-effa-11f0-b83f-8f35d6995138",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
+      "references": [],
       "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
-      "version": "WzQ1MSwxXQ=="
+      "updated_at": "2026-03-19T17:39:20.877Z",
+      "version": "WzQ1MywxXQ=="
     },
     {
       "attributes": {
         "columns": [
           "source.ip",
           "destination.ip",
+          "file.source",
           "file.mime_type",
-          "zeek.files.filename",
+          "file.entropy",
+          "filescan.tree.depth",
+          "file.name",
           "zeek.files.extracted_uri",
           "filescan.hits",
           "rule.ruleset",
           "rule.name",
-          "file.entropy",
-          "file.source",
           "event.id"
         ],
         "description": "",
@@ -488,32 +547,9 @@
         }
       ],
       "type": "search",
-      "updated_at": "2026-01-14T18:19:02.115Z",
+      "updated_at": "2026-03-19T17:39:20.877Z",
       "version": "WzQ1MiwxXQ=="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "title": "File Scanning - Logs Note",
-        "uiStateJSON": "{}",
-        "version": 1,
-        "visState": "{\"title\":\"File Scanning - Logs Note\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"#### Extracted File Downloads\\n\\nClick the `zeek.files.extracted_uri` value to download the file, if available.\\n\\n#### Complete Scan Results\\n\\nSome scan result fields aren't indexed. Expand a document and click **JSON** to view the full data in the `strelka` field.\"}}"
-      },
-      "id": "4e569bf0-f172-11f0-b0d6-07bf055ac2bc",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [],
-      "type": "visualization",
-      "updated_at": "2026-01-14T18:19:02.115Z",
-      "version": "WzQ1MywxXQ=="
     }
   ],
-  "version": "3.4.0"
+  "version": "3.5.0"
 }

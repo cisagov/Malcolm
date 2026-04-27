@@ -40,6 +40,7 @@ global disable_spicy_stun = (getenv("ZEEK_DISABLE_SPICY_STUN") == true_regex) ? 
 global disable_spicy_tailscale = (getenv("ZEEK_DISABLE_SPICY_TAILSCALE") == true_regex) ? T : F;
 global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == true_regex) ? T : F;
 global disable_spicy_wireguard = (getenv("ZEEK_DISABLE_SPICY_WIREGUARD") == true_regex) ? T : F;
+global disable_spicy_zip = (getenv("ZEEK_DISABLE_SPICY_ZIP") == true_regex) ? T : F;
 
 global disable_ics_all = (getenv("ZEEK_DISABLE_ICS_ALL") == true_regex) ? T : F;
 global disable_ics_bacnet = (getenv("ZEEK_DISABLE_ICS_BACNET") == true_regex) ? T : F;
@@ -270,6 +271,9 @@ event zeek_init() &priority=-5 {
   if (disable_spicy_wireguard) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
   }
+  if (disable_spicy_zip) {
+    Spicy::disable_file_analyzer(Files::ANALYZER_SPICY_ZIP);
+  }
 
   # register additional ports for Analyzers
   if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != "")) {
@@ -333,10 +337,6 @@ event zeek_init() &priority=-5 {
     }
   }
 
-}
-
-event file_new(f: fa_file) {
-  Files::add_analyzer(f, Files::ANALYZER_SHA256);
 }
 
 @if (!disable_log_passwords)

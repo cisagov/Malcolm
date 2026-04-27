@@ -10,7 +10,6 @@ function urlencodeall() {
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 ARKIME_RULES_DIR=${ARKIME_RULES_DIR:-"/opt/arkime/rules"}
-ARKIME_LUA_DIR=${ARKIME_LUA_DIR:-"/opt/arkime/lua"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
@@ -120,6 +119,14 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     [[ -n "$PCAP_PROCESSED_DIRECTORY" ]] && \
       sed -r -i "s|(pcapDir)\s*=\s*.*|\1=$PCAP_PROCESSED_DIRECTORY|" "${ARKIME_CONFIG_FILE}"
 
+    if [[ -n "$PCAP_FILTER" ]]; then
+      PCAP_FILTER_ESCAPED=$(printf '%s' "$PCAP_FILTER" | sed 's/[&|]/\\&/g')
+      sed -r -i "s|^[[:space:]]*(bpf)[[:space:]]*=[[:space:]]*.*|\1=${PCAP_FILTER_ESCAPED}|" "${ARKIME_CONFIG_FILE}"
+    else
+      # no filter specified, comment out bpf=
+      sed -r -i '/^[[:space:]]*bpf[[:space:]]*=/ s/^[[:space:]]*/&#/' "${ARKIME_CONFIG_FILE}"
+    fi
+
     # capture interface(s)
     if [[ -n "$CAPTURE_INTERFACE" ]] && [[ "$LIVE_CAPTURE" == "true" ]] ; then
 
@@ -129,7 +136,6 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       # place capture interfaces in the config file
       sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "${ARKIME_CONFIG_FILE}"
       sed -i "s/^\(readTruncatedPackets=\).*/\1"false"/" "${ARKIME_CONFIG_FILE}"
-      sed -r -i "s/(bpf)\s*=\s*.*/\1=${PCAP_FILTER:-}/" "${ARKIME_CONFIG_FILE}"
 
       # PCAP capture location
       sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"
@@ -176,12 +182,6 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     if [[ -d "${ARKIME_RULES_DIR}" ]]; then
       RULES_FILES="$(find "${ARKIME_RULES_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c \( -name '*.yml' -o -name '*.yaml' \) | tr '\n' ';' | sed 's/;$//' )"
       sed -r -i "s|(rulesFiles)\s*=\s*.*|\1=$RULES_FILES|" "${ARKIME_CONFIG_FILE}"
-    fi
-
-    # lua plugins
-    if [[ -d "${ARKIME_LUA_DIR}" ]]; then
-      LUA_FILES="$(find "${ARKIME_LUA_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c -name '*.lua' | tr '\n' ';' | sed 's/;$//' )"
-      sed -r -i "s|(luaFiles)\s*=\s*.*|\1=$LUA_FILES|" "${ARKIME_CONFIG_FILE}"
     fi
 
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then

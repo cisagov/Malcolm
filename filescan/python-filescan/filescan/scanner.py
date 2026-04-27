@@ -15,7 +15,7 @@ from filescan.model import ScanRequest, ScanResult, ScanTimeout, ScanEnd, ScanBe
 from pathlib import Path
 from pydantic import BaseModel
 from redis.asyncio import Redis
-from typing import Any, ClassVar
+from typing import Any, AsyncIterator, ClassVar
 
 
 class ScannerOptions(BaseModel, frozen=True):
@@ -33,32 +33,34 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
 
     async def handle_request(self, request: ScanRequest) -> None:
         log.info('received request for %s', request.id)
+
+        begin = request.get_begin(self.scanner_name)
+        results = []
+        end = None
+
         try:
-            begin = request.get_begin(self.scanner_name)
             await self.notify(begin)
-
-            end = None
-            result = None
-
             try:
                 with anyio.fail_after(self.scanner_config.timeout):
-                    response = await self.scan(request)
-                result = begin.get_result(response)
+                    async for response in self.scan(request):
+                        results.append(begin.get_result(response))
             except anyio.get_cancelled_exc_class():
                 raise
             except TimeoutError:
                 log.error('scan timed out for %s', request.id)
-                result = begin.get_result(error='scan timed out')
+                results.append(begin.get_result(error='scan timed out'))
                 end = begin.get_timeout()
             except Exception as e:
                 log.exception('scan failed for %s', request.id)
-                result = begin.get_result(error=str(e))
-
-            await self.send_result(result)
-            await self.notify(end or begin.get_end())
+                results.append(begin.get_result(error=str(e)))
 
         except anyio.get_cancelled_exc_class():
-            pass
+            results.append(begin.get_result(error="request cancelled"))
+
+        finally:
+            for result in results:
+                await self.send_result(result)
+            await self.notify(end or begin.get_end())
 
     async def notify(self, note: ScanBegin | ScanEnd | ScanTimeout) -> None:
         log.debug('sending notification: %r', note)
@@ -110,7 +112,7 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
             pass
 
     @abstractmethod
-    async def scan(self, request: ScanRequest) -> Any: ...
+    def scan(self, request: ScanRequest) -> AsyncIterator[Any]: ...
 
 
 def scanner_main(
@@ -143,7 +145,7 @@ def scanner_main(
         if config:
             options = scanner_class.config_class.from_path(config)
         else:
-            log.warning('no config file specified, this is probably not what ' 'you want! continuing anyway...')
+            log.warning('no config file specified, this is probably not what you want! continuing anyway...')
             options = scanner_class.config_class()
 
         try:

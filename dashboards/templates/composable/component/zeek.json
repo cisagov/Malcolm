@@ -1977,9 +1977,6 @@
                 "ja4ssh": {
                   "type": "keyword"
                 },
-                "host_key": {
-                  "type": "keyword"
-                },
                 "host_key_fingerprint": {
                   "type": "keyword"
                 },

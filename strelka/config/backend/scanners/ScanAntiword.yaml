@@ -1,0 +1,6 @@
+ScanAntiword:
+  - positive:
+      flavors:
+        - 'application/msword'
+        - 'olecf_file'
+    priority: 5

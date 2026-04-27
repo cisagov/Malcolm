@@ -1,0 +1,7 @@
+ScanIso:
+  - positive:
+      flavors:
+        - 'application/x-iso9660-image'
+    priority: 5
+    options:
+      limit: 50

@@ -111,10 +111,22 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec grep -H -P "_MALCOLM_LOGSTASH
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_OPENSEARCH_OUTPUT_PIPELINES_/${MALCOLM_OPENSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
 
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SSL_VERIFICATION_/${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
+if [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]]; then
+  find "$PIPELINES_DIR"/output -type f -name "*.conf" -exec sed -Ei \
+    -e 's/^([[:space:]]*)ssl_certificate_verification[[:space:]]*=>[[:space:]]*("?)true("?)$/\1ssl_verification_mode => \2full\3/' \
+    -e 's/^([[:space:]]*)ssl_certificate_verification[[:space:]]*=>[[:space:]]*("?)false("?)$/\1ssl_verification_mode => \2none\3/' \
+    "{}" \; 2>/dev/null
+fi
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_USER_/${OPENSEARCH_USER}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_PASSWORD_/${OPENSEARCH_PASSWORD}/g" "{}" \; 2>/dev/null
 
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_SSL_VERIFICATION_/${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
+if [[ "$OPENSEARCH_SECONDARY" == "elasticsearch-remote" ]]; then
+  find "$PIPELINES_DIR"/external -type f -name "*.conf" -exec sed -Ei \
+    -e 's/^([[:space:]]*)ssl_certificate_verification[[:space:]]*=>[[:space:]]*("?)true("?)$/\1ssl_verification_mode => \2full\3/' \
+    -e 's/^([[:space:]]*)ssl_certificate_verification[[:space:]]*=>[[:space:]]*("?)false("?)$/\1ssl_verification_mode => \2none\3/' \
+    "{}" \; 2>/dev/null
+fi
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_USER_/${OPENSEARCH_SECONDARY_USER}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_PASSWORD_/${OPENSEARCH_SECONDARY_PASSWORD}/g" "{}" \; 2>/dev/null
 

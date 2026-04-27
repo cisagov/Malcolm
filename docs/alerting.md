@@ -24,7 +24,7 @@ $ ./scripts/auth_setup
 9: netbox - (Re)generate internal passwords for NetBox
 10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
 11: postgres - (Re)generate internal superuser passwords for PostgreSQL
-12: redis - (Re)generate internal passwords for Redis
+12: valkey - (Re)generate internal passwords for Valkey
 13: arkime - Store password hash secret for Arkime viewer cluster
 14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 Configure Authentication (all): 7

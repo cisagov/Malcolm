@@ -1,0 +1,5 @@
+ScanXl4ma:
+  - positive:
+      flavors:
+        - 'excel4_file'
+    priority: 5

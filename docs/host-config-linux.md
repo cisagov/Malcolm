@@ -565,8 +565,8 @@ malcolm-pipeline-opensearch-1          ghcr.io/idaholab/malcolm/opensearch:{{ si
 malcolm-pipeline-pcap-capture-1        ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}        "/usr/bin/tini -- /u…"   pcap-capture        8 minutes ago   Up 8 minutes (healthy)
 malcolm-pipeline-pcap-monitor-1        ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}        "/usr/bin/tini -- /u…"   pcap-monitor        8 minutes ago   Up 8 minutes (healthy)   30441/tcp
 malcolm-pipeline-postgres-1            ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}          "/sbin/tini -- /usr/…"   postgres            8 minutes ago   Up 8 minutes (healthy)   5432/tcp
-malcolm-pipeline-redis-1               ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}               "/sbin/tini -- /usr/…"   redis               8 minutes ago   Up 8 minutes (healthy)   6379/tcp
-malcolm-pipeline-redis-cache-1         ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}               "/sbin/tini -- /usr/…"   redis-cache         8 minutes ago   Up 8 minutes (healthy)   6379/tcp
+malcolm-pipeline-valkey-1              ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}              "/sbin/tini -- /usr/…"   valkey              8 minutes ago   Up 8 minutes (healthy)   6379/tcp
+malcolm-pipeline-valkey-cache-1        ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}              "/sbin/tini -- /usr/…"   valkey-cache        8 minutes ago   Up 8 minutes (healthy)   6379/tcp
 malcolm-pipeline-strelka-backend-1     ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}     "/usr/bin/tini -- /u…"   strelka-backend     8 minutes ago   Up 8 minutes (healthy)
 malcolm-pipeline-strelka-frontend-1    ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}    "/sbin/tini -- /usr/…"   strelka-frontend    8 minutes ago   Up 8 minutes (healthy)   57314/tcp
 malcolm-pipeline-strelka-manager-1     ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}     "/sbin/tini -- /usr/…"   strelka-manager     8 minutes ago   Up 8 minutes (healthy)

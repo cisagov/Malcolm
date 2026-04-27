@@ -1,0 +1,9 @@
+ScanJarManifest:
+  - positive:
+      flavors:
+        - 'jar_manifest_file'
+    priority: 5
+    options:
+      headers:
+        - 'Manifest-Version'
+        - 'Created-By'

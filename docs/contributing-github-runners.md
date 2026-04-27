@@ -219,8 +219,8 @@ ghcr.io/idaholab/malcolm/htadmin:{{ site.malcolm.version }}                    7
 ghcr.io/romeogdetlevjr/malcolm/htadmin:main                    7e5a804dc944        247MB
 ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}               93b9d4ad4320        156MB
 ghcr.io/romeogdetlevjr/malcolm/pcap-capture:main               93b9d4ad4320        156MB
-ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                      98f21df2e899       52.5MB
-ghcr.io/romeogdetlevjr/malcolm/redis:main                      98f21df2e899       52.5MB
+ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}                     98f21df2e899       52.5MB
+ghcr.io/romeogdetlevjr/malcolm/valkey:main                     98f21df2e899       52.5MB
 ghcr.io/idaholab/malcolm/file-upload:{{ site.malcolm.version }}                9c5527615eba        290MB
 ghcr.io/romeogdetlevjr/malcolm/file-upload:main                9c5527615eba        290MB
 ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}                 a634739450dd       1.91GB

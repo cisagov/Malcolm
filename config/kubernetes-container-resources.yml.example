@@ -83,12 +83,12 @@ postgres:
     requests:
       cpu: "1"
       memory: "3Gi"
-redis-cache:
+valkey-cache:
   resources:
     requests:
       cpu: "0.5"
       memory: "1Gi"
-redis:
+valkey:
   resources:
     requests:
       cpu: "0.5"

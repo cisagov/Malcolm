@@ -1,0 +1,12 @@
+ScanVba:
+  - positive:
+      flavors:
+        - 'mhtml_file'
+        - 'application/msword'
+        - 'olecf_file'
+        - 'wordml_file'
+        - 'application/vnd.ms-office'
+        - 'application/x-mspublisher'
+    priority: 5
+    options:
+      analyze_macros: True

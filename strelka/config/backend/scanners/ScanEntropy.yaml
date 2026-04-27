@@ -1,0 +1,5 @@
+ScanEntropy:
+  - positive:
+      flavors:
+        - '*'
+    priority: 5

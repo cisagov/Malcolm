@@ -1,0 +1,6 @@
+ScanBzip2:
+  - positive:
+      flavors:
+        - 'application/x-bzip2'
+        - 'bzip2_file'
+    priority: 5

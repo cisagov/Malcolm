@@ -2,6 +2,7 @@
 
 * [Automatic file extraction and scanning](#ZeekFileExtraction)
     - [User interface](#ZeekFileExtractionUI)
+    - [Scanning archived files](#ScanningArchivedFiles)
 
 Malcolm can leverage Zeek's knowledge of network protocols to automatically detect file transfers and extract those files from PCAPs as Zeek processes them. This behavior can be enabled globally by modifying the `ZEEK_EXTRACTOR_MODE` [variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars), or on a per-upload basis for PCAP files uploaded via the [browser-based upload form](upload.md#Upload) when **Analyze with Zeek** is selected.
 
@@ -18,46 +19,14 @@ Depending on the volume of files extracted from network traffic, file scanning c
 
 Extracted files are scanned by [Strelka](https://target.github.io/strelka/#/), an [open-source](https://github.com/target/strelka) "real-time, container-based file scanning system used for threat hunting, threat detection, and incident response."
 
-Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be toggled or configured by editing [`strelka/config/backend/backend.yaml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/backend/backend.yaml). To disable a scanner, comment it out by adding `#` to each line of its section under `scanners:`, including the scanner's name:
+Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be enabled/disabled by including/excluding the scanner's name from the `STRELKA_SCANNERS` [variable in `pipeline.env`](malcolm-config.md#MalcolmConfigEnvVars).
 
-```yaml
-⋯
-scanners:
-  ⋯
-#  'ScanDocx':
-#    - positive:
-#        flavors:
-#          - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-#          - "docx_file"
-#      priority: 5
-#      options:
-#        extract_text: False
-  ⋯
-```
+Because scanners may have configurable options, an individual scanner can be configured by editing its `.yaml` file in [`strelka/config/backend/scanners/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/backend/scanners/). It's recommended to validate a scanner's configuration file after making changes to it. This could be done using an [online YAML validator](https://www.yamllint.com/) or locally depending on available tools:
 
-To enable a scanner, uncomment its section:
+* `python3 -c 'import sys, yaml; yaml.safe_load(sys.stdin)' < ./strelka/config/backend/scanners/ScanCapa.yaml`
+* `ruby -ryaml -e "YAML.load_file('./strelka/config/backend/scanners/ScanCapa.yaml')"`
 
-```yaml
-⋯
-scanners:
-  ⋯
-  'ScanDocx':
-    - positive:
-        flavors:
-          - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-          - "docx_file"
-      priority: 5
-      options:
-        extract_text: False
-  ⋯
-```
-
-It's recommended to validate this configuration file after making changes to it. This could be done using an [online YAML validator](https://www.yamllint.com/) or locally depending on available tools:
-
-* `python3 -c 'import sys, yaml; yaml.safe_load(sys.stdin)' < ./strelka/config/backend/backend.yaml`
-* `ruby -ryaml -e "YAML.load_file('./strelka/config/backend/backend.yaml')"`
-
-Each scanner may have configurable options; see the [scanner list](https://target.github.io/strelka/#/?id=scanner-list) for more details. Other Strelka-related configuration files can be found under [`strelka/config/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/). Consult the [Strelka documentation](https://target.github.io/strelka/#/?id=configuration-files) for more details.
+Other Strelka-related configuration files can be found under [`strelka/config/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/). Consult the [Strelka documentation](https://target.github.io/strelka/#/?id=configuration-files) for more details.
 
 For the [**YARA**](https://github.com/VirusTotal/yara) scanner, Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh) and/or [user-defined custom YARA rules](custom-rules.md#YARA) are used for scanning.
 
@@ -88,6 +57,24 @@ The `FILESCAN_HTTP_SERVER_…` [environment variables](malcolm-config.md#Malcolm
         + `FILESCAN_HTTP_SERVER_ZIP=false`
         + `FILESCAN_HTTP_SERVER_KEY=`
 
+
+## <a name="ScanningArchivedFiles"></a>Scanning archived files
+
+Multiple components of Malcolm's file-scanning pipeline can extract archive files (e.g., `zip`, `7z`, `.tar.gz`, etc.) in order to scan their contents:
+
+* Strelka - Strelka's [`backend.yaml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/backend/backend.yaml) configuration file controls which scanners are enabled or disabled (see the discussion on `STRELKA_SCANNERS` above). Many scanners decompress and/or extract files from various archive file types, including `ScanZip`, `ScanTar`, `ScanSevenZip`, and others. Search the [list of scanners](https://target.github.io/strelka/#/?id=scanner-list) for "extract" and "decompress" to review the scanners that handle archive files. If these scanners are enabled, Strelka will decompress and extract archive files and, in turn, scan their contents. This is Malcolm's default behavior.
+* Zeek - The [spicy-zip](https://github.com/zeek/spicy-zip) file analyzer for Zeek can extract the contents of ZIP files observed by Zeek. The `ZEEK_DISABLE_SPICY_ZIP` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`zeek.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/zeek.env.example) controls this behavior. By default, this value is set to `true`, meaning the spicy-zip analyzer is disabled so as not to conflict with Strelka's default behavior described above.
+* ClamAV - ClamAV's [`ScanArchive`](https://manpages.debian.org/trixie/clamav-daemon/clamd.conf.5.en.html#ScanArchive) setting determines whether it will scan the contents of archives and compressed files. The `CLAMD_SCAN_ARCHIVE` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env.example) controls this behavior. By default, this value is set to `false`, meaning ClamAV will not scan inside archive files, so as not to conflict with Strelka's default behavior described above.
+
+To avoid redundant processing and duplicated results, archive processing should be enabled for **only one** of these components.
+
+The `event.id` can be used to link files extracted from the same archive, as it contains Zeek's [UID](https://docs.zeek.org/en/current/logs/conn.html#the-uid-and-other-fields) and [FUID](https://docs.zeek.org/en/current/logs/files.html#inspecting-the-files-log). These fields in Strelka scanning results also show the relationship between archive files and their contents:
+
+* `filescan.tree.node` - A unique identifier assigned to each extracted file scanned
+* `filescan.tree.root` - The node identifier of the "root file" (e.g., the archive itself)
+* `filescan.tree.parent` - The node identifier of the "parent file" of a scanned file
+* `filescan.tree.depth` - The "depth" of the scanned file in the archive, with `0` indicating the archive itself
+
 ## <a name="ZeekFileExtractionUI"></a>User interface
 
 The files extracted by Zeek and the data about those files can be accessed through several of Malcolm's user interfaces.
@@ -95,7 +82,6 @@ The files extracted by Zeek and the data about those files can be accessed throu
 * The [**File Scanning** dashboard](dashboards.md#PrebuiltVisualizations) summarizes the results of the file scans performed by Strelka.
     * Click a `zeek.files.extracted_uri` value  in the **File Scanning - Logs** table to download the associated file, if available. Note that the presence of these links don't necessarily imply that the files they represent are available: depending on factors such as file preservation settings (above) and retention policies, files that were extracted and scanned may no longer be available. When this is the case, clicking one of the file download links will result in a "file not found" error. If one of these links refers to a file that was extracted and scanned on a [Hedgehog Linux](hedgehog.md) network sensor, Malcolm must be able to communicate with that sensor in order to retrieve and download the file.
     * Some scan result fields aren't indexed. Expand a document and click **JSON** to view the full scan result's data in the `strelka` field.
-
 
 ![The File Scanning dashboard displays the results of file scans performed by Strelka on files extracted from network traffic](./images/screenshots/dashboards_file_scanning.png)
 

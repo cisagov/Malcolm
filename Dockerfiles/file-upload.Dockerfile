@@ -87,6 +87,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rsync \
       tini \
       vim-tiny && \
+    rm -f /etc/ssh/ssh_host_* && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     mkdir -p /var/www/upload/server/php \
@@ -132,7 +133,7 @@ RUN mkdir -p /run/php \
             /var/www/upload/server/php/chroot && \
   echo "Put your files into /files. Don't use subdirectories." \
       >/var/www/upload/server/php/chroot/README.txt && \
-  rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
+  rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/log/journal
 
 # see PUSER_CHOWN comment above
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]

@@ -109,6 +109,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Logstash Output Pipelines](custom-rules.md#Logstash)
         + [Other Customizations](custom-rules.md#Other)
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
+        + [Scanning archived files](file-scanning.md#ScanningArchivedFiles)
         + [User interface](file-scanning.md#ZeekFileExtractionUI)
     - [Index management](index-management.md)
         + [OpenSearch index management](index-management.md#IndexManagement)

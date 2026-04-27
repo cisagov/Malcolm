@@ -1,0 +1,16 @@
+ScanSevenZip:
+  - positive:
+      flavors:
+        - 'application/x-7z-compressed'
+        - '_7zip_file'
+        - "image/vnd.fpx"
+        - "application/vnd.ms-msi"
+        - "application/x-msi"
+    priority: 5
+    options:
+      # min_length: 1
+      # max_length: 6
+      scanner_timeout: 150
+      crack_pws: True
+      log_pws: True
+      # brute_force: True

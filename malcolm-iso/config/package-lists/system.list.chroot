@@ -119,8 +119,8 @@ partclone
 parted
 pciutils
 pigz
-pmount
 pkexec
+pmount
 polkitd
 procps
 psmisc
@@ -143,6 +143,7 @@ strace
 sudo
 swig
 sysstat
+systemd-cryptsetup
 tar
 time
 tmux

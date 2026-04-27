@@ -1,0 +1,5 @@
+ScanIqy:
+  - positive:
+      flavors:
+        - 'iqy_file'
+    priority: 5

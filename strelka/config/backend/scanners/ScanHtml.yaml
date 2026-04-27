@@ -1,0 +1,9 @@
+ScanHtml:
+  - positive:
+      flavors:
+        - 'hta_file'
+        - 'text/html'
+        - 'html_file'
+    priority: 5
+    options:
+      max_hyperlinks: 50

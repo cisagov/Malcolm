@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: strelka-manager-container
-        image: ghcr.io/idaholab/malcolm/strelka-manager:26.02.0
+        image: ghcr.io/idaholab/malcolm/strelka-manager:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -30,7 +30,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - secretRef:
-              name: redis-env
+              name: valkey-env
           - configMapRef:
               name: pipeline-env
         livenessProbe:

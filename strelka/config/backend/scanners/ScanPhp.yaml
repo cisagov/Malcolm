@@ -1,0 +1,6 @@
+ScanPhp:
+  - positive:
+      flavors:
+        - 'text/x-php'
+        - 'php_file'
+    priority: 5

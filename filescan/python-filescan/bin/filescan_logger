@@ -17,7 +17,6 @@ from enum import Enum
 from filescan.click import click
 from filescan.config import BaseConfig
 from filescan.model import AnyScanMessageType, FileScanMap, FileEvent, FileResult
-from malcolm_utils import deep_get
 from pathlib import Path, PurePosixPath
 from pydantic import BaseModel, Field
 from redis.asyncio import Redis
@@ -25,7 +24,8 @@ from typing import TextIO
 
 
 ################################################################################
-################################################################################
+
+
 class FilePreservationMode(Enum):
     QUARANTINED = "quarantined"
     ALL = "all"
@@ -37,7 +37,7 @@ class LoggerOptions(BaseModel, frozen=True):
 
 
 class PreservationOptions(BaseModel, frozen=True):
-    policy: FilePreservationMode | None = FilePreservationMode.ALL
+    policy: FilePreservationMode = FilePreservationMode.ALL
     concurrent_deletes: int = Field(default=8, ge=1, le=64)
 
 
@@ -56,12 +56,14 @@ def safe_unlink(p: PurePosixPath) -> None:
         log.warning("failed to unlink %s: %s", path, e)
 
 
-def result_qualifies_for_preservation(scan_result: FileResult | None) -> bool:
-    return (
+def result_qualifies_for_preservation(scan_result: FileResult) -> bool:
+    return bool(
         isinstance(scan_result, FileResult)
-        and isinstance(scan_result.result, dict)
-        and (rules := scan_result.result.get('rules'))
-        and isinstance(rules, list)
+        and isinstance(scan_result.results, list)
+        and any(
+            isinstance(result, dict) and isinstance(result.get('rules'), list) and len(result['rules']) > 0
+            for result in scan_result.results
+        )
     )
 
 
@@ -71,27 +73,30 @@ async def preservation_cleanup_scan_artifacts(
     policy: FilePreservationMode,
     limiter: anyio.CapacityLimiter,
 ) -> None:
+    if not isinstance(scan_file, FileEvent) or not isinstance(scan_results, dict):
+        log.error("wrong type for scan cleanup: %r, %r", scan_file, scan_results)
+        return
+
     try:
-        if isinstance(scan_file, FileEvent) and isinstance(scan_results, dict):
-            log.debug(
-                "cleanup policy=%s file=%r results=%r",
-                policy,
-                scan_file,
-                scan_results,
-            )
-            if (policy == FilePreservationMode.NONE) or (
-                (policy == FilePreservationMode.QUARANTINED)
-                and not any(result_qualifies_for_preservation(r) for r in scan_results.values())
-            ):
-                log.info('unlinking %s', scan_file.path.name)
-                async with limiter:
-                    await anyio.to_thread.run_sync(
-                        safe_unlink,
-                        scan_file.path,
-                        abandon_on_cancel=True,
-                    )
-            else:
-                log.info('preserving %s', scan_file.path.name)
+        log.debug(
+            "cleanup policy=%s file=%r results=%r",
+            policy,
+            scan_file,
+            scan_results,
+        )
+        if (policy == FilePreservationMode.NONE) or (
+            (policy == FilePreservationMode.QUARANTINED)
+            and not any(result_qualifies_for_preservation(r) for r in scan_results.values())
+        ):
+            log.info('unlinking %s', scan_file.path.name)
+            async with limiter:
+                await anyio.to_thread.run_sync(
+                    safe_unlink,
+                    scan_file.path,
+                    abandon_on_cancel=True,
+                )
+        else:
+            log.info('preserving %s', scan_file.path.name)
 
     except Exception:
         log.exception("cleanup failed for scan %s", scan_file.path)
@@ -143,7 +148,9 @@ async def watch_pubsub(
                             log.info('complete: %s', scan.id)
                             output.write(scan.model_dump_json() + "\n")
                             output.flush()
-                            if preservation_policy != FilePreservationMode.ALL:
+                            if scan.file is None:
+                                log.warning("scan results have no associated file: %s", scan.id)
+                            elif preservation_policy != FilePreservationMode.ALL:
                                 preservation_cleanup_group.start_soon(
                                     preservation_cleanup_scan_artifacts,
                                     scan.file,

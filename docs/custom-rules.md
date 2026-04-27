@@ -28,7 +28,7 @@ Malcolm comes with [a few Arkime rules]({{ site.github.repository_url }}/blob/{{
 
 Arkime's [Lua plugin](https://arkime.com/settings#lua) allows sessions to be modified via simple Lua scripts. See the [Arkime Lua plugin documentation](https://github.com/arkime/arkime/tree/main/capture/plugins/lua) for more information and [example scripts](https://github.com/arkime/arkime/tree/main/capture/plugins/lua/samples).
 
-Lua files for the Arkime Lua plugin (with the `*.lua` extension) may be placed in the `./arkime/lua/` subdirectory in the Malcolm installation directory. These new scripts can applied by restarting Malcolm, or this can be done manually without completely restarting Malcolm by running the following command from the Malcolm installation directory:
+Lua files for the Arkime Lua plugin (with the `*.lua` extension) may be placed in the `./arkime/parsers/` subdirectory in the Malcolm installation directory. These new scripts can applied by restarting Malcolm, or this can be done manually without completely restarting Malcolm by running the following command from the Malcolm installation directory:
 
 ```
 ./scripts/restart -s arkime arkime-live

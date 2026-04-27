@@ -1,0 +1,5 @@
+ScanBase64PE:
+  - positive:
+      flavors:
+        - 'base64_pe'
+    priority: 5

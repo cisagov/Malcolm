@@ -1,0 +1,12 @@
+ScanLibarchive:
+  - positive:
+      flavors:
+        - 'application/vnd.ms-cab-compressed'
+        - 'cab_file'
+        - 'application/x-cpio'
+        - 'cpio_file'
+        - 'application/x-debian-package'
+        - 'debian_package_file'
+    priority: 5
+    options:
+      limit: 1000

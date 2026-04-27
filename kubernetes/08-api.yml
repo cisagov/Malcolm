@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:26.02.0
+        image: ghcr.io/idaholab/malcolm/api:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -71,7 +71,7 @@ spec:
           - secretRef:
               name: netbox-secret-env
           - secretRef:
-              name: redis-env
+              name: valkey-env
           - configMapRef:
               name: opensearch-env
         livenessProbe:

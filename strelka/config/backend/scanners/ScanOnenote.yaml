@@ -1,0 +1,7 @@
+ScanOnenote:
+  - positive:
+      flavors:
+        - 'application/onenote'
+        - 'application/msonenote'
+        - 'onenote_file'
+    priority: 5

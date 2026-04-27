@@ -1,4 +1,4 @@
-name: redis-build-and-push-ghcr
+name: valkey-build-and-push-ghcr
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
       - staging
     paths:
-      - 'Dockerfiles/redis.Dockerfile'
-      - 'container-health-scripts/redis.sh'
+      - 'Dockerfiles/valkey.Dockerfile'
+      - 'container-health-scripts/valkey.sh'
       - 'shared/bin/docker-uid-gid-setup.sh'
       - 'shared/bin/service_check_passthrough.sh'
       - '.trigger_workflow_build'
@@ -18,5 +18,5 @@ jobs:
   docker:
     uses: ./.github/workflows/docker-build-push-scan.yml
     with:
-      service: redis
-      dockerfile: ./Dockerfiles/redis.Dockerfile
+      service: valkey
+      dockerfile: ./Dockerfiles/valkey.Dockerfile

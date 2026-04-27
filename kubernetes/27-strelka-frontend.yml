@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: strelka-frontend-container
-        image: ghcr.io/idaholab/malcolm/strelka-frontend:26.02.0
+        image: ghcr.io/idaholab/malcolm/strelka-frontend:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -49,7 +49,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - secretRef:
-              name: redis-env
+              name: valkey-env
           - configMapRef:
               name: pipeline-env
         livenessProbe:
@@ -71,7 +71,7 @@ spec:
             subPath: "strelka-frontend"
       initContainers:
       - name: strelka-frontend-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.02.0
+        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

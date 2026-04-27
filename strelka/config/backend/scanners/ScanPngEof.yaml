@@ -1,0 +1,9 @@
+ScanPngEof:
+  - positive:
+      flavors:
+        - 'image/png'
+        - 'png_file'
+    negative:
+      source:
+        - 'ScanTranscode'
+    priority: 5

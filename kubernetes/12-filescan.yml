@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: filescan-container
-        image: ghcr.io/idaholab/malcolm/filescan:26.02.0
+        image: ghcr.io/idaholab/malcolm/filescan:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -61,7 +61,7 @@ spec:
           - configMapRef:
               name: pipeline-env
           - secretRef:
-              name: redis-env
+              name: valkey-env
           - secretRef:
               name: filescan-secret-env
           - configMapRef:
@@ -89,7 +89,7 @@ spec:
             readOnly: true
       initContainers:
       - name: filescan-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.02.0
+        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

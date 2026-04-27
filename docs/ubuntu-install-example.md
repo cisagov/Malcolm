@@ -221,7 +221,7 @@ user@host:~/Malcolm$ ./scripts/auth_setup
 9: netbox - (Re)generate internal passwords for NetBox
 10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
 11: postgres - (Re)generate internal superuser passwords for PostgreSQL
-12: redis - (Re)generate internal passwords for Redis
+12: valkey - (Re)generate internal passwords for Valkey
 13: arkime - Store password hash secret for Arkime viewer cluster
 14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 Configure Authentication (all): 1
@@ -258,7 +258,7 @@ Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal superuser passwords for PostgreSQL? (Y / n): y
 
-(Re)generate internal passwords for Redis? (Y / n): y
+(Re)generate internal passwords for Valkey? (Y / n): y
 
 Store password hash secret for Arkime viewer cluster? (y / N): n
 
@@ -293,8 +293,8 @@ user@host:~/Malcolm$ docker compose --profile malcolm pull
  ✔ pcap-capture Pulled
  ✔ pcap-monitor Pulled
  ✔ postgres Pulled
- ✔ redis Pulled
- ✔ redis-cache Pulled
+ ✔ valkey Pulled
+ ✔ valkey-cache Pulled
  ✔ strelka-backend Pulled
  ✔ strelka-frontend Pulled
  ✔ strelka-manager Pulled
@@ -324,7 +324,7 @@ ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}                 7
 ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}               672a7e07d8b7        174MB             0B   U
 ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}               2bf4908adc58        198MB             0B   U
 ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}                 a65a70c670d7        336MB             0B   U
-ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                      5f6dcf55d0d2       52.5MB             0B   U
+ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}                     5f6dcf55d0d2       52.5MB             0B   U
 ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}            17087ff5ee30       3.63GB             0B   U
 ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}           0f871f660102       81.8MB             0B   U
 ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}            a582a74cdb87       54.8MB             0B   U

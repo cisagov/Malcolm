@@ -1,0 +1,7 @@
+ScanUpx:
+  - positive:
+      flavors:
+        - 'upx_file'
+    priority: 5
+    options:
+      tmp_directory: '/dev/shm/'

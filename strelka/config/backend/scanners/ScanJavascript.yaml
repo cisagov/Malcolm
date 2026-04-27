@@ -1,0 +1,13 @@
+ScanJavascript:
+  - negative:
+      flavors:
+        - 'text/html'
+        - 'html_file'
+    positive:
+      flavors:
+        - 'javascript_file'
+        - 'text/javascript'
+    priority: 5
+    options:
+      beautify: True
+      max_strings: 50

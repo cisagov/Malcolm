@@ -1,0 +1,8 @@
+ScanClamav:
+  - positive:
+      flavors:
+        - '*'
+    priority: 5
+    options:
+      clamd_socket: null
+      freshen: False

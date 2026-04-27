@@ -303,8 +303,8 @@ nginx-proxy-deployment-6d9b9858fd-q9w5z       | Running | 10.42.3.140  | Replica
 opensearch-deployment-6c546f45b9-n4czl        | Running | 10.42.7.165  | ReplicaSet | malcolm-655119   | 887.36m   | 17.8Gi       | opensearch-container:0        | ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}            |
 pcap-monitor-deployment-66dbd9c68f-22tkm      | Running | 10.42.10.46  | ReplicaSet | malcolm-651493   | 183.31m   | 867.33Mi     | pcap-monitor-container:0      | ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}          |
 postgres-deployment-5c78f478fb-nl4zn          | Running | 10.42.15.210 | ReplicaSet | malcolm-651492   | 472.87m   | 85.33Mi      | postgres-container:0          | ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}            |
-redis-cache-deployment-5c776698fc-dvbp2       | Running | 10.42.5.20   | ReplicaSet | malcolm-655154   | 9.58m     | 10.18Mi      | redis-cache-container:0       | ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                 |
-redis-deployment-75486865c5-4xscs             | Running | 10.42.15.209 | ReplicaSet | malcolm-651492   | 9.66m     | 10.04Mi      | redis-container:0             | ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                 |
+valkey-cache-deployment-5c776698fc-dvbp2      | Running | 10.42.5.20   | ReplicaSet | malcolm-655154   | 9.58m     | 10.18Mi      | valkey-cache-container:0      | ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}                |
+valkey-deployment-75486865c5-4xscs           | Running | 10.42.15.209 | ReplicaSet | malcolm-651492   | 9.66m     | 10.04Mi      | valkey-container:0            | ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}                |
 strelka-backend-deployment-6dcf7ccdcc-xjbxx   | Running | 10.42.5.21   | ReplicaSet | malcolm-655154   | 4.72m     | 1.18Gi       | strelka-backend-container:0   | ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}       |
 strelka-frontend-deployment-6988c75f8c-gmf8c  | Running | 10.42.6.23   | ReplicaSet | malcolm-655160   | 0.03m     | 8.02Mi       | strelka-frontend-container:0  | ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}      |
 strelka-manager-deployment-f578ccc7-2vw7l     | Running | 10.42.12.15  | ReplicaSet | malcolm-681270   | 2.41m     | 7.57Mi       | strelka-manager-container:0   | ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}       |
@@ -470,7 +470,7 @@ $ ./scripts/auth_setup -f /path/to/kubeconfig.yaml
 9: netbox - (Re)generate internal passwords for NetBox
 10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
 11: postgres - (Re)generate internal superuser passwords for PostgreSQL
-12: redis - (Re)generate internal passwords for Redis
+12: valkey - (Re)generate internal passwords for Valkey
 13: arkime - Store password hash secret for Arkime viewer cluster
 14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 Configure Authentication (all): 1
@@ -505,7 +505,7 @@ Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal superuser passwords for PostgreSQL? (Y / n): y
 
-(Re)generate internal passwords for Redis? (Y / n): y
+(Re)generate internal passwords for Valkey? (Y / n): y
 
 Store password hash secret for Arkime viewer cluster? (y / N): n
 
@@ -615,8 +615,8 @@ nginx-proxy-deployment-6d9b9858fd-q9w5z       | Running | 10.42.3.140  | Replica
 opensearch-deployment-6c546f45b9-n4czl        | Running | 10.42.7.165  | ReplicaSet | malcolm-655119   | 887.36m   | 17.8Gi       | opensearch-container:0        | ghcr.io/idaholab/malcolm/opensearch:{{ site.malcolm.version }}            |
 pcap-monitor-deployment-66dbd9c68f-22tkm      | Running | 10.42.10.46  | ReplicaSet | malcolm-651493   | 183.31m   | 867.33Mi     | pcap-monitor-container:0      | ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}          |
 postgres-deployment-5c78f478fb-nl4zn          | Running | 10.42.15.210 | ReplicaSet | malcolm-651492   | 472.87m   | 85.33Mi      | postgres-container:0          | ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}            |
-redis-cache-deployment-5c776698fc-dvbp2       | Running | 10.42.5.20   | ReplicaSet | malcolm-655154   | 9.58m     | 10.18Mi      | redis-cache-container:0       | ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                 |
-redis-deployment-75486865c5-4xscs             | Running | 10.42.15.209 | ReplicaSet | malcolm-651492   | 9.66m     | 10.04Mi      | redis-container:0             | ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}                 |
+valkey-cache-deployment-5c776698fc-dvbp2       | Running | 10.42.5.20   | ReplicaSet | malcolm-655154   | 9.58m     | 10.18Mi      | valkey-cache-container:0      | ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}                |
+valkey-deployment-75486865c5-4xscs            | Running | 10.42.15.209 | ReplicaSet | malcolm-651492   | 9.66m     | 10.04Mi      | valkey-container:0            | ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}                |
 strelka-backend-deployment-6dcf7ccdcc-xjbxx   | Running | 10.42.5.21   | ReplicaSet | malcolm-655154   | 4.72m     | 1.18Gi       | strelka-backend-container:0   | ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}       |
 strelka-frontend-deployment-6988c75f8c-gmf8c  | Running | 10.42.6.23   | ReplicaSet | malcolm-655160   | 0.03m     | 8.02Mi       | strelka-frontend-container:0  | ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}      |
 strelka-manager-deployment-f578ccc7-2vw7l     | Running | 10.42.12.15  | ReplicaSet | malcolm-681270   | 2.41m     | 7.57Mi       | strelka-manager-container:0   | ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}       |

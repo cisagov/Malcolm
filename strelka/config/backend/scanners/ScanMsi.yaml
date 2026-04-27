@@ -1,0 +1,25 @@
+ScanMsi:
+  - positive:
+      flavors:
+        - "image/vnd.fpx"
+        - "application/vnd.ms-msi"
+        - "application/x-msi"
+    priority: 5
+    options:
+      tmp_directory: '/dev/shm/'
+      keys:
+        - 'Author'
+        - 'Characters'
+        - 'Company'
+        - 'CreateDate'
+        - 'LastModifiedBy'
+        - 'Lines'
+        - 'ModifyDate'
+        - 'Pages'
+        - 'Paragraphs'
+        - 'RevisionNumber'
+        - 'Software'
+        - 'Template'
+        - 'Title'
+        - 'TotalEditTime'
+        - 'Words'

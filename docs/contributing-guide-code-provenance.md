@@ -62,7 +62,7 @@ The base images used to build Malcolm's images are:
 * [opensearchproject/opensearch-dashboards](https://hub.docker.com/r/opensearchproject/opensearch-dashboards) (Docker-Verified Official Publisher Image)
 * [postgres:alpine](https://hub.docker.com/_/postgres) (Docker Official Image)
 * [python:3-slim](https://hub.docker.com/_/python) (Docker Official Image)
-* [redis:alpine](https://hub.docker.com/_/redis) (Docker Official Image)
+* [valkey:alpine](https://hub.docker.com/_/valkey) (Docker Official Image)
 
 As described on the [Docker Hub documentation](https://docs.docker.com/docker-hub/image-library/trusted-content/):
 

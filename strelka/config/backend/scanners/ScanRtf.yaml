@@ -1,0 +1,8 @@
+ScanRtf:
+  - positive:
+      flavors:
+        - 'text/rtf'
+        - 'rtf_file'
+    priority: 5
+    options:
+      limit: 1000

@@ -1,0 +1,7 @@
+ScanPkcs7:
+  - positive:
+      flavors:
+        - 'pkcs7_file'
+    priority: 5
+    options:
+      tmp_directory: '/dev/shm/'

@@ -1,0 +1,8 @@
+ScanSwf:
+  - positive:
+      flavors:
+        - 'application/x-shockwave-flash'
+        - 'fws_file'
+        - 'cws_file'
+        - 'zws_file'
+    priority: 5

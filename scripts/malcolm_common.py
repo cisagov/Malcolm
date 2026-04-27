@@ -1490,7 +1490,7 @@ def MalcolmAuthFilesExist(configDir=None, run_profile=PROFILE_MALCOLM, auth_meth
                 and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
             )
         )
-        and AuthFileCheck(os.path.join(configDirToCheck, 'redis.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'valkey.env'))
         and AuthFileCheck(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 
@@ -1737,8 +1737,8 @@ LOG_IGNORE_REGEX = re.compile(
   | POST\s+/wise/+get.+\b200\b
   | POST\s+HTTP/[\d\.].+\b200\b
   | reaped\s+unknown\s+pid
-  | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
-  | \[redis\.work\]:\s+task\s+completed:\s+task
+  | (redis|valkey).*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
+  | \[(redis|valkey)\.work\]:\s+task\s+completed:\s+task
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
   | retry\.go.+(send\s+unwait|done$)
   | running\s+full\s+sweep

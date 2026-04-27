@@ -46,6 +46,7 @@ services:
         target: /usr/share/opensearch/config/persist/opensearch.keystore
   dashboards-helper:
     volumes:
+      - dashboards-helper-data-init:/data/init
       - type: bind
         bind:
           create_host_path: false
@@ -80,6 +81,7 @@ services:
         read_only: true
   logstash:
     volumes:
+      - logstash-persistent-queue:/logstash-persistent-queue
       - type: bind
         bind:
           create_host_path: false
@@ -125,6 +127,12 @@ services:
   filebeat:
     volumes:
       - nginx-log-path:/nginx:ro
+      - filebeat-logs-registry:/usr/share/filebeat-logs/data
+      - filebeat-nginx-registry:/usr/share/filebeat-nginx/data
+      - filebeat-syslog-tcp-registry:/usr/share/filebeat-syslog-tcp/data
+      - filebeat-syslog-udp-registry:/usr/share/filebeat-syslog-udp/data
+      - filebeat-tcp-registry:/usr/share/filebeat-tcp/data
+      - filebeat-zeek-files-logs-registry:/usr/share/filebeat-zeek-files-logs/data
       - type: bind
         bind:
           create_host_path: false
@@ -187,8 +195,8 @@ services:
       - type: bind
         bind:
           create_host_path: false
-        source: ./arkime/lua
-        target: /opt/arkime/lua
+        source: ./arkime/parsers
+        target: /opt/arkime/parsers/configmap
         read_only: true
       - type: bind
         bind:
@@ -223,8 +231,8 @@ services:
       - type: bind
         bind:
           create_host_path: false
-        source: ./arkime/lua
-        target: /opt/arkime/lua
+        source: ./arkime/parsers
+        target: /opt/arkime/parsers/configmap
         read_only: true
       - type: bind
         bind:
@@ -308,6 +316,9 @@ services:
         read_only: true
   suricata:
     volumes:
+      - suricata-config:/etc/suricata
+      - suricata-managed:/var/lib/suricata
+      - suricata-run:/var/run/suricata
       - type: bind
         bind:
           create_host_path: false
@@ -338,6 +349,9 @@ services:
         read_only: true
   suricata-live:
     volumes:
+      - suricata-live-config:/etc/suricata
+      - suricata-live-managed:/var/lib/suricata
+      - suricata-live-run:/var/run/suricata
       - type: bind
         bind:
           create_host_path: false
@@ -363,6 +377,7 @@ services:
         read_only: true
   filescan:
     volumes:
+      - filescan-data:/filescan/data
       - type: bind
         bind:
           create_host_path: false
@@ -387,6 +402,9 @@ services:
         read_only: true
   strelka-backend:
     volumes:
+      - strelka-backend-clamav-rules:/var/lib/clamav
+      - strelka-backend-yara-rules-src:/yara-rules-src
+      - strelka-backend-yara-rules:/yara-rules
       - type: bind
         bind:
           create_host_path: false
@@ -407,6 +425,7 @@ services:
         read_only: true
   strelka-frontend:
     volumes:
+      - strelka-frontend-logs:/var/log/strelka
       - type: bind
         bind:
           create_host_path: false
@@ -419,7 +438,6 @@ services:
         source: ./strelka/config/frontend/
         target: /etc/strelka/configmap
         read_only: true
-      - strelka-logs:/var/log/strelka/
   strelka-manager:
     volumes:
       - type: bind
@@ -554,7 +572,7 @@ services:
           create_host_path: false
         source: ./postgres
         target: /var/lib/postgresql/data
-  redis:
+  valkey:
     volumes:
       - type: bind
         bind:
@@ -565,9 +583,9 @@ services:
       - type: bind
         bind:
           create_host_path: false
-        source: ./redis
+        source: ./valkey
         target: /data
-  redis-cache:
+  valkey-cache:
     volumes:
       - type: bind
         bind:

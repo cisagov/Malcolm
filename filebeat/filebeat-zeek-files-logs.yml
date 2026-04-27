@@ -62,7 +62,7 @@ filebeat.inputs:
       fingerprint:
         enabled: false
         offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
-        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:512}
   fields_under_root: true
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
@@ -88,7 +88,7 @@ filebeat.inputs:
       fingerprint:
         enabled: false
         offset: ${FILEBEAT_SCANNER_FINGERPRINT_OFFSET:0}
-        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:1024}
+        length: ${FILEBEAT_SCANNER_FINGERPRINT_LENGTH:512}
   fields_under_root: true
   tags: ["_filebeat_zeek_malcolm_live"]
   exclude_lines: ['^\s*#']
@@ -108,8 +108,8 @@ filebeat.inputs:
 
 #-------------------------- Redis Output (for filescan) ------------------------
 output.redis:
-  hosts: ["${REDIS_HOST:redis}:${REDIS_PORT:6379}"]
-  password: "${REDIS_PASSWORD}"
-  db: ${REDIS_ZEEK_FILES_DATABASE:1}
+  hosts: ["${VALKEY_HOST:valkey}:${VALKEY_PORT:6379}"]
+  password: "${VALKEY_PASSWORD}"
+  db: ${VALKEY_ZEEK_FILES_DATABASE:1}
   key: "zeek_notify"
   datatype: "list"

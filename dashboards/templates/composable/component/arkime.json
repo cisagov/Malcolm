@@ -11,6 +11,13 @@
                 }
               }
             },
+            "dns": {
+              "properties": {
+                "queryHost": {
+                  "type": "keyword"
+                }
+              }
+            },
             "geo": {
               "properties": {
                 "country_code2": {

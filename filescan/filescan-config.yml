@@ -1,8 +1,8 @@
 redis:
-  host: ${REDIS_CACHE_HOST}
-  port: ${REDIS_CACHE_PORT}
-  db: ${REDIS_FILESCAN_CACHE_DATABASE}
-  password: ${REDIS_PASSWORD}
+  host: ${VALKEY_CACHE_HOST}
+  port: ${VALKEY_CACHE_PORT}
+  db: ${VALKEY_FILESCAN_CACHE_DATABASE}
+  password: ${VALKEY_PASSWORD}
 
 preservation:
   policy: ${FILESCAN_PRESERVATION}
@@ -19,10 +19,10 @@ watcher:
       keys:
         - zeek_notify
       redis:
-        host: ${REDIS_HOST}
-        port: ${REDIS_PORT}
-        db: ${REDIS_ZEEK_FILES_DATABASE}
-        password: ${REDIS_PASSWORD}
+        host: ${VALKEY_HOST}
+        port: ${VALKEY_PORT}
+        db: ${VALKEY_ZEEK_FILES_DATABASE}
+        password: ${VALKEY_PASSWORD}
     - type: directory
       path: /filescan/data/files
       recursive: true

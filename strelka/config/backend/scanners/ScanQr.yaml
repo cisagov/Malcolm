@@ -1,0 +1,15 @@
+ScanQr:
+  - positive:
+      flavors:
+        - 'image/jpeg'
+        - 'jpeg_file'
+        - 'image/png'
+        - 'png_file'
+        - 'image/tiff'
+        - 'type_is_tiff'
+        - 'image/x-ms-bmp'
+        - 'bmp_file'
+        - 'image/webp'
+    priority: 5
+    options:
+      support_inverted: True

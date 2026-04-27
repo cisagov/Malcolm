@@ -1,0 +1,8 @@
+ScanDocx:
+  - positive:
+      flavors:
+        - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        - "docx_file"
+    priority: 5
+    options:
+      extract_text: False

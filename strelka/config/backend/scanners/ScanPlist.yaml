@@ -1,0 +1,15 @@
+ScanPlist:
+  - positive:
+      flavors:
+        - 'bplist_file'
+        - 'plist_file'
+    priority: 5
+    options:
+      keys:
+        - 'KeepAlive'
+        - 'Label'
+        - 'NetworkState'
+        - 'Program'
+        - 'ProgramArguments'
+        - 'RunAtLoad'
+        - 'StartInterval'

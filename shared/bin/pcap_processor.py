@@ -139,6 +139,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         extraTags,
         autoTag,
         notLocked,
+        useLibPcap,
         logger,
         debug,
     ) = arkimeWorkerArgs
@@ -226,6 +227,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             cmd.append(nodeHost)
                         if notLocked:
                             cmd.append('--nolockpcap')
+                        cmd.append('--libpcap' if useLibPcap else '--scheme')
                         cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
                         # execute capture for pcap file
@@ -700,6 +702,17 @@ def main():
             default=False,
             required=False,
         )
+        parser.add_argument(
+            '--libpcap',
+            dest='useLibPcap',
+            help="Force Arkime to use older libpcap mode",
+            metavar='true|false',
+            type=str2bool,
+            nargs='?',
+            const=True,
+            default=False,
+            required=False,
+        )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
         parser.add_argument(
             '--zeek',
@@ -859,6 +872,7 @@ def main():
                     args.extraTags,
                     args.autoTag,
                     args.notLocked,
+                    args.useLibPcap,
                     logging,
                     log_level_is_debug(args.verbose),
                 ],

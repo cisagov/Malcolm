@@ -1,0 +1,12 @@
+ScanHeader:
+  - positive:
+      flavors:
+        - '*'
+    priority: 5
+    options:
+      length: 50
+      encodings:
+        - classic
+        - backslash
+        - raw
+        - hex

@@ -53,7 +53,7 @@ Pulling opensearch        ... done
 Pulling pcap-capture      ... done
 Pulling pcap-monitor      ... done
 Pulling postgresql        ... done
-Pulling redis             ... done
+Pulling valkey            ... done
 Pulling suricata          ... done
 Pulling upload            ... done
 Pulling zeek              ... done
@@ -79,7 +79,7 @@ ghcr.io/idaholab/malcolm/opensearch                            {{ site.malcolm.v
 ghcr.io/idaholab/malcolm/pcap-capture                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   121MB
 ghcr.io/idaholab/malcolm/pcap-monitor                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   213MB
 ghcr.io/idaholab/malcolm/postgresql                            {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   268MB
-ghcr.io/idaholab/malcolm/redis                                 {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   34.2MB
+ghcr.io/idaholab/malcolm/valkey                                {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   34.2MB
 ghcr.io/idaholab/malcolm/suricata                              {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   278MB
 ghcr.io/idaholab/malcolm/zeek                                  {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1GB
 ```

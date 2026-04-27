@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:26.02.0
+        image: ghcr.io/idaholab/malcolm/logstash-oss:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -107,7 +107,7 @@ spec:
             subPath: "logstash"
       initContainers:
       - name: logstash-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.02.0
+        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

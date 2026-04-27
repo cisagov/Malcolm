@@ -2,7 +2,7 @@
 
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:26.02.0
+    image: ghcr.io/idaholab/malcolm/opensearch:26.04.1
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -76,7 +76,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:26.02.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -126,7 +126,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:26.02.0
+    image: ghcr.io/idaholab/malcolm/dashboards:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -167,7 +167,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:26.02.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -257,7 +257,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:26.02.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -277,7 +277,7 @@ services:
     - ./config/opensearch.env
     - ./config/upload-common.env
     - ./config/nginx.env
-    - ./config/redis.env
+    - ./config/valkey.env
     - ./config/zeek.env
     - ./config/beats-common.env
     - ./config/netbox-common.env
@@ -344,7 +344,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:26.02.0
+    image: ghcr.io/idaholab/malcolm/arkime:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -386,8 +386,8 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./arkime/lua
-      target: /opt/arkime/lua
+      source: ./arkime/parsers
+      target: /opt/arkime/parsers/configmap
       read_only: true
     - type: bind
       bind:
@@ -412,7 +412,7 @@ services:
       retries: 3
       start_period: 210s
   arkime-live:
-    image: ghcr.io/idaholab/malcolm/arkime:26.02.0
+    image: ghcr.io/idaholab/malcolm/arkime:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -459,8 +459,8 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./arkime/lua
-      target: /opt/arkime/lua
+      source: ./arkime/parsers
+      target: /opt/arkime/parsers/configmap
       read_only: true
     - type: bind
       bind:
@@ -486,7 +486,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:26.02.0
+    image: ghcr.io/idaholab/malcolm/zeek:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -548,7 +548,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:26.02.0
+    image: ghcr.io/idaholab/malcolm/zeek:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -608,7 +608,7 @@ services:
       retries: 3
       start_period: 60s
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:26.02.0
+    image: ghcr.io/idaholab/malcolm/suricata:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -667,7 +667,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:26.02.0
+    image: ghcr.io/idaholab/malcolm/suricata:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -730,7 +730,7 @@ services:
       retries: 3
       start_period: 120s
   filescan:
-    image: ghcr.io/idaholab/malcolm/filescan:26.02.0
+    image: ghcr.io/idaholab/malcolm/filescan:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -749,7 +749,7 @@ services:
     - ./config/ssl.env
     - ./config/auth-common.env
     - ./config/dashboards.env
-    - ./config/redis.env
+    - ./config/valkey.env
     - ./config/zeek.env
     - ./config/pipeline.env
     - ./config/filescan-secret.env
@@ -785,7 +785,7 @@ services:
       retries: 3
       start_period: 60s
   strelka-backend:
-    image: ghcr.io/idaholab/malcolm/strelka-backend:26.02.0
+    image: ghcr.io/idaholab/malcolm/strelka-backend:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -798,13 +798,13 @@ services:
     tty: true
     hostname: strelka-backend
     depends_on:
-    - redis-cache
+    - valkey-cache
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/redis.env
+    - ./config/valkey.env
     - ./config/pipeline.env
     shm_size: 512mb
     volumes:
@@ -836,7 +836,7 @@ services:
       retries: 3
       start_period: 60s
   strelka-frontend:
-    image: ghcr.io/idaholab/malcolm/strelka-frontend:26.02.0
+    image: ghcr.io/idaholab/malcolm/strelka-frontend:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -849,13 +849,13 @@ services:
     tty: true
     hostname: strelka-frontend
     depends_on:
-    - redis-cache
+    - valkey-cache
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/redis.env
+    - ./config/valkey.env
     - ./config/pipeline.env
     volumes:
     - strelka-frontend-logs:/var/log/strelka
@@ -878,7 +878,7 @@ services:
       retries: 3
       start_period: 60s
   strelka-manager:
-    image: ghcr.io/idaholab/malcolm/strelka-manager:26.02.0
+    image: ghcr.io/idaholab/malcolm/strelka-manager:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -891,13 +891,13 @@ services:
     tty: true
     hostname: strelka-manager
     depends_on:
-    - redis-cache
+    - valkey-cache
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/redis.env
+    - ./config/valkey.env
     - ./config/pipeline.env
     volumes:
     - type: bind
@@ -919,7 +919,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:26.02.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -969,7 +969,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:26.02.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -1020,7 +1020,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:26.02.0
+    image: ghcr.io/idaholab/malcolm/file-upload:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1060,7 +1060,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:26.02.0
+    image: ghcr.io/idaholab/malcolm/htadmin:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1103,7 +1103,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:26.02.0
+    image: ghcr.io/idaholab/malcolm/freq:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1135,7 +1135,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:26.02.0
+    image: ghcr.io/idaholab/malcolm/netbox:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1157,11 +1157,11 @@ services:
     - ./config/netbox.env
     - ./config/netbox-secret.env
     - ./config/postgres.env
-    - ./config/redis.env
+    - ./config/valkey.env
     depends_on:
     - postgres
-    - redis
-    - redis-cache
+    - valkey
+    - valkey-cache
     volumes:
     - type: bind
       bind:
@@ -1199,7 +1199,7 @@ services:
       retries: 3
       start_period: 120s
   postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:26.02.0
+    image: ghcr.io/idaholab/malcolm/postgresql:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1236,8 +1236,8 @@ services:
       timeout: 15s
       retries: 3
       start_period: 45s
-  redis:
-    image: ghcr.io/idaholab/malcolm/redis:26.02.0
+  valkey:
+    image: ghcr.io/idaholab/malcolm/valkey:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -1248,17 +1248,17 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: redis
+    hostname: valkey
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/redis.env
+    - ./config/valkey.env
     command:
     - sh
     - -c
-    - redis-server --dir /data --appendonly yes --appendfsync everysec --no-appendfsync-on-rewrite yes --auto-aof-rewrite-percentage 100 --auto-aof-rewrite-min-size $$REDIS_AUTO_AOF_REWRITE_MIN_SIZE --save '' --maxmemory $$REDIS_MAXMEMORY --maxmemory-policy $$REDIS_MAXMEMORY_POLICY --requirepass $$REDIS_PASSWORD
+    - valkey-server --dir /data --appendonly yes --appendfsync everysec --no-appendfsync-on-rewrite yes --auto-aof-rewrite-percentage 100 --auto-aof-rewrite-min-size $$VALKEY_AUTO_AOF_REWRITE_MIN_SIZE --save '' --maxmemory $$VALKEY_MAXMEMORY --maxmemory-policy $$VALKEY_MAXMEMORY_POLICY --requirepass $$VALKEY_PASSWORD
     volumes:
     - type: bind
       bind:
@@ -1269,7 +1269,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./redis
+      source: ./valkey
       target: /data
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
@@ -1277,8 +1277,8 @@ services:
       timeout: 15s
       retries: 3
       start_period: 45s
-  redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:26.02.0
+  valkey-cache:
+    image: ghcr.io/idaholab/malcolm/valkey:26.04.1
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -1289,17 +1289,17 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: redis-cache
+    hostname: valkey-cache
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/redis.env
+    - ./config/valkey.env
     command:
     - sh
     - -c
-    - redis-server --save '' --appendonly no --maxmemory $$REDIS_CACHE_MAXMEMORY --maxmemory-policy $$REDIS_CACHE_MAXMEMORY_POLICY --maxmemory-samples 10 --lazyfree-lazy-eviction yes --requirepass $$REDIS_PASSWORD
+    - valkey-server --save '' --appendonly no --maxmemory $$VALKEY_CACHE_MAXMEMORY --maxmemory-policy $$VALKEY_CACHE_MAXMEMORY_POLICY --maxmemory-samples 10 --lazyfree-lazy-eviction yes --requirepass $$VALKEY_PASSWORD
     volumes:
     - type: bind
       bind:
@@ -1314,7 +1314,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:26.02.0
+    image: ghcr.io/idaholab/malcolm/api:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1336,7 +1336,7 @@ services:
     - ./config/auth-common.env
     - ./config/dashboards.env
     - ./config/arkime.env
-    - ./config/redis.env
+    - ./config/valkey.env
     - ./config/netbox-common.env
     - ./config/netbox-secret.env
     - ./config/opensearch.env
@@ -1360,7 +1360,7 @@ services:
       retries: 3
       start_period: 60s
   keycloak:
-    image: ghcr.io/idaholab/malcolm/keycloak:26.02.0
+    image: ghcr.io/idaholab/malcolm/keycloak:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1397,7 +1397,7 @@ services:
       retries: 3
       start_period: 45s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:26.02.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:26.04.1
     profiles: ["malcolm"]
     logging:
       driver: local

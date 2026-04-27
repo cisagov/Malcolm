@@ -1,0 +1,12 @@
+ScanEmail:
+  - positive:
+      flavors:
+        - 'application/vnd.ms-outlook'
+        - 'message/rfc822'
+        - 'email_file'
+        - 'email_file_broad'
+    priority: 5
+    options:
+      create_thumbnail: True
+      thumbnail_header: False
+      thumbnail_size: [500, 500]

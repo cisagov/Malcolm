@@ -1537,6 +1537,9 @@
                 "set_real_time_clock_time_of_day": {
                   "type": "keyword"
                 },
+                "set_real_time_clock_timestamp": {
+                  "type": "date"
+                },
                 "set_real_time_clock_time_set_code": {
                   "type": "keyword"
                 },

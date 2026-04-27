@@ -374,7 +374,7 @@
       "attributes": {
         "columns": [
           "zeek.files.extracted_uri",
-          "zeek.files.filename",
+          "file.name",
           "file.size",
           "file.mime_type",
           "file.source",

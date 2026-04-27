@@ -1,0 +1,14 @@
+ScanNf:
+  - positive:
+      flavors:
+        - 'image/png'
+        - 'png_file'
+        - 'image/jpeg'
+        - 'jpeg_file'
+        - 'image/x-ms-bmp'
+        - 'bmp_file'
+        - 'image/webp'
+    negative:
+      source:
+        - 'ScanTranscode'
+    priority: 5

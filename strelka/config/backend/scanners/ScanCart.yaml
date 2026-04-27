@@ -1,0 +1,8 @@
+ScanCart:
+  - positive:
+      flavors:
+        # hmmmm...
+        # $ file --brief --mime src/python/tests/fixtures/test.cart
+        # application/octet-stream; charset=binary
+        - 'application/octet-stream'
+    priority: 5

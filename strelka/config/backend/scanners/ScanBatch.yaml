@@ -1,0 +1,6 @@
+ScanBatch:
+  - positive:
+      flavors:
+        - 'text/x-msdos-batch'
+        - 'batch_file'
+    priority: 5

@@ -1,0 +1,6 @@
+ScanTnef:
+  - positive:
+      flavors:
+        - 'application/vnd.ms-tnef'
+        - 'tnef_file'
+    priority: 5

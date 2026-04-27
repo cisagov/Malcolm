@@ -45,7 +45,7 @@ scripts
 !scripts/malcolm_utils.py
 zeek-logs
 suricata-logs
-redis
+valkey
 postgres
 filescan-logs
 netbox/media

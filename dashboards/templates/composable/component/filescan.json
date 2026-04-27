@@ -20,6 +20,22 @@
                   "type": "keyword"
                 }
               }
+            },
+            "tree": {
+              "properties": {
+                "root": {
+                  "type": "keyword"
+                },
+                "node": {
+                  "type": "keyword"
+                },
+                "parent": {
+                  "type": "keyword"
+                },
+                "depth": {
+                  "type": "short"
+                }
+              }
             }
           }
         },

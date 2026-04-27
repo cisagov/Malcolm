@@ -1,0 +1,5 @@
+ScanCcn:
+  - positive:
+      flavors:
+        - 'credit_cards'
+    priority: 5

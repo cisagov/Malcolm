@@ -755,7 +755,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 and (list(keystore_args)[0].lower() in ('create', 'remove'))
                 and localKeystorePreExists
             ):
-                # don't be so whiny if the "create" failed just because it already existed or a 'remove' failed on a nonexistant item
+                # don't be so whiny if the "create" failed just because it already existed or a 'remove' failed on a nonexistent item
                 logging.info(e)
             else:
                 logging.warning(e)
@@ -1299,7 +1299,7 @@ def stop(wipe=False):
                     BoundPath("filescan", "/filescan/data/logs", True, None, ["."]),
                     BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
                     BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
-                    BoundPath("redis", "/data", True, None, None),
+                    BoundPath("valkey", "/data", True, None, None),
                     BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
                     BoundPath(
                         "upload",
@@ -1455,7 +1455,7 @@ def start():
                 BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
                 BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
                 BoundPath("postgres", "/var/lib/postgresql/data", False, None, None),
-                BoundPath("redis", "/data", False, None, None),
+                BoundPath("valkey", "/data", False, None, None),
                 BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
                 BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
                 BoundPath("pcap-monitor", "/pcap", False, ["arkime-live", "processed", "upload"], None),
@@ -1845,10 +1845,10 @@ def authSetup():
                 [],
             ),
             (
-                'redis',
-                "(Re)generate internal passwords for Redis",
+                'valkey',
+                "(Re)generate internal passwords for Valkey",
                 False,
-                (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenValkeyPassword,
                 [],
             ),
             (
@@ -2760,14 +2760,14 @@ def authSetup():
                             stat.S_IRUSR | stat.S_IWUSR,
                         )
 
-                elif authItem[0] == 'redis':
+                elif authItem[0] == 'valkey':
                     with pushd(args.configDir):
                         UpdateEnvFiles(
                             [
                                 EnvValue(
                                     True,
-                                    'redis.env',
-                                    'REDIS_PASSWORD',
+                                    'valkey.env',
+                                    'VALKEY_PASSWORD',
                                     ''.join(
                                         secrets.choice(string.ascii_letters + string.digits + '_') for i in range(24)
                                     ),
@@ -3121,7 +3121,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "26.02.0"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "26.04.1"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
@@ -3262,13 +3262,13 @@ def main():
         help="(Re)generate internal passwords for NetBox",
     )
     authSetupGroup.add_argument(
-        '--auth-generate-redis-password',
-        dest='authGenRedisPassword',
+        '--auth-generate-valkey-password',
+        dest='authGenValkeyPassword',
         type=str2bool,
         nargs='?',
         const=True,
         default=False,
-        help="(Re)generate internal passwords for Redis",
+        help="(Re)generate internal passwords for Valkey",
     )
     authSetupGroup.add_argument(
         '--auth-generate-postgres-password',

@@ -1,0 +1,9 @@
+ScanElf:
+  - positive:
+      flavors:
+        - 'application/x-object'
+        - 'application/x-executable'
+        - 'application/x-sharedlib'
+        - 'application/x-coredump'
+        - 'elf_file'
+    priority: 5

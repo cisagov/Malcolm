@@ -342,8 +342,8 @@ malcolm-pipeline-opensearch-1          ghcr.io/idaholab/malcolm/opensearch:{{ si
 malcolm-pipeline-pcap-capture-1        ghcr.io/idaholab/malcolm/pcap-capture:{{ site.malcolm.version }}-arm64       "/usr/bin/tini -- /u…"   pcap-capture        8 minutes ago   Up 8 minutes (healthy)
 malcolm-pipeline-pcap-monitor-1        ghcr.io/idaholab/malcolm/pcap-monitor:{{ site.malcolm.version }}-arm64       "/usr/bin/tini -- /u…"   pcap-monitor        8 minutes ago   Up 8 minutes (healthy)   30441/tcp
 malcolm-pipeline-postgres-1            ghcr.io/idaholab/malcolm/postgresql:{{ site.malcolm.version }}-arm64         "/sbin/tini -- /usr/…"   postgres            8 minutes ago   Up 8 minutes (healthy)   5432/tcp
-malcolm-pipeline-redis-1               ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}-arm64              "/sbin/tini -- /usr/…"   redis               8 minutes ago   Up 8 minutes (healthy)   6379/tcp
-malcolm-pipeline-redis-cache-1         ghcr.io/idaholab/malcolm/redis:{{ site.malcolm.version }}-arm64              "/sbin/tini -- /usr/…"   redis-cache         8 minutes ago   Up 8 minutes (healthy)   6379/tcp
+malcolm-pipeline-valkey-1              ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}-arm64             "/sbin/tini -- /usr/…"   valkey              8 minutes ago   Up 8 minutes (healthy)   6379/tcp
+malcolm-pipeline-valkey-cache-1        ghcr.io/idaholab/malcolm/valkey:{{ site.malcolm.version }}-arm64             "/sbin/tini -- /usr/…"   valkey-cache        8 minutes ago   Up 8 minutes (healthy)   6379/tcp
 malcolm-pipeline-strelka-backend-1     ghcr.io/idaholab/malcolm/strelka-backend:{{ site.malcolm.version }}-arm64    "/usr/bin/tini -- /u…"   strelka-backend     8 minutes ago   Up 8 minutes (healthy)
 malcolm-pipeline-strelka-frontend-1    ghcr.io/idaholab/malcolm/strelka-frontend:{{ site.malcolm.version }}-arm64   "/sbin/tini -- /usr/…"   strelka-frontend    8 minutes ago   Up 8 minutes (healthy)   57314/tcp
 malcolm-pipeline-strelka-manager-1     ghcr.io/idaholab/malcolm/strelka-manager:{{ site.malcolm.version }}-arm64    "/sbin/tini -- /usr/…"   strelka-manager     8 minutes ago   Up 8 minutes (healthy)
@@ -752,11 +752,11 @@ opensearch-deployment-796fdc9f48-r8qfl          1/1     Running   0          36m
 pcap-capture-deployment-79cc46b569-gw6ts        1/1     Running   0          36m
 pcap-monitor-deployment-69b6d9d857-dwz4b        1/1     Running   0          36m
 postgres-deployment-f69649779-r5qss             1/1     Running   0          36m
-redis-cache-deployment-7f94f49886-swclf         1/1     Running   0          36m
-redis-deployment-6895f57c76-gbx9m               1/1     Running   0          36m
 suricata-live-deployment-7d44967bfc-hzbj9       1/1     Running   0          36m
 suricata-offline-deployment-85fb6b9b8b-z2cww    1/1     Running   0          36m
 upload-deployment-7c9798cb7d-cxqwk              1/1     Running   0          36m
+valkey-cache-deployment-7f94f49886-swclf        1/1     Running   0          36m
+valkey-deployment-6895f57c76-gbx9m              1/1     Running   0          36m
 zeek-live-deployment-8c5b9b899-wsv2t            1/1     Running   0          36m
 zeek-offline-deployment-5bbf797567-2zbq7        1/1     Running   0          36m
 ```

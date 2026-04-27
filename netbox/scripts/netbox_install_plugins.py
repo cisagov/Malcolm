@@ -183,7 +183,7 @@ def parse_args():
 def write_local_settings(args):
     success = False
 
-    # set a variable in local_settings.py for netbox-helathcheck-plugin
+    # set a variable in local_settings.py for netbox-healthcheck-plugin
     #   see https://github.com/netbox-community/netbox-healthcheck-plugin/issues/12#issuecomment-2451665212
     netboxSettingsPyDir = os.path.join(args.netboxDir, os.path.join('netbox', 'netbox'))
     if os.path.isdir(netboxSettingsPyDir):

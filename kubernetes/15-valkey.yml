@@ -2,40 +2,40 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: valkey
   namespace: malcolm
 spec:
   type: ClusterIP
   ports:
     - port: 6379
       protocol: TCP
-      name: redis
+      name: valkey
   selector:
-    app: redis
+    app: valkey
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis-deployment
+  name: valkey-deployment
   namespace: malcolm
   labels:
-    app: redis
+    app: valkey
     role: database
 spec:
   selector:
     matchLabels:
-      app: redis
+      app: valkey
   replicas: 1
   template:
     metadata:
       labels:
-        app: redis
+        app: valkey
         role: database
     spec:
       containers:
-      - name: redis-container
-        image: ghcr.io/idaholab/malcolm/redis:26.02.0
+      - name: valkey-container
+        image: ghcr.io/idaholab/malcolm/valkey:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -44,12 +44,12 @@ spec:
                "/usr/local/bin/docker-uid-gid-setup.sh",
                "/usr/local/bin/service_check_passthrough.sh",
                "-s",
-               "redis",
+               "valkey",
                "sh",
                "-c",
-               "redis-server --dir /data --appendonly yes --appendfsync everysec --no-appendfsync-on-rewrite yes --auto-aof-rewrite-percentage 100 --auto-aof-rewrite-min-size $(REDIS_AUTO_AOF_REWRITE_MIN_SIZE) --save '' --maxmemory $(REDIS_MAXMEMORY) --maxmemory-policy $(REDIS_MAXMEMORY_POLICY) --requirepass $(REDIS_PASSWORD)]
+               "valkey-server --dir /data --appendonly yes --appendfsync everysec --no-appendfsync-on-rewrite yes --auto-aof-rewrite-percentage 100 --auto-aof-rewrite-min-size $(VALKEY_AUTO_AOF_REWRITE_MIN_SIZE) --save '' --maxmemory $(VALKEY_MAXMEMORY) --maxmemory-policy $(VALKEY_MAXMEMORY_POLICY) --requirepass $(VALKEY_PASSWORD)"]
         ports:
-          - name: redis
+          - name: valkey
             protocol: TCP
             containerPort: 6379
         envFrom:
@@ -58,7 +58,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - secretRef:
-              name: redis-env
+              name: valkey-env
         livenessProbe:
           exec:
             command:
@@ -70,13 +70,13 @@ spec:
           failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: redis-var-local-catrust-volume
+            name: valkey-var-local-catrust-volume
           - mountPath: /data
-            name: redis-volume
-            subPath: redis
+            name: valkey-volume
+            subPath: valkey
       initContainers:
-      - name: redis-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.02.0
+      - name: valkey-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -92,14 +92,14 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/config:redis"
+            value: "/data/config:valkey"
         volumeMounts:
-          - name: redis-volume
+          - name: valkey-volume
             mountPath: "/data/config"
       volumes:
-        - name: redis-var-local-catrust-volume
+        - name: valkey-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: redis-volume
+        - name: valkey-volume
           persistentVolumeClaim:
             claimName: config-claim

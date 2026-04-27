@@ -5,6 +5,8 @@ renamed_environment_variable_files:
     netbox_postgres
   filescan_secret:
     zeek_secret
+  valkey:
+    redis
 copied_environment_variables:
   # destination_env_file:
   #   source_env_file:
@@ -22,6 +24,11 @@ copied_environment_variables:
     auth_common:
       NGINX_AUTH_MODE:
         NGINX_BASIC_AUTH
+  filebeat:
+    filebeat:
+      FILEBEAT_SCANNER_FINGERPRINT_LENGTH:
+        FILEBEAT_SCANNER_FINGERPRINT_LENGTH:
+          "1024": "512"
   filescan:
     filescan:
         FILESCAN_OUTPUT_PATH:
@@ -145,7 +152,42 @@ copied_environment_variables:
         DB_PASSWORD
       POSTGRES_KEYCLOAK_PASSWORD:
         DB_PASSWORD
-  redis:
+  valkey:
+    valkey:
+      VALKEY_AUTO_AOF_REWRITE_MIN_SIZE:
+        REDIS_AUTO_AOF_REWRITE_MIN_SIZE
+      VALKEY_CACHE_HOST:
+        REDIS_CACHE_HOST:
+          "redis-cache": valkey-cache
+      VALKEY_CACHE_MAXMEMORY:
+        REDIS_CACHE_MAXMEMORY
+      VALKEY_CACHE_MAXMEMORY_POLICY:
+        REDIS_CACHE_MAXMEMORY_POLICY
+      VALKEY_CACHE_PORT:
+        REDIS_CACHE_PORT
+      VALKEY_FILESCAN_CACHE_DATABASE:
+        REDIS_FILESCAN_CACHE_DATABASE
+      VALKEY_HOST:
+        REDIS_HOST:
+          "redis": valkey
+      VALKEY_MAXMEMORY:
+        REDIS_MAXMEMORY
+      VALKEY_MAXMEMORY_POLICY:
+        REDIS_MAXMEMORY_POLICY
+      VALKEY_NETBOX_CACHE_DATABASE:
+        REDIS_NETBOX_CACHE_DATABASE
+      VALKEY_NETBOX_DATABASE:
+        REDIS_NETBOX_DATABASE
+      VALKEY_PASSWORD:
+        REDIS_PASSWORD
+      VALKEY_PORT:
+        REDIS_PORT
+      VALKEY_STRELKA_COORDINATOR_CACHE_DATABASE:
+        REDIS_STRELKA_COORDINATOR_CACHE_DATABASE
+      VALKEY_STRELKA_GATEKEEPER_CACHE_DATABASE:
+        REDIS_STRELKA_GATEKEEPER_CACHE_DATABASE
+      VALKEY_ZEEK_FILES_DATABASE:
+        REDIS_ZEEK_FILES_DATABASE
     netbox:
       REDIS_HOST:
         REDIS_HOST:
@@ -217,6 +259,23 @@ removed_environment_variables:
     - DB_PASSWORD
   suricata_offline:
     - SURICATA_PCAP_PROCESSOR
+  valkey:
+    - REDIS_AUTO_AOF_REWRITE_MIN_SIZE
+    - REDIS_CACHE_HOST
+    - REDIS_CACHE_MAXMEMORY
+    - REDIS_CACHE_MAXMEMORY_POLICY
+    - REDIS_CACHE_PORT
+    - REDIS_FILESCAN_CACHE_DATABASE
+    - REDIS_HOST
+    - REDIS_MAXMEMORY
+    - REDIS_MAXMEMORY_POLICY
+    - REDIS_NETBOX_CACHE_DATABASE
+    - REDIS_NETBOX_DATABASE
+    - REDIS_PASSWORD
+    - REDIS_PORT
+    - REDIS_STRELKA_COORDINATOR_CACHE_DATABASE
+    - REDIS_STRELKA_GATEKEEPER_CACHE_DATABASE
+    - REDIS_ZEEK_FILES_DATABASE
   zeek:
     - CAPA_MAX_REQUESTS
     - CLAMD_MAX_REQUESTS
@@ -251,4 +310,6 @@ relocated_files:
   # Only occurs if Malcolm is not running, source exists, and destination does not.
   # path/to/source: path/to/destination
   netbox/postgres: postgres
-  netbox/redis: redis
+  netbox/redis: valkey
+  redis: valkey
+  arkime/lua: arkime/parsers

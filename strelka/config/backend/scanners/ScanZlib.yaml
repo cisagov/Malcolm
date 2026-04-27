@@ -1,0 +1,6 @@
+ScanZlib:
+  - positive:
+      flavors:
+        - 'application/zlib'
+        - 'zlib_file'
+    priority: 5

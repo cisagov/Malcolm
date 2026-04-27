@@ -33,12 +33,12 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `postgres-scripts` - code used in the `postgres` container for database initialization
 * `postgres` - an initially empty directory to hold the PostgreSQL database used by NetBox and Keycloak
-* `redis` - an initially empty directory where the Redis database runtime files will reside
 * `scripts` - control scripts for starting, stopping, restarting, etc., Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
 * `strelka` - code and configuration for the `strelka-` containers used in by `filescan` for file scanning
 * `suricata-logs` - an initially empty directory for Suricata logs to be uploaded, processed, and stored
 * `suricata` - code and configuration for the `suricata` container that handles PCAP processing using Suricata
+* `valkey` - an initially empty directory where the Valkey database runtime files will reside
 * `yara` - a directory for custom user-provided YARA rules
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
 * `zeek` - code and configuration for the `Zeek` container that handles PCAP processing using Zeek
@@ -64,15 +64,12 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/arkime` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/dashboards-helper` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/dashboards` (based on `opensearchproject/opensearch-dashboards`)
-* `ghcr.io/idaholab/malcolm/filescan` (based on `python:3`)
-* `ghcr.io/idaholab/malcolm/strelka-backend` (based on `ghcr.io/idaholab/strelka/strelka-backend:malcolm`)
-* `ghcr.io/idaholab/malcolm/strelka-manager` (based on `ghcr.io/idaholab/strelka/strelka-manager:malcolm`)
-* `ghcr.io/idaholab/malcolm/strelka-frontend` (based on `ghcr.io/idaholab/strelka/strelka-frontend:malcolm`)
 * `ghcr.io/idaholab/malcolm/file-upload` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
+* `ghcr.io/idaholab/malcolm/filescan` (based on `python:3`)
 * `ghcr.io/idaholab/malcolm/freq` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:11-slim`)
-* `ghcr.io/idaholab/malcolm/keycloak` (based on `quay.io/keycloak/keycloak:26.1`)
+* `ghcr.io/idaholab/malcolm/keycloak` (based on `quay.io/keycloak/keycloak`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
 * `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.23`)
@@ -80,8 +77,11 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/postgresql` (based on `postgres:16-alpine`)
-* `ghcr.io/idaholab/malcolm/redis` (based on `redis:7-alpine`)
+* `ghcr.io/idaholab/malcolm/strelka-backend` (based on `ghcr.io/idaholab/strelka/strelka-backend:malcolm`)
+* `ghcr.io/idaholab/malcolm/strelka-frontend` (based on `ghcr.io/idaholab/strelka/strelka-frontend:malcolm`)
+* `ghcr.io/idaholab/malcolm/strelka-manager` (based on `ghcr.io/idaholab/strelka/strelka-manager:malcolm`)
 * `ghcr.io/idaholab/malcolm/suricata` (based on `debian:13-slim`)
+* `ghcr.io/idaholab/malcolm/valkey` (based on `valkey/valkey:7-alpine`)
 * `ghcr.io/idaholab/malcolm/zeek` (based on `zeek/zeek`)
 
 Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if you have forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you will need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) to pull and re-tag the images.

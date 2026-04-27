@@ -1,0 +1,11 @@
+ScanEncryptedDoc:
+  - positive:
+      flavors:
+        - 'encrypted_word_document'
+    priority: 5
+    options:
+      max_length: 5
+      scanner_timeout: 150
+      log_pws: True
+      password_file: "/etc/strelka/passwords.dat"
+      # brute_force: True

@@ -4,7 +4,9 @@
 # first build documentation with jekyll
 FROM ghcr.io/mmguero-dev/jekyll:latest AS docbuild
 
-ARG GITHUB_TOKEN=ARG VCS_REVISION=ENV VCS_REVISION=$VCS_REVISION
+ARG GITHUB_TOKEN
+ARG VCS_REVISION
+ENV VCS_REVISION=$VCS_REVISION
 
 ADD --chmod=644 README.md _config.yml Gemfile /site/
 ADD _includes/ /site/_includes/

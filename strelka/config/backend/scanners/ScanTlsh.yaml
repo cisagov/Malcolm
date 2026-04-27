@@ -1,0 +1,8 @@
+ScanTlsh:
+  - positive:
+      flavors:
+        - '*'
+    priority: 5
+    options:
+      location: '/etc/strelka/tlsh/'
+      score: 30

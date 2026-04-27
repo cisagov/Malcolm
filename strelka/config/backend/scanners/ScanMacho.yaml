@@ -1,0 +1,8 @@
+ScanMacho:
+  - positive:
+      flavors:
+        - 'application/x-mach-binary'
+        - 'macho_file'
+    priority: 5
+    options:
+      tmp_directory: '/dev/shm/'

@@ -1,0 +1,7 @@
+ScanDmg:
+  - positive:
+      flavors:
+        - 'dmg_disk_image'
+        # - 'dmg_encrypted_disk_image'
+        - 'hfsplus_disk_image'
+    priority: 5

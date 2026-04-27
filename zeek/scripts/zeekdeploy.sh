@@ -225,6 +225,15 @@ else
   echo "MetricsPort = $ZEEK_METRICS_PORT" >> ./zeekctl.cfg
 fi
 
+# Increase CommandTimeout for systems where broker crypto handshakes exceed the
+# 60s default, causing ssh_runner muxer BrokenPipeErrors during zeekctl deploy.
+ZEEK_COMMAND_TIMEOUT=${ZEEK_COMMAND_TIMEOUT:-300}
+if grep --quiet ^CommandTimeout ./zeekctl.cfg; then
+  sed -r -i "s/(CommandTimeout)\s*=\s*.*/\1 = $ZEEK_COMMAND_TIMEOUT/" ./zeekctl.cfg
+else
+  echo "CommandTimeout = $ZEEK_COMMAND_TIMEOUT" >> ./zeekctl.cfg
+fi
+
 # completely rewrite node.cfg for one worker per interface
 # see idaholab/Malcolm#36 for details on fine-tuning
 
@@ -351,10 +360,23 @@ popd >/dev/null 2>&1
 pushd "$ZEEK_LOG_PATH" >/dev/null 2>&1
 
 function zeek_procs_running {
+  # zeekctl's state.db can lose track of worker PIDs when the ssh_runner
+  # muxer pipe breaks during deploy (BrokenPipeError race).  When that
+  # happens, zeekctl status reports workers as "stopped" even though the
+  # zeek processes are alive. Prefer whichever is the larger between
+  # the real process count (pidof zeek) and the zeekctl status count
+  # so that a state.db desync does not cause the health loop to exit
+  # and trigger unnecessary restart cycles.
+  local ctl_count=0
+  local pid_count
+  pid_count=$(pidof zeek 2>/dev/null | wc -w)
   if output=$("$ZEEK_CTL" status 2>/dev/null) && [[ -n "$output" ]]; then
-    echo "$output" | tail -n +2 | grep -P "localhost\s+running\s+\d+" | wc -l
+    ctl_count=$(echo "$output" | tail -n +2 | grep -P "localhost\s+running\s+\d+" | wc -l)
+  fi
+  if (( pid_count >= ctl_count )); then
+    echo "$pid_count"
   else
-    pidof zeek 2>/dev/null | wc -w
+    echo "$ctl_count"
   fi
 }
 
@@ -370,6 +392,16 @@ echo "Running via \"$ZEEK_CTL\" ($ZEEK_PROCS processes) ..." >&2
 "$ZEEK_CTL" deploy
 
 for (( i=1; i <= 30; i++)); do sleep 1; done
+
+# If the initial deploy left state.db desynced a second deploy re-registers the
+# running workers without restarting them, fixing zeekctl status for the health loop.
+RUNNING_AFTER_DEPLOY=$("$ZEEK_CTL" status 2>/dev/null | tail -n +2 | grep -cP "localhost\s+running\s+\d+")
+ACTUAL_PROCS=$(pidof zeek 2>/dev/null | wc -w)
+if (( ACTUAL_PROCS >= ZEEK_PROCS && RUNNING_AFTER_DEPLOY < ZEEK_PROCS )); then
+  echo "zeekctl state desync detected ($RUNNING_AFTER_DEPLOY reported vs $ACTUAL_PROCS actual), redeploying to resync..." >&2
+  "$ZEEK_CTL" deploy
+  for (( i=1; i <= 10; i++)); do sleep 1; done
+fi
 
 # keep track of intel updates in order to reload when they occur
 INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"

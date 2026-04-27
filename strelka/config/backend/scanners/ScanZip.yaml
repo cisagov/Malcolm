@@ -1,0 +1,19 @@
+ScanZip:
+  - positive:
+      flavors:
+        - 'application/java-archive'
+        - 'application/zip'
+        - 'zip_file'
+        - 'application/vnd.openxmlformats-officedocument'
+        - 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        - 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        - 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        - 'ooxml_file'
+    priority: 5
+    options:
+      limit: 1000
+      limit_metadata: True
+      size_limit: 250000000
+      crack_pws: False
+      log_pws: True
+      password_file: '/etc/strelka/passwords.dat'

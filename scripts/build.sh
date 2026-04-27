@@ -51,14 +51,25 @@ fi
 function filesize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" "$CONFIG_FILE" | awk '{print $2}' | sort -u)"
-  $DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
+  SIZE="$($DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null" 2>/dev/null)"
+
+  if [[ "$SIZE" =~ ^[0-9]+$ ]]; then
+    echo "$SIZE"
+  else
+    echo 0
+  fi
 }
 
 function dirsize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" "$CONFIG_FILE" | awk '{print $2}' | sort -u)"
-  KBYTES="$($DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1")"
-  echo $(($KBYTES * 1024))
+  KBYTES="$($DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1" 2>/dev/null)"
+
+  if [[ "$KBYTES" =~ ^[0-9]+$ ]]; then
+    echo $((KBYTES * 1024))
+  else
+    echo 0
+  fi
 }
 
 function _cleanup {
@@ -155,7 +166,7 @@ if (( $# == 0 )); then
   done
 
   DIRS_IN_IMAGES=(
-    "/var/lib/clamav;strelka-backend;200000000"
+    "/var/lib/clamav;strelka-backend;100000000"
   )
   for i in ${DIRS_IN_IMAGES[@]}; do
     DIR="$(echo "$i" | cut -d';' -f1)"

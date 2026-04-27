@@ -1,0 +1,6 @@
+ScanGifEof:
+  - positive:
+      flavors:
+        - 'image/gif'
+        - 'gif_file'
+    priority: 5

@@ -1,0 +1,5 @@
+ScanManifest:
+  - positive:
+      flavors:
+        - 'browser_manifest'
+    priority: 5

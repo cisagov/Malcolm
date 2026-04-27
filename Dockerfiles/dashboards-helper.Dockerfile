@@ -91,7 +91,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
-      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} -d /nonexistant -s /sbin/nologin ${PUSER} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} -d /nonexistent -s /sbin/nologin ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /data/init /opt/ecs && \
       cd /opt && \

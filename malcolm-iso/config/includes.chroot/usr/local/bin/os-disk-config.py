@@ -696,7 +696,7 @@ def main():
                 entry = Fstab.add(
                     device=f"{par.mapper}",
                     mountpoint=par.mount,
-                    options="defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s",
+                    options="defaults,inode64,nofail,noatime,rw,auto,user,x-systemd.device-timeout=600s",
                     fs_passno=2,
                     filesystem='xfs',
                     path=OS_PARAMS[osMode][FSTAB_FILE],
@@ -705,7 +705,7 @@ def main():
                 entry = Fstab.add(
                     device=f"UUID={par.uuid}",
                     mountpoint=par.mount,
-                    options="defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s",
+                    options="defaults,inode64,nofail,noatime,rw,auto,user,x-systemd.device-timeout=600s",
                     fs_passno=2,
                     filesystem='xfs',
                     path=OS_PARAMS[osMode][FSTAB_FILE],

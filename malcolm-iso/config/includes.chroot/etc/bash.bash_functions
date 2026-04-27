@@ -194,7 +194,7 @@ function encrypt_file() {
       ls -l "$1.enc" && \
       rm -vi "$1"
   else
-    echo "No file specified, or invalid/nonexistant file" >&2
+    echo "No file specified, or invalid/nonexistent file" >&2
   fi
 }
 
@@ -209,7 +209,7 @@ function decrypt_file() {
       ls -l "$OUT_FILE" && \
       rm -vi "$1"
   else
-    echo "No file specified, or invalid/nonexistant file" >&2
+    echo "No file specified, or invalid/nonexistent file" >&2
   fi
 }
 

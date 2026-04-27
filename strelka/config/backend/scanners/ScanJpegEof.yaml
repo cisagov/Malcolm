@@ -1,0 +1,9 @@
+ScanJpegEof:
+  - positive:
+      flavors:
+        - 'image/jpeg'
+        - 'jpeg_file'
+    negative:
+      source:
+        - 'ScanTranscode'
+    priority: 5

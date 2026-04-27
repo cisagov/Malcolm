@@ -1,0 +1,6 @@
+ScanXar:
+  - positive:
+      flavors:
+        - 'application/x-xar'
+        - 'xar_file'
+    priority: 5

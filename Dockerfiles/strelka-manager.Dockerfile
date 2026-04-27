@@ -21,7 +21,7 @@ USER root
 
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.52.4"
+ENV YQ_VERSION="4.52.5"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 RUN apk update --no-cache && \
@@ -29,7 +29,7 @@ RUN apk update --no-cache && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
       chmod 755 /usr/local/bin/yq && \
     addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
-      adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
+      adduser -D -H -u ${DEFAULT_UID} -h /nonexistent -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic

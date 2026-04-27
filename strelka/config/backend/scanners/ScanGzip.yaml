@@ -1,0 +1,7 @@
+ScanGzip:
+  - positive:
+      flavors:
+        - 'application/gzip'
+        - 'application/x-gzip'
+        - 'gzip_file'
+    priority: 5

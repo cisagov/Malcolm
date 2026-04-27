@@ -1,0 +1,8 @@
+ScanUrl:
+  - negative:
+      flavors:
+        - 'javascript_file'
+    positive:
+      flavors:
+        - 'text/plain'
+    priority: 5

@@ -1,0 +1,19 @@
+ScanPdf:
+  - positive:
+      flavors:
+        - 'application/pdf'
+        - 'pdf_file'
+    priority: 5
+    options:
+      objects:
+        - 'AA'
+        - 'EmbeddedFiles'
+        - 'JavaScript'
+        - 'JS'
+        - 'Launch'
+        - 'Macrosheet'
+        - 'MediaBox'
+        - 'OpenAction'
+        - 'URI'
+        - 'XObject'
+      max_objects: 250

@@ -53,11 +53,11 @@ ENV TERM=xterm
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-ENV SUPERCRONIC_VERSION="0.2.39"
+ENV SUPERCRONIC_VERSION="0.2.43"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
-ENV YQ_VERSION="4.52.4"
+ENV YQ_VERSION="4.52.5"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV STRELKA_HOST=$STRELKA_HOST
@@ -88,7 +88,7 @@ ADD --chmod=755 filescan/scripts/web-ui-asset-download.sh /usr/local/bin/
 
 RUN set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
-        useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} ; \
+        useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistent ${PUSER} ; \
         usermod -a -G tty ${PUSER} ; \
     # fix our package lists, upgrade, and install a few minimal dependencies
     sed -i /etc/apt/sources.list.d/debian.sources -e 's/main$/main contrib non-free/' ; \

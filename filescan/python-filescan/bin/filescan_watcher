@@ -29,7 +29,7 @@ from anyio.from_thread import BlockingPortal
 from collections import defaultdict
 from filescan.click import click
 from filescan.config import BaseConfig, AnyWatch, DirectoryWatch, RedisWatch, RedisOptions
-from filescan.model import FileEvent, ScanRequest, ScanSubmit
+from filescan.model import FileEvent, ScanRequest
 from filescan.watch import (
     AsyncFileSystemEventHandler,
     CreatedEvent,

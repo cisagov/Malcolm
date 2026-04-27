@@ -27,7 +27,7 @@
 .configured
 .os-info
 config.*/
-/redis
+/valkey
 /postgres
 /filescan-logs
 malcolm-config_2*.json

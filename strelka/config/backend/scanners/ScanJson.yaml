@@ -1,0 +1,6 @@
+ScanJson:
+  - positive:
+      flavors:
+        - 'application/json'
+        - 'json_file'
+    priority: 5

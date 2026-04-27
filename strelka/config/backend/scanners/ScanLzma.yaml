@@ -1,0 +1,8 @@
+ScanLzma:
+  - positive:
+      flavors:
+        - 'application/x-lzma'
+        - 'lzma_file'
+        - 'application/x-xz'
+        - 'xz_file'
+    priority: 5

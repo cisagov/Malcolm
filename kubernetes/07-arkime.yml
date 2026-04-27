@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:26.02.0
+        image: ghcr.io/idaholab/malcolm/arkime:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -80,8 +80,8 @@ spec:
             name: arkime-var-local-catrust-volume
           - mountPath: /var/local/curlrc/secretmap
             name: arkime-opensearch-curlrc-secret-volume
-          - mountPath: "/opt/arkime/lua/configmap"
-            name: arkime-lua-volume
+          - mountPath: "/opt/arkime/parsers/configmap"
+            name: arkime-parsers-volume
           - mountPath: "/opt/arkime/rules/configmap"
             name: arkime-rules-volume
           - mountPath: "/data/pcap"
@@ -91,7 +91,7 @@ spec:
             subPath: "arkime/wiseini"  
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.02.0
+        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -120,9 +120,9 @@ spec:
         - name: arkime-opensearch-curlrc-secret-volume
           secret:
             secretName: opensearch-curlrc
-        - name: arkime-lua-volume
+        - name: arkime-parsers-volume
           configMap:
-            name: arkime-lua
+            name: arkime-parsers
         - name: arkime-rules-volume
           configMap:
             name: arkime-rules

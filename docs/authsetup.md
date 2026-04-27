@@ -505,8 +505,8 @@ Authentication Setup:
                         API token for remote NetBox instance (for --auth-noninteractive when NETBOX_MODE=remote in netbox-common.env)
   --auth-generate-netbox-passwords [AUTHGENNETBOXPASSWORDS]
                         (Re)generate internal passwords for NetBox
-  --auth-generate-redis-password [AUTHGENREDISPASSWORD]
-                        (Re)generate internal passwords for Redis
+  --auth-generate-valkey-password [AUTHGENVALKEYPASSWORD]
+                        (Re)generate internal passwords for Valkey
   --auth-generate-postgres-password [AUTHGENPOSTGRESPASSWORD]
                         (Re)generate internal superuser passwords for PostgreSQL
   --auth-generate-opensearch-internal-creds [AUTHGENOPENSEARCHCREDS]

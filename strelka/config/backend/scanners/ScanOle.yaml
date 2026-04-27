@@ -1,0 +1,7 @@
+ScanOle:
+  - positive:
+      flavors:
+        - 'application/CDFV2'
+        - 'application/msword'
+        - 'olecf_file'
+    priority: 5

@@ -94,7 +94,7 @@ REDIS = {
         'SENTINEL_TIMEOUT': _environ_get_and_map('REDIS_SENTINEL_TIMEOUT', 10, _AS_INT),
         'USERNAME': environ.get('REDIS_USERNAME', ''),
         'PASSWORD': _read_secret('redis_password', environ.get('REDIS_PASSWORD', '')),
-        'DATABASE': _environ_get_and_map('REDIS_NETBOX_DATABASE', environ.get('REDIS_DATABASE', '0'), _AS_INT),
+        'DATABASE': _environ_get_and_map('REDIS_NETBOX_DATABASE', _environ_get_and_map('REDIS_DATABASE', '0'), _AS_INT),
         'SSL': _environ_get_and_map('REDIS_SSL', 'False', _AS_BOOL),
         'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False', _AS_BOOL),
     },
@@ -106,7 +106,7 @@ REDIS = {
         'USERNAME': environ.get('REDIS_CACHE_USERNAME', environ.get('REDIS_USERNAME', '')),
         'PASSWORD': _read_secret('redis_cache_password', environ.get('REDIS_CACHE_PASSWORD', environ.get('REDIS_PASSWORD', ''))),
         'DATABASE': _environ_get_and_map('REDIS_NETBOX_CACHE_DATABASE', environ.get('REDIS_CACHE_DATABASE', '1'), _AS_INT),
-        'SSL': _environ_get_and_map('REDIS_CACHE_SSL', environ.get('REDIS_SSL', 'False'), _AS_BOOL),
+        'SSL': _environ_get_and_map('REDIS_CACHE_SSL', _environ_get_and_map('REDIS_SSL', 'False'), _AS_BOOL),
         'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map('REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY', environ.get('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False'), _AS_BOOL),
     },
 }

@@ -1,0 +1,5 @@
+ScanPyinstaller:
+  - positive:
+      flavors:
+        - "pyinstaller_file"
+    priority: 5

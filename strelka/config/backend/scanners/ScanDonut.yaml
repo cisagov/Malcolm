@@ -1,0 +1,5 @@
+ScanDonut:
+  - positive:
+      flavors:
+        - 'hacktool_win_shellcode_donut'
+    priority: 5

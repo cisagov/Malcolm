@@ -1,0 +1,27 @@
+ScanExiftool:
+  - positive:
+      flavors:
+        - 'application/msword'
+        - 'olecf_file'
+        - 'application/vnd.ms-excel'
+        - 'application/pdf'
+        - 'pdf_file'
+        - 'lnk_file'
+        - 'image/gif'
+        - 'gif_file'
+        - 'image/jpeg'
+        - 'jpeg_file'
+        - 'image/png'
+        - 'png_file'
+        - 'image/tiff'
+        - 'type_is_tiff'
+        - 'image/x-ms-bmp'
+        - 'bmp_file'
+        - 'application/x-shockwave-flash'
+        - 'fws_file'
+        - 'image/webp'
+        - 'image/avif'
+        - 'image/heic'
+        - 'image/heif'
+        - "docx_file"
+    priority: 5

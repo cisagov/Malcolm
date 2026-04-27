@@ -107,6 +107,9 @@ sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
 # enable guests to mount vmware/etc. fuse-based mounts with allow_other
 sed -i "s/#user_allow_other.*/user_allow_other/" /etc/fuse.conf
 
+# don't store ssh_host keys in image
+rm -f /etc/ssh/ssh_host_*
+
 # some permissions
 find /etc/audit -type d -exec chmod 750 "{}" \;
 find /etc/audit -type f -exec chmod 640 "{}" \;

@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:9.3.0
+FROM docker.elastic.co/beats/filebeat-oss:9.3.2
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -79,10 +79,10 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION="4.52.4"
+ENV YQ_VERSION="4.52.5"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV EVTX_VERSION="0.11.1"
+ENV EVTX_VERSION="0.11.2"
 ENV EVTX_URL="https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VERSION}/evtx_dump-v${EVTX_VERSION}-XXX-unknown-linux-gnu"
 
 USER root

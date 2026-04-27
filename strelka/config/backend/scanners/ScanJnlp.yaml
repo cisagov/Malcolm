@@ -1,0 +1,5 @@
+ScanJnlp:
+  - positive:
+      flavors:
+        - "jnlp_file"
+    priority: 5

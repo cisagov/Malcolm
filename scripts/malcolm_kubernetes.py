@@ -118,10 +118,10 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(GetMalcolmPath(), os.path.join('logstash', 'maps')),
         },
     ],
-    'arkime-lua': [
+    'arkime-parsers': [
         {
             'secret': False,
-            'path': os.path.join(GetMalcolmPath(), os.path.join('arkime', 'lua')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('arkime', 'parsers')),
         },
     ],
     'arkime-rules': [
@@ -249,8 +249,8 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
     'pcap-capture',
     'pcap-monitor',
     'postgres',
-    'redis',
-    'redis-cache',
+    'valkey',
+    'valkey-cache',
     'strelka-backend',
     'strelka-frontend',
     'strelka-manager',
@@ -267,8 +267,8 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
     'filescan',
     'pcap-capture',
     'pcap-monitor',
-    'redis',
-    'redis-cache',
+    'valkey',
+    'valkey-cache',
     'strelka-backend',
     'strelka-frontend',
     'strelka-manager',

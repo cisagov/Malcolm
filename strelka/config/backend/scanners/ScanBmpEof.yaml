@@ -1,0 +1,9 @@
+ScanBmpEof:
+  - positive:
+      flavors:
+        - 'image/x-ms-bmp'
+        - 'bmp_file'
+    negative:
+      source:
+        - 'ScanTranscode'
+    priority: 5
