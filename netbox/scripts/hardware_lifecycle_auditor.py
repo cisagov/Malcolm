@@ -1,133 +1,133 @@
-from extras.scripts import Script, StringVar, FileVar
-from dcim.models import Device
-from extras.models import Tag
-from django.utils import timezone
 import json
 import requests
+from django.utils import timezone
+from django.forms import PasswordInput
+from extras.scripts import Script, StringVar, FileVar, ChoiceVar
+from dcim.models import Device
+from extras.models import Tag
 
 class HardwareLifecycleAuditor(Script):
     class Meta:
-        name = "Hardware Lifecycle Scanner (OpenEoX)"
-        description = "Scans active inventory against lifecycle data to identify End-of-Support devices, tags them, and outputs a CSV report."
-        field_order = ['remote_feed_url', 'auth_header', 'local_feed_file']
+        name = "Hardware Lifecycle Scanner (Universal)"
+        description = "Scans active inventory against lifecycle data to identify End-of-Support devices, tags them, and outputs a CSV report"
+        field_order = ['remote_feed_url', 'auth_type', 'auth_token', 'local_feed_file']
 
-    remote_feed_url = StringVar(
-        label="Remote OpenEoX Feed URL",
-        description="URL to a machine-readable JSON feed. Leave blank if uploading a file.",
-        default="",
+    remote_feed_url = StringVar(label="Remote API Feed URL", required=False)
+    
+    auth_type = ChoiceVar(
+        choices=(
+            ('Bearer', 'Bearer (Standard API Token)'),
+            ('token', 'Token (GitHub)'),
+            ('Basic', 'Basic (Legacy Systems)'),
+            ('', 'None/Custom'),
+        ),
+        default='Bearer',
         required=False
     )
-
-    auth_header = StringVar(
-        label="API Token / Auth Header (Optional)",
-        description="Format: 'Bearer YOUR_TOKEN' or 'token YOUR_GITHUB_PAT'. Required for private Git repos or authenticated internal APIs.",
-        required=False
-    )
-
-    local_feed_file = FileVar(
-        label="Local OpenEoX File",
-        description="Upload a local JSON file if operating in an air-gapped environment.",
-        required=False
-    )
+    
+    auth_token = StringVar(label="API Token", required=False, widget=PasswordInput)
+    local_feed_file = FileVar(label="Local JSON File", required=False)
 
     def run(self, data, commit):
-        # NetBox Tags for Malcolm Dashboard Enrichment
+        SCHEMA_CONFIG = {
+            "date_identifiers": {'end_of_support_date', 'eos_date', 'eol_date', 'LastDateOfSupport', 'EndOfLife', 'value'},
+            "model_identifiers": {'EOLProductID', 'model', 'product_id', 'part_number', 'name'},
+            "metadata_keys": {'PaginationResponseRecord', 'total_count', 'page_index', 'products', 'EOXRecord'}
+        }
         eos_tag, _ = Tag.objects.get_or_create(
-            name='Lifecycle: End of Support',
             slug='lifecycle-end-of-support',
-            defaults={'color': 'ff0000', 'description': 'Device has reached End of Support and is a security risk.'}
+            defaults={'name': 'Lifecycle: End of Support', 'color': 'ff0000'}
         )
-        
         supported_tag, _ = Tag.objects.get_or_create(
-            name='Lifecycle: Supported',
             slug='lifecycle-supported',
-            defaults={'color': '00ff00', 'description': 'Device is actively supported by the vendor.'}
+            defaults={'name': 'Lifecycle: Supported', 'color': '00ff00'}
         )
+        raw_data = self._get_raw_data(data)
+        if not raw_data: 
+            return "❌ Audit Aborted: No valid data source provided."
+        normalized_map = {}
+        def extract_lifecycle(obj, current_model=None):
+            """Generic recursive crawler: Pairs model identity with date values."""
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if k in SCHEMA_CONFIG["date_identifiers"] and isinstance(v, (str, dict)):
+                        date_str = v.get('value') if isinstance(v, dict) else v
+                        if current_model and isinstance(date_str, str) and date_str.strip():
+                            normalized_map[current_model] = date_str.strip()
+                    else:
+                        next_model = current_model
+                        if k not in SCHEMA_CONFIG["metadata_keys"] and k != 'value':
+                            next_model = k if not current_model else current_model
+                        extract_lifecycle(v, next_model)            
+            elif isinstance(obj, list):
+                for item in obj:
+                    potential_model = current_model
+                    if isinstance(item, dict):
+                        for m_key in SCHEMA_CONFIG["model_identifiers"]:
+                            if item.get(m_key):
+                                potential_model = item.get(m_key)
+                                break
+                    extract_lifecycle(item, potential_model)
 
-        #Load the Lifecycle Data
-        eos_data = {}
-        
-        if data.get('local_feed_file'):
-            self.log_info("Loading lifecycle data from uploaded file...")
-            try:
-                eos_data = json.loads(data['local_feed_file'].read())
-            except Exception as e:
-                self.log_failure(f"Failed to parse uploaded file as JSON: {e}")
-                return "❌ Audit Aborted: Failed to parse uploaded file."
-                
-        elif data.get('remote_feed_url'):
-            self.log_info(f"Fetching remote lifecycle feed from {data['remote_feed_url']}...")
-            
-            headers = {}
-            if data.get('auth_header'):
-                headers['Authorization'] = data['auth_header']
-                self.log_info("Applying provided Authentication header...")
-
-            try:
-                response = requests.get(data['remote_feed_url'], headers=headers, timeout=10)
-                if response.status_code == 200:
-                    eos_data = response.json()
-                else:
-                    self.log_failure(f"HTTP Error {response.status_code}: The remote URL is broken or authentication failed.")
-                    return f"❌ Audit Aborted: HTTP Error {response.status_code}."
-            except ValueError as e:
-                self.log_failure(f"JSON Parsing Error: The remote server did not return valid JSON. ({e})")
-                return "❌ Audit Aborted: Invalid JSON received from remote server."
-            except Exception as e:
-                self.log_failure(f"Network error while fetching remote feed: {e}")
-                return f"❌ Audit Aborted: Network error ({e})."
-
-        if not eos_data:
-            self.log_failure("No lifecycle data available to perform audit.")
-            return "❌ Audit Aborted: No valid lifecycle data was provided."
-
-        #Query NetBox Inventory
+        extract_lifecycle(raw_data)
+        self.log_info(f"Crawler successfully discovered {len(normalized_map)} lifecycle records in the JSON payload.")
         devices = Device.objects.filter(status='active')
-        self.log_info(f"Scanning {devices.count()} active devices for hardware lifecycle compliance...")
-
+        self.log_info(f"Auditing {devices.count()} active devices in NetBox...")
+        
         now = timezone.now().date()
-        compliant_count = 0
-        non_compliant_count = 0
+        stats = {"comp": 0, "non": 0, "skipped": 0}
+        csv_rows = ["Device,Model,EOS Date,Status"]
 
-        # Prepare CSV Output String
-        csv_output = "Device Name,Device Model,EOS Date,Status\n"
-
-        #Audit and Tag Devices
         for device in devices:
-            model_name = device.device_type.model
-            lifecycle_info = eos_data.get(model_name)
+            model = device.device_type.model
+            eos_str = normalized_map.get(model)
 
-            if lifecycle_info:
-                eos_date_str = lifecycle_info.get('end_of_support_date')
-                if eos_date_str:
-                    eos_date = timezone.datetime.strptime(eos_date_str, '%Y-%m-%d').date()
+            if eos_str:
+                try:
+                    eos_dt = timezone.datetime.strptime(eos_str[:10], '%Y-%m-%d').date()
+                    is_eos = eos_dt < now
                     
-                    if eos_date < now:
+                    if is_eos:
                         device.tags.add(eos_tag)
                         device.tags.remove(supported_tag)
-                        device.save()
-                        
-                        self.log_warning(f"ACTION REQUIRED: {device.name} ({model_name}) reached End-of-Support on {eos_date}.")
-                        csv_output += f"{device.name},{model_name},{eos_date},End-of-Support\n"
-                        non_compliant_count += 1
+                        status_label = "End-of-Support"
+                        stats["non"] += 1
+                        self.log_warning(f"ACTION REQUIRED: {device.name} ({model}) reached EOS on {eos_dt}")
                     else:
                         device.tags.add(supported_tag)
                         device.tags.remove(eos_tag)
+                        status_label = "Supported"
+                        stats["comp"] += 1
+                        self.log_success(f"COMPLIANT: {device.name} ({model}) supported until {eos_dt}")
+                    
+                    if commit: 
                         device.save()
                         
-                        self.log_success(f"COMPLIANT: {device.name} ({model_name}) is supported until {eos_date}.")
-                        csv_output += f"{device.name},{model_name},{eos_date},Supported\n"
-                        compliant_count += 1
+                    csv_rows.append(f"{device.name},{model},{eos_dt},{status_label}")
+                except Exception as e:
+                    self.log_failure(f"Failed to parse date '{eos_str}' for {model}: {str(e)}")
+                    continue
             else:
-                self.log_debug(f"Skipping {device.name}: No OpenEoX lifecycle data found for model '{model_name}'.")
+                stats["skipped"] += 1
+                self.log_info(f"Skipped: {device.name} ({model}) - No matching data in payload.")
 
-        self.log_info(f"Audit Complete. Supported: {compliant_count}, End-of-Support: {non_compliant_count}")
+        return f"Audit Complete. Supported: {stats['comp']} | EOS: {stats['non']} | Skipped: {stats['skipped']}\n" + "-"*40 + "\n" + "\n".join(csv_rows)
 
-        #Return the final summary and CSV format
-        summary = f"Audit Complete. Supported: {compliant_count} | End-of-Support: {non_compliant_count}\n"
-        summary += "-" * 50 + "\n"
-        summary += "CSV EXPORT:\n"
-        summary += csv_output
-
-        return summary
-
+    def _get_raw_data(self, data):
+        if data.get('local_feed_file'):
+            self.log_info("Reading uploaded local file...")
+            return json.loads(data['local_feed_file'].read())
+        
+        url = data.get('remote_feed_url')
+        if url:
+            headers = {}
+            if data.get('auth_token'):
+                headers["Authorization"] = f"{data.get('auth_type')} {data.get('auth_token')}".strip()
+            
+            try:
+                res = requests.get(url, headers=headers, timeout=15)
+                res.raise_for_status()
+                return res.json()
+            except Exception as e:
+                self.log_failure(f"Network error: {str(e)}")
+        return None
