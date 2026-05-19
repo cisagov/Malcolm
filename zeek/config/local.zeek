@@ -60,6 +60,8 @@ global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_roc_plus = (getenv("ZEEK_DISABLE_ICS_ROC_PLUS") == true_regex) ? T : F;
 global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
+global disable_ics_mms = (getenv("ZEEK_DISABLE_ICS_MMS") == true_regex) ? T : F;
+global disable_ics_iso_stack = (getenv("ZEEK_DISABLE_ICS_ISO_STACK") == true_regex) ? T : F;
 global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
 
 redef Broker::default_listen_address = "127.0.0.1";
@@ -234,6 +236,16 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_s7comm) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
+  }
+  if (disable_ics_all || disable_ics_mms) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_MMS);
+  }
+  if (disable_ics_all || disable_ics_iso_stack) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_TPKT);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_COTP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_SESS);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_PRES);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_ACSE);
   }
   if (disable_ics_all || disable_ics_synchrophasor) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_TCP);

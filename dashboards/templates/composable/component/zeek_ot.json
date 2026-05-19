@@ -6029,6 +6029,279 @@
                 }
               }
             },
+            "tpkt": {
+              "properties": {
+                "bytes_orig": {
+                  "type": "long"
+                },
+                "bytes_resp": {
+                  "type": "long"
+                },
+                "packets_orig": {
+                  "type": "long"
+                },
+                "packets_resp": {
+                  "type": "long"
+                }
+              }
+            },
+            "cotp_conn": {
+              "properties": {
+                "bytes_orig": {
+                  "type": "long"
+                },
+                "bytes_resp": {
+                  "type": "long"
+                },
+                "packets_orig": {
+                  "type": "long"
+                },
+                "packets_resp": {
+                  "type": "long"
+                },
+                "calling_tsap": {
+                  "type": "keyword"
+                },
+                "called_tsap": {
+                  "type": "keyword"
+                },
+                "class": {
+                  "type": "long"
+                },
+                "has_connect": {
+                  "type": "keyword"
+                },
+                "has_disconnect": {
+                  "type": "keyword"
+                },
+                "error": {
+                  "type": "keyword"
+                },
+                "reject_cause": {
+                  "type": "long"
+                }
+              }
+            },
+            "sess": {
+              "properties": {
+                "bytes_orig": {
+                  "type": "long"
+                },
+                "bytes_resp": {
+                  "type": "long"
+                },
+                "packets_orig": {
+                  "type": "long"
+                },
+                "packets_resp": {
+                  "type": "long"
+                }
+              }
+            },
+            "pres": {
+              "properties": {
+                "bytes_orig": {
+                  "type": "long"
+                },
+                "bytes_resp": {
+                  "type": "long"
+                },
+                "packets_orig": {
+                  "type": "long"
+                },
+                "packets_resp": {
+                  "type": "long"
+                },
+                "refused": {
+                  "type": "keyword"
+                },
+                "refuse_reason": {
+                  "type": "keyword"
+                },
+                "aborted": {
+                  "type": "keyword"
+                },
+                "abort_reason": {
+                  "type": "keyword"
+                },
+                "cids": {
+                  "type": "keyword"
+                }
+              }
+            },
+
+            "acse": {
+              "properties": {
+                "context_name": {
+                  "type": "keyword"
+                },
+                "calling_ap_title": {
+                  "type": "keyword"
+                },
+                "called_ap_title": {
+                  "type": "keyword"
+                },
+                "auth_mechanism": {
+                  "type": "keyword"
+                },
+                "auth_failure": {
+                  "type": "keyword"
+                },
+                "result": {
+                  "type": "keyword"
+                },
+                "aborted": {
+                  "type": "keyword"
+                },
+                "diag": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "mms": {
+              "properties": {
+                "devicevendor": {
+                  "type": "keyword"
+                },
+                "devicemodel": {
+                  "type": "keyword"
+                },
+                "devicerevision": {
+                  "type": "keyword"
+                },
+                "protocolversion": {
+                  "type": "keyword"
+                },
+                "parametercbb": {
+                  "type": "keyword"
+                },
+                "servicessupported": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "mms_name_list": {
+              "properties": {
+                "class": {
+                  "type": "keyword"
+                },
+                "scope": {
+                  "type": "keyword"
+                },
+                "domain": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "diag": {
+                  "type": "keyword"
+                },
+                "value_parsed": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "mms_var_attributes": {
+              "properties": {
+                "variable": {
+                  "type": "keyword"
+                },
+                "attributes": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "diag": {
+                  "type": "keyword"
+                },
+                "attributes_parsed": {
+                  "type": "nested",
+                  "properties": {
+                    "path": { "type": "keyword" },
+                    "value": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "mms_var_access": {
+              "properties": {
+                "operation": {
+                  "type": "keyword"
+                },
+                "variable": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "diag": {
+                  "type": "keyword"
+                },
+                "value_parsed": {
+                  "type": "nested",
+                  "properties": {
+                    "path": { "type": "keyword" },
+                    "value": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "mms_varlist_access": {
+              "properties": {
+                "operation": {
+                  "type": "keyword"
+                },
+                "listname": {
+                  "type": "keyword"
+                },
+                "listindex": {
+                  "type": "long"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "diag": {
+                  "type": "keyword"
+                },
+                "value_parsed": {
+                  "type": "nested",
+                  "properties": {
+                    "path": { "type": "keyword" },
+                    "value": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "mms_varlist_attributes": {
+              "properties": {
+                "list": {
+                  "type": "keyword"
+                },
+                "attributes": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "diag": {
+                  "type": "keyword"
+                },
+                "attributes_parsed": {
+                  "type": "keyword"
+                }
+              }
+            },
             "synchrophasor": {
               "properties": {
                 "data_frame_count": {
