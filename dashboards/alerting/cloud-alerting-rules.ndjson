@@ -1,0 +1,415 @@
+###############################################################################
+#  Malcolm – Cloud Infrastructure Logs: Real-Time Alerting Rules
+#  OpenSearch Alerting (Alerting plugin) – Monitors & Triggers
+#
+#  Import via:  OpenSearch Dashboards → Alerting → Monitors → Import
+#  Each NDJSON object is a single Monitor definition.
+#
+#  Covered log sources:
+#    AWS  - VPC Flow, CloudTrail, ELB/ALB, S3, Route 53, RDS
+#    Azure - NSG Flow Logs, Activity Logs, Application Gateway WAF
+###############################################################################
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-01: Mass Unauthorized Access Attempts",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "terms": { "tags": ["unauthorized_access", "access_denied", "unauthorized_access_attempt"] } },
+              { "terms": { "cloud.provider": ["aws", "azure"] } }
+            ]
+          }
+        },
+        "aggs": {
+          "by_ip": {
+            "terms": { "field": "source.ip", "size": 10, "min_doc_count": 10 }
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "More than 10 failed auth attempts from single IP in 5 min",
+    "severity": "1",
+    "condition": {
+      "script": {
+        "source": "ctx.results[0].hits.total.value > 10 || ctx.results[0].aggregations.by_ip.buckets.size() > 0",
+        "lang": "painless"
+      }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "CRITICAL - Mass unauthorized access from cloud infrastructure:\nEvent count: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nCheck Unified Multi-Cloud Security dashboard for details."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-02: DNS Tunneling / DGA Detected",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "terms": { "tags": ["potential_dns_tunneling", "potential_dga", "potential_amplification"] } },
+              { "term": { "event.dataset": "aws.route53" } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "DNS tunneling or DGA activity detected",
+    "severity": "1",
+    "condition": {
+      "script": {
+        "source": "ctx.results[0].hits.total.value > 0",
+        "lang": "painless"
+      }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "CRITICAL - DNS Tunneling or DGA activity detected via Route 53!\nEvents: {{ctx.results.0.hits.total.value}}\nTime window: {{ctx.periodStart}} to {{ctx.periodEnd}}\nInvestigate with AWS Route 53 DNS Analysis dashboard."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-03: AWS S3 Sensitive File Access",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "term": { "tags": "sensitive_file_access" } },
+              { "term": { "event.dataset": "aws.s3access" } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "Sensitive file (.pem/.key/.env) accessed in S3",
+    "severity": "2",
+    "condition": {
+      "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "HIGH - Sensitive file accessed in S3!\nFile accesses: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nCheck AWS S3 Access Logs dashboard for object keys."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-04: SQL Injection Attempt (ELB / AppGW WAF)",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "terms": { "tags": ["potential_sql_injection", "waf_sqli_detected"] } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "SQL injection pattern detected on load balancer or WAF",
+    "severity": "1",
+    "condition": {
+      "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "CRITICAL - SQL Injection attempt detected!\nEvents: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nSources visible in AWS ELB/ALB Overview or Azure AppGW dashboards."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-05: Azure High-Risk Resource Deletion",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "term": { "tags": "resource_deletion" } },
+              { "term": { "event.dataset": "azure.activitylogs" } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "Azure resource deletion detected",
+    "severity": "2",
+    "condition": {
+      "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "HIGH - Azure resource deletion event!\nDeletions: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nCheck Azure Activity Logs dashboard for resource details."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-06: AWS CloudTrail Root Account Usage",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "term": { "tags": "root_account_usage" } },
+              { "term": { "event.dataset": "aws.cloudtrail" } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "AWS root account used",
+    "severity": "1",
+    "condition": {
+      "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "CRITICAL - AWS Root account activity detected!\nEvents: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nImmediately review the AWS CloudTrail Activity dashboard."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-07: Azure WAF RCE / LFI / RFI Attack",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "terms": { "tags": ["waf_rce_detected", "high_risk_attack"] } },
+              { "term": { "event.dataset": "azure.applicationgateway" } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "Remote code execution / LFI attack detected by WAF",
+    "severity": "1",
+    "condition": {
+      "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "CRITICAL - RCE / LFI attack detected by Azure Application Gateway WAF!\nEvents: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nImmediately investigate source IPs in the Azure AppGW dashboard."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-08: RDS Mass Authentication Failures",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "term": { "tags": "db_authentication_failure" } },
+              { "term": { "event.dataset": "aws.rds" } }
+            ]
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "Multiple RDS authentication failures (possible brute force)",
+    "severity": "2",
+    "condition": {
+      "script": { "source": "ctx.results[0].hits.total.value > 5", "lang": "painless" }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "HIGH - Multiple RDS authentication failures detected!\nFailures: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nPossible brute-force attack on RDS database. Check RDS logs."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-09: Large Data Exfiltration via S3 or ELB",
+  "enabled": true,
+  "schedule": { "period": { "interval": 15, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-15m" } } },
+              { "terms": { "tags": ["large_download", "data_upload"] } },
+              { "terms": { "event.dataset": ["aws.s3access", "aws.elb"] } }
+            ]
+          }
+        },
+        "aggs": {
+          "total_bytes": { "sum": { "field": "http.response.bytes" } }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "Potential data exfiltration > 1 GB in 15 min",
+    "severity": "2",
+    "condition": {
+      "script": {
+        "source": "ctx.results[0].aggregations.total_bytes.value > 1073741824",
+        "lang": "painless"
+      }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "HIGH - Potential large data exfiltration detected!\nTotal bytes: {{ctx.results.0.aggregations.total_bytes.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nCheck AWS S3 Access Logs and ELB dashboards for source IPs."
+      }
+    }]
+  }]
+}
+
+{
+  "type": "monitor",
+  "name": "CLOUD-ALERT-10: Azure NSG Mass Port Scanning",
+  "enabled": true,
+  "schedule": { "period": { "interval": 5, "unit": "MINUTES" } },
+  "inputs": [{
+    "search": {
+      "indices": ["arkime_sessions3-*"],
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "filter": [
+              { "range": { "@timestamp": { "gte": "now-5m" } } },
+              { "term": { "tags": "potential_port_scan" } },
+              { "term": { "event.dataset": "azure.nsgflowlogs" } }
+            ]
+          }
+        },
+        "aggs": {
+          "by_src": {
+            "terms": { "field": "source.ip", "size": 5, "min_doc_count": 20 }
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "Port scan detected in NSG flow logs (> 20 denied per IP)",
+    "severity": "2",
+    "condition": {
+      "script": {
+        "source": "ctx.results[0].aggregations.by_src.buckets.size() > 0",
+        "lang": "painless"
+      }
+    },
+    "actions": [{
+      "name": "Log Alert",
+      "destination_id": "",
+      "message_template": {
+        "source": "HIGH - Port scan activity detected in Azure NSG!\nDenied connections: {{ctx.results.0.hits.total.value}}\nTime: {{ctx.periodStart}} to {{ctx.periodEnd}}\nCheck Azure NSG Flow Logs dashboard for source IPs."
+      }
+    }]
+  }]
+}
