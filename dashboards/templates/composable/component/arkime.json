@@ -126,6 +126,74 @@
             }
           }
         },
+        "bacnet": {
+          "properties": {
+            "apduType": {
+              "type": "keyword"
+            },
+            "apduTypeCnt": {
+              "type": "long"
+            },
+            "function": {
+              "type": "keyword"
+            },
+            "functionCnt": {
+              "type": "long"
+            },
+            "objectName": {
+              "type": "keyword"
+            },
+            "objectNameCnt": {
+              "type": "long"
+            },
+            "service": {
+              "type": "keyword"
+            },
+            "serviceCnt": {
+              "type": "long"
+            }
+          }
+        },
+        "c1222": {
+          "properties": {
+            "calledApInvocationId": {
+              "type": "long"
+            },
+            "calledApInvocationIdCnt": {
+              "type": "long"
+            },
+            "calledApTitle": {
+              "type": "keyword"
+            },
+            "calledApTitleCnt": {
+              "type": "long"
+            },
+            "callingApTitle": {
+              "type": "keyword"
+            },
+            "callingApTitleCnt": {
+              "type": "long"
+            },
+            "callingApInvocationId": {
+              "type": "long"
+            },
+            "callingApInvocationIdCnt": {
+              "type": "long"
+            },
+            "securityMode": {
+              "type": "keyword"
+            },
+            "securityModeCnt": {
+              "type": "long"
+            },
+            "responseControl": {
+              "type": "keyword"
+            },
+            "responseControlCnt": {
+              "type": "long"
+            }
+          }
+        },
         "cert": {
           "properties": {
             "alt": {
@@ -211,6 +279,34 @@
               "type": "keyword"
             },
             "typeCnt": {
+              "type": "long"
+            }
+          }
+        },
+        "dnp3": {
+          "properties": {
+            "dst": {
+              "type": "long"
+            },
+            "dstCnt": {
+              "type": "long"
+            },
+            "func": {
+              "type": "long"
+            },
+            "funcCnt": {
+              "type": "long"
+            },
+            "funcName": {
+              "type": "keyword"
+            },
+            "funcNameCnt": {
+              "type": "long"
+            },
+            "src": {
+              "type": "long"
+            },
+            "srcCnt": {
               "type": "long"
             }
           }
@@ -381,6 +477,52 @@
               "type": "keyword"
             },
             "useragentCnt": {
+              "type": "long"
+            }
+          }
+        },
+        "enip": {
+          "properties": {
+            "class": {
+              "type": "keyword"
+            },
+            "classCnt": {
+              "type": "long"
+            },
+            "command": {
+              "type": "keyword"
+            },
+            "commandCnt": {
+              "type": "long"
+            },
+            "deviceType": {
+              "type": "keyword"
+            },
+            "deviceTypeCnt": {
+              "type": "long"
+            },
+            "product": {
+              "type": "keyword"
+            },
+            "productCnt": {
+              "type": "long"
+            },
+            "service": {
+              "type": "keyword"
+            },
+            "serviceCnt": {
+              "type": "long"
+            },
+            "status": {
+              "type": "long"
+            },
+            "statusCnt": {
+              "type": "long"
+            },
+            "vendor": {
+              "type": "keyword"
+            },
+            "vendorCnt": {
               "type": "long"
             }
           }
@@ -693,6 +835,34 @@
         "length": {
           "type": "long"
         },
+        "modbus": {
+          "properties": {
+            "exccode": {
+              "type": "long"
+            },
+            "exccodeCnt": {
+              "type": "long"
+            },
+            "funccode": {
+              "type": "long"
+            },
+            "funccodeCnt": {
+              "type": "long"
+            },
+            "protocolid": {
+              "type": "long"
+            },
+            "transactionid": {
+              "type": "long"
+            },
+            "transactionidCnt": {
+              "type": "long"
+            },
+            "unitid": {
+              "type": "long"
+            }
+          }
+        },
         "mysql": {
           "properties": {
             "user": {
@@ -705,6 +875,22 @@
         },
         "node": {
           "type": "keyword"
+        },
+        "opcua": {
+          "properties": {
+            "endpointUrl": {
+              "type": "keyword"
+            },
+            "endpointUrlCnt": {
+              "type": "long"
+            },
+            "securityPolicyUri": {
+              "type": "keyword"
+            },
+            "securityPolicyUriCnt": {
+              "type": "long"
+            }
+          }
         },
         "oracle": {
           "properties": {
@@ -799,6 +985,52 @@
         "rootId": {
           "type": "keyword"
         },
+        "s7comm": {
+          "properties": {
+            "errorClass": {
+              "type": "long"
+            },
+            "errorClassCnt": {
+              "type": "long"
+            },
+            "errorCode": {
+              "type": "long"
+            },
+            "errorCodeCnt": {
+              "type": "long"
+            },
+            "func": {
+              "type": "long"
+            },
+            "funcCnt": {
+              "type": "long"
+            },
+            "funcName": {
+              "type": "keyword"
+            },
+            "funcNameCnt": {
+              "type": "long"
+            },
+            "opcode": {
+              "type": "long"
+            },
+            "opcodeCnt": {
+              "type": "long"
+            },
+            "pduref": {
+              "type": "long"
+            },
+            "pdurefCnt": {
+              "type": "long"
+            },
+            "rosctr": {
+              "type": "long"
+            },
+            "rosctrCnt": {
+              "type": "long"
+            }
+          }
+        },
         "segmentCnt": {
           "type": "long"
         },
@@ -879,6 +1111,46 @@
               "type": "keyword"
             },
             "versionCnt": {
+              "type": "long"
+            }
+          }
+        },
+        "synchrophasor": {
+          "properties": {
+            "cmd": {
+              "type": "long"
+            },
+            "cmdCnt": {
+              "type": "long"
+            },
+            "dataRate": {
+              "type": "long"
+            },
+            "dataRateCnt": {
+              "type": "long"
+            },
+            "frameType": {
+              "type": "keyword"
+            },
+            "frameTypeCnt": {
+              "type": "long"
+            },
+            "idcode": {
+              "type": "long"
+            },
+            "idcodeCnt": {
+              "type": "long"
+            },
+            "numPMU": {
+              "type": "long"
+            },
+            "numPMUCnt": {
+              "type": "long"
+            },
+            "station": {
+              "type": "keyword"
+            },
+            "stationCnt": {
               "type": "long"
             }
           }
