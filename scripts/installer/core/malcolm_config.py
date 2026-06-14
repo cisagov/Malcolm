@@ -491,12 +491,16 @@ class MalcolmConfig(ObservableStoreMixin):
                 continue
             if isinstance(typed_value, (list, tuple)) and (len(typed_value) == len(env_var_obj.config_items)):
                 for item_key, tv in zip(env_var_obj.config_items, typed_value):
-                    if tv == "" or tv is None:
+                    if (tv == "" or tv is None) and not (
+                        (item := self._items.get(item_key)) and item.accept_blank
+                    ):
                         continue
                     candidates[item_key].append((env_var_obj.key, tv))
             else:
                 for item_key in env_var_obj.config_items:
-                    if typed_value == "" or typed_value is None:
+                    if (typed_value == "" or typed_value is None) and not (
+                        (item := self._items.get(item_key)) and item.accept_blank
+                    ):
                         continue
                     candidates[item_key].append((env_var_obj.key, typed_value))
         return candidates
@@ -545,7 +549,9 @@ class MalcolmConfig(ObservableStoreMixin):
             if len(options) > 1 and winner_env_key is not None:
                 losers = [ek for (ek, _) in options if ek != winner_env_key]
                 InstallerLogger.debug(f"env conflict for {item_key}: picked {winner_env_key} over {losers}")
-            if winner_value is None or winner_value == "":
+            if (winner_value is None or winner_value == "") and not (
+                (item := self._items.get(item_key)) and item.accept_blank
+            ):
                 continue
             try:
                 self.apply_default(item_key, winner_value, ignore_errors=True)
@@ -950,8 +956,8 @@ class MalcolmConfig(ObservableStoreMixin):
         for key, item in self._items.items():
             value = item.get_value()
 
-            # Skip None values and empty strings to avoid validation issues on import
-            if value is None or (isinstance(value, str) and value == ""):
+            # Skip None values and empty strings (for non-accept_blank items) to avoid validation issues on import
+            if value is None or (isinstance(value, str) and value == "" and not item.accept_blank):
                 continue
 
             # Convert Enum values to their string representation for serialization

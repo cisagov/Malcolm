@@ -164,14 +164,13 @@ class ConfigurationMenu(BaseMenu):
         while True:
             new_value = self.prompt_config_item(item_to_edit)
 
-            # If user cancelled or entered same value, stop prompting
-            if new_value is None or new_value == item_to_edit.get_value():
+            # If user cancelled, stop prompting
+            if new_value is None:
                 break
 
             try:
                 # Attempt to set the new value
                 self.malcolm_config.set_value(selected_key, new_value)
-
                 break  # Success - exit the edit loop
             except Exception as e:
                 # Show validation error and re-prompt
