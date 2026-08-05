@@ -1,7 +1,7 @@
 git+https://github.com/netbox-community/netbox-healthcheck-plugin@v${NETBOX_HEALTHCHECK_VERSION}
 git+https://github.com/netbox-community/netbox-topology-views@v${NETBOX_TOPOLOGY_VERSION}
 git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}
-cryptography==48.0.1
+cryptography==50.0.0
 GitPython==3.1.50
 Jinja2==3.1.6
 paramiko==5.0.0
