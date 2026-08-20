@@ -10,6 +10,9 @@
 ###################################################################################################
 
 import argparse
+import bz2
+import gzip
+import lzma
 import glob
 import logging
 import magic
@@ -19,6 +22,7 @@ import re
 import shutil
 import signal
 import sys
+import tempfile
 import time
 
 import malcolm_utils
@@ -60,6 +64,18 @@ ARCHIVE_OR_EVTX_MIME_TYPES = frozenset(
     ]
 )
 
+RAW_COMPRESSED_PCAP_MIME_OPENERS = {
+    'application/gzip': gzip.open,
+    'application/x-gzip': gzip.open,
+    'application/x-bzip2': bz2.open,
+    'application/x-xz': lzma.open,
+    'application/x-lzma': lzma.open,
+}
+TAR_COMPRESSED_EXTS = re.compile(
+    r'\.(tgz|tbz2?|txz|tlz|tar\.(gz|bz2|xz|lz|lzma))$',
+    flags=re.IGNORECASE,
+)
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -85,6 +101,101 @@ def delete_uploaded_file(pathname, file_size, file_mime, file_type, reason, logg
         f"{scriptName}:\t🗑\t{pathname} ({sizeof_fmt(file_size)}, {file_mime}, {file_type}) {reason}, deleting"
     )
     os.unlink(pathname)
+
+
+###################################################################################################
+def try_decompress_pcap_stream(pathname, file_mime, pcap_dir, min_bytes, max_bytes, logger, uid, gid):
+    """Decompress a raw single-stream upload when its payload is PCAP/PCAPNG.
+
+    Container archives such as tar.gz continue through the existing Zeek/Filebeat archive path.
+    Returns True when the upload was handled as a compressed PCAP, otherwise False.
+    """
+    if (
+        (file_mime not in RAW_COMPRESSED_PCAP_MIME_OPENERS)
+        or (not os.path.isdir(pcap_dir))
+        or TAR_COMPRESSED_EXTS.search(pathname)
+    ):
+        return False
+
+    open_fn = RAW_COMPRESSED_PCAP_MIME_OPENERS[file_mime]
+    source_mode = os.stat(pathname).st_mode & 0o7777
+    temp_path = None
+    identified_pcap = False
+
+    try:
+        with open_fn(pathname, 'rb') as src:
+            header = src.read(65536)
+            if not header:
+                return False
+
+            payload_mime = magic.from_buffer(header, mime=True)
+            payload_type = magic.from_buffer(header)
+            identified_pcap = is_pcap_upload(payload_mime, payload_type)
+            if not identified_pcap:
+                return False
+
+            with tempfile.NamedTemporaryFile(
+                mode='wb',
+                dir=os.path.dirname(pathname),
+                prefix='.pcap-decompress-',
+                delete=False,
+            ) as dst:
+                temp_path = dst.name
+                total_bytes = len(header)
+                if total_bytes > max_bytes:
+                    raise ValueError(f'decompressed PCAP exceeds {sizeof_fmt(max_bytes)}')
+                dst.write(header)
+
+                while chunk := src.read(65536):
+                    total_bytes += len(chunk)
+                    if total_bytes > max_bytes:
+                        raise ValueError(f'decompressed PCAP exceeds {sizeof_fmt(max_bytes)}')
+                    dst.write(chunk)
+
+        if total_bytes < min_bytes:
+            raise ValueError(f'decompressed PCAP is smaller than {sizeof_fmt(min_bytes)}')
+
+        output_name = re.sub(
+            r'\.(gz|bz2|xz|lzma)$',
+            '',
+            os.path.basename(pathname),
+            flags=re.IGNORECASE,
+        )
+        if output_name in ('', '.', '..') or os.path.basename(output_name) != output_name:
+            raise ValueError(f'unsafe decompressed PCAP output name: {output_name!r}')
+
+        pcap_dir_real = os.path.realpath(pcap_dir)
+        output_path = os.path.realpath(os.path.join(pcap_dir_real, output_name))
+        if os.path.commonpath((pcap_dir_real, output_path)) != pcap_dir_real:
+            raise ValueError(f'decompressed PCAP output escapes destination: {output_name!r}')
+
+        os.chown(temp_path, uid, gid)
+        os.chmod(temp_path, source_mode)
+
+        logger.info(
+            f"{scriptName}:\t🖅\t{pathname} [{file_mime}] decompressed to {output_path} "
+            f"[{payload_mime}][{payload_type}]"
+        )
+        shutil.move(temp_path, output_path)
+        temp_path = None
+        os.unlink(pathname)
+        return True
+
+    except Exception as genericError:
+        if identified_pcap:
+            logger.error(
+                f"{scriptName}:\t🗑\t{pathname} compressed PCAP could not be processed: {genericError}, deleting"
+            )
+            try:
+                os.unlink(pathname)
+            except FileNotFoundError:
+                pass
+            return True
+        return False
+
+    finally:
+        if temp_path and os.path.isfile(temp_path):
+            os.unlink(temp_path)
 
 
 ###################################################################################################
@@ -118,6 +229,10 @@ def file_processor(pathname, **kwargs):
         if os.path.isdir(pcapDir) and is_pcap_upload(fileMime, fileType):
             # a pcap file to be processed by dropping it into pcapDir
             move_uploaded_file(pathname, pcapDir, fileMime, fileType, logger)
+            return
+
+        if try_decompress_pcap_stream(pathname, fileMime, pcapDir, minBytes, maxBytes, logger, uid, gid):
+            # a raw-compressed PCAP was decompressed and moved into pcapDir
             return
 
         if os.path.isdir(zeekDir) and fileMime in ARCHIVE_OR_EVTX_MIME_TYPES:
