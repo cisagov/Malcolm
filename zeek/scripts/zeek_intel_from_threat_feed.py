@@ -47,8 +47,8 @@ def main():
                 ' - MISP default feeds: https://www.misp-project.org/feeds/',
                 ' - Managing MISP feeds: https://misp.gitbooks.io/misp-book/content/managing-feeds/',
                 ' - Expand MISP usage: https://github.com/idaholab/Malcolm/issues/336',
-                ' - Mandiant Threat Intelligence Indicators API: https://gtidocs.virustotal.com/reference/ioc-collection-object'
-                ' - Google Threat Intelligence IoC Collection API: https://gtidocs.virustotal.com/reference/ioc-collection-object'
+                ' - Mandiant Threat Intelligence Indicators API: https://gtidocs.virustotal.com/reference/ioc-collection-object',
+                ' - Google Threat Intelligence IoC Collection API: https://gtidocs.virustotal.com/reference/ioc-collection-object',
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
                 'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
