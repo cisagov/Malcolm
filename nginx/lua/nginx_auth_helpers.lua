@@ -114,6 +114,11 @@ local path_role_envs = {
         "ROLE_ARKIME_WISE_READ_WRITE_ACCESS",
         "ROLE_READ_ACCESS",
         "ROLE_READ_WRITE_ACCESS"
+    }},
+
+    -- OpenSearch proxy
+    { pattern = "^/mapi/opensearch", roles = {
+        "ROLE_ADMIN"
     }}
 }
 
