@@ -8,6 +8,7 @@ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata ||
 
 # - modify suricata.yaml according to environment variables (as non-root)
 # - if SURICATA_DISABLE_SIDS contains entries for disable.conf, write it and run suricata-update to apply
+# - if periodic rule updates are enabled, perform the first update immediately at startup
 if [[ "$(id -u)" == "0" ]] && [[ -n "$PUSER" ]]; then
     su -s /bin/bash -p ${PUSER} << 'EOF'
         /usr/local/bin/suricata_config_populate.py --suricata ${SURICATA_TEST_CONFIG_BIN} ${SURICATA_TEST_CONFIG_VERBOSITY:-} >&2
@@ -16,7 +17,13 @@ if [[ "$(id -u)" == "0" ]] && [[ -n "$PUSER" ]]; then
                 while IFS= read -r line; do
                     grep -qxF "$line" /etc/suricata/disable.conf 2>/dev/null || echo "$line"
                 done >> /etc/suricata/disable.conf
-            SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+            if [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+                /usr/local/bin/suricata-update-rules.sh
+            else
+                SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+            fi
+        elif [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+            /usr/local/bin/suricata-update-rules.sh
         fi
 EOF
 else
@@ -26,7 +33,13 @@ else
             while IFS= read -r line; do
                 grep -qxF "$line" /etc/suricata/disable.conf 2>/dev/null || echo "$line"
             done >> /etc/suricata/disable.conf
-        SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+        if [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+            /usr/local/bin/suricata-update-rules.sh
+        else
+            SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+        fi
+    elif [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+        /usr/local/bin/suricata-update-rules.sh
     fi
 fi
 
