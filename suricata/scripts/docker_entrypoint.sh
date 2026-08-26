@@ -46,5 +46,18 @@ if [[ -d "$CONFIG_DIR" ]] && [[ -f "$CONFIG_DIR"/"$SURICATA_SOCKET_TEMPLATE_FILE
   done
 fi
 
+# Configure Suricata rule update scheduling at container startup so deployments can change
+# the schedule through suricata.env without rebuilding the image. Supercronic expects the
+# standard five-field cron format used by Malcolm's existing midnight-daily schedule.
+SURICATA_UPDATE_CRON_EXPRESSION="${SURICATA_UPDATE_CRON_EXPRESSION:-0 0 * * *}"
+read -r -a SURICATA_UPDATE_CRON_FIELDS <<< "$SURICATA_UPDATE_CRON_EXPRESSION"
+if [[ ${#SURICATA_UPDATE_CRON_FIELDS[@]} -ne 5 ]]; then
+    echo "Invalid SURICATA_UPDATE_CRON_EXPRESSION '$SURICATA_UPDATE_CRON_EXPRESSION'; using '0 0 * * *'" >&2
+    SURICATA_UPDATE_CRON_EXPRESSION="0 0 * * *"
+fi
+if [[ -n "${SUPERCRONIC_CRONTAB:-}" ]]; then
+    printf '%s %s\n' "$SURICATA_UPDATE_CRON_EXPRESSION" "/bin/bash /usr/local/bin/suricata-update-rules.sh" > "$SUPERCRONIC_CRONTAB"
+fi
+
 # start supervisor (which will spawn pcap-suricata, cron, etc.) or whatever the default command is
 exec "$@"
