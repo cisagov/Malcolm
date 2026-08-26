@@ -100,7 +100,7 @@ def processCsv(inputFileName, outputFileName):
                         note,
                         flags=re.IGNORECASE,
                     )
-                    name = '' if name.lower() == 'unknown' else name
+                    service = '' if service.lower() == 'unknown' else service
 
                     if (
                         proto
