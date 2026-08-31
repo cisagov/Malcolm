@@ -1,0 +1,52 @@
+# Traefik Helm values for exposing Malcolm on AKS through an Azure LoadBalancer.
+# Disable entry points that are not required by the deployment.
+
+service:
+  type: LoadBalancer
+
+ports:
+  web:
+    port: 80
+    expose:
+      default: true
+    exposedPort: 80
+    protocol: TCP
+
+  websecure:
+    port: 443
+    expose:
+      default: true
+    exposedPort: 443
+    protocol: TCP
+
+  lumberjack:
+    port: 5044
+    expose:
+      default: true
+    exposedPort: 5044
+    protocol: TCP
+
+  tcpjson:
+    port: 5045
+    expose:
+      default: true
+    exposedPort: 5045
+    protocol: TCP
+
+  sftp:
+    port: 8022
+    expose:
+      default: true
+    exposedPort: 8022
+    protocol: TCP
+
+  opensearch:
+    port: 9200
+    expose:
+      default: true
+    exposedPort: 9200
+    protocol: TCP
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
