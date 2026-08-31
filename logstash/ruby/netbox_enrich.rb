@@ -1787,6 +1787,10 @@ def netbox_lookup(
         end
       end
 
+      if (@lookup_type == :ip_prefix) && _prefixes.is_a?(Array) && !_prefixes.empty?
+        _prefixes = [_prefixes.max_by { |p| (IPAddr.new(p[:cidr].to_s).prefix rescue -1) }]
+      end
+
       # :cidr was only needed for most-specific-prefix selection above; drop it so
       #   the ip_prefix enrichment output shape is unchanged
       _prefixes.each { |p| p.delete(:cidr) if p.is_a?(Hash) } if _prefixes.is_a?(Array)
