@@ -136,10 +136,6 @@ def parse_autopopulate_config(raw_config)
     end
 
     range = cidr.to_range
-    unless range.first.private?
-      puts "parse_autopopulate_config skipping non-private CIDR: #{cidr_str}"
-      next
-    end
 
     entries << {
       cidr: cidr,
@@ -541,8 +537,6 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
          end
        end
 
-  return false unless ip.private?
-
   # Determine applicable config: site-specific first, fall back to '*', else allow
   config = config_site_hash[site_id]
   if config.nil? && (site_id.is_a?(Integer) || site_id.to_s.match?(/\A[+-]?\d+\z/)) && (site_id.to_i > 0)
@@ -555,11 +549,11 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
   end
   config = config_site_hash['*'] if config.nil?
 
-  return true if config.nil? || config[:allow_all_private]
+  return ip.private? if config.nil? || config[:allow_all_private]
 
-  # If no positive entries, but negatives exist, allow all except those excluded
+  # If no positive entries, but negatives exist, allow all private IPs except those excluded
   if config[:entries].none? { |e| e[:allow] } && !config[:entries].empty?
-    return !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
+    return ip.private? && !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
   end
 
   # Iterate entries in order; last matching rule wins
@@ -1570,7 +1564,7 @@ def netbox_lookup(
         _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb)
 
         if @autopopulate && (_devices.nil? || _devices.empty?)
-          # no results found, autopopulate enabled, private-space IP address...
+          # no results found, autopopulate enabled, eligible IP address...
           # let's create an entry for this device
           _autopopulate_device,
           _autopopulate_role,
@@ -1810,7 +1804,7 @@ def netbox_lookup(
                                                      _autopopulate_mac,
                                                      _nb)
     end # check if device was created and has ID
-  end # IP address is private IP
+  end # eligible IP address
 
   # yield return value for _lookup_hash getset
   return (!_lookup_result.nil? && !_lookup_result.empty?) ? _lookup_result : nil, _key_ip, _nb&.initialized? || false
