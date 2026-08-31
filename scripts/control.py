@@ -1539,10 +1539,10 @@ def start():
         if SYSTEM_INFO["malcolm_iso_install"] and dockerComposeYaml:
 
             # if we can control the UFW firewall clear it now
-            ufw_manager_cmd = 'ufw_manager.sh'
-            if not which(ufw_manager_cmd):
-                if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
-                    ufw_manager_cmd = os.path.join('/usr/local/bin/', ufw_manager_cmd)
+            ufw_manager_cmd = shutil.which('ufw_manager.sh')
+            if not ufw_manager_cmd:
+                if os.path.isfile('/usr/local/bin/ufw_manager.sh'):
+                    ufw_manager_cmd = '/usr/local/bin/ufw_manager.sh'
                 else:
                     ufw_manager_cmd = None
 
