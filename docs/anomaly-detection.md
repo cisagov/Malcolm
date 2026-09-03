@@ -9,4 +9,4 @@ A fresh installation of Malcolm configures [several detectors]({{ site.github.re
 * **file_mime_type** - Detects anomalies based on transferred file type (`file.mime_type`)
 * **total_bytes** - Detects anomalies based on traffic size (sum of `network.bytes`)
 
-These detectors are disabled by default, but may be enabled for anomaly detection over streaming or [historical data](https://aws.amazon.com/about-aws/whats-new/2022/01/amazon-opensearch-service-elasticsearch-anomaly-detection/).
+These detectors are disabled by default, but may be enabled for anomaly detection over live streaming or [historical data](https://opensearch.org/blog/real-time-and-historical-ad/).

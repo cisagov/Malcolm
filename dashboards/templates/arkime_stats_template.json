@@ -1,4 +1,8 @@
 {
-  "_meta" : { "timeField": null },
-  "index_patterns" : ["arkime_stats_*"]
+  "_meta": {
+    "timeField": null
+  },
+  "index_patterns": [
+    "arkime_stats_*"
+  ]
 }

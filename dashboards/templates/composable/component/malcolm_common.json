@@ -18,6 +18,9 @@
                 "uninventoried": {
                   "type": "keyword"
                 },
+                "purdue_zone": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -56,6 +59,9 @@
                   "type": "integer"
                 },
                 "name": {
+                  "type": "keyword"
+                },
+                "purdue_zone": {
                   "type": "keyword"
                 },
                 "site": {
@@ -100,6 +106,12 @@
             },
             "entropy": {
               "type": "float"
+            },
+            "strings": {
+              "type": "wildcard",
+              "ignore_above": 16384,
+              "doc_values": false,
+              "normalizer": "lowercase"
             }
           }
         },
@@ -119,6 +131,9 @@
               "type": "keyword"
             },
             "uninventoried": {
+              "type": "keyword"
+            },
+            "purdue_zone": {
               "type": "keyword"
             },
             "mac": {
@@ -175,6 +190,9 @@
                 "uninventoried": {
                   "type": "keyword"
                 },
+                "purdue_zone": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -213,6 +231,9 @@
                   "type": "integer"
                 },
                 "name": {
+                  "type": "keyword"
+                },
+                "purdue_zone": {
                   "type": "keyword"
                 },
                 "site": {

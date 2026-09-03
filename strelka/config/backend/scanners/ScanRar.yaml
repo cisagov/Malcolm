@@ -2,6 +2,7 @@ ScanRar:
   - positive:
       flavors:
         - 'application/x-rar'
+        - 'application/x-rar-compressed'
         - 'rar_file'
     priority: 5
     options:

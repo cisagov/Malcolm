@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: strelka-backend-container
-        image: ghcr.io/idaholab/malcolm/strelka-backend:26.04.1
+        image: ghcr.io/idaholab/malcolm/strelka-backend:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -50,6 +50,7 @@ spec:
             name: strelka-backend-config-volume
           - mountPath: "/yara-rules/custom/configmap"
             name: strelka-backend-yara-rules-custom-volume
+      terminationGracePeriodSeconds: 20
       volumes:
         - name: strelka-backend-var-local-catrust-volume
           configMap:

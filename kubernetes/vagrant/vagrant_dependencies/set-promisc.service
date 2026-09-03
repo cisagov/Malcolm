@@ -1,0 +1,11 @@
+[Unit]
+Description=Set interface to promiscuous mode
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ip link set eth0 promisc on
+ExecStart=/usr/sbin/ip link set eth0 up
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

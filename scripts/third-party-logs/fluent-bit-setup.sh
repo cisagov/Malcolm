@@ -323,7 +323,7 @@ function GetMalcolmConnInfo() {
 }
 
 ###############################################################################
-# identify information for fluent-bit intput/output
+# identify information for fluent-bit input/output
 function GetFluentBitFormatInfo() {
   local INPUT_NAME=
   declare -A PARAMS

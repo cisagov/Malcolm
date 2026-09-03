@@ -47,7 +47,7 @@ class MacInstaller(BaseInstaller):
 
     def _get_required_dependencies(self) -> List[str]:
         """Get the list of required dependencies for macOS."""
-        # afaik, htpassd, make, openssl, and xz are all included on MacOS
+        # afaik, htpassd, make, openssl, and xz are all included on macOS
         return []
 
     def install_dependencies(self) -> bool:

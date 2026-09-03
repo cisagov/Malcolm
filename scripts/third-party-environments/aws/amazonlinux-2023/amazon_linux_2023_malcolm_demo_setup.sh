@@ -115,7 +115,7 @@ function InstallEssentialPackages {
 }
 
 ###################################################################################
-# _GitClone - glone a git repository (recursing submodules) without history
+# _GitClone - clone a git repository (recursing submodules) without history
 function _GitClone {
   git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags "$@"
 }

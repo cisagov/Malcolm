@@ -8,12 +8,12 @@ require 'fuzzystringmatch'
 require 'ipaddr'
 require 'json'
 require 'lru_reredux'
-require 'psych'
+require 'yaml'
 require 'uri'
 require 'stringex_lite'
 
 ##############################################################################################
-# Despite the warning against globla variables, we are using them here in order to make sure that
+# Despite the warning against global variables, we are using them here in order to make sure that
 #   we don't have duplicate caches for things cross different clones of the filter,
 #   which is what happens if you just use @instance_variables. However, we should
 #   be safe because 1) we are using Concurrent::Map to maintain these per-type caches, and
@@ -259,7 +259,7 @@ def register(
   @add_tag = nil if @add_tag.respond_to?(:empty?) && @add_tag.empty?
 
   # verbose - either specified directly or read from ENV via verbose_env
-  #   false - store the "name" (fallback to "display") and "id" value(s) as @target.name and @target.id
+  #   false - store the "name" (fall back to "display") and "id" value(s) as @target.name and @target.id
   #             e.g., (@target is destination.segment) destination.segment.name => ["foobar"]
   #                                                    destination.segment.id => [123]
   #   true - store a hash of arrays *under* @target
@@ -543,7 +543,7 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
 
   return false unless ip.private?
 
-  # Determine applicable config: site-specific first, fallback to '*', else allow
+  # Determine applicable config: site-specific first, fall back to '*', else allow
   config = config_site_hash[site_id]
   if config.nil? && (site_id.is_a?(Integer) || site_id.to_s.match?(/\A[+-]?\d+\z/)) && (site_id.to_i > 0)
     # the site is being looked up by ID, not name, but there's no matching site ID in the config_site_hash,
@@ -1136,11 +1136,14 @@ def lookup_prefixes(
           end
           prefixes << { :name => _prefixName,
                         :id => p.fetch(:id, nil),
+                        :cidr => p.fetch(:prefix, nil),
                         :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
                         :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
                         :url => p.fetch(:url, nil),
                         :tags => p.fetch(:tags, nil),
-                        :details => @verbose ? p : nil }
+                        :details => @verbose ? p : nil
+                      # merge in any NetBox custom_fields (e.g. :purdue_zone) as top-level keys; on key collision, keep our hardcoded value over the custom field
+                      }.merge(p.fetch(:custom_fields, {}) || {}) { |_key, base_val, _custom_val| base_val }
         end
         _query[:offset] += _tmp_prefixes.size
         break unless (_tmp_prefixes.size >= @page_size)
@@ -1277,7 +1280,9 @@ def lookup_devices(
                           :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.has_key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
                           :device_type => ((_dtype = _device.fetch(:device_type, nil)) && _dtype&.has_key?(:name)) ? _dtype[:name] : _dtype&.fetch(:display, nil),
                           :manufacturer => ((_manuf = _device.dig(:device_type, :manufacturer)) && _manuf&.has_key?(:name)) ? _manuf[:name] : _manuf&.fetch(:display, nil),
-                          :details => @verbose ? _device : nil }
+                          :details => @verbose ? _device : nil
+                        # merge in any NetBox custom_fields (e.g. :purdue_zone) as top-level keys; on key collision, keep our hardcoded value over the custom field
+                        }.merge(_device.fetch(:custom_fields, {}) || {}) { |_key, base_val, _custom_val| base_val }
           end
         end
         _query[:offset] += _tmp_ip_addresses.size
@@ -1549,6 +1554,7 @@ def netbox_lookup(
     _autopopulate_manuf = nil
     _prefixes = nil
     _devices = nil
+    _interface_created = false
 
     # handle :ip_device first, because if we're doing autopopulate we're also going to use
     # some of the logic from :ip_prefix
@@ -1603,7 +1609,7 @@ def netbox_lookup(
         # update with new information on an existing device (i.e., from a previous call to netbox_lookup)
         _patched_device_data = Hash.new
 
-        # get existing tags to update them to remove "unkown-..." values if needed
+        # get existing tags to update them to remove "unknown-..." values if needed
         _tags = previous_result.fetch(:tags, nil)&.flatten&.map{ |hash| { slug: hash[:slug] } }&.uniq
 
         # API endpoints are different for VM vs real device
@@ -1692,7 +1698,8 @@ def netbox_lookup(
               then
                 _device_written = true
                 _autopopulate_device = _vm_create_response
-                # we've created the device as a VM, create_device_interface will be called below to create its interface
+                # we've created the device as a VM; create its interface+IP now (before lookup_devices)
+                # so that lookup_devices can find the new VM by IP and return a rich result
 
                 # now delete the old device entry
                 _old_device_delete_response = _nb.delete("dcim/devices/#{_previous_device_id}/")
@@ -1706,6 +1713,14 @@ def netbox_lookup(
                     reason: _old_device_delete_response.reason_phrase,
                     body: _old_device_delete_response.body })
                 end
+
+                # create interface+IP for the new VM now so lookup_devices can find it below
+                _autopopulate_device = create_device_interface(ip_key,
+                                                               _autopopulate_device,
+                                                               _autopopulate_manuf,
+                                                               _autopopulate_mac,
+                                                               _nb)
+                _interface_created = true
               elsif @debug
                 puts('netbox_lookup (%{name}): _vm_create_response: %{result}' % { name: _vm_data[:name], result: JSON.generate(_vm_create_response) })
               end
@@ -1747,6 +1762,35 @@ def netbox_lookup(
       # retrieve the list of IP address prefixes containing the search key
       _prefixes = lookup_prefixes(ip_key, site_id, _nb)
 
+      # if we autocreated a device/VM and a containing prefix has a purdue_zone custom
+      #   field set, propagate that value to the new object (most specific prefix wins)
+      if !_autopopulate_device.nil? &&
+         _autopopulate_device.fetch(:id, nil)&.nonzero? &&
+         _prefixes.is_a?(Array) &&
+         (_zone_prefix = _prefixes.select { |p| p.is_a?(Hash) && !p[:purdue_zone].to_s.empty? }
+                                  .max_by { |p| (IPAddr.new(p[:cidr].to_s).prefix rescue -1) }) &&
+         (_purdue_zone = _zone_prefix[:purdue_zone])
+      then
+        begin
+          _zone_patch_data = { :custom_fields => { :purdue_zone => _purdue_zone } }
+          if (_zone_patch_response = _nb.patch("#{_autopopulate_manuf&.fetch(:vm, false) ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_autopopulate_device[:id]}/", _zone_patch_data.to_json, @nb_headers).body) &&
+             _zone_patch_response.is_a?(Hash) &&
+             _zone_patch_response.has_key?(:id)
+          then
+            # reflect the value in this event's enrichment result as well
+            _lookup_result[:purdue_zone] = [ _purdue_zone ] if (@lookup_type == :ip_device) && _lookup_result.is_a?(Hash)
+          elsif @debug
+            puts('netbox_lookup (%{name} @ %{site}): _zone_patch_response: %{result}' % { name: ip_key, site: site_id, result: JSON.generate(_zone_patch_response) })
+          end
+        rescue Faraday::Error => e
+          puts "netbox_lookup purdue_zone patch (#{ip_key}, #{site_id}): #{e.message}" if @debug
+        end
+      end
+
+      # :cidr was only needed for most-specific-prefix selection above; drop it so
+      #   the ip_prefix enrichment output shape is unchanged
+      _prefixes.each { |p| p.delete(:cidr) if p.is_a?(Hash) } if _prefixes.is_a?(Array)
+
       if (_prefixes.nil? || _prefixes.empty?) && @autopopulate_create_prefix
         # we didn't find a prefix containing this private-space IPv4 address and auto-create is true
         _prefix_info = autopopulate_prefixes(_key_ip, site_id, @default_status, _nb)
@@ -1758,8 +1802,8 @@ def netbox_lookup(
       _lookup_result = _prefixes unless (@lookup_type != :ip_prefix)
     end # @lookup_type == :ip_prefix
 
-    if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero?
-      # device has been created, we need to create an interface for it
+    if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero? && !_interface_created
+      # device has been created (fresh autopopulate, not a device->VM conversion), we need to create an interface for it
       _autopopulate_device = create_device_interface(ip_key,
                                                      _autopopulate_device,
                                                      _autopopulate_manuf,

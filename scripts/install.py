@@ -646,7 +646,7 @@ def main():
                         InstallerLogger.error(f"Failed loading kubeconfig {parsed_args.malcolmOrchestrationFile}")
                     else:
                         InstallerLogger.error(
-                            f"The official Python client library for kubernetes is required for for {detected_orch_mode} mode"
+                            f"The official Python client library for kubernetes is required for {detected_orch_mode} mode"
                         )
                     sys.exit(2)
 

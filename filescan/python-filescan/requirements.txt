@@ -14,7 +14,7 @@ pydantic==2.11.7
 python-magic==0.4.27
 redis==6.4.0
 ruamel.yaml==0.18.14
-setuptools==80.9.0
+setuptools==83.0.0
 stream-zip==0.0.83
 supervisor==4.3.0
 watchdog==6.0.0

@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/idaholab/malcolm/filebeat-oss:26.04.1
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -89,9 +89,10 @@ spec:
           - name: filebeat-nginx-runtime-logs-volume
             mountPath: /nginx
             subPath: "nginx"
+      terminationGracePeriodSeconds: 30
       initContainers:
       - name: filebeat-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

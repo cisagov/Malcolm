@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rke2-coredns-rke2-coredns
+  namespace: kube-system
+  annotations:
+    meta.helm.sh/release-name: "rke2-coredns"
+    meta.helm.sh/release-namespace: kube-system
+  labels:
+    app.kubernetes.io/instance: rke2-coredns
+    app.kubernetes.io/name: rke2-coredns
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: CoreDNS
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health  {
+            lameduck 5s
+        }
+        ready
+        kubernetes cluster.local  cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        hosts {
+            # Configure the host plugin to resolve Kubernetes node names
+            ###NODE_IP_ADDRESS### ###NODE_HOST_NAME###
+            fallthrough
+        }
+        prometheus 0.0.0.0:9153
+        forward   . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }

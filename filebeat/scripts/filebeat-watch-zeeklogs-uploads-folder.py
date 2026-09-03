@@ -33,12 +33,14 @@ shuttingDown = [False]
 
 SUPPORTED_MIME_TYPES = [
     'application/gzip',
-    'application/x-gzip',
+    'application/vnd.rar',
     'application/x-7z-compressed',
     'application/x-bzip2',
     'application/x-cpio',
+    'application/x-gzip',
     'application/x-lzip',
     'application/x-lzma',
+    'application/x-rar',
     'application/x-rar-compressed',
     'application/x-tar',
     'application/x-xz',

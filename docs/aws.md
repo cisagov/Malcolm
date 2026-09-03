@@ -190,7 +190,7 @@ $ aws ec2 describe-images \
     - Replace `INSTANCE_TYPE` with the desired instance type in the following command
         + See [EC2 Instance Types](#AWSInstanceSizing) for suggestions
     - Replace `AMI_ID` with the AMI ID from the previous step in the following command
-    - Users who skipped the `create-key-pair` step above shoult omit the `--key-name malcolm-key` argument in the following command
+    - Users who skipped the `create-key-pair` step above should omit the `--key-name malcolm-key` argument in the following command
     - The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
 
 ```bash
@@ -679,7 +679,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     $ echo $VALIDATION_RECORD
     ```
     
-    * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propogate.
+    * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propagate.
     
     * Periodically check the status of the certificate until it has changed from `PENDING_VALIDATION` to `ISSUED`.
     
@@ -710,7 +710,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
         * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`)
 
     * If using a custom domain name for Malcolm:
-        * Use [`99-ingress-aws-alb-dns.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb-dns.yml.example), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
+        * Use [`99-ingress-aws-alb-dns.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb-dns.yml.example), replacing `malcolm.example.org` with the domain name which will point to the Malcolm instance.
 
         ```bash
         $ export CERT_ARN
@@ -726,7 +726,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
         $ echo $FILEBEAT_HOSTNAME
         ```
 
-        * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
+        * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propagate. If you also configured allowing incoming TCP connections from remote sensors, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
         * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://malcolm.example.org`)
 
 ### <a name="AWSEKSAutoMonitor"></a>Monitor Deployment

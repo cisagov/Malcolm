@@ -40,7 +40,7 @@ In addition to the `.iso` spot checks described above, Romeo uses [`malcolm-test
 
 ## 6. Extract Hedgehog Linux Raspberry Pi image
 
-The Hedgehog Linux [Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild) is also built on GitHub. As that image targets an ARM64 architecture, it can be pulled and extracted on an ARM64-based machine using the [convenience helper script](contributing-github-runners.md#convenience-scripts-for-development) mentioned earlier in step 4.
+The Hedgehog Linux [Raspberry Pi Image](hedgehog-raspi.md#HedgehogRaspiBuild) is also built on GitHub. As that image targets an ARM64 architecture, it can be pulled and extracted on an ARM64-based machine using the [convenience helper script](contributing-github-runners.md#convenience-scripts-for-development) mentioned earlier in step 4.
 
 ## 7. Submit and merge a pull request
 

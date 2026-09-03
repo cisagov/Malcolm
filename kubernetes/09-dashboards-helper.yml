@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: dashboards-helper-container
-        image: ghcr.io/idaholab/malcolm/dashboards-helper:26.04.1
+        image: ghcr.io/idaholab/malcolm/dashboards-helper:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -70,6 +70,7 @@ spec:
             name: dashboards-helper-var-local-catrust-volume
           - mountPath: /var/local/curlrc/secretmap
             name: dashboards-helper-opensearch-curlrc-secret-volume
+      terminationGracePeriodSeconds: 20
       volumes:
         - name: dashboards-helper-var-local-catrust-volume
           configMap:

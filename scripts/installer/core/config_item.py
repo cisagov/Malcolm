@@ -14,6 +14,7 @@ from dataclasses import dataclass, field, InitVar
 from typing import Any, Callable, Optional, Tuple, Union
 
 from scripts.malcolm_constants import WidgetType
+from scripts.installer.utils.logger_utils import InstallerLogger
 
 
 @dataclass
@@ -129,6 +130,20 @@ class ConfigItem:
         self._question = value
 
 
+def str_to_list(s):
+    """Convert a string representation of a list/tuple to a list of strings."""
+    if s is None:
+        return []
+    if not isinstance(s, str):
+        return list(s) if hasattr(s, '__iter__') else [s]
+
+    s = s.strip()
+    if len(s) >= 2 and s[0] in '([' and s[-1] in ')]':
+        s = s[1:-1]
+
+    return [item.strip().strip('\'"') for item in s.split(',') if item.strip()]
+
+
 class ListOfStringsConfigItem(ConfigItem):
     """Custom ConfigItem that converts comma-separated strings to lists of strings"""
 
@@ -136,13 +151,7 @@ class ListOfStringsConfigItem(ConfigItem):
         """Set and validate a new value, with automatic string-to-list conversion."""
 
         # Convert string input to list if needed
-        if isinstance(value, str):
-            if value.strip():
-                converted_value = [s.strip() for s in value.split(",") if s.strip()]
-            else:
-                converted_value = []
-        else:
-            converted_value = value
+        converted_value = str_to_list(value)
 
         # Now validate the converted value
         if self.validator:

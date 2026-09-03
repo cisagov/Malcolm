@@ -1,3 +1,5 @@
+7zip
+7zip-rar
 accountsservice
 aide
 aide-common
@@ -21,6 +23,7 @@ busybox
 bzip2
 ccache
 cifs-utils
+cloud-guest-utils
 coreutils
 cpio
 cracklib-runtime
@@ -111,9 +114,6 @@ ncdu
 net-tools
 ntfs-3g
 openssl
-p7zip
-p7zip-full
-p7zip-rar
 parprouted
 partclone
 parted
@@ -156,6 +156,8 @@ unzip
 upower
 usbutils
 user-setup
+util-linux
+util-linux-extra
 uuid-runtime
 vim-tiny
 whois

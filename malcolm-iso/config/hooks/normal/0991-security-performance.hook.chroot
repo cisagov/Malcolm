@@ -87,13 +87,32 @@ net.ipv4.conf.default.send_redirects=0
 net.ipv4.icmp_echo_ignore_broadcasts=1
 net.ipv4.ip_forward=1
 net.ipv4.tcp_retries2=5
-net.ipv6.conf.all.accept_source_route=0
-net.ipv6.conf.all.accept_ra=0
-net.ipv6.conf.default.accept_ra=0
-net.ipv6.conf.all.disable_ipv6=1
-net.ipv6.conf.default.disable_ipv6=1
-net.ipv6.conf.lo.disable_ipv6=1
+-net.ipv6.conf.all.accept_source_route=0
+-net.ipv6.conf.all.accept_ra=0
+-net.ipv6.conf.default.accept_ra=0
+-net.ipv6.conf.all.disable_ipv6=1
+-net.ipv6.conf.default.disable_ipv6=1
+-net.ipv6.conf.lo.disable_ipv6=1
 EOF
+
+mkdir -p /etc/polkit-1/rules.d/
+cat << 'EOF' > /etc/polkit-1/rules.d/50-networkmanager-netdev.rules
+polkit.addRule(function(action, subject) {
+    if (subject.isInGroup("netdev")) {
+        if (
+            action.id == "org.freedesktop.NetworkManager.network-control" ||
+            action.id == "org.freedesktop.NetworkManager.settings.modify.system" ||
+            action.id == "org.freedesktop.NetworkManager.settings.modify.own" ||
+            action.id == "org.freedesktop.NetworkManager.enable-disable-network" ||
+            action.id == "org.freedesktop.NetworkManager.enable-disable-wifi"
+        ) {
+            return polkit.Result.YES;
+        }
+    }
+});
+EOF
+chmod 755 /etc/polkit-1/rules.d/
+chmod 644 /etc/polkit-1/rules.d/50-networkmanager-netdev.rules
 
 # password requirement hardening
 sed -i -e 's/[[:space:]]*nullok[[:alnum:]_]*//g' /etc/pam.d/common-auth
@@ -144,6 +163,9 @@ EOF
 sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
 sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
 
+# filter auditd rules that don't apply to this platform
+/usr/local/bin/filter-audit-rules
+
 # disable ntp for now, and disable servers, but it could be turned back on later
 systemctl disable ntpsec || true
 sed -i "s/^\(pool \)/# \1/" /etc/ntpsec/ntp.conf
@@ -154,14 +176,7 @@ usermod -d /var/lib/ntpsec ntpsec
 
 # disable default fluentbit configuration
 systemctl disable fluent-bit || true
-
-# add fluentbit logfmt parser
-cat << 'EOF' >> /etc/fluent-bit/parsers.conf
-
-[PARSER]
-    Name logfmt
-    Format logfmt
-EOF
+rm -f /etc/fluent-bit/fluent-bit.conf
 
 # remove identifying operating system information from /etc/issue*
 truncate -s 0 /etc/motd

@@ -576,7 +576,7 @@
           "zeek.synchrophasor.frame_type",
           "event.action",
           "totDataBytes",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,
@@ -618,7 +618,7 @@
           "zeek.synchrophasor.data_rate",
           "zeek.synchrophasor.data_frame_count",
           "zeek.synchrophasor.frame_size_tot",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,

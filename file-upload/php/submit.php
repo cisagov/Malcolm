@@ -26,13 +26,18 @@ function console_log($data, $add_script_tags = false) {
 
 function sanitize_tagged_filename($filename) {
     $info = pathinfo($filename);
-    $name = sanitize_tagged_filename_part($info['filename']);
-    $extension = sanitize_tagged_filename_part($info['extension']);
+    $name      = sanitize_tagged_filename_part($info['filename']);
+    $extension = sanitize_tagged_filename_part($info['extension'] ?? '');
+
+    if (in_array(strtolower($extension), BLOCKED_EXTENSIONS, true)) {
+        $extension = 'bin';
+    }
+
     return (strlen($name) > 0 ? $name : '_') . '.' . $extension;
 }
 
 function sanitize_tagged_filename_part($str) {
-    return preg_replace("/[^a-zA-Z0-9\s_\(\)\.,-]/", "", $str);
+    return preg_replace("/[^a-zA-Z0-9\s_\(\),-]/", "", $str);
 }
 
 function move_temp_file_prefixed($file, $path, $prefix) {
@@ -81,10 +86,12 @@ function handle_base64_encoded_file_post($files) {
         $file = @json_decode($file);
         if (!is_object($file)) continue;
 
+        $safe_name = sanitize_tagged_filename(FilePond\sanitize_filename($file->name));
+
         FilePond\write_file(
-            UPLOAD_DIR, 
-            base64_decode($file->data), 
-            FilePond\sanitize_filename($file->name)
+            UPLOAD_DIR,
+            base64_decode($file->data),
+            $safe_name
         );
     }
 
@@ -118,6 +125,5 @@ function handle_transfer_ids_post($ids) {
         FilePond\remove_transfer_directory(TRANSFER_DIR, $id);
     }
 
-    $return_to = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/upload';
-    header("Location: ". $return_to);
+    header("Location: /upload");
 }

@@ -11,3 +11,9 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+JA4+ algorithms (used by the Zeek and Arkime components of Malcolm)
+have licensing requirements. The FoxIO License can be found at
+https://github.com/FoxIO-LLC/ja4/blob/main/LICENSE, with a license
+FAQ at https://github.com/FoxIO-LLC/ja4/blob/main/License%20FAQ.md.
+JA4+ is a trademark of FoxIO.

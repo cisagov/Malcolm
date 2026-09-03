@@ -11,7 +11,7 @@
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm in Docker on a Linux platform, see **[Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)**.
 
-For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linux](hedgehog.md) sensor using the [Malcolm installer ISO](malcolm-iso.md#ISO) and Hedgehog Linux installer ISO, see **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)**.
+For a more in-depth guide covering installing both Malcolm and a [Hedgehog Linux](hedgehog.md) sensor using the [Malcolm installer ISO](malcolm-iso.md#ISO) and Hedgehog Linux installer ISO, see **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)**.
 
 ### Source code
 
@@ -23,7 +23,7 @@ The `build.sh` script can build Malcolm's images from scratch. See [Building fro
 
 ### Initial configuration
 
-The scripts to control Malcolm require Python 3.9 or higher. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [dotenv](https://github.com/theskumar/python-dotenv), [requests](https://docs.python-requests.org/en/latest/) and [ruamel.yaml](https://yaml.readthedocs.io/en/latest/) modules for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
+The scripts to control Malcolm require Python 3.9 or higher. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [dotenv](https://github.com/theskumar/python-dotenv), [requests](https://docs.python-requests.org/en/latest/) and [ruamel.yaml](https://yaml.dev/doc/ruamel.yaml/) modules for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
 You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's images. You should also ensure your system configuration and Malcolm settings are tuned by running `./scripts/install.py` and `./scripts/configure` (see [The Malcolm installation menu](ubuntu-install-example.md#InstallMenu) and [Malcolm Configuration Menu Items](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems)).
 

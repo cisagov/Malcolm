@@ -244,7 +244,10 @@ def _validate_live_capture_iface(malcolm_config, add_issue) -> None:
     if any_method:
         if malcolm_config.is_item_visible(KEY_CONFIG_ITEM_PCAP_IFACE):
             pcap_iface = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_IFACE)
-            if not _is_non_empty_str(pcap_iface):
+            if not (
+                (isinstance(pcap_iface, str) and _is_non_empty_str(pcap_iface))
+                or (isinstance(pcap_iface, list) and pcap_iface and all(_is_non_empty_str(x) for x in pcap_iface))
+            ):
                 add_issue(
                     KEY_CONFIG_ITEM_PCAP_IFACE,
                     "Required when live capture is enabled",
@@ -284,7 +287,7 @@ def _validate_live_pcap_capture(malcolm_config, add_issue) -> None:
     ):
         add_issue(
             KEY_CONFIG_ITEM_LIVE_ARKIME,
-            f"Arime live capture is not available for the {profile} run profile with {primary_mode} as the primary data store",
+            f"Arkime live capture is not available for the {profile} run profile with {primary_mode} as the primary data store",
         )
 
 

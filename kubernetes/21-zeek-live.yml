@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/idaholab/malcolm/zeek:26.04.1
+        image: ghcr.io/idaholab/malcolm/zeek:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -71,9 +71,10 @@ spec:
           - mountPath: "/usr/local/zeek/share/zeek/site/intel"
             name: zeek-live-intel-volume
             subPath: "zeek/intel"
+      terminationGracePeriodSeconds: 30
       initContainers:
       - name: zeek-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

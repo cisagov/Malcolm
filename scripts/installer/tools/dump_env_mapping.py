@@ -39,7 +39,7 @@ def _roles_for_env_var(mapper, env_map_key: str, item_keys: List[str]) -> Tuple[
     """Return overall role and per-item roles for an env var based on explicit tags.
 
     Overall role is authoritative when all mapped items are authoritative,
-    derived when all are derived, otherwise mixed. When no mapping exists,
+    derived when all are derived; otherwise, mixed. When no mapping exists,
     returns ("n/a", {}).
     """
     ev = mapper.env_var_by_map_key.get(env_map_key)

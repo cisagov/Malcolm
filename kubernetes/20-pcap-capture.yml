@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: pcap-capture-container
-        image: ghcr.io/idaholab/malcolm/pcap-capture:26.04.1
+        image: ghcr.io/idaholab/malcolm/pcap-capture:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -62,9 +62,10 @@ spec:
           - mountPath: "/pcap"
             name: capture-pcap-volume
             subPath: "upload"
+      terminationGracePeriodSeconds: 30
       initContainers:
       - name: pcap-capture-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

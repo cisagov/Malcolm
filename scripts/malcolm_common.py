@@ -12,6 +12,7 @@ import os
 import math
 import platform
 import re
+import shutil
 import site
 import ssl
 import string
@@ -94,31 +95,71 @@ except ImportError:
 Dialog = None
 MainDialog = None
 
-# Reasonable dialog bounds; used to reduce awkward wrapping in python-dialog
+# Preferred dialog bounds. Actual bounds are further limited by the terminal.
 _DIALOG_MIN_WIDTH = 50
 _DIALOG_MAX_WIDTH = 140
 _DIALOG_MIN_HEIGHT = 7
 _DIALOG_MAX_HEIGHT = 30
 
+# Leave room for dialog's border/shadow and terminal edges.
+_DIALOG_TERMINAL_WIDTH_MARGIN = 4
+_DIALOG_TERMINAL_HEIGHT_MARGIN = 4
+
 
 def _dialog_size_for(text: str) -> tuple[int, int]:
-    """Compute a suitable (height, width) for a dialog widget.
+    """Compute a dialog size that fits the prompt and current terminal.
 
-    - Width fits the longest line with a small padding.
-    - Height accounts for the number of text lines plus button area.
+    The input value itself may be arbitrarily long; dialog's inputbox scrolls
+    horizontally, so it must not be used to determine the widget width.
     """
     try:
-        if not isinstance(text, str):
-            text = str(text)
+        text = str(text)
+
+        terminal = shutil.get_terminal_size(fallback=(80, 24))
+        max_width = max(
+            1,
+            min(
+                _DIALOG_MAX_WIDTH,
+                terminal.columns - _DIALOG_TERMINAL_WIDTH_MARGIN,
+            ),
+        )
+        max_height = max(
+            1,
+            min(
+                _DIALOG_MAX_HEIGHT,
+                terminal.lines - _DIALOG_TERMINAL_HEIGHT_MARGIN,
+            ),
+        )
+
+        # The configured minimum is only a preference. It cannot exceed the
+        # space actually available in the terminal.
+        min_width = min(_DIALOG_MIN_WIDTH, max_width)
+        min_height = min(_DIALOG_MIN_HEIGHT, max_height)
+
         lines = text.splitlines() or [""]
-        max_line = max((len(line) for line in lines), default=_DIALOG_MIN_WIDTH)
-        width = max(_DIALOG_MIN_WIDTH, min(max_line + 4, _DIALOG_MAX_WIDTH))
-        # base height for buttons + borders; add per text line beyond the first
-        height = _DIALOG_MIN_HEIGHT + max(0, len(lines) - 1)
-        height = max(_DIALOG_MIN_HEIGHT, min(height, _DIALOG_MAX_HEIGHT))
+
+        desired_width = max(
+            _DIALOG_MIN_WIDTH,
+            max((len(line) for line in lines), default=0) + 4,
+        )
+        width = min(desired_width, max_width)
+
+        # Account approximately for prompt lines wrapping at the selected
+        # dialog width. Four columns are reserved for borders/padding.
+        text_width = max(1, width - 4)
+        wrapped_lines = sum(max(1, math.ceil(len(line) / text_width)) for line in lines)
+
+        desired_height = _DIALOG_MIN_HEIGHT + wrapped_lines - 1
+        height = min(max(desired_height, min_height), max_height)
+
         return height, width
+
     except Exception:
-        return (_DIALOG_MIN_HEIGHT, _DIALOG_MIN_WIDTH)
+        terminal = shutil.get_terminal_size(fallback=(80, 24))
+        return (
+            min(_DIALOG_MIN_HEIGHT, max(1, terminal.lines - 4)),
+            min(_DIALOG_MIN_WIDTH, max(1, terminal.columns - 4)),
+        )
 
 
 def _dialog_menu_width_for(choices) -> int:
@@ -1467,32 +1508,32 @@ def MalcolmAuthFilesExist(configDir=None, run_profile=PROFILE_MALCOLM, auth_meth
     configDirToCheck = (
         configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     )
-    return (
-        (
-            (run_profile == PROFILE_HEDGEHOG)
-            or (
-                AuthFileCheck(
-                    os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
-                    allowEmpty=(auth_method == 'no_authentication'),
-                )
-                and AuthFileCheck(
-                    os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
-                    allowEmpty=(auth_method != 'ldap'),
-                )
-                and AuthFileCheck(
-                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
-                )
-                and AuthFileCheck(
-                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
-                )
-                and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
-                and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
-                and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
-            )
-        )
-        and AuthFileCheck(os.path.join(configDirToCheck, 'valkey.env'))
-        and AuthFileCheck(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
-    )
+
+    missing = []
+
+    if run_profile != PROFILE_HEDGEHOG:
+        checks = [
+            (os.path.join(MalcolmPath, 'nginx', 'htpasswd'), auth_method == 'no_authentication'),
+            (os.path.join(MalcolmPath, 'nginx', 'nginx_ldap.conf'), auth_method != 'ldap'),
+            (os.path.join(MalcolmPath, 'nginx', 'certs', 'cert.pem'), True),
+            (os.path.join(MalcolmPath, 'nginx', 'certs', 'key.pem'), True),
+            (os.path.join(configDirToCheck, 'netbox-secret.env'), False),
+            (os.path.join(configDirToCheck, 'postgres.env'), False),
+            (os.path.join(configDirToCheck, 'auth.env'), False),
+        ]
+        for path, allowEmpty in checks:
+            if not AuthFileCheck(path, allowEmpty=allowEmpty):
+                missing.append(path)
+
+    # checked regardless of profile
+    for path in (
+        os.path.join(configDirToCheck, 'valkey.env'),
+        os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
+    ):
+        if not AuthFileCheck(path):
+            missing.append(path)
+
+    return missing
 
 
 ###################################################################################################
@@ -1687,6 +1728,7 @@ LOG_IGNORE_REGEX = re.compile(
   | \bGET.+\b302\s+30\b
   | \d+\s+changes\s+in\s+\d+\s+seconds\.\s+Saving
   | _cat/indices
+  | API_TOKEN_PEPPERS\s+is\s+not\s+defined
   | Background\s+saving\s+started
   | Background\s+saving\s+terminated\s+with\s+success
   | branding.*config\s+is\s+not\s+found\s+or\s+invalid
@@ -1704,6 +1746,7 @@ LOG_IGNORE_REGEX = re.compile(
   | Error\s+during\s+file\s+comparison:.*no\s+such\s+file
   | Error\s+while\s+removing\s+state\s+from\s+statestore:\s+resource\s+.*\s+not\s+found
   | eshealth
+  | Test\s+run\s+complete.+failed:\s+0,\s+errored:\s+0
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
@@ -1730,6 +1773,7 @@ LOG_IGNORE_REGEX = re.compile(
   | No\s+active\s+configuration\s+revision\s+found\s+-\s+falling\s+back\s+to\s+most\s+recent
   | Notice:\s+pcap:\s+read\s+(\d+)\s+file
   | opensearch.*has\s+insecure\s+file\s+permissions
+  | /opt/netbox.+Warning.+Unable\s+to\s+(resolve|guess)
   | points\s+to\s+an\s+already\s+known\s+ingest\s+target
   | (POST|PUT)\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
@@ -1827,7 +1871,7 @@ def ProcessLogLine(line, debug=False):
                 timeStr = f"{messageTimeMatch[0]} "
 
             if ('job.schedule' in outputJson) and ('job.position' in outputJson) and ('job.command' in outputJson):
-                # this is a status line line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
+                # this is a status line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
 
                 # remove some clutter for the display
                 for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
@@ -1852,7 +1896,7 @@ def ProcessLogLine(line, debug=False):
                     )
 
             elif 'dashboards' in serviceStr:
-                # this is an line line from dashboards, let's clean it up a bit: remove some clutter for the display
+                # this is a line from dashboards, let's clean it up a bit: remove some clutter for the display
                 for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
                     outputJson.pop(noisyKey, None)
 
@@ -1860,7 +1904,7 @@ def ProcessLogLine(line, debug=False):
                 return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
 
             elif 'filebeat' in serviceStr:
-                # this is an line line from filebeat, let's clean it up a bit: remove some clutter for the display
+                # this is a line from filebeat, let's clean it up a bit: remove some clutter for the display
                 for noisyKey in [
                     'ecs.version',
                     'harvester_id',

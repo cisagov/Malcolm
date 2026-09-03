@@ -18,6 +18,10 @@ on:
 jobs:
   docker:
     uses: ./.github/workflows/docker-build-push-scan.yml
+    permissions:
+      packages: write
+      contents: read
+      security-events: write
     with:
       service: keycloak
       dockerfile: ./Dockerfiles/keycloak.Dockerfile

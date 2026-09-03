@@ -1,7 +1,7 @@
 <?php
 #
 # This generates the HTML <head> section of several php pages.
-# This pulls in Javascript and CSS style defin. files.
+# This pulls in JavaScript and CSS style def files.
 # This application used the 'bootstrap' CSS templating files.
 # This page also defines the HTML <title> for the application.
 #

@@ -9,7 +9,7 @@ export UMASK=077
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-# don't put duplicate lines in the history and ignore same sucessive entries.
+# don't put duplicate lines in the history and ignore same successive entries.
 export HISTCONTROL=ignoreboth:erasedups
 export HISTIGNORE="&:ls:ll:cd:history:h:[bf]g:exit:pwd:clear"
 export HISTFILESIZE=1000000000

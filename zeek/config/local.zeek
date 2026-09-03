@@ -31,6 +31,7 @@ global local_nets_str = getenv("ZEEK_LOCAL_NETS");
 global long_conn_durations = getenv("ZEEK_LONG_CONN_DURATIONS");
 global long_conn_repeat_last_duration = (getenv("ZEEK_LONG_CONN_REPEAT_LAST_DURATION") == true_regex) ? T : F;
 global long_conn_do_notice = (getenv("ZEEK_LONG_CONN_DO_NOTICE") == true_regex) ? T : F;
+global file_analyzer_timeout = double_to_interval((getenv("ZEEK_FILE_ANALYZER_TIMEOUT_SEC") == "") ? 5.0 : to_double(getenv("ZEEK_FILE_ANALYZER_TIMEOUT_SEC")));
 
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == true_regex) ? T : F;
 global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == true_regex) ? T : F;
@@ -59,6 +60,7 @@ global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_roc_plus = (getenv("ZEEK_DISABLE_ICS_ROC_PLUS") == true_regex) ? T : F;
 global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
+global disable_ics_iec104 = (getenv("ZEEK_DISABLE_ICS_IEC104") == true_regex) ? T : F;
 global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
 
 redef Broker::default_listen_address = "127.0.0.1";
@@ -143,6 +145,10 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 #   plugin altogether, as it's a tiny log that's going to get ignored anyway.
 redef JSONStreaming::enable_log_rotation = F;
 redef JSONStreaming::enabled_logs = set(PacketFilter::LOG);
+
+# Default amount of time a file can be inactive before the file analysis
+#   gives up and discards any internal state related to the file.
+redef default_file_timeout_interval = file_analyzer_timeout;
 
 event zeek_init() &priority=-5 {
 
@@ -229,6 +235,9 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_s7comm) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
+  }
+  if (disable_ics_all || disable_ics_iec104) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_SPICY_IEC104);
   }
   if (disable_ics_all || disable_ics_synchrophasor) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_TCP);

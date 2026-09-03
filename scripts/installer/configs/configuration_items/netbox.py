@@ -10,7 +10,7 @@ This module contains all configuration items related to NetBox settings,
 including NetBox instance management and network traffic enrichment options.
 """
 
-from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.enums import NetboxMode
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE,
@@ -20,9 +20,10 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_NETBOX_MODE,
     KEY_CONFIG_ITEM_NETBOX_SITE_NAME,
     KEY_CONFIG_ITEM_NETBOX_URL,
+    KEY_CONFIG_ITEM_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES,
 )
 from scripts.malcolm_common import ValidNetBoxSubnetFilter
-from scripts.malcolm_constants import WidgetType
+from scripts.malcolm_constants import WidgetType, MALCOLM_ENRICHABLE_LOG_TYPES, MALCOLM_ENRICHABLE_LOG_TYPES_DEFAULT
 
 CONFIG_ITEM_NETBOX_MODE = ConfigItem(
     key=KEY_CONFIG_ITEM_NETBOX_MODE,
@@ -77,6 +78,7 @@ CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER = ConfigItem(
     validator=lambda x: isinstance(x, str) and ValidNetBoxSubnetFilter(x),
     question='Comma-separated list of private CIDR subnets to control NetBox IP autopopulation',
     widget_type=WidgetType.TEXT,
+    accept_blank=True,
 )
 
 # Default value handled in MalcolmConfig based on AUTO_POPULATE/AUTO_CREATE_PREFIX and PCAP_NODE_NAME
@@ -87,6 +89,20 @@ CONFIG_ITEM_NETBOX_SITE_NAME = ConfigItem(
     validator=lambda x: isinstance(x, str),
     question="Default NetBox site name",
     widget_type=WidgetType.TEXT,
+)
+
+CONFIG_ITEM_NETBOX_ENRICHED_LOG_TYPES = ListOfStringsConfigItem(
+    key=KEY_CONFIG_ITEM_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES,
+    label="NetBox-Enriched Log Types",
+    default_value=MALCOLM_ENRICHABLE_LOG_TYPES_DEFAULT,
+    validator=lambda x: (isinstance(x, str) and (x in MALCOLM_ENRICHABLE_LOG_TYPES))
+    or (
+        isinstance(x, list)
+        and all(isinstance(dataset, str) and (dataset in MALCOLM_ENRICHABLE_LOG_TYPES) for dataset in x)
+    ),
+    question='Log types to enrich via NetBox ("default", "all", "ics"/"ot" for ICS-tagged logs, provider.dataset pairs, or combinations)',
+    widget_type=WidgetType.TEXT,
+    accept_blank=True,
 )
 
 

@@ -1,4 +1,4 @@
-FROM valkey/valkey:7-alpine
+FROM valkey/valkey:8-alpine
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"

@@ -205,17 +205,26 @@ fi
 # determine if we are now dropping privileges to exec ENTRYPOINT_CMD
 if [[ "$PUSER_PRIV_DROP" == "true" ]]; then
   EXEC_USER="${PUSER}"
-  USER_HOME="$(getent passwd ${PUSER} | cut -d: -f6)"
+  # Prefer getent, falling back to a manual /etc/passwd read, since getent
+  #   isn't POSIX-guaranteed and this is invoked before we know anything
+  #   about the image we're in.
+  if command -v getent >/dev/null 2>&1; then
+    USER_HOME="$(getent passwd "${PUSER}" | cut -d: -f6)"
+  else
+    USER_HOME="$(awk -F: -v u="${PUSER}" '$1 == u { print $6 }' /etc/passwd 2>/dev/null)"
+  fi
 else
   EXEC_USER="${USER:-root}"
   USER_HOME="${HOME:-/root}"
 fi
 
-# attempt to set ulimits (as user) and execute the entrypoint command specified
-su -s /bin/bash -p ${EXEC_USER} << EOF
-export USER="${EXEC_USER}"
-export HOME="${USER_HOME}"
-id
+# Build the inner command that actually applies per-user ulimits and execs the
+#   entrypoint. This runs AS the target user, after privileges have already
+#   been dropped by whichever mechanism below is selected, so it's expressed
+#   as a single string and handed to bash -c rather than a heredoc piped into
+#   an interactive-ish `su` shell (setpriv/gosu/su-exec have no shell of their
+#   own to pipe into; they just exec a command directly).
+read -r -d '' INNER_CMD <<'INNER_EOF' || true
 if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
   ulimit -c ${PUSER_RLIMIT_C:-0} >/dev/null 2>&1
   ulimit -l ${PUSER_RLIMIT_L:-unlimited} >/dev/null 2>&1
@@ -225,11 +234,80 @@ if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/nu
   ulimit -n ${PUSER_RLIMIT_N:-65535} >/dev/null 2>&1
   ulimit -u ${PUSER_RLIMIT_U:-262144} >/dev/null 2>&1
 fi
-if [[ ! -z "${ENTRYPOINT_CMD}" ]]; then
-  if [[ -z "${ENTRYPOINT_ARGS}" ]]; then
-    "${ENTRYPOINT_CMD}"
-  else
-    "${ENTRYPOINT_CMD}" $(printf "%q " "${ENTRYPOINT_ARGS[@]}")
-  fi
+id
+if [[ -n "${ENTRYPOINT_CMD}" ]]; then
+  exec "${ENTRYPOINT_CMD}" __ENTRYPOINT_ARGS_PLACEHOLDER__
 fi
-EOF
+INNER_EOF
+
+# Drop privileges and exec the entrypoint. Preference order, all of which
+#   exec directly with no intervening shell/session of their own (unlike
+#   `su`, which -- depending on distro -- may open a PAM session that
+#   force-kills its child on SIGTERM instead of forwarding the signal and
+#   waiting, breaking graceful container shutdown):
+#
+#   1. setpriv (util-linux) -- Needs numeric uid/gid (no username lookup)
+#      and explicit supplementary-group initialization via --init-groups
+#      (mutually exclusive with --keep-groups/--clear-groups, so don't
+#      combine it with those).
+#   2. gosu -- purpose-built for exactly this container privilege-drop
+#      pattern; present on some base images.
+#   3. su-exec -- Alpine-native equivalent of gosu.
+#   4. su -- last-resort fallback for any image with none of the above.
+#      `exec`'d so at least non-PAM (e.g. busybox) `su` collapses out of
+#      the process tree; PAM-backed `su` may still exhibit the session-kill
+#      behavior, but this preserves prior behavior for images that reach
+#      this branch.
+#
+# EXEC_UID/EXEC_GID are resolved once here since setpriv needs them numeric.
+#   Prefer getent, falling back to `id`, which is POSIX-required and a safer
+#   universal assumption for any future/forked image that might lack getent.
+if command -v getent >/dev/null 2>&1; then
+  EXEC_UID="$(getent passwd "${EXEC_USER}" | cut -d: -f3)"
+  EXEC_GID="$(getent passwd "${EXEC_USER}" | cut -d: -f4)"
+else
+  EXEC_UID="$(id -u "${EXEC_USER}" 2>/dev/null)"
+  EXEC_GID="$(id -g "${EXEC_USER}" 2>/dev/null)"
+fi
+
+export USER="${EXEC_USER}"
+export HOME="${USER_HOME}"
+export PUSER_RLIMIT_UNLOCK PUSER_RLIMIT_C PUSER_RLIMIT_L PUSER_RLIMIT_M \
+       PUSER_RLIMIT_V PUSER_RLIMIT_X PUSER_RLIMIT_N PUSER_RLIMIT_U \
+       ENTRYPOINT_CMD
+
+# Bash arrays cannot be exported across a process boundary into a separate
+#   `bash -c` child, so serialize ENTRYPOINT_ARGS (if any) directly into the
+#   inner command string using %q, which quotes each argument such that it
+#   re-parses back into the same argument, including embedded spaces/quotes.
+if [[ -n "${ENTRYPOINT_ARGS+x}" ]]; then
+  ENTRYPOINT_ARGS_QUOTED="$(printf '%q ' "${ENTRYPOINT_ARGS[@]}")"
+else
+  ENTRYPOINT_ARGS_QUOTED=""
+fi
+INNER_CMD="${INNER_CMD//__ENTRYPOINT_ARGS_PLACEHOLDER__/${ENTRYPOINT_ARGS_QUOTED}}"
+
+# Some images (notably Alpine's busybox multi-call binary) provide a
+#   `setpriv` that only implements --dump/--nnp/--inh-caps/--ambient-caps --
+#   it has no concept of --reuid/--regid/--init-groups at all. `command -v`
+#   alone can't distinguish this from util-linux's full setpriv, so probe
+#   --help for the flags we actually need before committing to this branch.
+has_full_setpriv() {
+  command -v setpriv >/dev/null 2>&1 || return 1
+  setpriv --help 2>&1 | grep -q -- '--reuid' \
+    && setpriv --help 2>&1 | grep -q -- '--init-groups'
+}
+
+if has_full_setpriv && [[ -n "${EXEC_UID}" ]] && [[ -n "${EXEC_GID}" ]]; then
+  exec setpriv --reuid="${EXEC_UID}" --regid="${EXEC_GID}" --init-groups \
+      /bin/bash -c "${INNER_CMD}"
+
+elif command -v gosu >/dev/null 2>&1; then
+  exec gosu "${EXEC_USER}" /bin/bash -c "${INNER_CMD}"
+
+elif command -v su-exec >/dev/null 2>&1; then
+  exec su-exec "${EXEC_USER}" /bin/bash -c "${INNER_CMD}"
+
+else
+  exec su -s /bin/bash -p "${EXEC_USER}" -c "${INNER_CMD}"
+fi

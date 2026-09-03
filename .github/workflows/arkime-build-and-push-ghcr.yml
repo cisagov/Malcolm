@@ -26,9 +26,14 @@ on:
 jobs:
   docker:
     uses: ./.github/workflows/docker-build-push-scan.yml
+    permissions:
+      packages: write
+      contents: read
+      security-events: write
     with:
       service: arkime
       dockerfile: ./Dockerfiles/arkime.Dockerfile
     secrets:
+      maxmind_account_id: ${{ secrets.MAXMIND_GEOIP_DB_ACCOUNT_ID }}
       maxmind_license_key: ${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}
       maxmind_alternate_url: ${{ secrets.MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL }}

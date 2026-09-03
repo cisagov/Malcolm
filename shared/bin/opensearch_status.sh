@@ -84,32 +84,32 @@ until [[ "$(curl "${CURL_CONFIG_PARAMS[@]}" -fsSL "$OPENSEARCH_URL/_cat/health?h
   sleep 1
 done
 
-echo "$OPENSEARCH_PRIMARY is up and healthy at "$OPENSEARCH_URL"" >&2
+echo "$OPENSEARCH_PRIMARY is up and healthy at "$OPENSEARCH_URL""
 
 if [[ -n "$WAIT_FOR_TEMPLATE_LEGACY" ]]; then
   sleep 1
-  echo "Waiting until $OPENSEARCH_PRIMARY has legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\"..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\"..."
   until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_template/$WAIT_FOR_TEMPLATE_LEGACY" 2>/dev/null | grep -q mappings ); do
     sleep 5
   done
-  echo "$OPENSEARCH_PRIMARY legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\" exists" >&2
+  echo "$OPENSEARCH_PRIMARY legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\" exists"
   sleep 5
 fi
 
 if [[ -n "$WAIT_FOR_TEMPLATE" ]]; then
   sleep 1
-  echo "Waiting until $OPENSEARCH_PRIMARY has index template \"$WAIT_FOR_TEMPLATE\"..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has index template \"$WAIT_FOR_TEMPLATE\"..."
   until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_index_template/$WAIT_FOR_TEMPLATE" 2>/dev/null | grep -q index_templates ); do
     sleep 5
   done
-  echo "$OPENSEARCH_PRIMARY index template \"$WAIT_FOR_TEMPLATE\" exists" >&2
+  echo "$OPENSEARCH_PRIMARY index template \"$WAIT_FOR_TEMPLATE\" exists"
   sleep 5
 fi
 
 if (( $WAIT_FOR_LOG_DATA == 1 )); then
   sleep 1
 
-  echo "Waiting until $OPENSEARCH_PRIMARY has logs..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has logs..."
 
   # wait until at least one network traffic log index exists (get index count where docs.count > 0)
   FOUND_INDEX=
@@ -130,5 +130,5 @@ if (( $WAIT_FOR_LOG_DATA == 1 )); then
     fi
     [[ -n "$FOUND_INDEX" ]] && break || sleep 5
   done
-  echo "Logs exist." >&2
+  echo "Logs exist."
 fi

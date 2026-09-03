@@ -78,4 +78,4 @@ if [[ -z $PCAP_ROTATE_SECONDS ]] && [[ -n $PCAP_ROTATE_MINUTES ]]; then
   export PCAP_ROTATE_SECONDS=$(echo "$PCAP_ROTATE_MINUTES * 60" | bc)
 fi
 
-supervisord -c "$CONFIG_FILE" -n
+exec supervisord -c "$CONFIG_FILE" -n

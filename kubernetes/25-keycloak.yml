@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: keycloak-container
-        image: ghcr.io/idaholab/malcolm/keycloak:26.04.1
+        image: ghcr.io/idaholab/malcolm/keycloak:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -75,6 +75,7 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: keycloak-var-local-catrust-volume
+      terminationGracePeriodSeconds: 30
       volumes:
         - name: keycloak-var-local-catrust-volume
           configMap:

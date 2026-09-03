@@ -1,6 +1,6 @@
 {
-  "config_id": "malcolm-api-loopback-webook",
-  "name": "malcolm-api-loopback-webook",
+  "config_id": "malcolm-api-loopback-webhook",
+  "name": "malcolm-api-loopback-webhook",
   "config": {
     "name": "Malcolm API Loopback Webhook",
     "description": "Malcolm API webhook to index OpenSearch alerts as session documents",

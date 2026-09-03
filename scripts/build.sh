@@ -47,6 +47,11 @@ else
     CONFIG_FILE_TMP="docker-compose-dev-$TMP_UID.yml"
   fi
 fi
+if [[ -d "${MALCOLM_CONFIG_DIR:-}" ]]; then
+  CONFIG_ENV_DIR=${MALCOLM_CONFIG_DIR}
+else
+  CONFIG_ENV_DIR=="$($DIRNAME $($REALPATH -e "${CONFIG_FILE}"))"/config
+fi
 
 function filesize_in_image() {
   FILESPEC="$2"
@@ -125,17 +130,28 @@ popd >/dev/null 2>&1
 if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
   # prefer a local environment variable
   MAXMIND_API_KEY="$MAXMIND_GEOIP_DB_LICENSE_KEY"
+elif [[ "${CONFIG_ENV_DIR}"/arkime-secret.env ]]; then
+  # but default to what they have saved in ./config/arkime-secret.env
+  MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*=\s*" "${CONFIG_ENV_DIR}"/arkime-secret.env | cut -d= -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 else
-  # but default to what they have saved in the docker-compose YML file
-  MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
+  MAXMIND_API_KEY=""
+fi
+if [ ${#MAXMIND_GEOIP_DB_ACCOUNT_ID} -gt 1 ]; then
+  # prefer a local environment variable
+  MAXMIND_ACCOUNT_ID="$MAXMIND_GEOIP_DB_ACCOUNT_ID"
+elif [[ "${CONFIG_ENV_DIR}"/arkime-secret.env ]]; then
+  # but default to what they have saved in ./config/arkime-secret.env
+  MAXMIND_ACCOUNT_ID="$($GREP -P "^\s*MAXMIND_GEOIP_DB_ACCOUNT_ID\s*=\s*" "${CONFIG_ENV_DIR}"/arkime-secret.env | cut -d= -f2 | tr -d '[:space:]'\'\" | head -n 1)"
+else
+  MAXMIND_ACCOUNT_ID=""
 fi
 
 # build the image(s)
 DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_ACCOUNT_ID="$MAXMIND_ACCOUNT_ID" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_ACCOUNT_ID="$MAXMIND_ACCOUNT_ID" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 if (( $# == 0 )); then

@@ -47,8 +47,34 @@ RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.bu
     find /site/_site -type f -name "*.html" -exec sed -i "s@/\(docs\|assets\)@/readme/\1@g" "{}" \; && \
     find /site/_site -type f -name "*.html" -exec sed -i 's@\(href=\)"/"@\1"/readme/"@g' "{}" \;
 
+# obtain openresty source code bundle from download site or Git
+FROM alpine:3.24 AS getresty
+
+# OPENRESTY_VERSION can be like "1.29.2.4" or "318a52b814ef903066002ffa3166b7714b3b9c6f"
+ARG OPENRESTY_VERSION=1.31.1.1
+ENV OPENRESTY_VERSION=$OPENRESTY_VERSION
+
+RUN apk update --no-cache; \
+    mkdir -p /usr/local/src/openresty; \
+    cd /usr/local/src/openresty; \
+    if echo "${OPENRESTY_VERSION}" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*$'; then \
+        echo "Downloading OpenResty: ${OPENRESTY_VERSION}"; \
+        wget -O "./openresty.tar.gz" "https://openresty.org/download/openresty-${OPENRESTY_VERSION}.tar.gz"; \
+    elif echo "${OPENRESTY_VERSION}" | grep -qE '^[0-9a-f]{40}$'; then \
+        apk add --no-cache bash dos2unix git make mercurial patch perl; \
+        echo "Checking out OpenResty: ${OPENRESTY_VERSION}"; \
+        git clone --no-checkout https://github.com/openresty/openresty.git; \
+        cd openresty; \
+        git checkout "${OPENRESTY_VERSION}"; \
+        make; \
+        mv openresty-*.tar.gz ../openresty.tar.gz; \
+    else \
+        echo "ERROR: Unrecognized OPENRESTY_VERSION format: ${OPENRESTY_VERSION}" >&2; \
+        exit 1; \
+    fi
+
 # build NGINX image
-FROM alpine:3.23
+FROM alpine:3.24
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -102,14 +128,12 @@ ENV NGINX_LDAP_TLS_STUNNEL_CHECK_HOST=$NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
 ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP=$NGINX_LDAP_TLS_STUNNEL_CHECK_IP
 ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=$NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
-# build latest nginx with nginx-auth-ldap
-ENV OPENRESTY_VERSION=1.27.1.2
+# build latest openresty with nginx-auth-ldap
 ENV NGINX_AUTH_LDAP_BRANCH=master
 
 # NGINX source
+COPY --from=getresty /usr/local/src/openresty/openresty.tar.gz /openresty.tar.gz
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
-ADD https://openresty.org/download/openresty-$OPENRESTY_VERSION.tar.gz /openresty.tar.gz
-
 
 # component icons from original sources and stuff for offline landing page
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
@@ -212,14 +236,15 @@ RUN set -x ; \
     py3-pip \
     py3-setuptools \
     py3-wheel \
+    su-exec \
     tar \
     zlib-dev \
     ; \
     \
-  mkdir -p /usr/src/nginx-auth-ldap /www /www/logs/nginx /var/log/nginx ; \
-  tar -zxC /usr/src -f /openresty.tar.gz ; \
+  mkdir -p /usr/src/openresty /usr/src/nginx-auth-ldap /www /www/logs/nginx /var/log/nginx ; \
   tar -zxC /usr/src/nginx-auth-ldap --strip=1 -f /nginx-auth-ldap.tar.gz ; \
-  cd /usr/src/openresty-$OPENRESTY_VERSION ; \
+  tar -zxC /usr/src/openresty --strip=1 -f /openresty.tar.gz ; \
+  cd /usr/src/openresty ; \
   ./configure $CONFIG ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
   make install ; \

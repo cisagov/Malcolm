@@ -276,7 +276,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "user",
+          "related.user",
           "zeek.login.client_user",
           "zeek.login.success",
           "event.id"

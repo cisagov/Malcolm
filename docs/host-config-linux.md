@@ -64,20 +64,18 @@ DefaultLimitNOFILE=65535:65535
 DefaultLimitMEMLOCK=infinity
 ```
 
-* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, users could add this line to `/etc/rc.local` (replacing `/dev/sda` with their disk block descriptor):
+* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, users could add this line to `/etc/rc.local` or their system's equivalent (replacing `/dev/sda` with their disk block descriptor):
 
 ```
-# change disk read-adhead value (# of blocks)
+# change disk read-ahead value (# of blocks)
 blockdev --setra 512 /dev/sda
 ```
-
-* Change the I/O scheduler to `deadline` or `noop`. Again, this can be done in a variety of ways. The simplest is to add `elevator=deadline` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub`.
 
 * Enable cgroup accounting for memory and swap space. This can be done by adding `systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub`.
 
 * If you are planning on using very large data sets, consider formatting the drive containing the `opensearch` volume as XFS.
 
-After making allthese changes, do a reboot for good measure!
+After making all these changes, do a reboot for good measure!
 
 ## Docker
 

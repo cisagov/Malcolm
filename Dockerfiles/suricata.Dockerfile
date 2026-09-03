@@ -33,11 +33,11 @@ ENV PUSER_RLIMIT_UNLOCK=true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 USER root
 
-ENV SUPERCRONIC_VERSION="0.2.43"
+ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
-ENV YQ_VERSION="4.52.5"
+ENV YQ_VERSION="4.53.6"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV SURICATA_VERSION_PATTERN="1:8.0.*"

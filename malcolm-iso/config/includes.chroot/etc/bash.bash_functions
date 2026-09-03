@@ -223,7 +223,7 @@ function h() { if [ -z "$1" ]; then history; else history | grep -i "$@"; fi; }
 ########################################################################
 function fname() { find . -iname "*$@*"; }
 
-function findupes() {
+function finddupes() {
   find . -not -empty -type f -printf "%s\n" 2>/dev/null | \
     sort -rn | \
     uniq -d | \

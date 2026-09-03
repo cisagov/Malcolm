@@ -196,10 +196,10 @@
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
-        "title": "C12.22  - Transport Protocol",
+        "title": "C12.22 - Transport Protocol",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
         "version": 1,
-        "visState": "{\"title\":\"C12.22  - Transport Protocol\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
+        "visState": "{\"title\":\"C12.22 - Transport Protocol\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
       },
       "id": "106def90-67e4-11f0-96a3-3b72e35c9eaf",
       "migrationVersion": {
@@ -580,7 +580,7 @@
           "source.ip",
           "destination.ip",
           "zeek.c1222.req_resp",
-          "event.event.action",
+          "event.action",
           "event.result",
           "zeek.c1222.ap_title",
           "event.id"

@@ -3,7 +3,7 @@ def concurrency
 end
 
 def register(params)
-  require 'psych'
+  require 'yaml'
 
   @source = params["source"]
   @target = params["target"]

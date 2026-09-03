@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:26.04.1
+        image: ghcr.io/idaholab/malcolm/postgresql:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -52,24 +52,35 @@ spec:
               name: netbox-common-env
           - secretRef:
               name: postgres-env
+        # failureThreshold bounds max pg major-upgrade duration; raise it before upgrading unusually large clusters
+        startupProbe:
+          exec:
+            command:
+              - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 0
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 40
         livenessProbe:
           exec:
             command:
-            - /usr/local/bin/container_health.sh
-          initialDelaySeconds: 90
-          periodSeconds: 60
+              - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 0
+          periodSeconds: 30
           timeoutSeconds: 15
           successThreshold: 1
-          failureThreshold: 10
+          failureThreshold: 20
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: postgres-var-local-catrust-volume
           - mountPath: /var/lib/postgresql/data
             name: postgres-volume
             subPath: postgres
+      terminationGracePeriodSeconds: 60
       initContainers:
       - name: postgres-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

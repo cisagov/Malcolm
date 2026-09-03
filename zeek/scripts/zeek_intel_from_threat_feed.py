@@ -33,7 +33,7 @@ def main():
                 'Outputs a Zeek intelligence framework file from various formats used to represent threat information:',
                 ' - "Indicator" objects in STIX™ v2.0/v2.1 JSON files',
                 ' - MISP attributes or core format JSON files',
-                ' - Indicators from Mantiant Threat Intelligence',
+                ' - Indicators from Mandiant Threat Intelligence',
                 '',
                 'See:',
                 ' - Malcolm documentation: https://idaholab.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel',

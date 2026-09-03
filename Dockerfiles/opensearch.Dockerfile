@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:3.5.0
+FROM opensearchproject/opensearch:3.8.0
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -32,7 +32,7 @@ ENV TERM=xterm
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION="4.52.5"
+ENV YQ_VERSION="4.53.6"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true

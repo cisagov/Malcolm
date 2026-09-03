@@ -19,7 +19,7 @@ Depending on the volume of files extracted from network traffic, file scanning c
 
 Extracted files are scanned by [Strelka](https://target.github.io/strelka/#/), an [open-source](https://github.com/target/strelka) "real-time, container-based file scanning system used for threat hunting, threat detection, and incident response."
 
-Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be enabled/disabled by including/excluding the scanner's name from the `STRELKA_SCANNERS` [variable in `pipeline.env`](malcolm-config.md#MalcolmConfigEnvVars).
+Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be enabled/disabled by including/excluding the scanner's name from the `STRELKA_SCANNERS` [variable in `pipeline.env`](malcolm-config.md#MalcolmConfigEnvVars). This variable is a comma-separated list which may contain scanner names and/or the string `default` for the built-in list of scanners (see `MALCOLM_STRELKA_SCANNERS_DEFAULT` in [`malcolm_constants.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/malcolm_constants.py)). Values may be combined (e.g., `default,ScanStrings`).
 
 Because scanners may have configurable options, an individual scanner can be configured by editing its `.yaml` file in [`strelka/config/backend/scanners/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/config/backend/scanners/). It's recommended to validate a scanner's configuration file after making changes to it. This could be done using an [online YAML validator](https://www.yamllint.com/) or locally depending on available tools:
 

@@ -33,7 +33,7 @@ elif (( "$#" > 1 )); then
   # more than one file specified to join (should be .00, .01, .02, etc., and .sha)
   echo "Joining..." >&2
 
-  # the part before the file extension needs to match for all files provided, otherwise bail
+  # the part before the file extension needs to match for all files provided; otherwise, bail
   PREV_BASE=
   for FILE in "$@"; do
     CURR_BASE="$(base "$(basename "${FILE}")")"

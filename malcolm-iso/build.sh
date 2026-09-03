@@ -170,6 +170,7 @@ PYCODE
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/maps/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/custom-plugins/requirements/"
+  mkdir -p "$MALCOLM_DEST_DIR/netbox/custom-scripts/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/media/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/preload/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/ca-trust/"
@@ -334,7 +335,7 @@ PYCODE
     --backports false \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
-    --bootappend-live "boot=live components username=${LIVE_USER} nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
+    --bootappend-live "boot=live components username=${LIVE_USER} nosplash random.trust_cpu=on cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
     --chroot-filesystem squashfs \
     --debian-installer live \
     --debian-installer-distribution $IMAGE_DISTRIBUTION \

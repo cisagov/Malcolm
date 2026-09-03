@@ -27,10 +27,10 @@ ENV RULES_UPDATE_ENABLED=$RULES_UPDATE_ENABLED
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.52.5"
+ENV YQ_VERSION="4.53.6"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV SUPERCRONIC_VERSION="0.2.43"
+ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
@@ -46,11 +46,12 @@ ENV CLAMAV_RULES_DIR="/var/lib/clamav"
 ARG STRELKA_BACKEND_PROCS=1
 ENV STRELKA_BACKEND_PROCS=$STRELKA_BACKEND_PROCS
 
-ARG STRELKA_SCANNERS=ScanBatch,ScanBmpEof,ScanBzip2,ScanClamav,ScanDmg,ScanDocx,ScanDonut,ScanEmail,ScanEncryptedDoc,ScanEncryptedZip,ScanEntropy,ScanExiftool,ScanGifEof,ScanGzip,ScanHtml,ScanIqy,ScanIso,ScanJarManifest,ScanJavascript,ScanJnlp,ScanJpegEof,ScanJson,ScanLibarchive,ScanLnk,ScanLsb,ScanLzma,ScanMacho,ScanManifest,ScanMsi,ScanOle,ScanOnenote,ScanPdf,ScanPe,ScanPgp,ScanPhp,ScanPkcs7,ScanPlist,ScanPngEof,ScanPyinstaller,ScanQr,ScanRar,ScanRpm,ScanRtf,ScanSevenZip,ScanSwf,ScanTar,ScanTnef,ScanTranscode,ScanUdf,ScanUpx,ScanUrl,ScanVb,ScanVba,ScanVhd,ScanVsto,ScanXar,ScanXl4ma,ScanXml,ScanYara,ScanZip,ScanZlib,ScanZstd
+ARG STRELKA_SCANNERS=default
 ENV STRELKA_SCANNERS=$STRELKA_SCANNERS
 
 ADD --chmod=755 strelka/*.sh /usr/local/bin/
 ADD --chmod=755 strelka/backend/*.sh /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD strelka/config/backend /etc/strelka/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \

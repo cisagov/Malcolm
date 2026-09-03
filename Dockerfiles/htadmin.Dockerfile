@@ -49,7 +49,6 @@ RUN apt-get -q update && \
       php-pear \
       php$PHP_VERSION-apcu \
       php$PHP_VERSION-cli \
-      php$PHP_VERSION-curl \
       php$PHP_VERSION-fpm \
       php$PHP_VERSION-gd \
       procps \

@@ -9,7 +9,7 @@
 #   - /usr/share/foobar/config/persist/foobar.keystore
 #       - "real" location of keystore file used by foobar
 #   - /usr/share/foobar/config/bootstrap/foobar.keystore
-#       - if "persist" keystore does't exist, but "bootstrap" keystore
+#       - if "persist" keystore doesn't exist, but "bootstrap" keystore
 #         does, then copy "bootstrap" keystore to "persist" keystore
 #   - /usr/share/foobar/config/foobar.keystore
 #       - symlinks to "persist" keystore (foobar requires this

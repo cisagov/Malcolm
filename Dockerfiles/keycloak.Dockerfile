@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9 AS ubi-micro-build
+FROM redhat/ubi9:latest AS ubi-micro-build
 
 RUN mkdir -p /mnt/rootfs && \
     dnf install --nodocs -y --releasever 9 --setopt install_weak_deps=false --installroot /mnt/rootfs \
@@ -13,7 +13,7 @@ RUN mkdir -p /mnt/rootfs && \
     dnf --installroot /mnt/rootfs clean all && \
     rpm --root /mnt/rootfs -e --nodeps setup
 
-FROM quay.io/keycloak/keycloak:26.5 AS builder
+FROM quay.io/keycloak/keycloak:26.7 AS builder
 
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=false
@@ -24,7 +24,7 @@ WORKDIR /opt/keycloak
 
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:26.5
+FROM quay.io/keycloak/keycloak:26.7
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"

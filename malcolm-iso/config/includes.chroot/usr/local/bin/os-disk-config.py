@@ -5,8 +5,7 @@
 
 ###################################################################################################
 # Detect, partition, and format devices to be used for:
-#  - Hedgehog Linux - sensor packet/log captures
-#  - Malcolm - database and capture artifacts
+#  - Malcolm - database and capture artifacts (both Malcolm and Hedgehog variants)
 #
 # Run the script with --help for options
 ###################################################################################################
@@ -25,8 +24,6 @@ from collections import defaultdict
 from fstab import Fstab
 
 from malcolm_constants import (
-    HEDGEHOG_PCAP_DIR,
-    HEDGEHOG_ZEEK_DIR,
     MALCOLM_DB_DIR,
     MALCOLM_LOGS_DIR,
     MALCOLM_PCAP_DIR,
@@ -59,35 +56,15 @@ CRYPT_DEV_PREFIX = 'crypt_dev_prefix'
 
 ###################################################################################################
 # Operating system mode constants
-OS_MODE_HEDGEHOG = "hedgehog"
 OS_MODE_MALCOLM = "malcolm"
-OS_MODE_MALCOLM_HEDGEHOG = "malcolm-hedgehog"
+OS_MODE_HEDGEHOG = "hedgehog"
 
 ETC_INSTALLER_AGGREGATOR = "aggregator"
 ETC_INSTALLER_SENSOR = "sensor"
 
 OS_PARAMS = defaultdict(lambda: None)
-OS_PARAMS[OS_MODE_HEDGEHOG] = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_MALCOLM] = defaultdict(lambda: None)
-OS_PARAMS[OS_MODE_MALCOLM_HEDGEHOG] = defaultdict(lambda: None)
-OS_PARAMS[OS_MODE_HEDGEHOG].update(
-    {
-        MINIMUM_DEVICE_BYTES: 100 * 1024 * 1024 * 1024,  # 100GiB
-        MOUNT_ROOT_PATH: "/capture",
-        MOUNT_DIRS: [HEDGEHOG_PCAP_DIR, HEDGEHOG_ZEEK_DIR],
-        FSTAB_FILE: "/etc/fstab",
-        CRYPTTAB_FILE: "/etc/crypttab",
-        GROUP_OWNER: "netdev",
-        USER_UID: 1000,
-        DIR_PERMS: 0o750,
-        SUBDIR_PERMS: 0o770,
-        SYSTEM_CONFIG_FILE: '/opt/sensor/sensor_ctl/control_vars.conf',
-        CRYPT_KEYFILE: '/etc/capture_crypt.key',
-        CRYPT_KEYFILE_PERMS: 0o600,
-        OTHER_FILE_PERMS: 0o600,
-        CRYPT_DEV_PREFIX: 'capture_vault_',
-    }
-)
+OS_PARAMS[OS_MODE_HEDGEHOG] = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_MALCOLM].update(
     {
         MINIMUM_DEVICE_BYTES: 100 * 1024 * 1024 * 1024,  # 100GiB
@@ -105,7 +82,7 @@ OS_PARAMS[OS_MODE_MALCOLM].update(
         CRYPT_DEV_PREFIX: 'malcolm_vault_',
     }
 )
-OS_PARAMS[OS_MODE_MALCOLM_HEDGEHOG].update(
+OS_PARAMS[OS_MODE_HEDGEHOG].update(
     {
         **OS_PARAMS[OS_MODE_MALCOLM],
         MOUNT_DIRS: [d for d in OS_PARAMS[OS_MODE_MALCOLM][MOUNT_DIRS] if d != MALCOLM_DB_DIR],
@@ -156,7 +133,6 @@ def CreateMapperDeviceName(device):
 ###################################################################################################
 def DetermineOSPlatform():
     os_release_info = {}
-    installer_id = None
 
     try:
         os_release_info = distro.os_release_info()
@@ -173,16 +149,7 @@ def DetermineOSPlatform():
                     except Exception:
                         pass
 
-    if os.path.isfile('/etc/installer'):
-        with open("/etc/installer", 'r') as f:
-            installer_id = f.readline().strip()
-
-    variant = os_release_info.get('variant_id')
-
-    if (variant == OS_MODE_HEDGEHOG) and (installer_id == ETC_INSTALLER_AGGREGATOR):
-        return OS_MODE_MALCOLM_HEDGEHOG
-    else:
-        return variant
+    return os_release_info.get('variant_id')
 
 
 ###################################################################################################
@@ -267,7 +234,7 @@ def main():
         default=None,
         metavar='<string>',
         type=str,
-        help=f'Script mode: {OS_MODE_HEDGEHOG}, {OS_MODE_MALCOLM} or {OS_MODE_MALCOLM_HEDGEHOG} (default: autodetect)',
+        help=f'Script mode: {OS_MODE_MALCOLM} or {OS_MODE_HEDGEHOG} (default: autodetect)',
     )
     parser.add_argument(
         '-i',
@@ -331,7 +298,7 @@ def main():
     if not args.osMode:
         args.osMode = DetermineOSPlatform()
 
-    if args.osMode in (OS_MODE_HEDGEHOG, OS_MODE_MALCOLM, OS_MODE_MALCOLM_HEDGEHOG):
+    if args.osMode in (OS_MODE_MALCOLM, OS_MODE_HEDGEHOG):
         osMode = args.osMode
     else:
         parser.print_help()
@@ -349,7 +316,7 @@ def main():
                 remove_prefix(x, '/dev/mapper/')
                 for x in glob.glob(f"/dev/mapper/{OS_PARAMS[osMode][CRYPT_DEV_PREFIX]}*")
             ]:
-                logging.info(f"Running crypsetup luksClose on {cryptDev}...")
+                logging.info(f"Running cryptsetup luksClose on {cryptDev}...")
                 _, cryptOut = run_subprocess(
                     f"/sbin/cryptsetup --verbose luksClose {cryptDev}", stdout=True, stderr=True, timeout=300
                 )
@@ -518,7 +485,7 @@ def main():
                                 _, reloadOut = run_subprocess("systemctl daemon-reload")
 
                                 # for good measure, run luksErase in case it was a previous luks volume
-                                logging.info(f"Running crypsetup luksErase on {parDev}...")
+                                logging.info(f"Running cryptsetup luksErase on {parDev}...")
                                 _, cryptOut = run_subprocess(
                                     f"/sbin/cryptsetup --verbose --batch-mode luksErase {parDev}",
                                     stdout=True,
@@ -533,7 +500,7 @@ def main():
                                 # luks volume creation
 
                                 # format device as a luks volume
-                                logging.info(f"Running crypsetup luksFormat on {device}...")
+                                logging.info(f"Running cryptsetup luksFormat on {device}...")
                                 ecode, cryptOut = run_subprocess(
                                     f"/sbin/cryptsetup --verbose --batch-mode luksFormat {parDev} --uuid='{parUuid}' --key-file {OS_PARAMS[osMode][CRYPT_KEYFILE]}",
                                     stdout=True,
@@ -547,7 +514,7 @@ def main():
                                         logging.info(f"\t{line}")
                                 if ecode == 0:
                                     # open the luks volume in /dev/mapper/
-                                    logging.info(f"Running crypsetup luksOpen on {device}...")
+                                    logging.info(f"Running cryptsetup luksOpen on {device}...")
                                     parMapperDev = CreateMapperDeviceName(parDev)
                                     ecode, cryptOut = run_subprocess(
                                         f"/sbin/cryptsetup --verbose luksOpen {parDev} {CreateMapperName(parDev)} --key-file {OS_PARAMS[osMode][CRYPT_KEYFILE]}",
@@ -742,28 +709,7 @@ def main():
                             createdUserDirs[subdir] = userDir
                             break
 
-                if (osMode == OS_MODE_HEDGEHOG) and os.path.isfile(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE]):
-                    # replace paths in-place in control_vars.conf
-                    capture_re = re.compile(r"\b(?P<key>PCAP_PATH|ZEEK_LOG_PATH)\s*=\s*.*?$")
-                    with fileinput.FileInput(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE], inplace=True, backup='.bak') as f:
-                        for line in f:
-                            line = line.rstrip("\n")
-                            log_path_match = capture_re.search(line)
-                            if log_path_match is not None:
-                                if (log_path_match.group('key') == 'PCAP_PATH') and (
-                                    createdUserDirs[HEDGEHOG_PCAP_DIR] is not None
-                                ):
-                                    print(capture_re.sub(r"\1=%s" % createdUserDirs[HEDGEHOG_PCAP_DIR], line))
-                                elif (log_path_match.group('key') == 'ZEEK_LOG_PATH') and (
-                                    createdUserDirs[HEDGEHOG_ZEEK_DIR] is not None
-                                ):
-                                    print(capture_re.sub(r"\1=%s" % createdUserDirs[HEDGEHOG_ZEEK_DIR], line))
-                                else:
-                                    print(line)
-                            else:
-                                print(line)
-
-                elif (osMode in (OS_MODE_MALCOLM, OS_MODE_MALCOLM_HEDGEHOG)) and os.path.isdir(
+                if (osMode in (OS_MODE_MALCOLM, OS_MODE_HEDGEHOG)) and os.path.isdir(
                     os.path.join(ownerHome, 'Malcolm')
                 ):
                     # write .os-disk-config-defaults to be picked up by install.py

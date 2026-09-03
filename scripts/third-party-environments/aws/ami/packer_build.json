@@ -20,8 +20,7 @@
       "region": "{{user `vpc_region`}}",
       "vpc_filter": {
         "filters": {
-          "tag:Name": "{{user `vpc_tag_name_filter`}}",
-          "isDefault": "false"
+          "tag:Name": "{{user `vpc_tag_name_filter`}}"
         }
       },
       "subnet_filter": {

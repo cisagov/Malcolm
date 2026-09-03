@@ -7,7 +7,7 @@
 # This script takes as input the filenames of one or more .zeek scripts which
 # contain records (see https://docs.zeek.org/en/master/script-reference/types.html#type-record).
 #
-# The scripts are parsed into their constitutent records and &log fields.
+# The scripts are parsed into their constituent records and &log fields.
 #
 # Each record is then printed out in the formats used by Malcolm for parsing and defining Zeek logs:
 # - Logstash (https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/1001_zeek_parse.conf
@@ -323,7 +323,7 @@ def main():
     recordsPathMap = {}
 
     # Parse all of the .zeek scripts TWICE: once to find the mapping of record names to .log paths,
-    # and a second time to get the fields for those recoreds. Yeah, it's inefficient, but this
+    # and a second time to get the fields for those records. Yeah, it's inefficient, but this
     # is something you do once in a blue moon so I don't care.
     for parseLoop in (0, 1):
         for val in args.input if args.input else ():
@@ -386,7 +386,7 @@ def main():
                         predicate=IsRecordNode,
                     ):
                         # determine the name of the record node
-                        # this isn't *exactly* going to match the acutal filename
+                        # this isn't *exactly* going to match the actual filename
                         # of the .log file, but it'll be close enough for a good start
                         typeName = None
                         try:

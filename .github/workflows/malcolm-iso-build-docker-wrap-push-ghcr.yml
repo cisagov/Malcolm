@@ -17,5 +17,9 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/iso-build-push.yml
+    permissions:
+      packages: write
+      contents: read
+      security-events: write
     with:
       profile: malcolm

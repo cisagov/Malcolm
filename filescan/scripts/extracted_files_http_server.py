@@ -669,7 +669,7 @@ def main():
         '-k',
         '--key',
         dest='key',
-        help="File encryption key (for ZIP file if -z/--zip, otherwise openssl-compatible encryption",
+        help="File encryption key (for ZIP file if -z/--zip; otherwise, openssl-compatible encryption",
         metavar='<str>',
         type=str,
         default=defaultKey,

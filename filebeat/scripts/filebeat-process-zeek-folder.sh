@@ -7,9 +7,9 @@
 #   - are not in processed/ or current/ or upload/ or extract_files/ or live/ (-prune)
 #   - are archive files (or, application/x-ms-evtx, which are also handled here as we accept
 #     Windows event log .evtx files which may be compressed and we don't know what's inside
-#     the archvies prior to this)
+#     the archives prior to this)
 #   - are not in use (fuser -s)
-# 1. move file to processed/ (preserving original subdirectory heirarchy, if any)
+# 1. move file to processed/ (preserving original subdirectory hierarchy, if any)
 # 2. calculate tags based on splitting the file path and filename (splitting on
 #    on ",-/_.")
 
@@ -38,12 +38,12 @@ if mkdir $LOCKDIR; then
 
   # get new logs ready for processing
   cd "$ZEEK_LOGS_DIR"
-  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx|application/octet-stream)" | sort -V | \
+  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/vnd.rar|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-gzip|application/x-lzip|application/x-lzma|application/x-rar|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx|application/octet-stream)" | sort -V | \
     xargs -P $FILEBEAT_PREPARE_PROCESS_COUNT -I '{}' bash -c '
 
     # separate filename and mime type
-    FILENAME="$( echo "{}" | awk -F"|" "{print \$1}" )"
-    FILEMIME="$( echo "{}" | awk -F"|" "{print \$2}" )"
+    FILENAME="$( echo "$1" | awk -F"|" "{print \$1}" )"
+    FILEMIME="$( echo "$1" | awk -F"|" "{print \$2}" )"
     # trim leading and trailing spaces
     FILENAME="${FILENAME#"${FILENAME%%[![:space:]]*}"}"
     FILENAME="${FILENAME%"${FILENAME##*[![:space:]]}"}"
@@ -101,15 +101,15 @@ if mkdir $LOCKDIR; then
         fi
 
         mkdir -p "$DESTDIR"
-        mkdir -p "$DESTDIR_EXTRACTED"
 
         if [[ "$FILEMIME" == "application/x-ms-evtx" ]]; then
           # special case for Windows event log files that are uploaded uncompressed
+          mkdir -p "$DESTDIR_EXTRACTED"
           mv "$FILENAME" "$DESTDIR_EXTRACTED"/"$(basename "$DESTNAME")"
         else
-          # extract archive to DESTDIR_EXTRACTED
+          # extract archive to DESTDIR_EXTRACTED (dir will be created by safe-extract.py)
           mv "$FILENAME" "$DESTNAME"
-          python3 -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
+          /usr/local/bin/safe-extract.py "$DESTNAME" "$DESTDIR_EXTRACTED"
         fi
 
         ZEEK_LOG_EXT=log
@@ -135,6 +135,6 @@ if mkdir $LOCKDIR; then
 
       fi # fuser says the file is not in use
     fi # FILENAME and FILEMIME are good
-  '
+  ' _ {}
 
 fi

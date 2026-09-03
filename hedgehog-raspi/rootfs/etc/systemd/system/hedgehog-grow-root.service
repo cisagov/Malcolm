@@ -1,0 +1,13 @@
+[Unit]
+Description=Expand Hedgehog root partition and filesystem
+After=local-fs.target
+Before=malcolm-system-init.service
+ConditionPathExists=!/var/lib/hedgehog/root-filesystem-expanded
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/hedgehog-grow-root
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

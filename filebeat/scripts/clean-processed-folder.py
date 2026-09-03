@@ -58,17 +58,19 @@ _LOG_MIME_TYPES = (
 
 _ARCHIVE_MIME_TYPES = (
     "application/gzip",
+    "application/vnd.rar",
     "application/x-7z-compressed",
     "application/x-bzip2",
     "application/x-cpio",
     "application/x-gzip",
     "application/x-lzip",
     "application/x-lzma",
-    "application/x-ms-evtx",
+    "application/x-rar",
     "application/x-rar-compressed",
     "application/x-tar",
     "application/x-xz",
     "application/zip",
+    "application/x-ms-evtx",
 )
 
 _LOG_FILE_TYPE_PATTERNS = [
@@ -276,7 +278,7 @@ def prune_files() -> None:
     # check the filescan logs
     filescan_files = list_files_in_dir(filescan_dir, sort_by_age=True)
     if filescan_files:
-        # filescan_files is sorted sorted oldest to newest; don't consider the newest file for deletion
+        # filescan_files is sorted oldest to newest; don't consider the newest file for deletion
         filescan_files.pop()
     logging.debug(f"Found {len(filescan_files)} filescan files to consider.")
     process_files(filescan_files, fb_files, check_logs=True, check_archives=False, label="Filescan")

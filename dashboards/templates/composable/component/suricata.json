@@ -996,6 +996,9 @@
                 "state": {
                   "type": "keyword"
                 },
+                "stored": {
+                  "type": "keyword"
+                },
                 "tx_id": {
                   "type": "keyword"
                 }
@@ -1116,6 +1119,9 @@
                 },
                 "length": {
                   "type": "integer"
+                },
+                "protocol": {
+                  "type": "keyword"
                 },
                 "redirect": {
                   "type": "keyword"
@@ -1801,6 +1807,12 @@
                 "dest_port": {
                   "type": "integer"
                 },
+                "pcap_cnt": {
+                  "type": "integer"
+                },
+                "pkt_src": {
+                  "type": "keyword"
+                },
                 "proto": {
                   "type": "keyword"
                 },
@@ -1811,6 +1823,12 @@
                   "type": "integer"
                 }
               }
+            },
+            "tc_progress": {
+              "type": "keyword"
+            },
+            "ts_progress": {
+              "type": "keyword"
             },
             "tx_id": {
               "type": "keyword"

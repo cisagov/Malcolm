@@ -511,7 +511,6 @@ def main():
     else:
         logline = "success (dry run only, no write performed)"
     logging.info(logline)
-    print(logline)
 
     if args.opensearch_mode == DatabaseMode.OpenSearchLocal and args.fix_unassigned and not args.dryrun:
         # set some configuration-related indexes' (e.g., opensearch/opendistro) replica count to 0

@@ -86,7 +86,7 @@ def custom_transform_suricata_disable_ics_all(malcolmIcs: bool) -> str:
 
 
 def custom_reverse_transform_suricata_disable_ics_all(value: str) -> bool:
-    return _env_str_to_bool(value)
+    return not _env_str_to_bool(value)
 
 
 def custom_transform_suricata_rotated_pcap(autoSuricata: bool, liveSuricata: bool) -> str:

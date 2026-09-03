@@ -33,7 +33,7 @@
 "523": "associated with encryption in RFC 5248"
 "530": "Authentication problem"
 "541": "The recipient address rejected your message"
-"550": "Non-existent email address"
+"550": "Nonexistent email address"
 "551": "User not local or invalid address – relay denied"
 "552": "Exceeded storage allocation"
 "553": "Mailbox name invalid"

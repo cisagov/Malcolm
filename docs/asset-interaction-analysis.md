@@ -20,16 +20,16 @@ Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbo
 
 ## <a name="NetBoxEnrichment"></a>Enriching network traffic metadata via NetBox lookups
 
-As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHMENT` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`), the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/) for more information.
+As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHMENT` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`), the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/schema/swagger-ui/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/) for more information.
 
 * `destination.…`
-    - `destination.device.cluster` (`/virtualization/clusters/`) (for [Virtual Machine](https://demo.netbox.dev/static/docs/coe-functionality/virtualization/) device types)
-    - [`destination.device.device_type`](https://demo.netbox.dev/static/docs/core-functionality/device-types/) (`/dcim/device-types/`)
+    - `destination.device.cluster` (`/virtualization/clusters/`) (for [Virtual Machine](https://docs.netbox.dev/en/stable/features/virtualization/) device types)
+    - [`destination.device.device_type`](https://docs.netbox.dev/en/stable/models/dcim/devicetype/) (`/dcim/device-types/`)
     - `destination.device.id` (`/dcim/devices/{id}`)
     - `destination.device.manufacturer` (`/dcim/manufacturers/`)
     - `destination.device.name` (`/dcim/devices/`)
     - `destination.device.role` (`/dcim/device-roles/`)
-    - [`destination.device.service`](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) (`/ipam/services/`)
+    - [`destination.device.service`](https://netboxlabs.com/docs/netbox/models/ipam/servicetemplate/) (`/ipam/services/`)
     - `destination.device.site` (`/dcim/sites/`)
     - `destination.device.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
     - `destination.segment.id` (`/ipam/prefixes/{id}`)
@@ -50,7 +50,7 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHM
 
 For Malcolm's purposes, both physical devices and virtualized hosts will be stored as described above: the `device_type` field can be used to distinguish between them.
 
-NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges. The site to associate with network traffic can be specified when [PCAP is uploaded](upload.md#Upload), when configuring [live analysis](live-analysis.md#LiveAnalysis), and when [configuring forwarding from Hedgehog Linux](malcolm-hedgehog-e2e-iso-install.md#HedgehogCommConfig). If not otherwise specified, the value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used for these enrichment lookups.
+NetBox has the concept of [sites](https://netboxlabs.com/docs/netbox/features/facilities/#sites). Sites can have overlapping IP address ranges. The site to associate with network traffic can be specified when [PCAP is uploaded](upload.md#Upload), when configuring [live analysis](live-analysis.md#LiveAnalysis), and when [configuring forwarding from Hedgehog Linux](malcolm-hedgehog-e2e-iso-install.md#HedgehogCommConfig). If not otherwise specified, the value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used for these enrichment lookups.
 
 When NetBox enrichment is attempted for a log, the value `netbox` is automatically added to its `tags` field.
 
@@ -99,9 +99,9 @@ However, careful consideration should be made before enabling this feature: the 
 
 Devices created using this autopopulate method will include a `tags` value of `Autopopulated`. It is recommended that users periodically review automatically-created devices for correctness and to fill in known details that couldn't be determined from network traffic. For example, the `manufacturer` field for automatically-created devices will be set based on the organizational unique identifier (OUI) determined from the first three bytes of the observed MAC address, which may not be accurate if the device's traffic was observed across a router. If possible, observed hostnames (extracted from logs that provide a mapping of IP address to host name, such as Zeek's `dns.log`, `ntlm.log`, and `dhcp.log`) will be used in the naming of the automatically-created devices, falling back to the device manufacturer otherwise (e.g., `MYHOSTNAME` vs. `Schweitzer Engineering @ 10.10.0.123`).
 
-Since device autocreation is based on IP address, information about network segments (IP [prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)) must be first [manually specified](#NetBoxPopManual) in NetBox in order for devices to be automatically populated. Users should populate the `description` field in the NetBox IPAM Prefixes data model to specify a name to be used for NetBox network segment autopopulation and enrichment, otherwise the IP prefix itself will be used.
+Since device autocreation is based on IP address, information about network segments (IP [prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)) must be first [manually specified](#NetBoxPopManual) in NetBox in order for devices to be automatically populated. Users should populate the `description` field in the NetBox IPAM Prefixes data model to specify a name to be used for NetBox network segment autopopulation and enrichment; otherwise, the IP prefix itself will be used.
 
-Although network devices can be automatically created using this method, [services](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) should inventoried manually. The **Uninventoried Observed Services** visualization in the [**Zeek Known Summary** dashboard](dashboards.md#DashboardsVisualizations) can help users review network services to be created in NetBox.
+Although network devices can be automatically created using this method, [services](https://netboxlabs.com/docs/netbox/models/ipam/servicetemplate/) should inventoried manually. The **Uninventoried Observed Services** visualization in the [**Zeek Known Summary** dashboard](dashboards.md#DashboardsVisualizations) can help users review network services to be created in NetBox.
 
 See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for more information on this feature.
 
@@ -142,7 +142,7 @@ If no matching site-specific rule is found, the default rule — defined using a
 
 ### <a name="NetBoxPopPassiveOUIMatch"></a> Matching device manufacturers to OUIs
 
-Malcolm's NetBox inventory is prepopulated with a collection of [community-sourced device type definitions](https://github.com/netbox-community/devicetype-library) which can then be augmented by users [manually](#NetBoxPopManual) or through [preloading](#NetBoxPreload). During passive autopopulation device manufacturer is inferred from organizationally unique identifiers (OUIs), which make up the first three octets of a MAC address. The IEEE Standards Association maintains the [registry of OUIs](https://standards-oui.ieee.org/), which is not necessarily very internally consistent with how organizations specify the name associated with their OUI entry. In other words, there's not a foolproof programattic way for Malcolm to map MAC address OUI organization names to NetBox manufacturer names, barring creating and maintaining a manual mapping (which would be very large and difficult to keep up-to-date).
+Malcolm's NetBox inventory is prepopulated with a collection of [community-sourced device type definitions](https://github.com/netbox-community/devicetype-library) which can then be augmented by users [manually](#NetBoxPopManual) or through [preloading](#NetBoxPreload). During passive autopopulation device manufacturer is inferred from organizationally unique identifiers (OUIs), which make up the first three octets of a MAC address. The IEEE Standards Association maintains the [registry of OUIs](https://standards-oui.ieee.org/), which is not necessarily very internally consistent with how organizations specify the name associated with their OUI entry. In other words, there's not a foolproof programmatic way for Malcolm to map MAC address OUI organization names to NetBox manufacturer names, barring creating and maintaining a manual mapping (which would be very large and difficult to keep up-to-date).
 
 Malcolm's [NetBox lookup code]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/ruby/netbox_enrich.rb) used in the log enrichment pipeline attempts to match OUI organization names against the list of NetBox's manufacturers using ["fuzzy string matching"](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance), a technique in which two strings of characters are compared and assigned a similarity score between `0` (completely dissimilar) and `1` (identical). The `NETBOX_DEFAULT_FUZZY_THRESHOLD` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) can be used to tune the threshold for determining a match. A fairly high value is recommended (above `0.85`; `0.95` is the default) to avoid autopopulating the NetBox inventory with devices with manufacturers that don't actually exist in the network being monitored.
 

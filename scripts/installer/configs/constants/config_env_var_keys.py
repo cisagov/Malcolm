@@ -66,6 +66,9 @@ KEY_ENV_LOGSTASH_HOST = "LOGSTASH_HOST"  # Logstash host and port
 KEY_ENV_LOGSTASH_REVERSE_DNS = "LOGSTASH_REVERSE_DNS"  # automatic local reverse dns lookup
 KEY_ENV_LOGSTASH_OUI_LOOKUP = "LOGSTASH_OUI_LOOKUP"  # automatic MAC OUI lookup
 KEY_ENV_LOGSTASH_JAVA_OPTS = "LS_JAVA_OPTS"  # logstash memory allowance
+KEY_ENV_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES = (
+    "LOGSTASH_NETBOX_ENRICHMENT_DATASETS"  # netbox-enriched log types via logstash
+)
 
 KEY_ENV_NETBOX_ENRICHMENT = "NETBOX_ENRICHMENT"  # enrich network traffic metadata via NetBox API calls
 KEY_ENV_NETBOX_AUTO_CREATE_PREFIX = (
@@ -117,6 +120,7 @@ KEY_ENV_PUID = "PUID"  # process User ID
 KEY_ENV_PROFILE_KEY = PROFILE_KEY
 
 KEY_ENV_SURICATA_UPDATE_RULES = "SURICATA_UPDATE_RULES"  # Suricata signature updates (via suricata-update)
+KEY_ENV_SURICATA_DISABLE_SIDS = "SURICATA_DISABLE_SIDS"  # List of Suricata SIDs to disable
 KEY_ENV_SURICATA_DISABLE_ICS_ALL = "SURICATA_DISABLE_ICS_ALL"  # disable/enable ICS analyzers
 KEY_ENV_SURICATA_LIVE_CAPTURE = "SURICATA_LIVE_CAPTURE"  # live traffic analysis with Suricata
 KEY_ENV_SURICATA_STATS_ENABLED = "SURICATA_STATS_ENABLED"  # live capture statistics for Suricata
@@ -164,6 +168,7 @@ KEY_ENV_PIPELINE_ENABLED = (
     "PIPELINE_DISABLED"  # Pipeline DISABLED (note that this is boolean is reversed from the installer logic)
 )
 KEY_ENV_PIPELINE_WORKERS = "STRELKA_BACKEND_PROCS"
+KEY_ENV_PIPELINE_SCANNERS = "STRELKA_SCANNERS"
 
 
 def get_env_key_dict():

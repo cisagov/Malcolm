@@ -34,11 +34,12 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_TWEAK_IFACE,
 )
 
-CONFIG_ITEM_PCAP_IFACE = ConfigItem(
+CONFIG_ITEM_PCAP_IFACE = ListOfStringsConfigItem(
     key=KEY_CONFIG_ITEM_PCAP_IFACE,
     label="Capture Interface(s)",
-    default_value="",
-    validator=lambda x: isinstance(x, str),
+    default_value=[],
+    accept_blank=True,
+    validator=lambda x: isinstance(x, str) or (isinstance(x, list) and all(isinstance(iface, str) for iface in x)),
     question="Capture interface(s) (comma-separated)",
     widget_type=WidgetType.TEXT,
 )

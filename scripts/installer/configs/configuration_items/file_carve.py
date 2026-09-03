@@ -12,15 +12,16 @@ including file extraction and preservation configuration.
 from typing import Tuple
 
 
-from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.enums import (
     FileExtractionMode,
     FilePreservationMode,
 )
-from scripts.malcolm_constants import WidgetType
+from scripts.malcolm_constants import WidgetType, MALCOLM_STRELKA_SCANNERS_DEFAULT
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_PIPELINE_ENABLED,
     KEY_CONFIG_ITEM_PIPELINE_WORKERS,
+    KEY_CONFIG_ITEM_PIPELINE_SCANNERS,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP,
@@ -125,6 +126,16 @@ CONFIG_ITEM_PIPELINE_WORKERS = ConfigItem(
     validator=lambda x: isinstance(x, int) and x > 0,
     question="Number of Strelka file scanning workers (e.g., 1, 4, etc.)",
     widget_type=WidgetType.NUMBER,
+)
+
+CONFIG_ITEM_PIPELINE_SCANNERS = ListOfStringsConfigItem(
+    key=KEY_CONFIG_ITEM_PIPELINE_SCANNERS,
+    label="Enabled Strelka Scanners",
+    default_value=MALCOLM_STRELKA_SCANNERS_DEFAULT,
+    validator=lambda x: isinstance(x, str) or (isinstance(x, list) and all(isinstance(dataset, str) for dataset in x)),
+    question='Comma-separated list of Strelka scanners to enable',
+    widget_type=WidgetType.TEXT,
+    accept_blank=True,
 )
 
 CONFIG_ITEM_FILE_SCAN_RULE_UPDATE = ConfigItem(

@@ -2,7 +2,7 @@
 
 * [Obtaining Malcolm's release artifacts](#FromGit)
 * [Using `git` to clone the Malcolm source code](#FromReleaseArtifacts)
-* [Software requirements](#SofwareRequirements)
+* [Software requirements](#SoftwareRequirements)
 * [Running `install.py`](#UIOpts)
 * [The Malcolm configuration menu](#ConfigMenu)
 * [The Malcolm installation menu](#InstallMenu)
@@ -12,7 +12,7 @@
 
 Here's a step-by-step example of getting [Malcolm from GitHub]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}), configuring the local system and the Malcolm instance, and running it on a system running Ubuntu Linux. Installing Malcolm may require some variation depending on individual system configuration, but this should be a good starting point.
 
-For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linux](hedgehog.md) sensor using the [Malcolm installer ISO](malcolm-iso.md#ISO) and Hedgehog Linux installer ISO, see **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)**.
+For a more in-depth guide covering installing both Malcolm and a [Hedgehog Linux](hedgehog.md) sensor using the [Malcolm installer ISO](malcolm-iso.md#ISO) and Hedgehog Linux installer ISO, see **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)**.
 
 The commands in this example should be executed as a non-root user except where clearly indicated with the use of `sudo`. Replace `user` in this example with the local account username.
 
@@ -53,9 +53,9 @@ Resolving deltas: 100% (33914/33914), done.
 user@host:~$ cd Malcolm/
 ```
 
-## <a name="SofwareRequirements"></a>Software requirements
+## <a name="SoftwareRequirements"></a>Software requirements
 
-The Malcolm installer requires Python 3.9 or higher and a few Python libraries. On most Linux distributions these libraries (often packaged as `python3-ruamel.yaml` and `python3-dotenv`) can be installed from official repos, using `apt` or `apt-get` (for Ubuntu and other Debian-based distributions), or `yum` or `dnf` (for Redhat-based distributions). Alternatively, [`ruamel.yaml`](https://pypi.org/project/ruamel.yaml/) and [`dotenv`](https://pypi.org/project/dotenv/) can be [installed via `pip`](https://packaging.python.org/en/latest/tutorials/installing-packages/).
+The Malcolm installer requires Python 3.9 or higher and a few Python libraries. On most Linux distributions these libraries (often packaged as `python3-ruamel.yaml` and `python3-dotenv`) can be installed from official repos, using `apt` or `apt-get` (for Ubuntu and other Debian-based distributions), or `yum` or `dnf` (for Red Hat-based distributions). Alternatively, [`ruamel.yaml`](https://pypi.org/project/ruamel.yaml/) and [`dotenv`](https://pypi.org/project/dotenv/) can be [installed via `pip`](https://packaging.python.org/en/latest/tutorials/installing-packages/).
 ```
 $ sudo apt-get -y -qq update
 $ sudo apt-get -y install python3-ruamel.yaml python3-dotenv
@@ -163,7 +163,7 @@ Enter item number or action:
 * **Install Docker if Missing**, **Docker Installation Method**, **Try Docker Convenience Script**, and **Try Docker Repository Installation**
   - If the system does not already have Docker (or Podman, if it was selected during configuration) installed, the Malcolm installer will attempt to install it for you. The installation options include:
     + `repository` - Install Docker [using its `apt` repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
-    + `convenience_script` - Install Docker [using covenience script](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script)
+    + `convenience_script` - Install Docker [using convenience script](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script)
 * **Docker Users**
   - When using the Docker runtime, because Malcolm's containers' processes should run without superuser permissions, the username of the non-root user under which Malcolm will be run should be specified here to be added to the `docker` group.
   - Select **Y** to attempt to install Docker using the installation method specified above.

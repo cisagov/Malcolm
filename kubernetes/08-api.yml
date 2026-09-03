@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:26.04.1
+        image: ghcr.io/idaholab/malcolm/api:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -88,6 +88,7 @@ spec:
             name: api-var-local-catrust-volume
           - mountPath: /var/local/curlrc/secretmap
             name: api-opensearch-curlrc-secret-volume
+      terminationGracePeriodSeconds: 20
       volumes:
         - name: api-var-local-catrust-volume
           configMap:

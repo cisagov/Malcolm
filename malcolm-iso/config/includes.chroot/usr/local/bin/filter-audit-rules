@@ -1,0 +1,314 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+
+DEFAULT_RULES_DIR = Path("/etc/audit/rules.d")
+
+
+def get_supported_syscalls() -> set[str]:
+    """Return syscall names supported by the native 64-bit ABI."""
+    result = subprocess.run(
+        ["/usr/bin/ausyscall", "b64", "--dump"],
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    supported: set[str] = set()
+
+    for line in result.stdout.splitlines():
+        fields = line.split(None, 1)
+        if len(fields) == 2 and fields[0].isdigit():
+            supported.add(fields[1].strip())
+
+    if not supported:
+        raise RuntimeError("ausyscall returned no native 64-bit syscalls")
+
+    return supported
+
+
+def split_syscalls(value: str) -> list[str]:
+    """Split an audit -S argument, which may contain comma-separated names."""
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def referenced_required_paths(tokens: list[str]) -> list[str]:
+    """Return paths from -F path= filters that must already exist."""
+    paths: list[str] = []
+
+    index = 0
+    while index < len(tokens):
+        if tokens[index] == "-F" and index + 1 < len(tokens):
+            field = tokens[index + 1]
+
+            if field.startswith("path="):
+                paths.append(field.removeprefix("path="))
+
+            index += 2
+        else:
+            index += 1
+
+    return paths
+
+
+def rule_arch(tokens: list[str]) -> str | None:
+    """Return the value of an audit arch filter, if present."""
+    index = 0
+
+    while index < len(tokens):
+        if tokens[index] == "-F" and index + 1 < len(tokens):
+            field = tokens[index + 1]
+            if field.startswith("arch="):
+                return field.removeprefix("arch=")
+            index += 2
+        else:
+            index += 1
+
+    return None
+
+
+def filter_syscalls(
+    tokens: list[str],
+    supported: set[str],
+) -> tuple[list[str], list[str]]:
+    """
+    Remove unsupported names from all -S arguments.
+
+    Returns the updated tokens and the list of removed syscall names.
+    """
+    output: list[str] = []
+    removed: list[str] = []
+
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+
+        if token != "-S":
+            output.append(token)
+            index += 1
+            continue
+
+        if index + 1 >= len(tokens):
+            # Leave malformed input intact so audit tooling can report it.
+            output.append(token)
+            index += 1
+            continue
+
+        syscall_names = split_syscalls(tokens[index + 1])
+        kept = [name for name in syscall_names if name in supported]
+        removed.extend(name for name in syscall_names if name not in supported)
+
+        if kept:
+            output.extend(["-S", ",".join(kept)])
+
+        index += 2
+
+    return output, removed
+
+
+def has_syscall_selector(tokens: list[str]) -> bool:
+    return "-S" in tokens
+
+
+def format_rule(tokens: list[str]) -> str:
+    """Reconstruct an audit rule without shell quoting."""
+    return " ".join(tokens)
+
+
+def process_rule(
+    line: str,
+    supported_syscalls: set[str],
+    source: Path,
+    line_number: int,
+) -> tuple[str | None, list[str]]:
+    """
+    Process one audit rule.
+
+    A None result means the rule should be omitted.
+    """
+    stripped = line.strip()
+
+    if not stripped or stripped.startswith("#"):
+        return line, []
+
+    try:
+        tokens = shlex.split(stripped, comments=False, posix=True)
+    except ValueError as exc:
+        raise RuntimeError(f"{source}:{line_number}: cannot parse rule: {exc}") from exc
+
+    messages: list[str] = []
+
+    arch = rule_arch(tokens)
+
+    if arch == "b32":
+        messages.append("removed unsupported 32-bit audit rule")
+        return None, messages
+
+    missing_paths = [path for path in referenced_required_paths(tokens) if not os.path.exists(path)]
+
+    if missing_paths:
+        messages.append("removed rule for missing path(s): " + ", ".join(missing_paths))
+        return None, messages
+
+    originally_had_syscalls = has_syscall_selector(tokens)
+
+    if originally_had_syscalls:
+        # Rules without an explicit arch are interpreted using the native ABI.
+        # Malcolm only supports 64-bit systems, so validate them against b64 too.
+        tokens, removed_syscalls = filter_syscalls(tokens, supported_syscalls)
+
+        if removed_syscalls:
+            messages.append("removed unsupported syscall(s): " + ", ".join(sorted(set(removed_syscalls))))
+
+        if not has_syscall_selector(tokens):
+            messages.append("removed rule because no supported syscalls remain")
+            return None, messages
+
+    updated = format_rule(tokens)
+
+    # Preserve formatting exactly when no semantic change was made.
+    if not messages:
+        return line, []
+
+    return updated + "\n", messages
+
+
+def rewrite_file(
+    path: Path,
+    supported_syscalls: set[str],
+    dry_run: bool,
+    backup_suffix: str | None,
+) -> bool:
+    original_lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    output_lines: list[str] = []
+    changed = False
+
+    for line_number, line in enumerate(original_lines, start=1):
+        result, messages = process_rule(
+            line,
+            supported_syscalls,
+            path,
+            line_number,
+        )
+
+        for message in messages:
+            print(f"{path}:{line_number}: {message}", file=sys.stderr)
+
+        if result is None:
+            changed = True
+            continue
+
+        output_lines.append(result)
+
+        if result != line:
+            changed = True
+
+    if not changed:
+        return False
+
+    if dry_run:
+        return True
+
+    if backup_suffix:
+        backup = path.with_name(path.name + backup_suffix)
+        if not backup.exists():
+            shutil.copy2(path, backup)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        delete=False,
+    ) as temporary:
+        temporary.writelines(output_lines)
+        temporary_path = Path(temporary.name)
+
+    shutil.copymode(path, temporary_path)
+    os.replace(temporary_path, path)
+
+    return True
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Adapt Linux audit rules to the installed 64-bit platform")
+    parser.add_argument(
+        "--rules-dir",
+        type=Path,
+        default=DEFAULT_RULES_DIR,
+        help=f"audit rules directory; default: {DEFAULT_RULES_DIR}",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="report changes without modifying files",
+    )
+    parser.add_argument(
+        "--backup-suffix",
+        default=".pre-platform-filter",
+        help=("suffix for one-time backups; use an empty string for no backups " "(default: .pre-platform-filter)"),
+    )
+    parser.add_argument(
+        "--load",
+        action="store_true",
+        help="run augenrules --load after rewriting",
+    )
+    args = parser.parse_args()
+
+    if os.geteuid() != 0 and not args.dry_run:
+        parser.error("must run as root unless --dry-run is used")
+
+    if not args.rules_dir.is_dir():
+        parser.error(f"rules directory does not exist: {args.rules_dir}")
+
+    supported_syscalls = get_supported_syscalls()
+    rule_files = sorted(args.rules_dir.glob("*.rules"))
+
+    if not rule_files:
+        parser.error(f"no .rules files found under {args.rules_dir}")
+
+    changed_files: list[Path] = []
+
+    for path in rule_files:
+        if rewrite_file(
+            path,
+            supported_syscalls,
+            args.dry_run,
+            args.backup_suffix or None,
+        ):
+            changed_files.append(path)
+
+    if changed_files:
+        action = "would update" if args.dry_run else "updated"
+        for path in changed_files:
+            print(f"{action}: {path}")
+    else:
+        print("No audit-rule changes required")
+
+    if args.load and not args.dry_run:
+        subprocess.run(
+            ["/usr/sbin/augenrules", "--load"],
+            check=True,
+        )
+
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except subprocess.CalledProcessError as exc:
+        print(f"command failed with exit status {exc.returncode}", file=sys.stderr)
+        raise SystemExit(exc.returncode)
+    except Exception as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        raise SystemExit(1)

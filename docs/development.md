@@ -18,7 +18,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `filescan-logs` - an initially empty directory into which file scanning result logs will be generated
 * `filescan` - code and configuration for the `filescan` container that can scan files extracted by Zeek
 * `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
-* `hedgehog-raspi` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) [Raspberry Pi image](hedgehog-raspi-build.md#HedgehogRaspiBuild)
+* `hedgehog-raspi` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) [Raspberry Pi image](hedgehog-raspi.md)
 * `htadmin` - configuration for the `htadmin` user account management container
 * `keycloak` - code for the [`keycloak`](authsetup.md#AuthKeycloak) container
 * `logstash` - code and configuration for the `logstash` container that parses Zeek logs and forwards them to the `opensearch` container
@@ -72,7 +72,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/keycloak` (based on `quay.io/keycloak/keycloak`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
-* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.23`)
+* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.24`)
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:13-slim`)

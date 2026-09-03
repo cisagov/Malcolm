@@ -36,7 +36,7 @@ Malcolm's source code and release artifacts are made up of the following:
 
 ## <a name="UpstreamComponents"></a> Upstream Components
 
-Malcolm is a tool suite that incorporates many open source components (some of which are listed [here](contributing-github-runners.md#GitHubRunners)).
+Malcolm is a tool suite that incorporates many open source components (some of which are listed [here](components.md#Components)).
 
 ![components](images/malcolm_components.png)
 
@@ -45,7 +45,7 @@ Malcolm is a tool suite that incorporates many open source components (some of w
 The main sources of Malcolm’s core tools and libraries are the 'base images' on which Malcolm is built. These base images are defined in:
 
 * [Dockerfiles]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) used to build container images
-* scripts that use the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build the x86_64 ISO and ARM64 [Raspberry Pi installer](hedgehog-raspi-build.md#HedgehogRaspiBuild) images
+* scripts that use the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build the x86_64 ISO and ARM64 [Raspberry Pi installer](hedgehog-raspi.md#HedgehogRaspiBuild) images
 
 #### <a name="ContainerImages"></a> Container Images
 
@@ -62,7 +62,7 @@ The base images used to build Malcolm's images are:
 * [opensearchproject/opensearch-dashboards](https://hub.docker.com/r/opensearchproject/opensearch-dashboards) (Docker-Verified Official Publisher Image)
 * [postgres:alpine](https://hub.docker.com/_/postgres) (Docker Official Image)
 * [python:3-slim](https://hub.docker.com/_/python) (Docker Official Image)
-* [valkey:alpine](https://hub.docker.com/_/valkey) (Docker Official Image)
+* [valkey:alpine](https://hub.docker.com/r/valkey/valkey) (Docker Official Image)
 
 As described on the [Docker Hub documentation](https://docs.docker.com/docker-hub/image-library/trusted-content/):
 
@@ -72,13 +72,13 @@ Using these official images as the base of Malcolm's Docker images relies on a t
 
 #### <a name="ISOInstalledEnvironments"></a> ISO-Installed Environments
 
-For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog.md), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
+For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog.md), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
 
-Beyond building on this solid foundation, and as these environments are full-fledged operating systems, the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks are used as a basis for additional hardening that targets the following guidelines for establishing a secure configuration posture:
+Beyond building on this solid foundation, and as these environments are full-fledged operating systems, the Malcolm aggregator base operating system uses the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) hardening scripts, which target Debian GNU/Linux 9 through 13. The project builds on the [OVH-debian-cis](https://github.com/ovh/debian-cis) framework and implements checks from:
 
-* [CIS Debian Linux Benchmarks](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/)
-* [DISA STIG (Security Technical Implementation Guides) for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
-* Additional recommendations from [cisecurity.org](https://www.cisecurity.org/)
+* CIS recommendations
+* DISA STIG for Red Hat Enterprise Linux 7 (V2R5) and Ubuntu (V1R2), adapted for Debian
+* Additional checks contributed by the HardenedLinux community
 
 More details on this hardening can be found [here for Malcolm](hardening.md).
 
@@ -157,6 +157,6 @@ Pull requests that follow [best practices](https://docs.github.com/en/pull-reque
 
 ## <a name="SecurityVulnerabilityScanning"></a> Security Vulnerability Scanning
 
-When Malcolm's official container images are [built on GitHub](contributing-github-runners.md#GitHubRunners), they are automatically scanned with [Trivy](https://trivy.dev/latest/). Trivy can "find vulnerabilities (CVE) & misconfigurations (IaC) across code repositories, binary artifacts, container images, Kubernetes clusters, and more." When Trivy detects a vulnerability in a software package included in Malcolm, a report is automatically generated and uploaded to the Malcolm repository's [code scanning](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning) dashboard on GitHub. These are periodically reviewed and addressed (by updating to a newer version of the affected dependency if it has become available, by applying other safeguards in the code to avoid the affected functionality, replacing the dependency with another alternative, or other solutions as determined on a case-by-case basis) by the Malcolm development team.
+When Malcolm's official container images are [built on GitHub](contributing-github-runners.md#GitHubRunners), they are automatically scanned with [Trivy](https://trivy.dev/docs/latest/). Trivy can "find vulnerabilities (CVE) & misconfigurations (IaC) across code repositories, binary artifacts, container images, Kubernetes clusters, and more." When Trivy detects a vulnerability in a software package included in Malcolm, a report is automatically generated and uploaded to the Malcolm repository's [code scanning](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning) dashboard on GitHub. These are periodically reviewed and addressed (by updating to a newer version of the affected dependency if it has become available, by applying other safeguards in the code to avoid the affected functionality, replacing the dependency with another alternative, or other solutions as determined on a case-by-case basis) by the Malcolm development team.
 
 In addition to this proactive vulnerability scanning, GitHub also sends [Dependabot alerts](https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts) when it detects a vulnerable dependency in the Malcolm code base. These are also addressed as they arise.

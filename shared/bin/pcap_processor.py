@@ -326,6 +326,10 @@ def zeekFileWorker(zeekWorkerArgs):
                                 # use Zeek to process the pcap
                                 zeekCmd = [zeekBin, "-r", fileInfo[FILE_INFO_DICT_NAME], ZEEK_LOCAL_SCRIPT]
 
+                                # enable ZAM script optimization if requested
+                                if str2bool(os.getenv("ZEEK_ZAM", "false")):
+                                    zeekCmd.extend(["-O", "ZAM"])
+
                                 # set file extraction parameters if required
                                 if extractFileMode != ZEEK_EXTRACTOR_MODE_NONE:
                                     zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT)
@@ -636,7 +640,7 @@ def main():
         '--node',
         required=False,
         dest='nodeName',
-        help="PCAP source node name (may be overriden by publisher)",
+        help="PCAP source node name (may be overridden by publisher)",
         metavar='<STR>',
         type=str,
         default=os.getenv('PCAP_NODE_NAME', 'malcolm'),

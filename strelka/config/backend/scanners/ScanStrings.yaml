@@ -1,8 +1,11 @@
 ScanStrings:
-  - positive:
-      flavors:
-        - 'mz_file'
   - negative:
       flavors:
         - 'base64'
+    positive:
+      flavors:
+        - 'mz_file'
     priority: 5
+    options:
+      limit: 0
+      min_length: 8

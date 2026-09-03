@@ -1,4 +1,4 @@
-FROM zeek/zeek:8.1.1
+FROM zeek/zeek:8.2.2
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -50,9 +50,9 @@ ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 ADD --chmod=644 zeek/requirements.txt /usr/local/src/requirements.txt
 
-ENV SUPERCRONIC_VERSION="0.2.43"
+ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
-ENV SUPERCRONIC_CRONTAB="${ZEEK_DIR}/crontab"
+ENV SUPERCRONIC_CRONTAB="${ZEEK_DIR}/etc/crontab"
 
 # build and install system packages, zeek, spicy and plugins
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
@@ -189,7 +189,7 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP="(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_C1222_UDP|ANALYZER_C1222_TCP|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_ROC_PLUS_TCP|ANALYZER_ROC_PLUS_UDP|ANALYZER_OMRON_FINS_TCP|ANALYZER_OMRON_FINS_UDP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka|JGras::FuzzyHashing)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP="(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_C1222_UDP|ANALYZER_C1222_TCP|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_ROC_PLUS_TCP|ANALYZER_ROC_PLUS_UDP|ANALYZER_OMRON_FINS_TCP|ANALYZER_OMRON_FINS_UDP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka|JGras::FuzzyHashing|ANALYZER_SPICY_IEC104)"
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP="(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-1675/main|CVE-2021-31166/detect|CVE-2021-38647/omigod|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-21907/main|cve-2022-22954/main|CVE-2022-23270-PPTP/main|CVE-2022-24491/main|CVE-2022-24497/main|cve-2022-26809/main|CVE-2022-26937/main|CVE-2022-30216/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja4/main|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-agenttesla-detector/main|zeek-asyncrat-detector/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-netsupport-detector/main|zeek-quasarrat-detector/main|zeek-sniffpass/__load__|zeek-strrat-detector/main|zerologon/main|zeek-long-connections/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
@@ -291,6 +291,7 @@ ARG ZEEK_OMRON_FINS_DETAILED=true
 ARG ZEEK_KAFKA_ENABLED=
 ARG ZEEK_KAFKA_BROKERS=kafka.local:9091
 ARG ZEEK_KAFKA_TOPIC=zeek
+ARG ZEEK_FILE_ANALYZER_TIMEOUT_SEC=5
 
 ENV ZEEK_DISABLE_STATS=$ZEEK_DISABLE_STATS
 ENV ZEEK_DISABLE_LOG_PASSWORDS=$ZEEK_DISABLE_LOG_PASSWORDS
@@ -321,6 +322,7 @@ ENV ZEEK_OMRON_FINS_DETAILED=$ZEEK_OMRON_FINS_DETAILED
 ENV ZEEK_KAFKA_ENABLED=$ZEEK_KAFKA_ENABLED
 ENV ZEEK_KAFKA_BROKERS=$ZEEK_KAFKA_BROKERS
 ENV ZEEK_KAFKA_TOPIC=$ZEEK_KAFKA_TOPIC
+ENV ZEEK_FILE_ANALYZER_TIMEOUT_SEC=$ZEEK_FILE_ANALYZER_TIMEOUT_SEC
 
 # This is in part to handle an issue when running with rootless podman and
 #   "userns_mode: keep-id". It seems that anything defined as a VOLUME
@@ -331,7 +333,7 @@ ENV ZEEK_KAFKA_TOPIC=$ZEEK_KAFKA_TOPIC
 #   where I've put this workaround) in this case the PUSER_CHOWN was
 #   already being set like this, so even if I resolve that issue
 #   I probably don't want to remove this.
-ENV PUSER_CHOWN="$ZEEK_DIR"
+ENV PUSER_CHOWN="$ZEEK_DIR/etc;$ZEEK_DIR/share/zeek/site/custom;$ZEEK_DIR/share/zeek/site/intel;$ZEEK_DIR/share/zeekctl;$ZEEK_DIR/spool"
 
 # see PUSER_CHOWN comment above
 VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]

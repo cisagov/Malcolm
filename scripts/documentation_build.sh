@@ -18,15 +18,14 @@ ENCODING="utf-8"
 
 # parse command-line options
 VERBOSE_FLAG=""
-REVISION="${VCS_REVSION:-$( git rev-parse --short HEAD 2>/dev/null || true )}"
+REVISION="${VCS_REVISION:-$( git rev-parse --short HEAD 2>/dev/null || true )}"
 MALCOLM_VERSION=""
 REPOSITORY_NAME=""
-OWNER_NAME=""
 SITEMAP_URL=""
 DEFAULT_BRANCH=""
 TOKEN="${GITHUB_TOKEN:-}"
 LOG_BASE_DIR=$(pwd)
-while getopts 'vr:t:n:o:b:s:m:' OPTION; do
+while getopts 'vr:t:n:b:s:m:' OPTION; do
   case "$OPTION" in
     v)
       set -x
@@ -39,10 +38,6 @@ while getopts 'vr:t:n:o:b:s:m:' OPTION; do
 
     n)
       REPOSITORY_NAME="$OPTARG"
-      ;;
-
-    o)
-      OWNER_NAME="$OPTARG"
       ;;
 
     b)
@@ -133,7 +128,6 @@ else
 fi
 
 [[ -n "$REPOSITORY_NAME" ]] && "$YQ" eval --inplace ".\"repository\"=\"$REPOSITORY_NAME\""               ./_config.yml
-[[ -n "$OWNER_NAME" ]] &&      "$YQ" eval --inplace ".\"github\".\"owner_name\"=\"$OWNER_NAME\""         ./_config.yml
 [[ -n "$DEFAULT_BRANCH" ]] &&  "$YQ" eval --inplace ".\"github\".\"default_branch\"=\"$DEFAULT_BRANCH\"" ./_config.yml
 [[ -n "$SITEMAP_URL" ]] &&     "$YQ" eval --inplace ".\"url\"=\"$SITEMAP_URL\""                          ./_config.yml
 [[ -n "$MALCOLM_VERSION" ]] && "$YQ" eval --inplace ".\"malcolm\".\"version\"=\"$MALCOLM_VERSION\""      ./_config.yml

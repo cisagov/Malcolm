@@ -72,7 +72,7 @@ ChangeLog
 
   * (Design) Add Capitalised version of glyphs and kern. (Lt, LtIt,
     Md, MdIt) DM (LP: #677446)
-  * (Design) Re-space and tighen Regular and Italic by amount specified
+  * (Design) Re-space and tighten Regular and Italic by amount specified
     by Mark Shuttleworth (minus 4 FUnits). (Rg, It) (LP: #677149)
   * (Design) Design: Latin (U+0192) made straight more like l/c f with
     tail (LP: #670768)

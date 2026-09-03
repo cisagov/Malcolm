@@ -40,6 +40,9 @@
                 },
                 "longitude": {
                   "type": "float"
+                },
+                "region_code": {
+                  "type": "keyword"
                 }
               }
             },
@@ -96,6 +99,9 @@
                 },
                 "longitude": {
                   "type": "float"
+                },
+                "region_code": {
+                  "type": "keyword"
                 }
               }
             },

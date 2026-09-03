@@ -514,19 +514,20 @@
           "destination.ip",
           "file.source",
           "file.mime_type",
-          "file.entropy",
-          "filescan.tree.depth",
           "file.name",
-          "zeek.files.extracted_uri",
+          "file.size",
           "filescan.hits",
           "rule.ruleset",
           "rule.name",
+          "filescan.tree.depth",
+          "file.entropy",
+          "zeek.files.extracted_uri",
           "event.id"
         ],
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:filescan\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:filescan\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [],
         "title": "File Scanning - Logs",

@@ -36,6 +36,11 @@ from threading import Lock
 from typing import Optional
 
 try:
+    import rapidjson
+except ImportError:
+    rapidjson = None
+
+try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
@@ -111,7 +116,7 @@ class CountUntilException:
 
 
 ###################################################################################################
-# if a string starts with 'base64:', decode it, otherwise return it as-is
+# if a string starts with 'base64:', decode it; otherwise, return it as-is
 def base64_decode_if_prefixed(s: str):
     if s.startswith('base64:'):
         return b64decode(s[7:]).decode('utf-8')
@@ -860,7 +865,7 @@ def flatten(coll):
 
 
 ###################################################################################################
-# if the object is an iterable, return it, otherwise return a tuple with it as a single element.
+# if the object is an iterable, return it; otherwise, return a tuple with it as a single element.
 # useful if you want to user either a scalar or an array in a loop, etc.
 def get_iterable(x):
     if isinstance(x, Iterable) and not isinstance(x, str):
@@ -947,8 +952,11 @@ def get_hostname_without_domain():
 # attempt to decode a string as JSON, returning the object if it decodes and None otherwise
 def LoadStrIfJson(jsonStr, default=None):
     try:
-        return json.loads(jsonStr)
-    except ValueError:
+        if rapidjson is not None:
+            return rapidjson.loads(jsonStr, parse_mode=rapidjson.PM_TRAILING_COMMAS)
+        else:
+            return json.loads(jsonStr)
+    except Exception:
         return default
 
 
@@ -1199,10 +1207,7 @@ def bool_to_str(v):
 
 
 def true_or_false_no_quotes(v):
-    if isinstance(v, bool):
-        return "true" if v else "false"
-    else:
-        return str(v)
+    return bool_to_str(v)
 
 
 def true_or_false_quotes(v):

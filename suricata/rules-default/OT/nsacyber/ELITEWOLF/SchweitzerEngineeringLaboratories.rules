@@ -17,7 +17,7 @@ alert tcp any 23 -> any any (msg:"ELITEWOLF SEL Telnet Activity"; pcre:"/SEL-[0-
 alert tcp any 23 -> any any (msg:"ELITEWOLF SEL Access Level 1 Change"; content: "Level 1"; sid:1000014; rev:1;)
 alert tcp any 23 -> any any (msg:"ELITEWOLF SEL Access Level 2 Change"; content: "Level 2"; sid:1000015; rev:1;)
 alert tcp any 23 -> any any (msg:"ELITEWOLF SEL 2032 Processor"; content:"COMMUNICATIONS PROCESSOR-S/N"; sid:1000016; rev:1;)
-alert tcp any 23 -> any any (msg:"ELITEWOLF SEL Callibration Access Level Login Success"; content:"Calibration Access Established"; sid:1000017; rev:1;)
+alert tcp any 23 -> any any (msg:"ELITEWOLF SEL Calibration Access Level Login Success"; content:"Calibration Access Established"; sid:1000017; rev:1;)
 
 alert tcp any any -> any 21 (msg: "ELITEWOLF SEL FTP Activity - Access Change"; content: "USER 2AC"; sid:1000018; rev:1;)
 alert tcp any any -> any 21 (msg: "ELITEWOLF SEL FTP Activity - Change working directory 2701"; content: "CWD SEL-2701"; sid:1000019; rev:1;)

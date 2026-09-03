@@ -4,7 +4,7 @@
 
 To continue with the example of the `cooltool` service added in the [PCAP processors](contributing-pcap.md#PCAP) section, assuming that `cooltool` generates some textual log files to be parsed and indexed into Malcolm.
 
-Users will have have configured `cooltool` in the `cooltool.Dockerfile` and its section in the `docker-compose` files to write logs into a subdirectory or subdirectories in a shared folder - [bind mounted](contributing-local-modifications.md#Bind) in such a way that both the `cooltool` and `filebeat` containers can access. Referring to the `zeek` container as an example, this is how the `./zeek-logs` folder is handled; both the `filebeat` and `zeek` services have `./zeek-logs` in their `volumes:` section:
+Users will have configured `cooltool` in the `cooltool.Dockerfile` and its section in the `docker-compose` files to write logs into a subdirectory or subdirectories in a shared folder - [bind mounted](contributing-local-modifications.md#Bind) in such a way that both the `cooltool` and `filebeat` containers can access. Referring to the `zeek` container as an example, this is how the `./zeek-logs` folder is handled; both the `filebeat` and `zeek` services have `./zeek-logs` in their `volumes:` section:
 
 ```
 $ grep -P "^(      - ./zeek-logs|  [\w-]+:)" docker-compose.yml | grep -B1 "zeek-logs"

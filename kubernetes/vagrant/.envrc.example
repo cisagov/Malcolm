@@ -1,0 +1,7 @@
+export VAGRANT_CPUS=8
+export VAGRANT_MEMORY=32768
+export VAGRANT_DISK_SIZE=100G
+export VAGRANT_GUI=true
+export VAGRANT_NIC=eth0
+export MALCOLM_HOST_PORT=8443
+export KUBECONFIG=./kubeconfig

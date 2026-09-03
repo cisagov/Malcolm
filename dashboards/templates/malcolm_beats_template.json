@@ -1,5 +1,7 @@
 {
-  "index_patterns" : ["MALCOLM_OTHER_INDEX_PATTERN_REPLACER"],
+  "index_patterns": [
+    "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
+  ],
   "composed_of": [
     "ecs_base",
     "ecs_ecs",
@@ -27,21 +29,31 @@
     "custom_winlog",
     "custom_zeek_diagnostic"
   ],
-  "template" :{
-    "settings" : {
-      "index" : {
-        "mapping.total_fields.limit" : "6000",
-        "mapping.nested_fields.limit" : "250",
-        "max_docvalue_fields_search" : "200"
+  "template": {
+    "settings": {
+      "index": {
+        "mapping.total_fields.limit": "6000",
+        "mapping.nested_fields.limit": "250",
+        "max_docvalue_fields_search": "200"
       }
     },
     "mappings": {
       "properties": {
-        "timestamp": { "type": "date" },
-        "node": { "type": "keyword" },
-        "event.result": { "type": "keyword" },
-        "os.family": { "type": "keyword" },
-        "os.type": { "type": "keyword" }
+        "timestamp": {
+          "type": "date"
+        },
+        "node": {
+          "type": "keyword"
+        },
+        "event.result": {
+          "type": "keyword"
+        },
+        "os.family": {
+          "type": "keyword"
+        },
+        "os.type": {
+          "type": "keyword"
+        }
       }
     }
   }

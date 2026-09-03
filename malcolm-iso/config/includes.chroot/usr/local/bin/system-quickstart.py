@@ -40,8 +40,11 @@ MSG_TIME_SYNC_TEST_SUCCESS = 'Server time retrieved successfully!\n\n'
 MSG_TIME_SYNC_TYPE = 'Select time synchronization method'
 SSHD_CONFIG_FILE = "/etc/ssh/sshd_config"
 TIME_SYNC_HTPDATE = 'htpdate'
-TIME_SYNC_HTPDATE_COMMAND = '/usr/sbin/htpdate -4 -a -l -s'
+TIME_SYNC_HTPDATE_INITIAL_COMMAND = '/usr/sbin/htpdate -4 -l -s'
+TIME_SYNC_HTPDATE_PERIODIC_COMMAND = '/usr/sbin/htpdate -4 -a -l'
 TIME_SYNC_HTPDATE_CRON = '/etc/cron.d/htpdate'
+TIME_SYNC_HTPDATE_DEFAULT_URL = 'https://1.1.1.1:443'
+TIME_SYNC_HTPDATE_DEFAULT_INTERVAL = 15
 TIME_SYNC_HTPDATE_TEST_COMMAND = '/usr/sbin/htpdate -4 -a -d'
 TIME_SYNC_NTP = 'ntp'
 TIME_SYNC_NTP_CONFIG = '/etc/ntpsec/ntp.conf'
@@ -57,6 +60,46 @@ class CancelledError(Exception):
 def clearquit():
     os.system('clear')
     sys.exit(0)
+
+
+def get_htpdate_config():
+    """Parse the htpdate cron entry written by this script, if any.
+
+    Returns:
+        tuple: (url, interval_minutes), either or both of which may be None
+    """
+    url = None
+    interval = None
+    cron_re = re.compile(r"^\s*\*/(\d+)\s+(?:\S+\s+){4}root\s+\S*htpdate\s+(?:-\S+\s+)*(\S+)\s*$")
+    try:
+        with open(TIME_SYNC_HTPDATE_CRON) as f:
+            for line in f:
+                cron_match = cron_re.search(line)
+                if cron_match is not None:
+                    interval = int(cron_match.group(1))
+                    url = cron_match.group(2)
+                    break
+    except (OSError, ValueError):
+        pass
+    return url, interval
+
+
+def get_ntp_config():
+    """Parse the NTP configuration file for the active server, if any.
+
+    Returns:
+        str: the host of the first uncommented 'server' directive, or None
+    """
+    server_re = re.compile(r"^\s*server\s+(\S+)")
+    try:
+        with open(TIME_SYNC_NTP_CONFIG) as f:
+            for line in f:
+                server_match = server_re.search(line)
+                if server_match is not None:
+                    return server_match.group(1)
+    except OSError:
+        pass
+    return None
 
 
 # the main dialog window used for the duration of this tool
@@ -145,6 +188,15 @@ def main():
 
             elif config_mode == MSG_CONFIG_TIME_SYNC[0]:
                 # time synchronization configuration##################################################################################################
+
+                # Prepopulate values from existing configuration, if present.
+                # A parseable htpdate cron entry indicates htpdate is the active method.
+                # Configuring NTP removes that cron file; otherwise, an uncommented
+                # "server" line in ntp.conf indicates NTP.
+                prev_htpdate_url, prev_htpdate_interval = get_htpdate_config()
+                prev_ntp_host = get_ntp_config()
+                htpdate_selected = (prev_htpdate_url is not None) or (prev_ntp_host is None)
+
                 time_sync_mode = ''
                 code = Dialog.OK
                 while (len(time_sync_mode) == 0) and (code == Dialog.OK):
@@ -154,9 +206,9 @@ def main():
                             (
                                 TIME_SYNC_HTPDATE,
                                 'Use a Malcolm server (or another HTTP/HTTPS server)',
-                                True,
+                                htpdate_selected,
                             ),
-                            (TIME_SYNC_NTP, 'Use an NTP server', False),
+                            (TIME_SYNC_NTP, 'Use an NTP server', not htpdate_selected),
                         ],
                     )
                 if code != Dialog.OK:
@@ -167,10 +219,21 @@ def main():
 
                     http_url = ''
                     while True:
-                        # http/https URL for for htpdate
+                        # http/https URL for htpdate
                         code, values = d.form(
                             MSG_TIME_SYNC_HTPDATE_CONFIG,
-                            [('URL', 1, 1, 'https://1.1.1.1:443', 1, 25, 30, 255)],
+                            [
+                                (
+                                    'URL',
+                                    1,
+                                    1,
+                                    prev_htpdate_url if prev_htpdate_url else TIME_SYNC_HTPDATE_DEFAULT_URL,
+                                    1,
+                                    25,
+                                    30,
+                                    255,
+                                )
+                            ],
                         )
                         values = [x.strip() for x in values]
 
@@ -201,7 +264,11 @@ def main():
 
                     # get polling interval
                     code, htpdate_interval = d.rangebox(
-                        "Time synchronization polling interval (minutes)", width=60, min=1, max=60, init=15
+                        "Time synchronization polling interval (minutes)",
+                        width=60,
+                        min=1,
+                        max=60,
+                        init=prev_htpdate_interval if prev_htpdate_interval else TIME_SYNC_HTPDATE_DEFAULT_INTERVAL,
                     )
                     if code == Dialog.CANCEL or code == Dialog.ESC:
                         raise CancelledError
@@ -215,11 +282,13 @@ def main():
                         f.write('SHELL=/bin/bash\n')
                         f.write('PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\n')
                         f.write('\n')
-                        f.write(f'*/{htpdate_interval} * * * * root {TIME_SYNC_HTPDATE_COMMAND} {http_url}\n')
+                        f.write(f'*/{htpdate_interval} * * * * root {TIME_SYNC_HTPDATE_PERIODIC_COMMAND} {http_url}\n')
                         f.write('\n')
 
                     # now actually do the sync "for real" one time (so we can get in sync before waiting for the interval)
-                    ecode, sync_output = run_subprocess(f"{TIME_SYNC_HTPDATE_COMMAND} {http_url}")
+                    ecode, sync_output = run_subprocess(f"{TIME_SYNC_HTPDATE_INITIAL_COMMAND} {http_url}")
+                    if ecode == 0 and os.path.isfile('/usr/sbin/fake-hwclock'):
+                        run_subprocess('/usr/sbin/fake-hwclock save')
                     emsg_str = '\n'.join(sync_output)
                     code = d.msgbox(text=f"{MSG_TIME_SYNC_CONFIG_SUCCESS if (ecode == 0) else ''}{emsg_str}")
 
@@ -229,7 +298,10 @@ def main():
                     ntp_host = ''
                     while True:
                         # host/port for ntp
-                        code, values = d.form(MSG_TIME_SYNC_NTP_CONFIG, [('Host', 1, 1, '', 1, 25, 30, 255)])
+                        code, values = d.form(
+                            MSG_TIME_SYNC_NTP_CONFIG,
+                            [('Host', 1, 1, prev_ntp_host if prev_ntp_host else '', 1, 25, 30, 255)],
+                        )
                         values = [x.strip() for x in values]
 
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
@@ -266,8 +338,16 @@ def main():
                     run_subprocess('/bin/systemctl stop ntpsec')
                     run_subprocess('/bin/systemctl enable ntpsec')
                     ecode, start_output = run_subprocess('/bin/systemctl start ntpsec', stderr=True)
+
                     if ecode == 0:
-                        code = d.msgbox(text=f"{MSG_TIME_SYNC_CONFIG_SUCCESS}")
+                        wait_ecode, _ = run_subprocess(
+                            '/usr/sbin/ntpwait -n 5 -s 2',
+                            stderr=True,
+                        )
+                        if wait_ecode == 0 and os.path.isfile('/usr/sbin/fake-hwclock'):
+                            run_subprocess('/usr/sbin/fake-hwclock save')
+
+                        code = d.msgbox(text=MSG_TIME_SYNC_CONFIG_SUCCESS)
                     else:
                         code = d.msgbox(text=MSG_MESSAGE_ERROR.format('\n'.join(start_output)))
 

@@ -4,7 +4,7 @@
 
 ## <a name="DashboardsNewViz"></a>Adding new visualizations and dashboards
 
-Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboard) in OpenSearch Dashboards using its drag-and-drop WYSIWIG tools. Assuming users have created a new dashboard to package with Malcolm, the dashboard and its visualization components can be exported using the [dashboard export API](api-dashboard-export.md):
+Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboard) in OpenSearch Dashboards using its drag-and-drop WYSIWYG tools. Assuming users have created a new dashboard to package with Malcolm, the dashboard and its visualization components can be exported using the [dashboard export API](api-dashboard-export.md):
 
 1. Identify the ID of the dashboard (found in the URL: e.g., for `/dashboards/app/dashboards#/view/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` the ID would be `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 

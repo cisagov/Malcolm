@@ -505,7 +505,7 @@ async def main(
                 'failed to open primary redis connection',
                 exc_info=True,
             )
-            log.fatal(
+            log.critical(
                 'unable to open primary redis connection: %s:%d/%d',
                 options.redis.host,
                 options.redis.port,
@@ -533,12 +533,15 @@ async def main(
                         'failed to open redis connection for watch',
                         exc_info=True,
                     )
-                    log.error(
-                        'failed to open redis connection for watch: %s:%d/%d',
+                    log.critical(
+                        'unable to open redis connection for watch: %s:%d/%d',
                         watch.redis.host,
                         watch.redis.port,
                         watch.redis.db,
                     )
+                    # supervisor restarts this process, allowing the watch to recover
+                    # when its configured Valkey endpoint becomes available
+                    sys.exit(1)
 
             elif isinstance(watch, DirectoryWatch):
                 if not watch.path.exists():

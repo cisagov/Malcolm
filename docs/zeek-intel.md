@@ -61,7 +61,7 @@ taxii|2.1|https://example.com/taxii/api2/|URL Blocklist
 …
 ```
 
-Malcolm will attempt to query the TAXII feed(s) for `indicator` STIX objects and convert them to the Zeek intelligence format as described above. There are publicly available TAXII 2.x-compatible services provided by a number of organizations including [Anomali Labs](https://www.anomali.com/resources/limo) and [MITRE](https://www.mitre.org/capabilities/cybersecurity/overview/cybersecurity-blog/attck%E2%84%A2-content-available-in-stix%E2%84%A2-20-via); or users may choose from several open-source offerings to roll their own TAXII 2 server (e.g., [oasis-open/cti-taxii-server](https://github.com/oasis-open/cti-taxii-server), [freetaxii/server](https://github.com/freetaxii/server), [StephenOTT/TAXII-Server](https://github.com/StephenOTT/TAXII-Server), etc.).
+Malcolm will attempt to query the TAXII feed(s) for `indicator` STIX objects and convert them to the Zeek intelligence format as described above. There are publicly available TAXII 2.x-compatible services provided by a number of organizations including [Anomali Labs](https://www.anomali.com/resources/limo) and [MITRE](https://github.com/mitre-attack/attack-stix-data/); or users may choose from several open-source offerings to roll their own TAXII 2 server (e.g., [oasis-open/cti-taxii-server](https://github.com/oasis-open/cti-taxii-server), [freetaxii/server](https://github.com/freetaxii/server), [StephenOTT/TAXII-Server](https://github.com/StephenOTT/TAXII-Server), etc.).
 
 Note that only **indicators** of [**cyber-observable objects**](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the **equals (`=`)** [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a **single value** can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
 
@@ -122,7 +122,7 @@ If a [YAML](https://yaml.org/) file named `google.yaml` is found in `./zeek/inte
   api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-The `collection_type` parameter may be optionally provided, consisting of a comma-separated list of the values supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats):
+The `collection_type` parameter may be optionally provided, consisting of a comma-separated list of the values supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-collections):
 
 * [`threat-actor`](https://gtidocs.virustotal.com/reference/threat-actor-object)
 * [`malware-family`](https://gtidocs.virustotal.com/reference/malware-family-object)
@@ -136,7 +136,7 @@ For example:
   collection_type: threat-actor,malware-family
 ```
 
-Additionally, the `filters` parameter may be optionally provided, consisting of filters as supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats#searches-observations). See these [examples](https://gtidocs.virustotal.com/reference/list-threats#examples) of filtering syntax. Note: filtering by collection type should be done with the `collection_type` parameter described above and not as part of `filters`.
+Additionally, the `filters` parameter may be optionally provided, consisting of filters as supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-collections#searches-observations). See these [examples](https://gtidocs.virustotal.com/reference/list-collections#examples) of filtering syntax. Note: filtering by collection type should be done with the `collection_type` parameter described above and not as part of `filters`.
 
 ```yaml
   filters: 'motivation:espionage targeted_industry:government targeted_region:US'
@@ -148,7 +148,7 @@ Filter values that contain spaces should be enclosed in quotation marks:
   filters: 'targeted_industry:"Energy & Utilities"'
 ```
 
-While there is no comprehensive list of possible values for [these filters](https://gtidocs.virustotal.com/reference/list-threats#allowed-filters-by-object-collection_type), here are some examples:
+While there is no comprehensive list of possible values for [these filters](https://gtidocs.virustotal.com/reference/list-collections#allowed-filters-by-object-collection_type), here are some examples:
 
 <details>
   <summary><code>source_region</code> and <code>targeted_region</code></summary>
@@ -390,7 +390,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Capture system network information</li>
     <li>Capture TCP network connection state</li>
     <li>Capture token information</li>
-    <li>Capture Two Factor Autentication (2FA) codes</li>
+    <li>Capture Two Factor Authentication (2FA) codes</li>
     <li>Capture UDP network connection state</li>
     <li>Capture video</li>
     <li>Capture video with camera</li>
@@ -406,7 +406,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Collect video files</li>
     <li>Command and Control via the MQTT Pub/Sub Protocol Capability</li>
     <li>Command line capabilities</li>
-    <li>Communiates using SSH</li>
+    <li>Communicates using SSH</li>
     <li>Communicates bidirectionally with a web service</li>
     <li>Communicates using a binary protocol</li>
     <li>Communicates using a dead drop resolver</li>
@@ -479,13 +479,13 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Create a socket</li>
     <li>Create directories</li>
     <li>Create files</li>
-    <li>Create or drop a polymorhpic file</li>
+    <li>Create or drop a polymorphic file</li>
     <li>Creates HTTP Server</li>
     <li>Creates processes</li>
     <li>Creates processes in suspended state</li>
-    <li>Creates shorcut</li>
+    <li>Creates shortcut</li>
     <li>Creates user accounts</li>
-    <li>Creates Windows regisry keys or values</li>
+    <li>Creates Windows registry keys or values</li>
     <li>Create TCP socket</li>
     <li>Create thread</li>
     <li>Create UDP socket</li>
@@ -519,7 +519,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Deletes Windows registry keys</li>
     <li>Deletes Windows registry keys or values</li>
     <li>Deletes Windows registry values</li>
-    <li>Deltes Widnows Backup Catalog</li>
+    <li>Deletes Windows Backup Catalog</li>
     <li>Denial of Service</li>
     <li>Determines public IP address of host</li>
     <li>Directory manipulation</li>
@@ -528,7 +528,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Driver Capabilities</li>
     <li>Dumps process memory</li>
     <li>Email capabilities</li>
-    <li>Emnumerates Local Account</li>
+    <li>Enumerates Local Account</li>
     <li>Encodes communications using Base64</li>
     <li>Encodes communications using BasE91</li>
     <li>Encodes communications using custom Base64 alphabet</li>
@@ -713,7 +713,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Overwriting capabilities</li>
     <li>Password Cracks</li>
     <li>Password Sprays</li>
-    <li>Performs anti-disassembly obfucscation</li>
+    <li>Performs anti-disassembly obfuscation</li>
     <li>Performs CD-ROM operations</li>
     <li>Performs GUI operations</li>
     <li>Performs keyboard operations</li>
@@ -839,7 +839,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Tampers with Windows safe mode</li>
     <li>TCP Scan</li>
     <li>Terminates processes</li>
-    <li>Timestomping capabilities</li>
+    <li>Timestamping capabilities</li>
     <li>Tries to lock mutex</li>
     <li>Tunnels network traffic</li>
     <li>Unlocks mutex</li>
@@ -892,7 +892,7 @@ While there is no comprehensive list of possible values for [these filters](http
     <li>Uses Pastebin as part of C2</li>
     <li>Uses pCloud as part of C2</li>
     <li>Uses QuickLZ decompression</li>
-    <li>Uses RedHat OpenShift as part of C2</li>
+    <li>Uses Red Hat OpenShift as part of C2</li>
     <li>Uses Slack as a part of C2</li>
     <li>Uses Stack Overflow as part of C2</li>
     <li>Uses Statcounter for C2</li>

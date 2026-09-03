@@ -1,5 +1,7 @@
 {
-  "index_patterns" : ["MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"],
+  "index_patterns": [
+    "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
+  ],
   "composed_of": [
     "ecs_base",
     "ecs_ecs",
@@ -30,12 +32,12 @@
     "custom_filescan",
     "custom_malcolm_common"
   ],
-  "template" :{
-    "settings" : {
-      "index" : {
-        "mapping.total_fields.limit" : "7500",
-        "mapping.nested_fields.limit" : "250",
-        "max_docvalue_fields_search" : "200"
+  "template": {
+    "settings": {
+      "index": {
+        "mapping.total_fields.limit": "7500",
+        "mapping.nested_fields.limit": "250",
+        "max_docvalue_fields_search": "200"
       }
     }
   }

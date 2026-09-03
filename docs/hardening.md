@@ -3,11 +3,12 @@
 * [Hardening](#Hardening)
     - [Compliance Exceptions](#ComplianceExceptions)
 
-The Malcolm aggregator base operating system uses the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks that target the following guidelines for establishing a secure configuration posture:
 
-* [CIS Debian Linux 9/10 Benchmark](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/)
-* [DISA STIG (Security Technical Implementation Guides) for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
-* Additional recommendations from [cisecurity.org](https://www.cisecurity.org/)
+The Malcolm aggregator base operating system uses the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) hardening scripts, which target Debian GNU/Linux 9 through 13. The project builds on the [OVH-debian-cis](https://github.com/ovh/debian-cis) framework and implements checks from:
+
+* CIS recommendations
+* DISA STIG for Red Hat Enterprise Linux 7 (V2R5) and Ubuntu (V1R2), adapted for Debian
+* Additional checks contributed by the HardenedLinux community
 
 ## <a name="ComplianceExceptions"></a>Compliance Exceptions
 
@@ -15,7 +16,7 @@ The Malcolm aggregator base operating system uses the [harbian-audit](https://gi
 
 The Malcolm aggregator base operating system claims exceptions from the recommendations in this benchmark in the following categories:
 
-**1.1 Install Updates, Patches and Additional Security Software** - When the the Malcolm aggregator appliance software is built, all the latest applicable security patches and updates are included. How future updates are to be handled is still under design.
+**1.1 Install Updates, Patches and Additional Security Software** - When the Malcolm aggregator appliance software is built, all the latest applicable security patches and updates are included. How future updates are to be handled is still under design.
 
 **1.3 Enable verify the signature of local packages** - As the base distribution is not using embedded signatures, `debsig-verify` would reject all packages (see comment in `/etc/dpkg/dpkg.cfg`). Enabling embedded signatures after installation would disallow any future updates.
 
@@ -75,4 +76,4 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.2 Ensure loopback traffic is configured**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - The Malcolm aggregator base operating system **is** configured with an appropriately locked-down software firewall (managed by "[Uncomplicated Firewall](https://launchpad.net/ufw)" `ufw`). However, the methods outlined in the [CIS benchmark recommendations](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/) do not account for this configuration.
 
-**8.6 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) that verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass intergrity checks.
+**8.6 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.6_verify_integrity_packages.sh) that verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass integrity checks.

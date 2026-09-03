@@ -2,7 +2,7 @@
 
 Installing and configuring Docker to run under the Windows Subsystem for Linux (WSL) must be done manually, rather than through the `install.py` script as with Linux and macOS.
 
-1. Make sure your Windows 10 or Windows 11 system is up-to-date with the current Windows cummulative update.
+1. Make sure your Windows 10 or Windows 11 system is up-to-date with the current Windows cumulative update.
 2. Open PowerShell or Windows Command Prompt in administrator mode by right-clicking the icon in the Start Menu and selecting **Run as administrator**.
 3. Enter the command [`wsl --install`](https://learn.microsoft.com/en-us/windows/wsl/install) and wait for the installation to finish.
 4. Reboot the system.

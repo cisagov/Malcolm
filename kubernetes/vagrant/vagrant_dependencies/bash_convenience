@@ -1,0 +1,181 @@
+########################################################################################################
+# General-purpose convenience functions
+
+export KUBESPACE=malcolm
+
+command -v kubectl >/dev/null 2>&1 && alias k=kubectl
+command -v k9s >/dev/null 2>&1 && \
+  alias k9s='k9s --logoless --splashless' && \
+  alias k9="k9s --logoless --splashless -n $KUBESPACE"
+
+function kctl () {
+  if [[ -n "${KUBECONFIG}" ]]; then
+    kubectl --kubeconfig "${KUBECONFIG}" "$@"
+  else
+    kubectl "$@"
+  fi
+}
+
+function kstern () {
+  if [[ -n "${KUBECONFIG}" ]]; then
+    stern --kubeconfig "${KUBECONFIG}" "$@"
+  else
+    stern "$@"
+  fi
+}
+
+function kpods () {
+  NAMESPACE="${1:-$KUBESPACE}"
+  if [[ -n "$NAMESPACE" ]]; then
+    NAMESPACE_ARGS=( --namespace "${NAMESPACE}" )
+  else
+    NAMESPACE_ARGS=( --all-namespaces )
+  fi
+  kctl get pods --no-headers "${NAMESPACE_ARGS[@]}"
+}
+
+function knodes () {
+  kctl get nodes -o json \
+  | jq -r '
+    def roles:
+      (.metadata.labels // {})
+      | to_entries
+      | map(select(.key|startswith("node-role.kubernetes.io/")))
+      | map(.key | sub("^node-role\\.kubernetes\\.io/";""))
+      | map(select(length>0))
+      | unique
+      | sort
+      | join(",");
+
+    def status:
+      (.status.conditions // [])
+      | map(select(.type=="Ready"))
+      | (if length>0 and .[0].status=="True" then "Ready" else "NotReady" end);
+
+    .items[]
+    | . as $n
+    | ($n.metadata.name + " (" + status + ", " + (roles | if .=="" then "none" else . end) + "):\n"
+       + (($n.metadata.labels // {})
+          | to_entries
+          | sort_by(.key)
+          | map("  - " + .key + "=" + (.value|tostring))
+          | join("\n")
+         )
+       + "\n"
+      )
+  '
+}
+
+function kshell () {
+  SERVICE="${1}"
+  if [[ -n "${SERVICE}" ]]; then
+    NAMESPACE="${2:-$KUBESPACE}"
+    if [[ -n "$NAMESPACE" ]]; then
+      NAMESPACE_ARGS=( --namespace "${NAMESPACE}" )
+      AWK_ARGS=( '{print $1}' )
+    else
+      NAMESPACE_ARGS=( --all-namespaces )
+      AWK_ARGS=( '{print $2}' )
+    fi
+    SHELL="${3:-/bin/bash}"
+    POD="$(kctl get pods --no-headers "${NAMESPACE_ARGS[@]}" | grep -P "\b${SERVICE}\b" | awk "${AWK_ARGS[@]}" | sort | head -n 1)"
+    if [[ -n "${POD}" ]]; then
+        kctl exec "${NAMESPACE_ARGS[@]}" --stdin --tty "${POD}" -- "${SHELL}"
+    else
+        echo "Unable to identify pod for ${SERVICE}" >&2
+    fi
+  else
+    echo "No service specified" >&2
+  fi
+}
+
+function klogs () {
+  SERVICE="${1:-}"
+
+  NAMESPACE="${2:-$KUBESPACE}"
+  if [[ -n "$NAMESPACE" ]]; then
+    NAMESPACE_ARGS=( --namespace "${NAMESPACE}" )
+    AWK_ARGS=( '{print $1}' )
+  else
+    NAMESPACE_ARGS=( --all-namespaces )
+    AWK_ARGS=( '{print $2}' )
+  fi
+
+  [[ -n "${SERVICE}" ]] && \
+    POD="$(kctl get pods --no-headers "${NAMESPACE_ARGS[@]}" | grep -P "\b${SERVICE}\b" | awk "${AWK_ARGS[@]}" | sort | head -n 1)" || \
+    POD=
+
+  if command -v stern >/dev/null 2>&1; then
+      kstern "${POD:-.*}" "${NAMESPACE_ARGS[@]}" --container '.*' --container-state all
+  else
+    [[ -n "${POD}" ]] && \
+      kctl logs --follow=true --all-containers "${POD}" "${NAMESPACE_ARGS[@]}" ||
+      echo "Unable to identify ${SERVICE} pod " >&2
+  fi
+}
+
+function kresources () {
+    NAMESPACE="${1:-$KUBESPACE}"
+    if [[ -n "$NAMESPACE" ]]; then
+      NAMESPACE_ARGS=( --namespace "${NAMESPACE}" )
+    else
+      NAMESPACE_ARGS=( --all-namespaces )
+    fi
+    for RESOURCE in $(kubectl api-resources --verbs=list --namespaced -o name); do
+      if [[ ! "$RESOURCE" =~ ^events.* ]]; then
+        readarray -t KCTL_OUTPUT < <(kctl get --ignore-not-found "${NAMESPACE_ARGS[@]}" "$RESOURCE")
+        if [[ ${#KCTL_OUTPUT[@]} -gt 0 ]]; then
+          echo "============================="
+          echo "${RESOURCE}"
+          echo "-----------------------------"
+          printf '%s\n' "${KCTL_OUTPUT[@]}"
+        fi
+      fi
+    done
+}
+
+function get_configmaps () {
+  config_map_file_name="malcolm_configmapsv2.yaml"
+  configmap_names=$(kubectl get configmaps -n "$KUBESPACE" -o jsonpath='{.items[*].metadata.name}')
+
+  IFS=" " read -ra names <<< "$configmap_names"
+
+  rm -f $config_map_file_name
+  for name in "${names[@]}"; do
+    echo "ConfigMap Name: $name"
+    # You can perform actions on each ConfigMap here
+    # For example, you can kubectl describe, kubectl edit, or any other operation
+    echo "---" >> $config_map_file_name
+    kubectl get configmap $name -n $KUBESPACE -o yaml >> $config_map_file_name
+    echo "" >> $config_map_file_name
+  done
+}
+
+function get_secrets () {
+  secret_file_name="malcolm_secrets.yaml"
+  secret_names=$(kubectl get secret -n "$KUBESPACE" -o jsonpath='{.items[*].metadata.name}')
+
+  IFS=" " read -ra names <<< "$secret_names"
+
+  rm -f $secret_file_name
+  for name in "${names[@]}"; do
+    echo "ConfigMap Name: $name"
+    # You can perform actions on each ConfigMap here
+    # For example, you can kubectl describe, kubectl edit, or any other operation
+    echo "---" >> $secret_file_name
+    kubectl get secret $name -n $KUBESPACE -o yaml >> $secret_file_name
+    echo "" >> $secret_file_name
+  done
+}
+
+function supervisor_check () {
+  pod_names=$(kubectl get pod -n "$KUBESPACE" -o jsonpath='{.items[*].metadata.name}')
+
+  IFS=" " read -ra names <<< "$pod_names"
+
+  for name in "${names[@]}"; do
+    echo "Pod Name: $name"
+    kubectl exec $name -n $KUBESPACE -- supervisorctl status
+    echo ""
+  done
+}

@@ -8,8 +8,8 @@
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 ###############################################################################
 
-$fluent_bit_version = '5.0'
-$fluent_bit_full_version = '5.0.2'
+$fluent_bit_version = '5.1'
+$fluent_bit_full_version = '5.1.1'
 
 ###############################################################################
 # select an item from a menu provided in an array
@@ -127,7 +127,7 @@ if (-Not $fluentbit_installed) {
         }
     }
 
-    # calculate the SHA256 sum of the ZIP file an compare it to the downloaded SHA256 value
+    # calculate the SHA256 sum of the ZIP file and compare it to the downloaded SHA256 value
     if ((Test-Path -Path $fluent_bit_shafile -PathType Leaf) -and (Test-Path -Path $fluent_bit_zip -PathType Leaf)) {
         $fluentbit_expected_hash = ((Get-Content "$fluent_bit_shafile" -First 1).ToLower() -split '\s+')[0]
         $fluentbit_zip_hash = (Get-FileHash "$fluent_bit_zip").Hash.ToLower()

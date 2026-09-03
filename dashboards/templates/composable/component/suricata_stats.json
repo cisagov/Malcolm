@@ -304,10 +304,10 @@
                       "type": "long"
                     },
                     "vlan": {
-                      "type": "long"
+                      "type": "keyword"
                     },
                     "vlan_qinq": {
-                      "type": "long"
+                      "type": "keyword"
                     },
                     "vntag": {
                       "type": "long"

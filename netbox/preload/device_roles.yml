@@ -1,318 +1,663 @@
-- name: Access point
-  slug: access-point
-  color: Pink
+# Top-level / grouping roles (no parents)
+- name: Unspecified
+  slug: unspecified
+  description: Default/unknown role
+  color: Light Grey
   vm_role: true
-- name: Active Directory
-  slug: active-directory
-  description: Central authentication in a network
+
+- name: SCADA
+  slug: scada
+  description: Supervisory control and data acquisition system (may supervise DCS/PCS)
+  color: Purple
   vm_role: true
-- name: Actuator
-  slug: actuator
-  description: Impact the physical process with standardized signals
-  vm_role: true
-- name: Application server
-  slug: application-server
-  color: Green
-  vm_role: true
-- name: Authentication server
-  slug: authentication-server
-  color: Dark Green
-  vm_role: true
-- name: BAS
-  slug: bas
-  description: Building automation
-  color: Amber
-  vm_role: true
-- name: BMS
-  slug: bms
-  description: Building management
-  color: Amber
-  vm_role: true
-- name: Bridge
-  slug: bridge
-  color: Pink
-  vm_role: true
-- name: Camera
-  slug: camera
-  color: Amber
-  vm_role: true
-- name: Cloud server
-  slug: cloud-server
-  color: Green
-  vm_role: true
-- name: CNC
-  slug: cnc
-  description: Computer numerical control
+
+- name: Field Device
+  slug: field-device
+  description: Field-level device that senses or affects the physical process
   color: Indigo
   vm_role: true
-- name: Collaboration server
-  slug: collaboration-server
+
+- name: Controller
+  slug: controller
+  description: Control device that executes logic and controls field devices
+  color: Dark Purple
+  vm_role: true
+
+- name: IT Server
+  slug: it-server
+  description: IT infrastructure server providing applications or network services
   color: Green
   vm_role: true
-- name: Database server
-  slug: database-server
-  color: Green
-  vm_role: true
-- name: DCS
-  slug: dcs
-  description: Distributed control system
-  color: Purple
-  vm_role: true
-- name: DHCP server
-  slug: dhcp-server
-  description: Dynamic host communication protocol server
-  color: Dark Green
-  vm_role: true
-- name: DNS server
-  slug: dns-server
-  description: Domain name system server
-  color: Dark Green
-  vm_role: true
-- name: Domain controller
-  slug: domain-controller
-  color: Dark Green
-  vm_role: true
-- name: EACS
-  slug: eacs
-  description: Electronic access control
-  color: Amber
-  vm_role: true
-- name: EWS
-  slug: ews
-  description: Engineering Workstaion
-  vm_role: true
-- name: Fax
-  slug: fax
-  color: Cyan
-  vm_role: true
-- name: File server
-  slug: file-server
-  color: Green
-  vm_role: true
-- name: Firewall
-  slug: firewall
-  color: Dark Red
-  description: Monitors and controls incoming and outgoing network traffic
-  vm_role: true
-- name: Gateway
-  slug: gateway
-  color: Pink
-  vm_role: true
-- name: Gateway Coupler
-  slug: gateway-coupler
-  description: Handles data transmission between different protocols
-  vm_role: true
-- name: Historian
-  slug: historian
-  color: Purple
-  description: Stores process values
-  vm_role: true
-- name: HMI
-  slug: hmi
-  description: Human machine interface for field operation
-  color: Purple
-  vm_role: true
-- name: Hub
-  slug: hub
+
+- name: Network Structure
+  slug: network-structure
+  description: Network infrastructure device providing connectivity between systems
   color: Grey
   vm_role: true
-- name: HVAC
-  slug: hvac
-  description: Heating, ventilation and air conditioning
-  color: Amber
-  vm_role: true
-- name: Hypervisor
-  slug: hypervisor
+
+- name: OT Client
+  slug: ot-client
+  description: OT user endpoint used to operate, engineer, or monitor industrial systems
   color: Light Green
   vm_role: true
-- name: IDS
-  slug: ids
-  description: Intrusion detection system
+
+- name: Office
+  slug: office
+  description: Office productivity and communications device or service
+  color: Cyan
+  vm_role: true
+
+- name: Connected Device
+  slug: connected-device
+  description: Network-connected endpoint that is not a server or network infrastructure
+  color: Light Blue
+  vm_role: true
+
+- name: Monitoring
+  slug: monitoring
+  description: Monitoring and security tooling (availability, performance, detection, response)
   color: Fuchsia
   vm_role: true
-- name: IED
-  slug: ied
-  description: Intelligent Electronic Device
-  vm_role: true
-- name: IIoT
-  slug: iiot
-  description: Industrial internet of things device
-  color: Purple
-  vm_role: true
-- name: IoT
-  slug: iot
-  description: Internet of things device
-  color: Light Blue
-  vm_role: true
-- name: IPS
-  slug: ips
-  description: Intrusion prevention system
-  color: Fuchsia
-  vm_role: true
-- name: Kiosk
-  slug: kiosk
-  color: Light Blue
-  vm_role: true
-- name: KVM
-  slug: kvm
-  description: Keyboard, video and mouse switch
-  color: Light Blue
-  vm_role: true
-- name: Lighting
-  slug: lighting
-  description: Lighting controls
+
+
+# SCADA subtree
+- name: Building automation system
+  slug: building-automation-system
+  parent: scada
+  description: SCADA subsystem for building automation (HVAC, lighting, access control)
   color: Amber
   vm_role: true
-- name: Load balancer
-  slug: load-balancer
-  color: Pink
+
+- name: DCS
+  slug: dcs
+  parent: scada
+  description: Distributed control system
+  color: Dark Purple
   vm_role: true
+
+- name: PCS
+  slug: pcs
+  parent: scada
+  description: Process control system
+  color: Dark Purple
+  vm_role: true
+
+
+# Building automation system subtree
+- name: Access Control
+  slug: access-control
+  parent: building-automation-system
+  description: Physical access control subsystem (doors, badges, cameras)
+  color: Amber
+  vm_role: true
+
+- name: HVAC
+  slug: hvac
+  parent: building-automation-system
+  description: Heating, ventilation, and air conditioning system
+  color: Amber
+  vm_role: true
+
+- name: Lighting Control
+  slug: lighting-control
+  parent: building-automation-system
+  description: Building lighting control system
+  color: Amber
+  vm_role: true
+
+
+# Access Control subtree
+- name: Camera
+  slug: camera
+  parent: access-control
+  description: Surveillance/security camera
+  color: Amber
+  vm_role: true
+
+- name: Electronic access control
+  slug: electronic-access-control
+  parent: access-control
+  description: Electronic access control system (EACS) controller
+  color: Amber
+  vm_role: true
+
+- name: Badge reader
+  slug: badge-reader
+  parent: access-control
+  description: Badge/NFC/RFID reader for door or area access control
+  color: Amber
+  vm_role: true
+
+
+# Field Device subtree
+- name: Actuator
+  slug: actuator
+  parent: field-device
+  description: Converts control signals into physical action on the process
+  color: Indigo
+  vm_role: true
+
+- name: IIoT
+  slug: iiot
+  parent: field-device
+  description: Industrial IoT field device (sensor/actuator with network connectivity)
+  color: Light Blue
+  vm_role: true
+
+- name: NFC Reader
+  slug: nfc-reader
+  parent: field-device
+  description: NFC-based field measurement/inspection reader
+  color: Indigo
+  vm_role: true
+
+- name: Physical sensor
+  slug: physical-sensor
+  parent: field-device
+  description: Senses physical quantities and reports measurements
+  color: Indigo
+  vm_role: true
+
+- name: VFD
+  slug: vfd
+  parent: field-device
+  description: Variable frequency drive (motor speed controller)
+  color: Indigo
+  vm_role: true
+
+
+# Controller subtree
+- name: CNC
+  slug: cnc
+  parent: controller
+  description: Computer numerical control controller for machine tools
+  color: Dark Purple
+  vm_role: true
+
+- name: IED
+  slug: ied
+  parent: controller
+  description: Intelligent electronic device (e.g., protection/measurement/control)
+  color: Dark Purple
+  vm_role: true
+
+- name: PLC
+  slug: plc
+  parent: controller
+  description: Programmable logic controller
+  color: Dark Purple
+  vm_role: true
+
+- name: RTU
+  slug: rtu
+  parent: controller
+  description: Remote terminal unit for telemetry and control
+  color: Dark Purple
+  vm_role: true
+
+
+# IT Server subtree (group roles)
+- name: Administration
+  slug: administration
+  parent: it-server
+  description: IT admin and identity services (directory, auth, enterprise apps)
+  color: Green
+  vm_role: true
+
+- name: Communication
+  slug: communication
+  parent: it-server
+  description: User communication services (email, web, VPN, real-time comms)
+  color: Green
+  vm_role: true
+
+- name: Data Storage
+  slug: data-storage
+  parent: it-server
+  description: Centralized storage and data retention services
+  color: Green
+  vm_role: true
+
+- name: Management
+  slug: management
+  parent: it-server
+  description: Business/plant management systems and collaboration tooling
+  color: Green
+  vm_role: true
+
+- name: Network Service
+  slug: network-service
+  parent: it-server
+  description: Core network services (DNS, DHCP, NTP, load balancing)
+  color: Green
+  vm_role: true
+
+- name: Virtual Host Device
+  slug: virtual-host-device
+  parent: it-server
+  description: Virtualization host running and managing virtual machines
+  color: Green
+  vm_role: true
+
+
+# Administration subtree
+- name: Active Directory
+  slug: active-directory
+  parent: administration
+  description: Microsoft directory service for identity and authentication
+  color: Dark Green
+  vm_role: true
+
+- name: Application server
+  slug: application-server
+  parent: administration
+  description: Runs and publishes applications for users or other systems
+  color: Green
+  vm_role: true
+
+- name: Authentication server
+  slug: authentication-server
+  parent: administration
+  description: Provides authentication and authorization for users and services
+  color: Dark Green
+  vm_role: true
+
+- name: Domain controller
+  slug: domain-controller
+  parent: administration
+  description: Active Directory domain controller (directory, auth, policy)
+  color: Dark Green
+  vm_role: true
+
+- name: SIEM
+  slug: siem
+  parent: administration
+  description: Security information and event management (log collection/correlation)
+  color: Fuchsia
+  vm_role: true
+
+
+# Communication subtree
 - name: Mail server
   slug: mail-server
+  parent: communication
+  description: Sends, receives, and stores email
   color: Green
   vm_role: true
+
+- name: Real-time communication server
+  slug: real-time-communication-server
+  parent: communication
+  description: Provides real-time messaging/voice/video communication services
+  color: Dark Green
+  vm_role: true
+
+- name: VPN server
+  slug: vpn-server
+  parent: communication
+  description: Terminates VPN tunnels for secure remote access
+  color: Dark Green
+  vm_role: true
+
+- name: Web server
+  slug: web-server
+  parent: communication
+  description: Serves web applications and websites over HTTP/S
+  color: Green
+  vm_role: true
+
+
+# Data Storage subtree
+- name: Cloud server
+  slug: cloud-server
+  parent: data-storage
+  description: Cloud-hosted storage or storage gateway service
+  color: Green
+  vm_role: true
+
+- name: File server
+  slug: file-server
+  parent: data-storage
+  description: Central file storage and sharing service
+  color: Green
+  vm_role: true
+
+- name: Historian
+  slug: historian
+  parent: data-storage
+  description: Stores and serves time-series process/telemetry data
+  color: Purple
+  vm_role: true
+
 - name: Media server
   slug: media-server
+  parent: data-storage
+  description: Stores and streams audio/video content
   color: Green
   vm_role: true
+
+- name: NAS
+  slug: nas
+  parent: data-storage
+  description: Network-attached storage appliance
+  color: Green
+  vm_role: true
+
+- name: Database server
+  slug: database-server
+  description: Database service hosting structured application data
+  color: Green
+  vm_role: true
+
+
+# Management subtree
+- name: BMS
+  slug: bms
+  parent: management
+  description: Building management system controlling HVAC, power, lighting, and security
+  color: Amber
+  vm_role: true
+
+- name: Collaboration server
+  slug: collaboration-server
+  parent: management
+  description: Collaboration tooling (shared workspaces, chat, docs, coordination)
+  color: Green
+  vm_role: true
+
+- name: PIMS
+  slug: pims
+  parent: management
+  description: Plant information management system (aggregates and presents plant data)
+  color: Purple
+  vm_role: true
+
+- name: PLM
+  slug: plm
+  parent: management
+  description: Product lifecycle management system
+  color: Indigo
+  vm_role: true
+
+- name: VCS
+  slug: vcs
+  parent: management
+  description: Version control system (source control)
+  color: Green
+  vm_role: true
+
 - name: MES
   slug: mes
   description: Manufacturing execution system
   color: Indigo
   vm_role: true
-- name: Modem
-  slug: modem
+
+
+# Network Service subtree
+- name: DHCP server
+  slug: dhcp-server
+  parent: network-service
+  description: DHCP service providing dynamic IP address assignment
+  color: Dark Green
+  vm_role: true
+
+- name: DNS server
+  slug: dns-server
+  parent: network-service
+  description: DNS service providing name resolution
+  color: Dark Green
+  vm_role: true
+
+- name: Load balancer
+  slug: load-balancer
+  parent: network-service
+  description: Distributes traffic across servers for availability and performance
   color: Pink
   vm_role: true
-- name: NAS
-  slug: nas
-  description: Network attached storage
-  color: Green
-  vm_role: true
-- name: Network sensor
-  slug: network-sensor
-  color: Fuchsia
-  vm_role: true
+
 - name: NTP server
   slug: ntp-server
-  description: Network time protocol server
+  parent: network-service
+  description: NTP service providing time synchronization
   color: Dark Green
   vm_role: true
-- name: Photocopier
-  slug: photocopier
-  color: Light Blue
+
+
+# Virtual Host Device subtree
+- name: Hypervisor
+  slug: hypervisor
+  parent: virtual-host-device
+  description: Virtualization host platform (hardware and hypervisor software)
+  color: Light Green
   vm_role: true
-- name: Physical sensor
-  slug: physical-sensor
-  color: Indigo
-  description: Used to capture physical quantities
-  vm_role: true
-- name: PLC
-  slug: plc
-  description: Programmable logic controller
-  color: Purple
-  vm_role: true
-- name: PLM
-  slug: plm
-  description: Product lifecycle management system
-  color: Indigo
-  vm_role: true
-- name: Print server
-  slug: print-server
-  color: Green
-  vm_role: true
-- name: Printer
-  slug: printer
-  color: Light Blue
-  vm_role: true
-- name: Proxy server
-  slug: proxy-server
-  color: Dark Green
-  vm_role: true
-- name: Real-time communication server
-  slug: real-time-communication-server
-  color: Dark Green
-  vm_role: true
-- name: Repeater
-  slug: repeater
+
+
+# Network Structure subtree
+- name: Access point
+  slug: access-point
+  parent: network-structure
+  description: Wireless access point providing Wi-Fi connectivity
   color: Pink
   vm_role: true
-- name: Router
-  slug: router
+
+- name: Bridge
+  slug: bridge
+  parent: network-structure
+  description: Bridges two network segments at Layer 2
   color: Pink
-  description: Monitors and controls incoming and outgoing network traffic
   vm_role: true
-- name: RTU
-  slug: rtu
-  description: Remote terminal unit
-  color: Purple
+
+- name: Gateway
+  slug: gateway
+  parent: network-structure
+  description: Network edge device category (routing, firewalling, protocol coupling)
+  color: Pink
   vm_role: true
-- name: Safety automation system
-  slug: safety-automation-system
-  color: Amber
-  vm_role: true
-- name: SCADA
-  slug: scada
-  description: Supervisory control and data acquisition
-  color: Purple
-  vm_role: true
-- name: SCADA client
-  slug: scada-client
-  vm_role: true
-- name: Scanner
-  slug: scanner
-  color: Light Blue
-  vm_role: true
-- name: Server
-  slug: server
-  color: Green
-  vm_role: true
-- name: SIEM
-  slug: siem
-  description: Security information and event management
-  color: Fuchsia
-  vm_role: true
-- name: Switch L2
-  slug: switch-l2
-  description: Layer 2 switch
-  vm_role: true
-- name: Switch L3
-  slug: switch-l3
-  description: Layer 3 switch
-  vm_role: true
-- name: Switch
-  slug: switch
-  description: Switch (layer unspecified)
+
+- name: Hub
+  slug: hub
+  parent: network-structure
+  description: Layer 1 repeater that forwards traffic to all ports
   color: Grey
   vm_role: true
-- name: Telephony
-  slug: telephony
-  color: Cyan
+
+- name: KVM
+  slug: kvm
+  parent: network-structure
+  description: Keyboard-video-mouse switch for shared console access
+  color: Light Blue
   vm_role: true
-- name: VCS
-  slug: vcs
-  description: Version control system
-  color: Green
-  vm_role: true
-- name: VFD
-  slug: vfd
-  description: Variable frequency drive
-  color: Indigo
-  vm_role: true
-- name: Virtual Machine Server
-  slug: vm-server
-  color: Light Green
-  vm_role: true
-- name: VPN server
-  slug: vpn-server
-  description: Virtual private network server
+
+- name: Network Proxy
+  slug: network-proxy
+  parent: network-structure
+  description: Generic proxy that intermediates and forwards network traffic
   color: Dark Green
   vm_role: true
-- name: Web server
-  slug: web-server
-  color: Green
+
+- name: Repeater
+  slug: repeater
+  parent: network-structure
+  description: Regenerates and retransmits signals to extend a link
+  color: Pink
   vm_role: true
+
+- name: Switch
+  slug: switch
+  parent: network-structure
+  description: Network switch (layer unspecified)
+  color: Grey
+  vm_role: true
+
+- name: Switch L2
+  slug: switch-l2
+  parent: network-structure
+  description: Layer 2 Ethernet switch
+  color: Grey
+  vm_role: true
+
+
+# Gateway subtree
+- name: Firewall
+  slug: firewall
+  parent: gateway
+  description: Filters and controls network traffic based on policy
+  color: Dark Red
+  vm_role: true
+
+- name: Gateway Coupler
+  slug: gateway-coupler
+  parent: gateway
+  description: Industrial gateway coupler bridging similar networks (e.g., PROFINET to PROFINET)
+  color: Pink
+  vm_role: true
+
+- name: Modem
+  slug: modem
+  parent: gateway
+  description: Modulates/demodulates signals for WAN access (DSL/cable/cellular)
+  color: Pink
+  vm_role: true
+
+- name: Protocol Coupler
+  slug: protocol-coupler
+  parent: gateway
+  description: Protocol converter translating between different industrial protocols
+  color: Pink
+  vm_role: true
+
+- name: Router
+  slug: router
+  parent: gateway
+  description: Routes traffic between IP networks (Layer 3)
+  color: Pink
+  vm_role: true
+
+- name: Switch L3
+  slug: switch-l3
+  parent: gateway
+  description: Layer 3 switch (routing-capable switch)
+  color: Grey
+  vm_role: true
+
+
+# OT Client subtree
+- name: EWS
+  slug: ews
+  parent: ot-client
+  description: Engineering workstation used to configure and maintain control systems
+  color: Light Green
+  vm_role: true
+
+- name: HMI
+  slug: hmi
+  parent: ot-client
+  description: Human-machine interface used by operators to control a process
+  color: Light Green
+  vm_role: true
+
+- name: SCADA client
+  slug: scada-client
+  parent: ot-client
+  description: SCADA client workstation for supervisory monitoring and control
+  color: Light Green
+  vm_role: true
+
 - name: Workstation
   slug: workstation
+  parent: ot-client
+  description: General-purpose OT workstation used to access industrial systems
   color: Light Green
+  vm_role: true
+
+
+# Office subtree
+- name: Photocopier
+  slug: photocopier
+  parent: office
+  description: Photocopier/multifunction office device
+  color: Cyan
+  vm_role: true
+
+- name: Print server
+  slug: print-server
+  parent: office
+  description: Central print service managing printers and print queues
+  color: Cyan
+  vm_role: true
+
+- name: Printer
+  slug: printer
+  parent: office
+  description: Network printer
+  color: Cyan
+  vm_role: true
+
+- name: Telephony
+  slug: telephony
+  parent: office
+  description: Telephony and VoIP devices and services
+  color: Cyan
+  vm_role: true
+
+
+# Telephony subtree
+- name: Fax
+  slug: fax
+  parent: telephony
+  description: Fax machine or fax service endpoint
+  color: Cyan
+  vm_role: true
+
+- name: Phone
+  slug: phone
+  parent: telephony
+  description: Desk phone or VoIP handset
+  color: Cyan
+  vm_role: true
+
+
+# Connected Device subtree
+- name: IoT
+  slug: iot
+  parent: connected-device
+  description: Internet of things endpoint device
+  color: Light Blue
+  vm_role: true
+
+- name: Kiosk
+  slug: kiosk
+  parent: connected-device
+  description: Self-service kiosk terminal for customer or user interaction
+  color: Light Blue
+  vm_role: true
+
+
+# Monitoring subtree
+- name: Honeypot
+  slug: honeypot
+  parent: monitoring
+  description: Decoy system designed to attract and observe attacker activity
+  color: Yellow
+  vm_role: true
+
+- name: IDS
+  slug: ids
+  parent: monitoring
+  description: Intrusion detection system (alerts on suspicious activity)
+  color: Fuchsia
+  vm_role: true
+
+- name: IPS
+  slug: ips
+  parent: monitoring
+  description: Intrusion prevention system (blocks or mitigates malicious activity)
+  color: Fuchsia
+  vm_role: true
+
+- name: Network sensor
+  slug: network-sensor
+  parent: monitoring
+  description: Passive network sensor receiving traffic via TAP/SPAN for monitoring
+  color: Fuchsia
   vm_role: true

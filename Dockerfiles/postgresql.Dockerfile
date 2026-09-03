@@ -1,4 +1,4 @@
-FROM postgres:16-alpine
+FROM postgres:18-alpine
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -30,9 +30,13 @@ ADD --chmod=755 postgres-scripts/docker-entrypoint-initdb.d/*.sh /docker-entrypo
 ADD --chmod=755 postgres-scripts/docker-entrypoint-startdb.d/*.sh /docker-entrypoint-startdb.d/
 ADD --chmod=755 postgres-scripts/*.sh /usr/local/bin/
 
+ENV PGDATA=/var/lib/postgresql/data
+
 RUN apk update --no-cache && \
-    apk add --no-cache bash jq procps psmisc rsync shadow tini && \
-    apk add --no-cache --virtual .build-deps rsync && \
+    apk add --no-cache bash jq musl-locales procps psmisc rsync shadow tini && \
+    # NOTE: as this moves image forward, add old supported versions
+    # here for version-to-version upgrades (e.g., postgresql18 postgresql18-contrib)
+    apk add --no-cache postgresql16 postgresql16-contrib && \
     rsync -a /usr/local/bin/ /usr/bin/ && \
     rsync -a /usr/local/share/ /usr/share/ && \
     rsync -a /usr/local/lib/ /usr/lib/ && \
@@ -40,8 +44,8 @@ RUN apk update --no-cache && \
     ln -s /usr/bin /usr/local/bin && \
     ln -s /usr/share /usr/local/share && \
     ln -s /usr/lib /usr/local/lib && \
-    chmod 00775 /var/lib/postgresql /var/lib/postgresql/data /run/postgresql && \
-    apk del .build-deps
+    mkdir -p "${PGDATA}" && \
+    chmod 00775 /var/lib/postgresql /var/lib/postgresql/data /run/postgresql
 
 USER root
 

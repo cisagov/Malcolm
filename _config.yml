@@ -2,7 +2,7 @@ repository: cisagov/Malcolm
 title: Malcolm
 offline_mode: false
 malcolm:
-  version: 26.04.1
+  version: 26.08.0
 description: A powerful, easily deployable network traffic analysis tool suite for network security monitoring
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0
@@ -37,7 +37,6 @@ thirdparty_logs_docs_uri: docs/third-party-logs.html
 upload_docs_uri: docs/upload.html
 url:
 github:
-  owner_name: Cybersecurity and Infrastructure Security Agency
   default_branch: main
 plugins:
   - jekyll-relative-links

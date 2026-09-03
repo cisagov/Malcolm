@@ -16,6 +16,7 @@ import tarfile
 import tempfile
 import time
 import malcolm_utils
+from pathlib import Path
 
 from distutils.dir_util import copy_tree
 from datetime import datetime
@@ -25,6 +26,19 @@ from slugify import slugify
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
+
+
+###################################################################################################
+def map_valkey_env_to_redis():
+    # Mirror redis_valkey_env_map.sh from the container ENTRYPOINT chain. When this script is
+    # invoked via "docker compose exec" / kubectl exec (e.g., control.py netboxRestore), the
+    # exec session gets only the compose/pod-spec environment: variables exported by entrypoint
+    # scripts are absent, so REDIS_* would be unset and every manage.py subprocess would load a
+    # Django configuration with default (wrong) cache/RQ settings. Like the shell wrapper, an
+    # already-present REDIS_* variable wins (setdefault only fills in missing keys).
+    for key, value in list(os.environ.items()):
+        if key.startswith('VALKEY_'):
+            os.environ.setdefault('REDIS_' + key[len('VALKEY_') :], value)
 
 
 ###################################################################################################
@@ -154,6 +168,14 @@ def parse_args():
         default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH', '/opt/netbox-devicetype-library-import'),
         required=False,
         help="Directory containing NetBox Device-Type-Library-Import project and library repo",
+    )
+    parser.add_argument(
+        '--scripts',
+        dest='scripts_dir',
+        type=str,
+        default=os.getenv('NETBOX_CUSTOM_SCRIPTS_PATH', '/opt/netbox-custom-scripts'),
+        required=False,
+        help="Directory containing NetBox custom scripts",
     )
     parser.add_argument(
         '-p',
@@ -364,7 +386,7 @@ def execute_restore_commands(args, database_file):
         '-p',
         str(args.postgres_port),
         '-U',
-        {args.postgres_user},
+        args.postgres_user,
         '-c',
         'TRUNCATE users_user CASCADE',
     ]
@@ -386,6 +408,8 @@ def perform_migrations(netbox_venv_py, manage_script):
             os.path.basename(manage_script),
             "migrate",
             "--check",
+            "--no-input",
+            "--no-color",
         ]
         err, results = malcolm_utils.run_process(cmd, logger=logging)
         if err != 0:
@@ -393,21 +417,26 @@ def perform_migrations(netbox_venv_py, manage_script):
                 [
                     "migrate",
                     "--no-input",
+                    "--no-color",
                 ],
                 [
                     "trace_paths",
                     "--no-input",
+                    "--no-color",
                 ],
                 [
                     "remove_stale_contenttypes",
                     "--no-input",
+                    "--no-color",
                 ],
                 [
                     "clearsessions",
+                    "--no-color",
                 ],
                 [
                     "reindex",
                     "--lazy",
+                    "--no-color",
                 ],
             ]:
 
@@ -418,16 +447,28 @@ def perform_migrations(netbox_venv_py, manage_script):
                     success = False
 
         # create users_user for superuser
+        # Run the script via runpy inside a small --command stub rather than piping it on
+        # stdin: stdin goes through code.InteractiveConsole, which prints tracebacks and
+        # exits 0, silently masking failures (e.g., the missing superuser token after
+        # TRUNCATE users_user CASCADE). An exception raised inside run_path propagates out
+        # of the --command exec and manage.py exits nonzero. The traceback scan is
+        # belt-and-suspenders in case some failure mode still exits 0.
+        su_script = '/usr/local/bin/netbox_superuser_create.py'
         cmd = [
             netbox_venv_py,
             os.path.basename(manage_script),
             "shell",
+            "--no-color",
             "--interface",
             "python",
+            "--command",
+            f"import runpy; runpy.run_path({su_script!r}, run_name='__main__')",
         ]
-        with open('/usr/local/bin/netbox_superuser_create.py', 'r') as f:
-            err, results = malcolm_utils.run_process(cmd, logger=logging, stdin=f.read())
-        if (err != 0) or (not results):
+        err, results = malcolm_utils.run_process(cmd, logger=logging)
+        results_str = "\n".join(results) if isinstance(results, (list, tuple)) else str(results)
+        if (err == 0) and results and ('Traceback' not in results_str):
+            logging.info(f'success setting up superuser: {results}')
+        else:
             logging.error(f'{err} setting up superuser: {results}')
             success = False
 
@@ -464,10 +505,18 @@ def restore_database_backup(args, netbox_venv_py, manage_script):
     successes = []
     try:
         stop_netbox()
-        successes.append(execute_restore_commands(args, database_file))
-        start_netbox()
-        successes.append(perform_migrations(netbox_venv_py, manage_script))
-        restore_media_directory(args, database_file)
+        try:
+            successes.append(execute_restore_commands(args, database_file))
+            # run migrations (and, more importantly, superuser/token recreation) BEFORE
+            # bringing granian back up: execute_restore_commands truncates users_user,
+            # so starting the API first would serve a window (>= startsecs) during which
+            # no users or tokens exist and clients get 403s. None of these steps needs
+            # the NetBox service itself, only postgreSQL.
+            successes.append(perform_migrations(netbox_venv_py, manage_script))
+            restore_media_directory(args, database_file)
+        finally:
+            # bring the service back up even if the restore failed partway
+            start_netbox()
     except Exception as e:
         logging.error(f"{type(e).__name__} restoring {os.path.basename(database_file)}: {e}")
 
@@ -588,6 +637,8 @@ def ensure_default_permissions(args, nb, groups):
                 'users.token',
                 'users.user',
                 'users.userconfig',
+                'users.owner',
+                'users.ownergroup',
             ],
         }
         default_group_permissions[f'{group_name}_user_config_permission'] = {
@@ -625,7 +676,7 @@ def ensure_default_permissions(args, nb, groups):
 
     try:
         # get all content types (for creating new permissions)
-        all_object_type_names = [f'{x.app_label}.{x.model}' for x in nb.extras.object_types.all()]
+        all_object_type_names = [f'{x.app_label}.{x.model}' for x in nb.core.object_types.all()]
 
         perms_pre_existing = {x.name: x for x in nb.users.permissions.all()}
         logging.debug(f"permissions (before): { {k:v.id for k, v in perms_pre_existing.items()} }")
@@ -810,6 +861,7 @@ def process_netbox_initializers(args, netbox_venv_py, manage_script):
                             netbox_venv_py,
                             os.path.basename(manage_script),
                             "load_initializer_data",
+                            "--no-color",
                             "--path",
                             tmp_preload_dir,
                         ],
@@ -837,8 +889,10 @@ def process_device_type_library_import(args, netbox_venv_py):
                 os_env = os.environ.copy()
                 os_env['NETBOX_URL'] = args.netbox_url
                 os_env['NETBOX_TOKEN'] = args.netbox_token
+                os_env.pop('VIRTUAL_ENV', None)
                 os_env['REPO_URL'] = 'local'
-                cmd = [netbox_venv_py, 'nb-dt-import.py']
+                os_env['REPO_PATH'] = './repo'
+                cmd = [netbox_venv_py, '-m', 'uv', 'run', '--no-sync', 'nb-dt-import.py']
                 err, results = malcolm_utils.run_process(
                     cmd,
                     logger=logging,
@@ -856,17 +910,146 @@ def process_device_type_library_import(args, netbox_venv_py):
     return success
 
 
+def process_custom_netbox_scripts(args, netbox_venv_py, manage_script):
+    # ######  Custom Scripts #######################################################################################
+    results = []
+
+    if not args.scripts_dir:
+        return results
+
+    scripts_path = Path(args.scripts_dir).expanduser().resolve()
+
+    if not scripts_path.is_dir():
+        return results
+
+    with malcolm_utils.pushd(os.path.dirname(manage_script)):
+        script_files = sorted(p for p in scripts_path.iterdir() if p.is_file() and p.suffix == ".py")
+        for script_file in script_files:
+            success = False
+            try:
+                logging.info(f"Importing {script_file.name}")
+
+                src_path_literal = repr(str(script_file))
+                dest_dir_literal = repr("/opt/netbox/netbox/scripts/")
+                dest_name_literal = repr(script_file.name)
+
+                script_code = f"""
+import os
+import shutil
+import hashlib
+from django.utils import timezone
+from core.models import DataSource, DataFile
+from extras.models import ScriptModule
+
+try:
+    src_path = {src_path_literal}
+    dest_dir = {dest_dir_literal}
+    dest_name = {dest_name_literal}
+    dest_path = os.path.join(dest_dir, dest_name)
+
+    os.makedirs(dest_dir, exist_ok=True)
+
+    if os.path.exists(src_path):
+        shutil.copy2(src_path, dest_path)
+
+    if os.path.exists(dest_path):
+        ds, _ = DataSource.objects.update_or_create(
+            name=dest_name,
+            defaults={{
+                'type': 'local',
+                'parameters': {{'path': dest_dir}},
+                'enabled': True
+            }}
+        )
+
+        with open(dest_path, 'rb') as f:
+            data = f.read()
+
+        df, _ = DataFile.objects.update_or_create(
+            source=ds,
+            path=dest_name,
+            defaults={{
+                'size': len(data),
+                'hash': hashlib.sha256(data).hexdigest(),
+                'last_updated': timezone.now()
+            }}
+        )
+
+        ScriptModule.objects.update_or_create(
+            data_file=df,
+            defaults={{
+                'data_source': ds,
+                'file_path': df.path,
+                'auto_sync_enabled': True
+            }}
+        )
+        print(f"SUCCESS: {{dest_name}} is fully automated.")
+    else:
+        print(f"WARNING: {{dest_name}} not found in container at {{dest_path}}.")
+except Exception as e:
+    print(f"WARNING: Failed to automate script: {{e}}")
+"""
+                with malcolm_utils.temporary_filename('.py') as tmp_import_script:
+                    with open(tmp_import_script, "w", encoding="utf-8") as file:
+                        file.write(script_code)
+
+                    script_importer_cmdline_stub = f"""
+import runpy
+runpy.run_path({str(tmp_import_script)!r}, run_name="__main__")
+"""
+                    err, out = malcolm_utils.run_process(
+                        [
+                            netbox_venv_py,
+                            manage_script,
+                            "nbshell",
+                            "--no-color",
+                            "-c",
+                            script_importer_cmdline_stub,
+                        ],
+                        logger=logging,
+                    )
+
+                if err == 0:
+                    success = True
+                    logging.debug(f"Automated {script_file.name}: {out}")
+                else:
+                    logging.error(f"Error {err} automating {script_file.name}: {out}")
+
+                results.append({"script": script_file.name, "success": success, "output": out, "err": err})
+
+            except Exception as e:
+                logging.error(f"{type(e).__name__} uploading {script_file.name}: {e}")
+                results.append({"script": script_file.name, "success": False, "output": str(e), "err": None})
+
+    return results
+
+
+##########################################################################################
+
+
 ###################################################################################################
 # main
 def main():
+    # normalize VALKEY_*/REDIS_* before anything spawns a manage.py subprocess, in case we
+    # were invoked outside the container's ENTRYPOINT chain (e.g., docker/kubectl exec)
+    map_valkey_env_to_redis()
+
     args = parse_args()
 
     netbox_venv_py = os.path.join(os.path.join(os.path.join(args.netbox_dir, 'venv'), 'bin'), 'python')
     manage_script = os.path.join(os.path.join(args.netbox_dir, 'netbox'), 'manage.py')
+    nb = None
 
     # if there is a database backup .gz in the preload directory, load it up (preferring the newest
     # if there are multiple) instead of populating via API
     preload_database_success = restore_database_backup(args, netbox_venv_py, manage_script)
+
+    # if a backup file was explicitly requested (vs. discovered in the preload directory) and the
+    # restore failed, exit nonzero so callers (control.py netboxRestore) actually see the failure
+    # instead of reporting a clean restore over a database with no superuser token
+    if args.preload_backup_file and not preload_database_success:
+        logging.error(f"Restore of {os.path.basename(args.preload_backup_file)} failed")
+        sys.exit(1)
 
     # only proceed to do the regular population if if we didn't preload a database backup, or
     #   if we attempted (and failed) but they didn't explicitly specify a backup file
@@ -880,88 +1063,13 @@ def main():
         sites = ensure_default_sites(args, nb)
         fix_missing_prefix_descriptions(nb)
 
+    process_custom_netbox_scripts(args, netbox_venv_py, manage_script)
     process_netbox_initializers(args, netbox_venv_py, manage_script)
-
     if not preload_database_success and (not args.preload_backup_file):
         process_device_type_library_import(args, netbox_venv_py)
 
 
 ###################################################################################################
-
-
-def automate_openeox_script(netbox_venv_py, manage_script):
-    import logging
-    import malcolm_utils
-    success = False
-    logging.info("Automating Hardware Lifecycle Script Registration")
-
-    script_code = """
-import os
-import shutil
-import hashlib
-from django.utils import timezone
-from core.models import DataSource, DataFile
-from extras.models import ScriptModule
-
-try:
-    src_path = '/usr/local/bin/hardware_lifecycle_auditor.py'
-    dest_dir = '/opt/netbox/netbox/scripts/'
-    dest_path = os.path.join(dest_dir, 'hardware_lifecycle_auditor.py')
-
-    # 1. Safely copy the script to NetBox's writable directory
-    if os.path.exists(src_path):
-        shutil.copy2(src_path, dest_path)
-
-    if os.path.exists(dest_path):
-        # 2. Register Local Data Source
-        ds, _ = DataSource.objects.update_or_create(
-            name='Hardware Lifecycle',
-            defaults={
-                'type': 'local',
-                'parameters': {'path': dest_dir},
-                'enabled': True
-            }
-        )
-
-        with open(dest_path, 'rb') as f:
-            data = f.read()
-
-        df, _ = DataFile.objects.update_or_create(
-            source=ds,
-            path='hardware_lifecycle_auditor.py',
-            defaults={
-                'size': len(data),
-                'hash': hashlib.sha256(data).hexdigest(),
-                'last_updated': timezone.now()
-            }
-        )
-
-        sm, _ = ScriptModule.objects.update_or_create(
-            data_file=df,
-            defaults={
-                'data_source': ds,
-                'file_path': df.path,
-                'auto_sync_enabled': True
-            }
-        )
-        print("SUCCESS: Hardware Lifecycle script is fully automated.")
-    else:
-        print(f"WARNING: {src_path} not found in container.")
-except Exception as e:
-    print(f"WARNING: Failed to automate script: {e}")
-"""
-
-    cmd = [netbox_venv_py, manage_script, "nbshell", "-c", script_code]
-    err, results = malcolm_utils.run_process(cmd, logger=logging)
-
-    if err == 0:
-        logging.debug(f"automate_openeox_script: {results}")
-        success = True
-    else:
-        logging.error(f"{err} automating script: {results}")
-
-    return success
-
 
 ##########################################################################################
 

@@ -7,3 +7,9 @@
 - name: Hostname Unknown
   slug: hostname-unknown
   color: Light Grey
+- name: "Lifecycle: Supported"
+  slug: lifecycle-supported
+  color: Light Green
+- name: "Lifecycle: End of Support"
+  slug: lifecycle-end-of-support
+  color: Dark Red

@@ -1,0 +1,174 @@
+name: raspi-build-push
+
+on:
+  workflow_call:
+    inputs:
+      profile:
+        required: true
+        type: string
+      rpi_model:
+        required: true
+        type: string
+      rpi_os:
+        required: true
+        type: string
+
+concurrency:
+  group: raspi-build-push-${{ inputs.profile }}-${{ inputs.rpi_model }}-${{ inputs.rpi_os }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      packages: write
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-arm
+            arch: arm64
+            platform: linux/arm64
+    defaults:
+      run:
+        shell: bash
+    steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        with:
+          driver-opts: |
+            image=moby/buildkit:master
+      -
+        name: Build environment setup
+        run: |
+          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          sudo rm -rf \
+            "$AGENT_TOOLSDIRECTORY" \
+            /opt/ghc \
+            /usr/lib/jvm \
+            /usr/local/.ghcup \
+            /usr/local/lib/android \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y update >/dev/null 2>&1
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge remove \
+            azure-cli \
+            dotnet* \
+            firefox \
+            google-chrome-stable \
+            google-cloud-cli \
+            microsoft-edge-stable \
+            mono-* \
+            mysql* \
+            postgresql* \
+            powershell \
+            temurin*  >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge autoremove >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
+            apt-transport-https \
+            bc \
+            binfmt-support \
+            bmap-tools \
+            build-essential \
+            ca-certificates \
+            curl \
+            debhelper-compat \
+            debian-archive-keyring \
+            debootstrap \
+            dosfstools \
+            genisoimage \
+            gettext \
+            git \
+            gnupg2 \
+            imagemagick \
+            jq \
+            kpartx \
+            po4a \
+            python3 \
+            qemu-user-static \
+            qemu-utils \
+            rsync \
+            software-properties-common \
+            squashfs-tools \
+            time \
+            virt-what \
+            vmdb2 \
+            xmlstarlet \
+            xorriso \
+            xz-utils \
+            yq \
+            zerofree
+      -
+        name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      -
+        name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
+      -
+        name: Extract commit SHA
+        shell: bash
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        id: extract_commit_sha
+      -
+        name: Extract Malcolm version
+        shell: bash
+        run: |
+          echo "mversion=$(python3 - <<'PYCODE'
+          import importlib.util
+          spec = importlib.util.spec_from_file_location("malcolm_constants", "scripts/malcolm_constants.py")
+          mod = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+          print(mod.MALCOLM_VERSION)
+          PYCODE
+          )" >> "$GITHUB_OUTPUT"
+      -
+        name: Build image
+        run: |
+          IMAGES=( $(yq -r '.services[] | select(.profiles[]? == "${{ inputs.profile }}") | .image' docker-compose.yml | sort -u | sed 's/$/-arm64/' ) )
+          for IMAGE in "${IMAGES[@]}"; do
+            REPO_IMAGE="$(echo "$IMAGE" | sed "s@^.*\(malcolm\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}-arm64/")"
+            docker pull "$REPO_IMAGE" && \
+              docker tag "$REPO_IMAGE" "$IMAGE" && \
+              docker rmi "$REPO_IMAGE"
+          done
+          DEST_IMAGES_TXZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.xz
+          echo "Saving Malcolm Docker images (${{ inputs.profile }} run profile) to \"$DEST_IMAGES_TXZ\""
+          docker save "${IMAGES[@]}" | xz -1 > "$DEST_IMAGES_TXZ"
+          for IMAGE in "${IMAGES[@]}"; do
+            docker rmi "$IMAGE"
+          done
+          pushd ./hedgehog-raspi
+          mkdir -p ./shared
+          mv "$DEST_IMAGES_TXZ" ./shared/
+          echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
+          echo "$(basename "$DEST_IMAGES_TXZ")" > ./shared/docker_images.txt
+          echo "export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
+          echo "export VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
+          sudo make raspi_${{ inputs.rpi_model }}_${{ inputs.rpi_os }}.img.xz
+          sudo rm -f raspi_${{ inputs.rpi_model }}_${{ inputs.rpi_os }}.img
+          sudo chmod 644 ./raspi_${{ inputs.rpi_model }}_${{ inputs.rpi_os }}*.*
+          popd
+      -
+        name: ghcr.io login
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Build and push IMG image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: ./hedgehog-raspi
+          build-args: |
+            IMAGE_NAME=${{ inputs.profile }}-raspi-${{ inputs.rpi_model }}-${{ inputs.rpi_os }}
+          push: true
+          provenance: false
+          platforms: ${{ matrix.platform }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/${{ inputs.profile }}-raspi-${{ inputs.rpi_model }}-${{ inputs.rpi_os }}:${{ steps.extract_branch.outputs.branch }}

@@ -292,10 +292,14 @@ def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
 
 
 def _apply_network_overrides(data: dict, network_name: Optional[str]) -> None:
-    if network_name:
+    if network_name is not None:
         for network in deep_get(data, ["networks"], {}):
-            deep_set(data, ["networks", network, "external"], True)
-            deep_set(data, ["networks", network, "name"], network_name)
+            if network_name:
+                deep_set(data, ["networks", network, "external"], True)
+                deep_set(data, ["networks", network, "name"], network_name)
+            else:
+                deep_set(data, ["networks", network, "external"], False)
+                deep_set(data, ["networks", network, "name"], None, deleteIfNone=True)
 
 
 def _get_exposed_services_config(malcolm_config):

@@ -37,6 +37,22 @@ fi
 
 if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
+  # curl and wget disagree on proxy env var casing. wget only reads the lowercase
+  # forms (http_proxy/https_proxy/no_proxy); curl reads the lowercase forms and
+  # also several uppercase forms (HTTPS_PROXY, NO_PROXY, etc.) at lower precedence,
+  # but by design never reads uppercase HTTP_PROXY specifically -- this is a
+  # deliberate curl safeguard against the "httpoxy" issue, where an attacker-
+  # controlled Proxy: request header could get turned into HTTP_PROXY in a CGI
+  # environment and redirect outbound traffic. See https://httpoxy.org/.
+  # Since arkime_update_geo.sh and maxmind-mmdb-download.sh use a mix of wget and
+  # curl, and some configurations may use plain http:// URLs, mirror the common
+  # uppercase container proxy variables into their lowercase equivalents here so
+  # both tools see them consistently. Explicitly configured lowercase values are
+  # preserved and take precedence.
+  [[ -n "${HTTP_PROXY:-}" && -z "${http_proxy:-}" ]] && export http_proxy="$HTTP_PROXY"
+  [[ -n "${HTTPS_PROXY:-}" && -z "${https_proxy:-}" ]] && export https_proxy="$HTTPS_PROXY"
+  [[ -n "${NO_PROXY:-}" && -z "${no_proxy:-}" ]] && export no_proxy="$NO_PROXY"
+
   # download and/or update geo updates
   $ARKIME_DIR/bin/arkime_update_geo.sh
 
@@ -67,10 +83,10 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
     if [[ "${INDEX_MANAGEMENT_ENABLED:-false}" == "true" ]]; then
       [[ "${INDEX_MANAGEMENT_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
-      [[ "${OPENSEARCH_PRIMARY}" == "elasticsearch-remote" ]] && LIFECYCLE_POLCY=ilm || LIFECYCLE_POLCY=ism
-      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ${LIFECYCLE_POLCY} "${INDEX_MANAGEMENT_OPTIMIZATION_PERIOD}" "${INDEX_MANAGEMENT_RETENTION_TIME}" ${HOT_WARM_FLAG} --segments "${INDEX_MANAGEMENT_SEGMENTS}" --replicas "${INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS}" --history "${INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS}"
-      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --${LIFECYCLE_POLCY} "${DB_INIT_ARGS[@]}"
-      echo "${LIFECYCLE_POLCY} created"
+      [[ "${OPENSEARCH_PRIMARY}" == "elasticsearch-remote" ]] && LIFECYCLE_POLICY=ilm || LIFECYCLE_POLICY=ism
+      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ${LIFECYCLE_POLICY} "${INDEX_MANAGEMENT_OPTIMIZATION_PERIOD}" "${INDEX_MANAGEMENT_RETENTION_TIME}" ${HOT_WARM_FLAG} --segments "${INDEX_MANAGEMENT_SEGMENTS}" --replicas "${INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS}" --history "${INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS}"
+      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --${LIFECYCLE_POLICY} "${DB_INIT_ARGS[@]}"
+      echo "${LIFECYCLE_POLICY} created"
     fi
 
     echo "Creating default user..."

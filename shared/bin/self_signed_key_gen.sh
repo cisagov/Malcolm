@@ -101,6 +101,24 @@ function randomStateFull {
   echo "$CHOSEN_STATE"
 }
 
+function generate_ca {
+  echo "Generating CA certificate and key..."
+
+  if [[ -z "${SUBJECT}" ]]; then
+    SUBJECT_DEFAULT="/C=US/ST=$(randomStateAbbr)/O=ACME/OU=R&D"
+    [[ $INTERACTIVE_SHELL == "yes" ]] && SUBJECT="" || SUBJECT=$SUBJECT_DEFAULT
+
+    while [[ -z $SUBJECT ]]; do
+      echo ""
+      read -p "CA subject [$SUBJECT_DEFAULT]? " SUBJECT
+      SUBJECT=${SUBJECT:-$SUBJECT_DEFAULT}
+    done
+  fi
+
+  openssl genrsa -out ca.key 2048
+  openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -subj "$SUBJECT" -out ca.crt
+}
+
 if [ -d "$WORKDIR" ]; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
@@ -113,19 +131,25 @@ if [ -d "$WORKDIR" ]; then
   # generate new ca/server/client certificates/keys
 
   # ca -------------------------------
-  echo "Generating CA certificate and key..."
+  CA_KEY="$OUTPUT_PATH/ca.key"
+  CA_CRT="$OUTPUT_PATH/ca.crt"
 
-  if [[ -z "${SUBJECT}" ]]; then
-    SUBJECT_DEFAULT="/C=US/ST=$(randomStateAbbr)/O=ACME/OU=R&D"
-    [[ $INTERACTIVE_SHELL == "yes" ]] && SUBJECT="" || SUBJECT=$SUBJECT_DEFAULT
-    while [[ -z $SUBJECT ]]; do
-      echo ""
-      read -p "CA subject [$SUBJECT_DEFAULT]? " SUBJECT
-      SUBJECT=${SUBJECT:-$SUBJECT_DEFAULT}
-    done
+  # Skip CA generation if both ca.key and ca.crt files already exist
+  if [[ -f "$CA_KEY" && -f "$CA_CRT" ]]; then
+    echo "CA certificate and key already exist at $OUTPUT_PATH. Skipping generation."
+    # copy the existing CA.crt/key to the workdir for use in server/client generation
+    	cp "$CA_CRT" "$WORKDIR/"
+	    cp "$CA_KEY" "$WORKDIR/"
+
+  elif [[ -f "$CA_KEY" || -f "$CA_CRT" ]]; then
+    echo "CA certificate WARNING: Only one of ca.key or ca.crt exists in $OUTPUT_PATH."
+    echo "Existing files will be overwritten to ensure consistency."
+    generate_ca
+
+  else
+    generate_ca
+
   fi
-  openssl genrsa -out ca.key 2048
-  openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -subj "$SUBJECT" -out ca.crt
 
   # server -------------------------------
   echo "Generating server certificate and key..."

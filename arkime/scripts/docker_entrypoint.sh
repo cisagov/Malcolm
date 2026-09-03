@@ -11,7 +11,7 @@ function urlencodeall() {
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 ARKIME_RULES_DIR=${ARKIME_RULES_DIR:-"/opt/arkime/rules"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
-ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
+ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 32 | head -n 1)}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-"daily"}
 ARKIME_QUERY_ALL_INDICES=${ARKIME_QUERY_ALL_INDICES:-"false"}
@@ -89,7 +89,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     # note: when setting the node name, the viewer_service.sh script needs to match
     sed -i "s/MALCOLM_PCAP_NODE_NAME/${NODE_NAME}-upload/g" "${ARKIME_CONFIG_FILE}"
 
-    # certFile/keyFile is cleared based on ARKIME_SSL, or overriden via ARKIME_CERTFILE/ARKIME_KEYFILE
+    # certFile/keyFile is cleared based on ARKIME_SSL, or overridden via ARKIME_CERTFILE/ARKIME_KEYFILE
     [[ "${ARKIME_SSL:-true}" == "false" ]] && \
       ( sed -r -i "s/(certFile)\s*=\s*.*/\1=/" "${ARKIME_CONFIG_FILE}" ; sed -r -i "s/(keyFile)\s*=\s*.*/\1=/" "${ARKIME_CONFIG_FILE}" )
     [[ -n "$ARKIME_CERTFILE" ]] && \
@@ -186,13 +186,14 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
 
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
       # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
-        sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+      sed -r -i "s/(authMode)\s*=\s*.*/\1=s2s/" "${ARKIME_CONFIG_FILE}"
     fi
 
     # enable ja4+ plugin if it's present
@@ -218,10 +219,10 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     #   are going to be handled purely based on URI path in the NGINX stuff (nginx/lua/nginx_auth_helpers.lua).
     #   Once all of these permissions are settable at the role level in Arkime, we can uncomment those and revisit it.
     # -SG 2025.06.17
-    RBAC_FILE="$(mktemp)"
-    CONFIG_RBAC_FILE="$(mktemp)"
-    echo -e "\n[user-role-mappings]" >> "${RBAC_FILE}"
     if [[ "${ROLE_BASED_ACCESS,,}" =~ ^(1|true|yes|on)$ ]]; then
+      RBAC_FILE="$(mktemp)"
+      CONFIG_RBAC_FILE="$(mktemp)"
+      echo -e "\n[user-role-mappings]" >> "${RBAC_FILE}"
       echo "arkimeUser=true" >> "${RBAC_FILE}"
       [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
         echo "arkimeAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
@@ -237,24 +238,22 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         echo "wiseUser=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_WISE_READ_ACCESS')" >> "${RBAC_FILE}"
       [[ -n "$ROLE_ARKIME_WISE_READ_WRITE_ACCESS" ]]  && \
         echo "wiseAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_WISE_READ_WRITE_ACCESS')" >> "${RBAC_FILE}"
-    else
-      echo "arkimeAdmin=true" >> "${RBAC_FILE}"
+      echo -e "\n" >> "${RBAC_FILE}"
+      awk '
+          FNR==NR { insert_lines[NR] = $0; insert_count = NR; next }
+          /^\[custom-fields\]/ && !inserted {
+              for (i = 1; i <= insert_count; i++) print insert_lines[i]
+              inserted = 1
+          }
+          { print }
+          END {
+              if (!inserted) {
+                  for (i = 1; i <= insert_count; i++) print insert_lines[i]
+              }
+          }
+      ' "${RBAC_FILE}" "${ARKIME_CONFIG_FILE}" > "${CONFIG_RBAC_FILE}" && mv "${CONFIG_RBAC_FILE}" "${ARKIME_CONFIG_FILE}"
+      rm -f "${RBAC_FILE}" "${CONFIG_RBAC_FILE}"
     fi
-    echo -e "\n" >> "${RBAC_FILE}"
-    awk '
-        FNR==NR { insert_lines[NR] = $0; insert_count = NR; next }
-        /^\[custom-fields\]/ && !inserted {
-            for (i = 1; i <= insert_count; i++) print insert_lines[i]
-            inserted = 1
-        }
-        { print }
-        END {
-            if (!inserted) {
-                for (i = 1; i <= insert_count; i++) print insert_lines[i]
-            }
-        }
-    ' "${RBAC_FILE}" "${ARKIME_CONFIG_FILE}" > "${CONFIG_RBAC_FILE}" && mv "${CONFIG_RBAC_FILE}" "${ARKIME_CONFIG_FILE}"
-    rm -f "${RBAC_FILE}" "${CONFIG_RBAC_FILE}"
 
     # make sure permissions and ownership are nice
     chmod 600 "${ARKIME_CONFIG_FILE}" || true
@@ -264,14 +263,19 @@ fi
 
 
 # An example wise.ini file is baked into the container image by the Dockerfile as $ARKIME_DIR/etc/wise.ini.example
-# After the container is booted we copy wise.ini.example from $ARMIKE_DIR/etc/ to $ARKIME_DIR/wiseini/
+# After the container is booted we copy wise.ini.example from $ARKIME_DIR/etc/ to $ARKIME_DIR/wiseini/
 # if $ARKIME_DIR/wiseini/wise.ini does not already exist.
 # $ARKIME_DIR/wiseini/wise.ini will either be a R/W mounted file, when run under Docker Compose or
 # $ARKIME_DIR/wiseini/ will be a persistent volume when run under Kubernetes.
 # This allows changes to persist when the wise application edits its own ini file at runtime.
 
-if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]] && [[ "$LIVE_CAPTURE" == "false" ]]; then
-    cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
+if [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]] && [[ "$LIVE_CAPTURE" == "false" ]]; then
+  if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]]; then
+      cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
+  elif [[ ! -s "${ARKIME_WISE_CONFIG_FILE}" ]]; then
+      truncate --size=0 "${ARKIME_WISE_CONFIG_FILE}"
+      tee -a "${ARKIME_WISE_CONFIG_FILE}" < "${ARKIME_WISE_EXAMPLE_FILE}" >/dev/null
+  fi
 fi
 
 if [[  -d "${ARKIME_DIR}/wiseini" ]]; then
@@ -282,6 +286,9 @@ fi
 if [[ "${ARKIME_EXPOSE_WISE_GUI}"  == "true" ]]; then
   sed "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}" > ./wise.tmp
   sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" ./wise.tmp
+  if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
+    sed -r -i "s/(authMode)\s*=\s*.*/\1=s2s/" ./wise.tmp
+  fi
   if [[ "${ARKIME_ALLOW_WISE_GUI_CONFIG}"  == "true" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|"  ./wise.tmp
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseini/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"

@@ -81,7 +81,7 @@ function get_latest_github_tagged_release() {
 # clone_github_repo
 #
 # clone the latest GitHub release tag if available (else, master/HEAD) under ./
-# release tag/branch can be overriden by specifying the branch name with after the URL delimited by a |
+# release tag/branch can be overridden by specifying the branch name with after the URL delimited by a |
 #
 function clone_github_repo() {
   URL_PARAM="$1"
@@ -201,7 +201,7 @@ done < <(find . \
           -print0
         )
 
-# precompile yara rules for performance gains in Streka
+# precompile yara rules for performance gains in Strelka
 if (( ${#YARAC_ARGS[@]} > 0 )); then
   yarac "${YARAC_ARGS[@]}" "${YARA_COMPILED_RULES_FILE}.new" >&2
   YARAC_RESULT=$?

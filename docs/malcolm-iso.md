@@ -61,7 +61,7 @@ $ ./malcolm-iso/build_via_vagrant.sh -f -i malcolm -d malcolm_YYYYMMDD_HHNNSS_xx
 
 A system installed from the resulting ISO will load the Malcolm images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
 
-Alternatively, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm images before building the ISO. The resulting ISO file is wrapped in a image that provides an HTTP server from which the ISO may be downloaded.  See [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners) for more information.
+Alternatively, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm images before building the ISO. The resulting ISO file is wrapped in an image that provides an HTTP server from which the ISO may be downloaded.  See [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners) for more information.
 
 ## <a name="ISOInstallation"></a>Installation
 
@@ -80,9 +80,9 @@ At the end of the installation process, users will be prompted with the followin
 
 * **Format non-OS drive(s) for artifact storage?**
 * **Disable IPv6?**
-* **Automatically login to the GUI session?**
+* **Automatically log in to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
-* **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
+* **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stigs/general_purpose_operating_system_security_requirements_guide/2024-07-02/finding/V-203595)?** *(only applies when installed on U.S. government information systems)*
 * **Allow SSH password authentication?** *(Caution: password authentication is less secure than public/private key pairs)*
 
 Following these prompts, the installer will reboot and the Malcolm base operating system will boot.

@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: ghcr.io/idaholab/malcolm/nginx-proxy:26.04.1
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -106,9 +106,10 @@ spec:
         - name: nginx-runtime-logs-volume
           mountPath: /var/log/nginx
           subPath: "nginx"
+      terminationGracePeriodSeconds: 20
       initContainers:
       - name: nginx-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

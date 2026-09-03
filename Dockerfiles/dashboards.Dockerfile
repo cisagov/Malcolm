@@ -1,4 +1,27 @@
-FROM opensearchproject/opensearch-dashboards:3.5.0
+FROM opensearchproject/opensearch-dashboards:3.8.0 AS permissions
+
+ENV PUSER="opensearch-dashboards"
+ENV PGROUP="opensearch-dashboards"
+ENV OPENSEARCH_DASHBOARDS_HOME=/usr/share/opensearch-dashboards
+
+USER root
+RUN yum install -y findutils && \
+    rm -rf $OPENSEARCH_DASHBOARDS_HOME/config/opensearch.example.org.key \
+           $OPENSEARCH_DASHBOARDS_HOME/config/opensearch.example.org.cert \
+           $OPENSEARCH_DASHBOARDS_HOME/node/fallback && \
+    mkdir -p $OPENSEARCH_DASHBOARDS_HOME/config $OPENSEARCH_DASHBOARDS_HOME/data && \
+    chown -R root:root $OPENSEARCH_DASHBOARDS_HOME && \
+    find $OPENSEARCH_DASHBOARDS_HOME -type d -exec chmod a+rx,go-w {} + && \
+    find $OPENSEARCH_DASHBOARDS_HOME -type f -exec chmod a+r,go-w {} + && \
+    mkdir -p $OPENSEARCH_DASHBOARDS_HOME/config $OPENSEARCH_DASHBOARDS_HOME/data && \
+    chown --silent -R ${PUSER}:${PGROUP} \
+      $OPENSEARCH_DASHBOARDS_HOME/config \
+      $OPENSEARCH_DASHBOARDS_HOME/data && \
+    chmod -R u+rwX,go-rwx \
+      $OPENSEARCH_DASHBOARDS_HOME/config \
+      $OPENSEARCH_DASHBOARDS_HOME/data
+
+FROM redhat/ubi9-minimal:latest AS ubi-micro-build
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -25,30 +48,60 @@ ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/t
 
 ARG NODE_OPTIONS="--max_old_space_size=4096"
 ENV NODE_OPTIONS=$NODE_OPTIONS
-
-ENV PATH="/data:${PATH}"
+ENV OPENSEARCH_DASHBOARDS_HOME=/usr/share/opensearch-dashboards
+ENV PATH="$PATH:$OPENSEARCH_DASHBOARDS_HOME/bin"
 
 USER root
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
-    yum install -y curl-minimal psmisc findutils util-linux jq openssl rsync procps-ng python3 zip unzip && \
-    yum remove -y vim-* && \
+    microdnf install -y \
+        bash \
+        curl-minimal \
+        findutils \
+        gzip \
+        jq \
+        nss \
+        openssl \
+        procps-ng \
+        psmisc \
+        python3 \
+        rsync \
+        shadow-utils \
+        tar \
+        unzip \
+        util-linux \
+        which \
+        xorg-x11-fonts-Type1 \
+        zip && \
+    groupadd -g $DEFAULT_GID $PGROUP && \
+        adduser -u $DEFAULT_UID -g $DEFAULT_GID -d $OPENSEARCH_DASHBOARDS_HOME $PUSER && \
     usermod -a -G tty ${PUSER} && \
-    chown --silent -R ${PUSER}:${PGROUP} /usr/share/opensearch-dashboards && \
     curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
       chmod +x /usr/bin/tini && \
-    yum clean all && \
-    rm -rf /var/cache/yum
+    microdnf clean all && \
+    rm -rf /var/cache/dnf /var/cache/yum
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/dashboards.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
-ADD --chmod=644 dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
+COPY --from=permissions $OPENSEARCH_DASHBOARDS_HOME $OPENSEARCH_DASHBOARDS_HOME
+ADD --chmod=644 dashboards/opensearch_dashboards.yml $OPENSEARCH_DASHBOARDS_HOME/config/opensearch_dashboards.orig.yml
 ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
+
+# This is in part to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN="$OPENSEARCH_DASHBOARDS_HOME/config;$OPENSEARCH_DASHBOARDS_HOME/data"
+
+# see PUSER_CHOWN comment above
+VOLUME ["/usr/share/opensearch-dashboards/config"]
+VOLUME ["/usr/share/opensearch-dashboards/data"]
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \

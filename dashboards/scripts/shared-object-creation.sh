@@ -195,6 +195,18 @@ function DoReplacersInFile() {
       # OpenSearch - flat_object - https://opensearch.org/docs/latest/field-types/supported-field-types/flat-object/
       # Elasticsearch - flattened - https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html
       sed -i "s/flat_object/flattened/g" "${REPLFILE}" || true
+
+      # the parameters for wildcard field type differ between opensearch and elasticsearch
+      # opensearch - https://docs.opensearch.org/latest/mappings/supported-field-types/wildcard/
+      # elasticsearch - https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword#wildcard-field-type
+      jq '
+        walk(
+          if type == "object" and .type? == "wildcard"
+          then del(.doc_values, .normalizer)
+          else .
+          end
+        )
+      ' "${REPLFILE}" | sponge "${REPLFILE}"
     fi
 
     if [[ "$FILE_TYPE" == "dashboard" ]]; then
@@ -477,7 +489,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
           #############################################################################################################################
           # Index pattern(s)
-          #   - Only set overwrite=true if we actually updated the templates above, otherwise overwrite=false and fail silently
+          #   - Only set overwrite=true if we actually updated the templates above; otherwise, overwrite=false and fail silently
           #     if they already exist (http result code 409)
           echo "Importing index pattern..."
           [[ "${TEMPLATES_IMPORTED}" == "true" ]] && SHOW_IMPORT_ERROR="--show-error" || SHOW_IMPORT_ERROR=

@@ -1003,7 +1003,7 @@
                 "find_device_response_flags_ieee_802_15_4_dsss_o_qpsk_modulation": {
                   "type": "keyword"
                 },
-                "find_device_response_flags_mutli_sensor_field_device": {
+                "find_device_response_flags_multi_sensor_field_device": {
                   "type": "keyword"
                 },
                 "find_device_response_flags_protocol_bridge_device": {
@@ -1105,7 +1105,7 @@
                 "poll_sub_device_response_flags_ieee_802_15_4_dsss_o_qpsk_modulation": {
                   "type": "keyword"
                 },
-                "poll_sub_device_response_flags_mutli_sensor_field_device": {
+                "poll_sub_device_response_flags_multi_sensor_field_device": {
                   "type": "keyword"
                 },
                 "poll_sub_device_response_flags_protocol_bridge_device": {
@@ -1943,7 +1943,7 @@
                 "session_log_record_session_status_summary_undefined_bits": {
                   "type": "long"
                 },
-                "session_log_record_session_status_summary_writes_occured": {
+                "session_log_record_session_status_summary_writes_occurred": {
                   "type": "keyword"
                 },
                 "session_log_record_start_configuration_change_count": {
@@ -2064,7 +2064,7 @@
                 "read_additional_device_status_contents_standardized_status2_undefined_bits": {
                   "type": "long"
                 },
-                "read_additional_device_status_contents_standardized_status3_bandwith_allocation_pending": {
+                "read_additional_device_status_contents_standardized_status3_bandwidth_allocation_pending": {
                   "type": "keyword"
                 },
                 "read_additional_device_status_contents_standardized_status3_block_transfer_pending": {
@@ -2076,7 +2076,7 @@
                 "read_additional_device_status_contents_standardized_status3_radio_failure": {
                   "type": "keyword"
                 },
-                "read_additional_device_status_contents_standardized_status3_resereved": {
+                "read_additional_device_status_contents_standardized_status3_reserved": {
                   "type": "keyword"
                 },
                 "read_additional_device_status_contents_standardized_status3_undefined_bits": {
@@ -2496,7 +2496,7 @@
                 "read_unique_identifier_long_tag_response_flags_ieee_802_15_4_dsss_o_qpsk_modulation": {
                   "type": "keyword"
                 },
-                "read_unique_identifier_long_tag_response_flags_mutli_sensor_field_device": {
+                "read_unique_identifier_long_tag_response_flags_multi_sensor_field_device": {
                   "type": "keyword"
                 },
                 "read_unique_identifier_long_tag_response_flags_protocol_bridge_device": {
@@ -2586,7 +2586,7 @@
                 "read_unique_identifier_response_flags_ieee_802_15_4_dsss_o_qpsk_modulation": {
                   "type": "keyword"
                 },
-                "read_unique_identifier_response_flags_mutli_sensor_field_device": {
+                "read_unique_identifier_response_flags_multi_sensor_field_device": {
                   "type": "keyword"
                 },
                 "read_unique_identifier_response_flags_protocol_bridge_device": {
@@ -2679,7 +2679,7 @@
                 "read_unique_identifier_tag_response_flags_ieee_802_15_4_dsss_o_qpsk_modulation": {
                   "type": "keyword"
                 },
-                "read_unique_identifier_tag_response_flags_mutli_sensor_field_device": {
+                "read_unique_identifier_tag_response_flags_multi_sensor_field_device": {
                   "type": "keyword"
                 },
                 "read_unique_identifier_tag_response_flags_protocol_bridge_device": {
@@ -3829,7 +3829,7 @@
                 "ext_obj_encoding": {
                   "type": "keyword"
                 },
-                "ext_obj_encryption_algorithom": {
+                "ext_obj_encryption_algorithm": {
                   "type": "keyword"
                 },
                 "ext_obj_password": {
@@ -6026,6 +6026,322 @@
                 },
                 "session_id": {
                   "type": "long"
+                }
+              }
+            },
+            "iec104_ctrl": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "asdu_type": {
+                  "type": "keyword"
+                },
+                "cot": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "time_sync": {
+                  "type": "keyword"
+                },
+                "tsc": {
+                  "type": "long"
+                },
+                "qrp": {
+                  "type": "long"
+                },
+                "actcon_ts": {
+                  "type": "date"
+                },
+                "actterm_ts": {
+                  "type": "date"
+                },
+                "duration": {
+                  "type": "float"
+                },
+                "missing": {
+                  "type": "keyword"
+                },
+                "error": {
+                  "type": "keyword"
+                },
+                "error_reason": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iec104_query": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "asdu_type": {
+                  "type": "keyword"
+                },
+                "cot": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "qoi": {
+                  "type": "long"
+                },
+                "qcc_rqt": {
+                  "type": "long"
+                },
+                "qcc_frz": {
+                  "type": "long"
+                },
+                "actcon_ts": {
+                  "type": "date"
+                },
+                "actterm_ts": {
+                  "type": "date"
+                },
+                "duration": {
+                  "type": "float"
+                },
+                "missing": {
+                  "type": "keyword"
+                },
+                "error": {
+                  "type": "keyword"
+                },
+                "error_reason": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iec104_read": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "asdu_type": {
+                  "type": "keyword"
+                },
+                "cot": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "raw_data": {
+                  "type": "long"
+                },
+                "actcon_ts": {
+                  "type": "date"
+                },
+                "duration": {
+                  "type": "float"
+                },
+                "missing": {
+                  "type": "keyword"
+                },
+                "error": {
+                  "type": "keyword"
+                },
+                "error_reason": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iec104_write": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "asdu_type": {
+                  "type": "keyword"
+                },
+                "cot": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "se": {
+                  "type": "keyword"
+                },
+                "qualifier": {
+                  "type": "long"
+                },
+                "actcon_ts": {
+                  "type": "date"
+                },
+                "actterm_ts": {
+                  "type": "date"
+                },
+                "duration": {
+                  "type": "float"
+                },
+                "missing": {
+                  "type": "keyword"
+                },
+                "error": {
+                  "type": "keyword"
+                },
+                "error_reason": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iec104_file": {
+              "properties": {
+                "ts_end": {
+                  "type": "date"
+                },
+                "duration": {
+                  "type": "float"
+                },
+                "direction": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "fname": {
+                  "type": "long"
+                },
+                "segments": {
+                  "type": "long"
+                },
+                "bytes": {
+                  "type": "long"
+                },
+                "status": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iec104_telemetry": {
+              "properties": {
+                "asdu_type": {
+                  "type": "keyword"
+                },
+                "cot": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "spi": {
+                  "type": "keyword"
+                },
+                "bl": {
+                  "type": "keyword"
+                },
+                "sb": {
+                  "type": "keyword"
+                },
+                "nt": {
+                  "type": "keyword"
+                },
+                "iv": {
+                  "type": "keyword"
+                },
+                "ov": {
+                  "type": "keyword"
+                },
+                "cp24": {
+                  "type": "keyword"
+                },
+                "cp56": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iec104_param": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "asdu_type": {
+                  "type": "keyword"
+                },
+                "cot": {
+                  "type": "keyword"
+                },
+                "ca": {
+                  "type": "long"
+                },
+                "ioa": {
+                  "type": "long"
+                },
+                "value": {
+                  "type": "keyword"
+                },
+                "qpm_kpa": {
+                  "type": "long"
+                },
+                "qpm_pop": {
+                  "type": "keyword"
+                },
+                "qpm_lpc": {
+                  "type": "keyword"
+                },
+                "qpa": {
+                  "type": "long"
+                },
+                "actcon_ts": {
+                  "type": "date"
+                },
+                "actterm_ts": {
+                  "type": "date"
+                },
+                "duration": {
+                  "type": "float"
+                },
+                "missing": {
+                  "type": "keyword"
+                },
+                "error": {
+                  "type": "keyword"
+                },
+                "error_reason": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
                 }
               }
             },

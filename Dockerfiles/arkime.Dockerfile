@@ -33,7 +33,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 ENV ARKIME_DIR="/opt/arkime"
-ENV ARKIME_VERSION="6.1.1"
+ENV ARKIME_VERSION="6.7.0"
 ENV ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH=no
@@ -65,6 +65,7 @@ ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG PCAP_NODE_NAME=malcolm
 ARG PCAP_PROCESSED_DIRECTORY=/data/pcap/processed
+ARG MAXMIND_GEOIP_DB_ACCOUNT_ID=""
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 ARG MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -103,13 +104,13 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       bc \
-      bzip2 \
       curl \
       ethtool \
       file \
-      git \
-      gzip \
+      geoip-bin \
+      geoipupdate \
       inotify-tools \
+      iproute2 \
       jq \
       libcap2-bin \
       libglib2.0-0 \
@@ -129,9 +130,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       libyara10 \
       libzmq5 \
       lua5.4 \
-      lzma \
       mmdb-bin \
-      p7zip-full \
       procps \
       psmisc \
       python3 \
@@ -139,13 +138,8 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       python3-setuptools \
       python3-wheel \
       rsync \
-      tar \
       tini \
-      unrar \
-      unzip \
-      vim-tiny \
       wget \
-      xz-utils \
       zlib1g && \
     cd /tmp && \
       curl -fsSL -o ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
@@ -158,7 +152,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
-    apt-get -q -y --purge remove git gcc gcc-12 cpp cpp-12 && \
+    apt-get -q -y --purge remove libtool python3-setuptools python3-wheel gcc cpp && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

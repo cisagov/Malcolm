@@ -1,0 +1,87 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: backend-transport
+  namespace: malcolm
+spec:
+  insecureSkipVerify: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: malcolm-ingressroute
+  namespace: malcolm
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: nginx-proxy
+          port: 443
+          scheme: https
+          serversTransport: backend-transport
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: logstash-lumberjack
+  namespace: malcolm
+spec:
+  entryPoints:
+    - lumberjack
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: logstash
+          port: 5044
+  tls:
+    passthrough: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: filebeat-tcpjson
+  namespace: malcolm
+spec:
+  entryPoints:
+    - tcpjson
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: filebeat
+          port: 5045
+  tls:
+    passthrough: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: upload-sftp
+  namespace: malcolm
+spec:
+  entryPoints:
+    - sftp
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: upload
+          port: 22
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: nginx-proxy-opensearch
+  namespace: malcolm
+spec:
+  entryPoints:
+    - opensearch
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: nginx-proxy
+          port: 9200
+  tls:
+    passthrough: true

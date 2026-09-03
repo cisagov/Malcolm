@@ -39,7 +39,7 @@ opensearch_security:
       preferred: ["Global"]
 
 data_source:
-  enabled: false
+  enabled: _MALCOLM_DASHBOARDS_DATA_SOURCE_ENABLED_
 
 opensearchDashboards:
   branding:

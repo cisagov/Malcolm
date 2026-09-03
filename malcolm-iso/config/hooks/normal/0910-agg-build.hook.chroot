@@ -113,21 +113,25 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
+case "$(uname -m)" in
+  x86_64)  BINARCH=amd64 ;;
+  aarch64) BINARCH=arm64 ;;
+  *) echo "Unsupported arch: $(uname -m)" >&2; exit 1 ;;
+esac
+BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
 # docker-compose symlink
 dpkg -s docker-compose-plugin && \
     ln -s -r /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 # yq
-RELEASE_URL="https://api.github.com/repos/mikefarah/yq/releases/latest"
-RELEASE_FILE_REGEX="yq_linux_amd64\\\.tar\\\.gz$"
-cd /usr/local/bin
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxf - ./yq_linux_amd64
-mv ./yq_linux_amd64 ./yq
-chmod 755 ./yq
+RELEASE_URL="https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${BINARCH}"
+curl "${GITHUB_API_CURL_ARGS[@]}" -o /usr/local/bin/yq "${RELEASE_URL}"
+chmod 755 /usr/local/bin/yq
 
 # croc
 RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
-RELEASE_FILE_REGEX="Linux-64bit\\\.tar\\\.gz$"
+[[ "$BINARCH" == amd64 ]] && RELEASE_FILE_REGEX="Linux-64bit\\\.tar\\\.gz$" || RELEASE_FILE_REGEX="Linux-ARM64\\\.tar\\\.gz$"
 cd /usr/local/bin
 curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxvf - croc
 chmod 755 ./croc
@@ -139,7 +143,14 @@ JUST_RELEASE_URL="https://api.github.com/repos/casey/just/releases/latest"
 mkdir -p /tmp/just
 cd /tmp
 just_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$JUST_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
-just_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$just_assets_url" | jq ".[] | select(.browser_download_url | contains(\"x86_64-unknown-linux-musl.tar.gz\")) | .browser_download_url" | tr -d '"')"
+just_arch=$([[ "$BINARCH" == amd64 ]] && echo x86_64 || echo aarch64)
+just_tar_url="$(
+  curl "${GITHUB_API_CURL_ARGS[@]}" "$just_assets_url" |
+    jq -r --arg arch "$just_arch" '
+      .[] | select(.browser_download_url | contains($arch + "-unknown-linux-musl.tar.gz"))
+      | .browser_download_url
+    '
+)"
 curl "${GITHUB_API_CURL_ARGS[@]}" "${just_tar_url}" | tar xzf - -C ./just
 mv ./just/just /usr/local/bin/just
 chmod 755 /usr/local/bin/just
@@ -152,7 +163,15 @@ EZA_RELEASE_URL="https://api.github.com/repos/eza-community/eza/releases/latest"
 mkdir -p /tmp/eza
 cd /tmp
 eza_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$EZA_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
-eza_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$eza_assets_url" | jq ".[] | select(.browser_download_url | contains(\"x86_64-unknown-linux-gnu.tar.gz\")) | .browser_download_url" | tr -d '"')"
+eza_arch=$([[ "$BINARCH" == amd64 ]] && echo x86_64 || echo aarch64)
+eza_pattern=$([[ "$BINARCH" == amd64 ]] && echo '-unknown-linux-musl.tar.gz' || echo '-unknown-linux-gnu_no_libgit.tar.gz')
+eza_tar_url="$(
+  curl "${GITHUB_API_CURL_ARGS[@]}" "$eza_assets_url" |
+    jq -r --arg arch "$eza_arch" --arg pattern "$eza_pattern" '
+      .[] | select(.browser_download_url | contains($arch + $pattern))
+      | .browser_download_url
+    '
+)"
 curl "${GITHUB_API_CURL_ARGS[@]}" "${eza_tar_url}" | tar xzf - -C ./eza
 mv ./eza/eza /usr/local/bin/eza
 chmod 755 /usr/local/bin/eza
@@ -171,7 +190,7 @@ fc-cache -f -v
 
 # stern
 RELEASE_URL="https://api.github.com/repos/stern/stern/releases/latest"
-RELEASE_FILE_REGEX="_linux_amd64\\\.tar\\\.gz$"
+[[ "$BINARCH" == amd64 ]] && RELEASE_FILE_REGEX="_linux_amd64\\\.tar\\\.gz$" || RELEASE_FILE_REGEX="_linux_arm64\\\.tar\\\.gz$"
 cd /tmp
 mkdir -p ./stern
 curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./stern
@@ -182,10 +201,14 @@ rm -rf /tmp/stern*
 ###
 
 # kubectl
-curl -sSL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+curl -sSL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/$BINARCH/kubectl"
 chmod 755 /usr/local/bin/kubectl
 chown root:root /usr/local/bin/kubectl
 ###
+
+chmod 0755 /usr/local/bin/*.sh /usr/local/bin/system-quickstart.py
+
+systemctl enable malcolm-system-init.service
 
 # run kiosk system process information daemon under systemd
 if [ -f /opt/kiosk/kiosk.service ]; then
@@ -193,5 +216,5 @@ if [ -f /opt/kiosk/kiosk.service ]; then
   chown root:root /etc/systemd/system/kiosk.service
   chmod 644 /etc/systemd/system/kiosk.service
   systemctl daemon-reload
-  systemctl enable kiosk
+  systemctl enable kiosk.service
 fi

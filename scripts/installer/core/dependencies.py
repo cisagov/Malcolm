@@ -96,14 +96,14 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_PROCESS_USER_ID: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_RUNTIME_BIN,
-            condition=lambda runtime: bool(runtime),
+            condition=lambda runtime: bool(runtime) and (not SYSTEM_INFO["malcolm_iso_install"]),
             ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
         )
     ),
     KEY_CONFIG_ITEM_PROCESS_GROUP_ID: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_RUNTIME_BIN,
-            condition=lambda runtime: bool(runtime),
+            condition=lambda runtime: bool(runtime) and (not SYSTEM_INFO["malcolm_iso_install"]),
             ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
         )
     ),
@@ -157,7 +157,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
             condition=lambda profile, orch: (
-                profile == PROFILE_MALCOLM and orch == OrchestrationFramework.DOCKER_COMPOSE
+                profile == PROFILE_MALCOLM
+                and orch == OrchestrationFramework.DOCKER_COMPOSE
+                and (not SYSTEM_INFO["malcolm_iso_install"])
             ),
             is_top_level=True,
         )
@@ -899,6 +901,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
+    KEY_CONFIG_ITEM_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode != NetboxMode.DISABLED.value)),
+            ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
+        )
+    ),
     # -------------------------------------------------------------------------
     # FILE CARVING DEPENDENCIES
     # -------------------------------------------------------------------------
@@ -965,6 +974,16 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
     KEY_CONFIG_ITEM_PIPELINE_WORKERS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_PIPELINE_ENABLED,
+                KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            ],
+            condition=lambda enabled, mode: bool(enabled) and (mode != FileExtractionMode.NONE.value),
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_PIPELINE_SCANNERS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[
                 KEY_CONFIG_ITEM_PIPELINE_ENABLED,
@@ -1371,6 +1390,18 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # ANALYSIS DEPENDENCIES
     # -------------------------------------------------------------------------
     KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            ui_parent=KEY_CONFIG_ITEM_AUTO_SURICATA,
+        ),
+        value=ValueRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
+            condition=True,
+            default_value=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_SURICATA_DISABLE_SIDS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
             condition=lambda auto, live: bool(auto) or bool(live),

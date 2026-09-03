@@ -36,13 +36,20 @@
 
 
 ## By default uploaded media is stored on the local filesystem. Using Django-storages is also supported. Provide the
-## class path of the storage driver in STORAGE_BACKEND and any configuration options in STORAGE_CONFIG. For example:
-# STORAGE_BACKEND = 'storages.backends.s3boto3.S3Boto3Storage'
-# STORAGE_CONFIG = {
-#     'AWS_ACCESS_KEY_ID': 'Key ID',
-#     'AWS_SECRET_ACCESS_KEY': 'Secret',
-#     'AWS_STORAGE_BUCKET_NAME': 'netbox',
-#     'AWS_S3_REGION_NAME': 'eu-west-1',
+## class path of the storage driver and any configuration options in STORAGES. For example:
+# STORAGES = {
+#     'default': {
+#         'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+#         'OPTIONS': {
+#             'access_key': 'Key ID',
+#             'secret_key': 'Secret',
+#             'bucket_name': 'netbox',
+#             'region_name': 'us-west-1',
+#         }
+#     },
+#     'staticfiles': {
+#         'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+#     }
 # }
 
 

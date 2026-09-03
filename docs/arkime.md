@@ -25,7 +25,7 @@ In this way, when full packet capture is an option, analysis of PCAP files can b
 
 A few values of particular mention include **Data Source** (`event.provider` in OpenSearch), which can be used to distinguish from among the sources of the network traffic metadata record (e.g., `zeek` for Zeek logs and `arkime` for Arkime sessions); and, **Log Type** (`event.dataset` in OpenSearch), which corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.provider == zeek && event.dataset == conn`, or restricted to records from `weird.log` by searching `event.provider == zeek && event.dataset == weird`.
 
-Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at **https://localhost/help** if connecting locally), then click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
+Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at **https://localhost/arkime/help** if connecting locally), then click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
 ![Zeek fields](./images/screenshots/arkime_help_fields.png)
 
@@ -47,7 +47,7 @@ Filtering on community ID OR'ed with zeek UID (e.g., `network.community_id == "1
 
 ## <a name="ArkimeHelp"></a>Help
 
-Click the owl 🦉 icon in the upper-left hand corner of to access the Arkime usage documentation (accessible at **https://localhost/help** if connecting locally), which includes such topics as search syntax, the Sessions view, SPIView, SPIGraph, and the Connections graph.
+Click the owl 🦉 icon in the upper-left hand corner of to access the Arkime usage documentation (accessible at **https://localhost/arkime/help** if connecting locally), which includes such topics as search syntax, the Sessions view, SPIView, SPIGraph, and the Connections graph.
 
 ## <a name="ArkimeSessions"></a>Sessions
 
@@ -57,8 +57,8 @@ The **Sessions** view provides low-level details of the sessions being investiga
 
 The **Sessions** view contains many filtering controls, allowing users to display all sessions or just sessions of interest, among other display options.
 
-* [search bar](https://localhost/help#search): Indicated by the magnifying glass **🔍** icon, the search bar allows defining filters on session/log metadata.
-* [time bounding](https://localhost/help#timebounding) controls: The **🕘**, **Start**, **End**, **Bounding**, and **Interval** fields, and the **date histogram** can be used to visually zoom and pan the time range being examined.
+* [search bar](https://localhost/arkime/help#search): Indicated by the magnifying glass **🔍** icon, the search bar allows defining filters on session/log metadata.
+* [time bounding](https://localhost/arkime/help#timebounding) controls: The **🕘**, **Start**, **End**, **Bounding**, and **Interval** fields, and the **date histogram** can be used to visually zoom and pan the time range being examined.
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
 * views button: Indicated by the eyeball **👁** icon, views allow users to overlay additional, previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views, including filtering on the `event.dataset` field.
 * map: A global map can be expanded by clicking the globe **🌎** icon. This allows filtering sessions by IP-based geolocation, when possible.
@@ -77,11 +77,11 @@ Details for individual sessions/logs can be expanded by clicking the plus **➕*
 
 When viewing Arkime session details (i.e., a session generated from a PCAP file), an additional packets section will be visible underneath the metadata sections. When the details of a session of this type are expanded, Arkime will read the packet(s) comprising the session for display here. Various controls can be used to adjust how the packet is displayed (enabling **natural** decoding and enabling **Show Images & Files** may produce visually pleasing results), and other options (including PCAP download, carving images and files, applying decoding filters, and examining payloads in [CyberChef](https://github.com/gchq/CyberChef)) are available.
 
-See also Arkime's usage documentation for more information on the [Sessions view](https://localhost/help#sessions).
+See also Arkime's usage documentation for more information on the [Sessions view](https://localhost/arkime/help#sessions).
 
 ### <a name="ArkimePCAPExport"></a>PCAP Export
 
-Clicking the down arrow **▼** icon to the far right of the search bar presents a list of actions including **PCAP Export** (see Arkime's [sessions help](https://localhost/help#sessions) for information on the other actions).  When full PCAP sessions are displayed, the **PCAP Export** feature allows users to create a new PCAP file from the matching Arkime sessions, including controls for which sessions are included (open items, visible items, or all matching items) and whether or not to include linked segments. Click **Export PCAP** button to generate the PCAP, after which users will be presented with a browser download dialog to save or open the file. Note that depending on the scope of the filters specified this might take a long time (or, possibly even time out).
+Clicking the down arrow **▼** icon to the far right of the search bar presents a list of actions including **PCAP Export** (see Arkime's [sessions help](https://localhost/arkime/help#sessions) for information on the other actions).  When full PCAP sessions are displayed, the **PCAP Export** feature allows users to create a new PCAP file from the matching Arkime sessions, including controls for which sessions are included (open items, visible items, or all matching items) and whether or not to include linked segments. Click **Export PCAP** button to generate the PCAP, after which users will be presented with a browser download dialog to save or open the file. Note that depending on the scope of the filters specified this might take a long time (or, possibly even time out).
 
 ![Export PCAP](./images/screenshots/arkime_export_pcap.png)
 
@@ -91,11 +91,11 @@ Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a q
 
 ![Arkime's SPIView](./images/screenshots/arkime_spiview.png)
 
-Click the the plus **➕** icon to the right of a category to expand it. The values for specific fields are displayed by clicking the field description in the field list underneath the category name. The list of field names can be filtered by typing part of the field name in the *Search for fields to display in this category* text input. The **Load All** and **Unload All** buttons can be used to toggle display of all fields belonging to that category. Once displayed, a field's name or one of its values may be clicked to provide further actions for filtering or displaying that field or its values. Of particular interest may be the **Open [fieldname] SPI Graph** option when clicking on a field's name. This will open a new tab with the SPI Graph ([see below](#ArkimeSPIGraph)) populated with the field's top values.
+Click the plus **➕** icon to the right of a category to expand it. The values for specific fields are displayed by clicking the field description in the field list underneath the category name. The list of field names can be filtered by typing part of the field name in the *Search for fields to display in this category* text input. The **Load All** and **Unload All** buttons can be used to toggle display of all fields belonging to that category. Once displayed, a field's name or one of its values may be clicked to provide further actions for filtering or displaying that field or its values. Of particular interest may be the **Open [fieldname] SPI Graph** option when clicking on a field's name. This will open a new tab with the SPI Graph ([see below](#ArkimeSPIGraph)) populated with the field's top values.
 
 Note that because the SPIView page can run many queries, SPIView limits the search domain to 7 days (in other words, seven indices, as each index represents 1 day's worth of data). When using SPIView, users will have best results by limiting the search time frame to less than or equal to 7 days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/arkime/etc/config.ini) and rebuilding the `ghcr.io/idaholab/malcolm/arkime` container.
 
-See also Arkime's usage documentation for more information on [SPIView](https://localhost/help#spiview).
+See also Arkime's usage documentation for more information on [SPIView](https://localhost/arkime/help#spiview).
 
 ## <a name="ArkimeSPIGraph"></a>SPIGraph
 
@@ -105,7 +105,7 @@ Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **Graph** visualizes 
 
 Controls can be found underneath the time bounding controls for selecting the field of interest, the number of elements to be displayed, the sort order, and a periodic refresh of the data.
 
-See also Arkime's usage documentation for more information on [SPIGraph](https://localhost/help#spigraph).
+See also Arkime's usage documentation for more information on [SPIGraph](https://localhost/arkime/help#spigraph).
 
 ## <a name="ArkimeConnections"></a>Connections
 
@@ -124,7 +124,7 @@ While the default source and destination fields are *Src IP* and *Dst IP:Dst Por
 
 or any other combination of these or other fields.
 
-See also Arkime's usage documentation for more information on the [Connections graph](https://localhost/help#connections).
+See also Arkime's usage documentation for more information on the [Connections graph](https://localhost/arkime/help#connections).
 
 ## <a name="ArkimeHunt"></a>Hunt
 
@@ -134,7 +134,7 @@ Clicking the **Create a packet search job** on the Hunt page will allow users to
 
 * a packet search job **name**
 * a **maximum number of packets** to examine per session
-* the **search string** and its format (*ascii*, *ascii (case sensitive)*, *hex*, *regex*, or *hex regex*)
+* the **search string** and its format (*ascii*, *ascii (case-sensitive)*, *hex*, *regex*, or *hex regex*)
 * whether to search **source packets**, **destination packets**, or both
 * whether to search **raw** or **reassembled** packets
 
@@ -154,7 +154,7 @@ From this list of filtered sessions you can expand session details and explore p
 
 The hunt feature is available only for sessions created from full packet capture data, not Zeek logs. This being the case, it is a good idea to click the eyeball **👁** icon and select the **Arkime Sessions** view to exclude Zeek logs from candidate sessions prior to using the hunt feature.
 
-See also Arkime's usage documentation for more information on the [hunt feature](https://localhost/help#hunt).
+See also Arkime's usage documentation for more information on the [hunt feature](https://localhost/arkime/help#hunt).
 
 ## <a name="ArkimeStats"></a>Statistics
 
@@ -172,7 +172,7 @@ The **History** view provides a historical list of queries issues to Arkime and 
 
 ![Arkime's History view](./images/screenshots/arkime_history.png)
 
-See also Arkime's usage documentation for more information on the [Files list](https://localhost/help#files), [statistics](https://localhost/help#files), and [history](https://localhost/help#history).
+See also Arkime's usage documentation for more information on the [Files list](https://localhost/arkime/help#files), [statistics](https://localhost/arkime/help#files), and [history](https://localhost/arkime/help#history).
 
 ## <a name="ArkimeSettings"></a>Settings
 
@@ -180,7 +180,7 @@ See also Arkime's usage documentation for more information on the [Files list](h
 
 The **Settings** page can be used to tweak Arkime preferences, define additional custom views and column configurations, tweak the color theme, and more.
 
-See Arkime's usage documentation for more information on [settings](https://localhost/help#settings).
+See Arkime's usage documentation for more information on [settings](https://localhost/arkime/help#settings).
 
 ![Arkime general settings](./images/screenshots/arkime_general_settings.png)
 
@@ -188,7 +188,7 @@ See Arkime's usage documentation for more information on [settings](https://loca
 
 ## <a name="ArkimeWISE"></a>WISE
 
-Arkime's WISE plugin leverages data feeds to enhance Arkime's logs. WISE is the successor to depricated tagger plugin. 
+Arkime's WISE plugin leverages data feeds to enhance Arkime's logs. WISE is the successor to deprecated tagger plugin. 
 
 See Arkime's documentation for additional information on leveraging the [WISE plugin](https://arkime.com/wise).
 

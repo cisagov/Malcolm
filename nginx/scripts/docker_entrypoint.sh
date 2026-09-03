@@ -107,6 +107,22 @@ STUNNEL_CONF=/etc/stunnel/stunnel.conf
 CA_TRUST_HOST_DIR=/var/local/ca-trust
 CA_TRUST_RUN_DIR=/var/run/ca-trust
 
+# separate directory (NOT CA_TRUST_RUN_DIR, which is wiped/rewritten below for the
+# LDAP/stunnel ssl_ca_dir c_rehash symlinks) for the combined PEM bundle used by
+# lua_ssl_trusted_certificate for OpenResty/lua-resty-openidc (Keycloak OIDC) cosocket
+# TLS verification. Cosocket-based TLS in OpenResty does NOT fall back to the OS trust
+# store automatically, so without this, KEYCLOAK_SSL_VERIFY=true will always fail with
+# "unable to get local issuer certificate" even against a publicly-trusted CA.
+LUA_SSL_TRUST_DIR=/var/run/ca-trust-lua
+LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE="${LUA_SSL_TRUST_DIR}/lua_ssl_trusted_certificate.pem"
+SYSTEM_CA_BUNDLE=""
+for CANDIDATE in /etc/ssl/certs/ca-certificates.crt \
+                 /etc/pki/tls/certs/ca-bundle.crt \
+                 /usr/share/ssl/certs/ca-bundle.crt \
+                 /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem; do
+  [[ -f "$CANDIDATE" ]] && { SYSTEM_CA_BUNDLE="$CANDIDATE"; break; }
+done
+
 # copy trusted CA certs to runtime directory and c_rehash them to create symlinks
 STUNNEL_CA_PATH_LINE=""
 STUNNEL_VERIFY_LINE=""
@@ -114,9 +130,34 @@ STUNNEL_CHECK_HOST_LINE=""
 STUNNEL_CHECK_IP_LINE=""
 NGINX_LDAP_CA_PATH_LINE=""
 NGINX_LDAP_CHECK_REMOTE_CERT_LINE=""
-mkdir -p "$CA_TRUST_RUN_DIR"
+mkdir -p "$CA_TRUST_RUN_DIR" "$LUA_SSL_TRUST_DIR"
 # attempt to make sure trusted CA certs dir is readable by unprivileged nginx worker
-chmod 755 "$CA_TRUST_RUN_DIR" || true
+chmod 755 "$CA_TRUST_RUN_DIR" "$LUA_SSL_TRUST_DIR" || true
+
+# seed the combined lua_ssl_trusted_certificate bundle with the system CA bundle so
+# publicly-trusted CAs (e.g., Let's Encrypt) still verify even when nothing custom
+# has been placed in CA_TRUST_HOST_DIR
+rm -f "$LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE"
+if [[ -f "$SYSTEM_CA_BUNDLE" ]]; then
+  cat "$SYSTEM_CA_BUNDLE" > "$LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE"
+else
+  : > "$LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE"
+fi
+
+# append every cert found in CA_TRUST_HOST_DIR onto the combined lua trust bundle,
+# regardless of whether the LDAP-specific block below also runs
+for CA_FILE in "$CA_TRUST_HOST_DIR"/*; do
+  [[ -f "$CA_FILE" ]] || continue
+  # only concatenate things that look like PEM certs; skip hash symlinks, README, etc.
+  if grep -q -- "-----BEGIN CERTIFICATE-----" "$CA_FILE" 2>/dev/null; then
+    echo "" >> "$LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE"
+    cat "$CA_FILE" >> "$LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE"
+  fi
+done
+
+# make sure the combined lua trust bundle is readable by the unprivileged nginx worker
+chmod 644 "$LUA_SSL_TRUSTED_CERTIFICATE_BUNDLE" || true
+
 CA_FILES=$(shopt -s nullglob dotglob; echo "$CA_TRUST_HOST_DIR"/*)
 if (( ${#CA_FILES} )) ; then
   rm -f "$CA_TRUST_RUN_DIR"/*
@@ -126,7 +167,7 @@ if (( ${#CA_FILES} )) ; then
     # attempt to make sure trusted CA certs are readable by unprivileged nginx worker
     chmod 644 * || true
 
-    # create hash symlinks
+    # create hash symlinks (used by ssl_ca_dir for LDAP/stunnel, below)
     c_rehash -compat .
 
     # variables for stunnel config
@@ -441,7 +482,6 @@ if [[ ! -f ${NGINX_CONF_DIR}/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpassw
   rm -rf /tmp/auth/* || true
 fi
 
-# do environment variable substitutions from $NGINX_TEMPLATES_DIR to $NGINX_CONFD_DIR
 # NGINX_DASHBOARDS_... are a special case as they have to be crafted a bit based on a few variables
 set +e
 
@@ -489,9 +529,96 @@ export NGINX_DASHBOARDS_PREFIX
 export NGINX_DASHBOARDS_PROXY_PASS
 export NGINX_DASHBOARDS_PROXY_URL="$(echo "$(echo "$NGINX_DASHBOARDS_PROXY_PASS" | sed 's@/$@@')/$(echo "$NGINX_DASHBOARDS_PREFIX" | sed 's@^/@@')" | sed 's@/$@@')"
 
-# now process the environment variable substitutions
+# do environment variable substitutions from $NGINX_TEMPLATES_DIR to $NGINX_CONFD_DIR
+function normalize_bool() {
+  local name="$1"
+  local value="${!name-}"
+
+  case "${value,,}" in
+    1|true|yes|on)
+      value=true
+      ;;
+    0|false|no|off)
+      value=false
+      ;;
+    *)
+      echo "$name must be true or false, got: $value" >&2
+      exit 1
+      ;;
+  esac
+
+  printf -v "$name" '%s' "$value"
+  export "$name"
+}
+
+function validate_nginx_template_value() {
+  local name="$1"
+  local value="${!name-}"
+
+  if [[ $value =~ [[:cntrl:]] ||
+        $value == *'"'* ||
+        $value == *'\'* ||
+        $value == *'$'* ]]; then
+    echo "$name contains characters unsafe for generated nginx configuration" >&2
+    exit 1
+  fi
+}
+
+# Validate variables used while rendering nginx configuration templates.
+# Keep these lists coordinated with files in $NGINX_TEMPLATES_DIR.
+
+# normalize these to true/false if they have other truthy/falsy values
+ARKIME_SSL="${ARKIME_SSL:-true}"
+ROLE_BASED_ACCESS="${ROLE_BASED_ACCESS:-false}"
+normalize_bool ARKIME_SSL
+normalize_bool ROLE_BASED_ACCESS
+
+# reject invalid characters in these ones
+for VAR in \
+  MALCOLM_NETWORK_INDEX_PATTERN \
+  NGINX_DASHBOARDS_PREFIX \
+  NGINX_DASHBOARDS_PROXY_PASS \
+  NGINX_DASHBOARDS_PROXY_URL \
+  NGINX_X_FORWARDED_PROTO_OVERRIDE \
+  NGINX_CSP_FORM_ACTION_EXTRA \
+  ROLE_ADMIN \
+  ROLE_CAPTURE_SERVICE
+do
+  validate_nginx_template_value "$VAR"
+done
+
+# only substitute environment variables that are allowed
+TEMPLATE_VARS='
+${DOLLAR}
+${MALCOLM_NETWORK_INDEX_PATTERN}
+${NGINX_DASHBOARDS_PREFIX}
+${NGINX_DASHBOARDS_PROXY_PASS}
+${NGINX_DASHBOARDS_PROXY_URL}
+${NGINX_X_FORWARDED_PROTO_OVERRIDE}
+${NGINX_CSP_FORM_ACTION_EXTRA}
+${ARKIME_SSL}
+${ROLE_ADMIN}
+${ROLE_BASED_ACCESS}
+${ROLE_CAPTURE_SERVICE}
+'
+
 for TEMPLATE in "$NGINX_TEMPLATES_DIR"/*.conf.template; do
-  DOLLAR=$ envsubst < "$TEMPLATE" > "$NGINX_CONFD_DIR/$(basename "$TEMPLATE"| sed 's/\.template$//')"
+  OUTPUT="$NGINX_CONFD_DIR/$(basename "$TEMPLATE" | sed 's/\.template$//')"
+  OUTPUT_TMP="${OUTPUT}.tmp"
+
+  if ! DOLLAR='$' envsubst "$TEMPLATE_VARS" \
+    < "$TEMPLATE" \
+    > "$OUTPUT_TMP"; then
+    echo "Failed to process nginx template: $TEMPLATE" >&2
+    rm -f "$OUTPUT_TMP"
+    exit 1
+  fi
+
+  if ! mv -f "$OUTPUT_TMP" "$OUTPUT"; then
+    echo "Failed to install rendered nginx template: $OUTPUT" >&2
+    rm -f "$OUTPUT_TMP"
+    exit 1
+  fi
 done
 
 if [[ -z "${NGINX_RESOLVER_OVERRIDE:-}" ]]; then

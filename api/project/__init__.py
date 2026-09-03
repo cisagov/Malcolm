@@ -18,6 +18,7 @@ from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
 from malcolm_constants import DatabaseMode
+from werkzeug.exceptions import HTTPException
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -282,9 +283,11 @@ def is_internal_request(req):
 
 
 def translate_roles(req):
-    roles_map = defaultdict(lambda: True)
+    roles_map = defaultdict(lambda: False)
     try:
         client_roles = [role for role in map(str.strip, req.headers.get('X-Forwarded-Roles', '').split(',')) if role]
+        roles_map['ping'] = True
+        roles_map['version'] = True
         roles_map['event'] = any(
             role in client_roles
             for role in (
@@ -352,6 +355,14 @@ def translate_roles(req):
             )
         )
         roles_map['ingest_stats'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+            )
+        )
+        roles_map['redis_keyspace_info'] = any(
             role in client_roles
             for role in (
                 app.config["ROLE_ADMIN"],
@@ -895,7 +906,11 @@ def fields():
         raise PermissionError("Not authorized to perform this action")
 
     args = get_request_arguments(request)
+
     template_name = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
+    if not re.fullmatch(r'[A-Za-z0-9_*-]+', template_name):
+        return jsonify(error="Invalid template name"), 400
+
     doctype = doctype_from_args(args)
     include_arkime = (template_name == app.config["MALCOLM_TEMPLATE"]) and (doctype == "network")
 
@@ -1327,7 +1342,7 @@ def dashboard_export(dashid):
                 # ... or just return it as-is
                 responseText = response.text
 
-            # remove index pattern definition from exported dashboard as they get created programatically
+            # remove index pattern definition from exported dashboard as they get created programmatically
             #   on Malcolm startup and we don't want them to come in with imported dashboards
             if responseParsed := malcolm_utils.LoadStrIfJson(responseText):
                 if 'objects' in responseParsed and isinstance(responseParsed['objects'], list):
@@ -1406,7 +1421,7 @@ def ingest_stats():
             ).extra(size=0)
             # Exclusions:
             #   NGINX access and error logs: we want to exclude nginx error and
-            #       access logs, otherwise the very act of accessing Malcolm will
+            #       access logs; otherwise, the very act of accessing Malcolm will
             #       update the latest ingest time returned from this function.
             #   event() webhook: we want to exclude alerts written by the event()
             #       webhook API (see below) and limit our results to actual
@@ -1583,6 +1598,20 @@ def redis_keyspace_info():
     return jsonify(result)
 
 
+def deep_merge(base, overlay, conflicts=None):
+    if conflicts is None:
+        conflicts = {}
+    for key, value in overlay.items():
+        if key in base:
+            if isinstance(base[key], dict) and isinstance(value, dict):
+                deep_merge(base[key], value, conflicts.setdefault(key, {}))
+            else:
+                conflicts[key] = value
+        else:
+            base[key] = value
+    return conflicts
+
+
 @app.route(
     f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/ping", methods=['GET']
 )
@@ -1717,7 +1746,17 @@ def event():
         if (not alertBody) and '_raw' in data:
             alertBody = data.get('_raw')
         if alertBody:
-            alert['event']['original'] = alertBody
+            try:
+                if alertBodyParsed := (
+                    alertBody if isinstance(alertBody, dict) else malcolm_utils.LoadStrIfJson(alertBody)
+                ):
+                    conflicts = deep_merge(alert, alertBodyParsed)
+                    if conflicts:
+                        alert['conflicts'] = conflicts
+                else:
+                    alert['event']['original'] = alertBody
+            except Exception:
+                alert['event']['original'] = alertBody
 
         if triggerName := malcolm_utils.deep_get(
             data,
@@ -1778,6 +1817,12 @@ def event():
     return jsonify(result=idxResponse)
 
 
+@app.errorhandler(PermissionError)
+def permission_error(e):
+    """Return HTTP 403 for authorization failures."""
+    return jsonify(error="Not authorized to perform this action"), 403
+
+
 @app.errorhandler(Exception)
 def basic_error(e):
     """General exception handler for the app
@@ -1788,10 +1833,14 @@ def basic_error(e):
     Returns
     -------
     error
-        The type of exception and its string representation (e.g., "KeyError: 'protocols'")
+        Generic error message; exception details are logged server-side only.
     """
+    # Let HTTP exceptions return their proper status codes
+    if isinstance(e, HTTPException):
+        return jsonify(error=e.description), e.code
+
     errorStr = f"{type(e).__name__}: {str(e)}"
-    if debugApi and (not isinstance(e, PermissionError)):
+    if debugApi:
         print(errorStr)
         print(traceback.format_exc())
-    return jsonify(error=errorStr)
+    return jsonify(error="Internal server error"), 500

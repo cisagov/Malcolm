@@ -104,7 +104,7 @@ elif [[ $ACTION == "reset" ]]; then
     for entry in $("$YQ" '.rules | keys | .[]' "$TEMP_YML"); do
       ACTION_VAL=$("$YQ" -r ".rules[$entry].action" "$TEMP_YML")
       RULE_ITEMS=($("$YQ" -r ".rules[$entry].rule[]" "$TEMP_YML"))
-      # recursively call this script for to delete the rule (failures are non-fatal, what else can we do?)
+      # recursively call this script to delete the rule (failures are non-fatal, what else can we do?)
       [[ $VERBOSE == 1 ]] && VERBOSE_FLAG=-v || VERBOSE_FLAG=
       "$SCRIPT_DIR"/"$SCRIPT_NAME" $VERBOSE_FLAG -d -a "$ACTION_VAL" -u "$UFW_STATUS_YML" -y "$YQ" "${RULE_ITEMS[@]}" || true
     done

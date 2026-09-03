@@ -54,9 +54,19 @@ you'll need to execute `make` as root.
 The argument to `make` is constructed as follows:
 `raspi_<model>_<release>.<result-type>`
 
-Whereby <model\> is one of `4` or `5`; <release\> is `trixie`; and <result-type\> is `img` or `yaml`.
+`<model>` is `4` or `5`, `<release>` is `trixie` or experimental
+`forky`, and `<result-type>` is `img` or `yaml`. Use model `4` for
+Raspberry Pi 4 systems and model `5` for Raspberry Pi 5 systems.
 
-Model `4` for all models of the Raspberry Pi 4, and model `5` for all models of the Raspberry Pi 5.
+Supported model and release combinations are:
+
+* Raspberry Pi 4: `trixie` or experimental `forky`
+* Raspberry Pi 5: experimental `forky` only
+
+**NOTE:** Raspberry Pi 5 images require `forky` because the kernel in
+`trixie` does not provide the required level of Raspberry Pi 5 hardware
+support. Builds based on `forky` are experimental and may have issues.
+
 So if you want to build the default image for a Raspberry Pi 4 with Trixie, you can just issue:
 
 ```shell
@@ -65,14 +75,7 @@ So if you want to build the default image for a Raspberry Pi 4 with Trixie, you 
 
 At this point; it might be wise to go do something else. The build **WILL** take a while. 
 
-**NOTE:** While this setup will build hedgehog for all raspberry pi variants, it is highly unlikely 
-that any variant other than RPI 4 (8GB version) or higher will have adequate resources to function effectively as a sensor.
-
-**NOTE:** Raspberry Pi 5 is **not yet supported** due to missing upstream kernel support. See the following resources:
-
-* [Debian Wiki](https://raspi.debian.net/faq/#faq-rpi5)
-* [Debian Mailing list, March 2024](https://lists.debian.org/debian-arm/2024/03/msg00009.html)
-* [Debian Mailing list, November 2023](https://lists.debian.org/debian-arm/2023/11/msg00025.html)
+**NOTE:** While this setup will build hedgehog for all Raspberry Pi variants, it is highly unlikely that any variant other than Raspberry Pi 4 (8GB version) or higher will have adequate resources to function effectively as a sensor.
 
 ## Installing the image onto the Raspberry Pi
 
@@ -94,20 +97,20 @@ important parts of your system.  Double check it's the correct
 device!), copy the image onto the SD card:
 
 ```shell
-bmaptool copy raspi_3_trixie.img.xz /dev/mmcblk0
+bmaptool copy raspi_4_trixie.img.xz /dev/mmcblk0
 ```
 
 Alternatively, if you don't have `bmap-tools` installed, you can use
 `dd` with the compressed image:
 
 ```shell
-xzcat raspi_3_trixie.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+xzcat raspi_4_trixie.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Or with the uncompressed image:
 
 ```shell
-dd if=raspi_3_trixie.img of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+dd if=raspi_4_trixie.img of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Then, plug the SD card into the Raspberry Pi, and power it up.

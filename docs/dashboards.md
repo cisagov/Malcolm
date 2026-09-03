@@ -5,6 +5,7 @@
         + [Screenshots](#DiscoverGallery)
     - [Visualizations and dashboards](#DashboardsVisualizations)
         + [Prebuilt visualizations and dashboards](#PrebuiltVisualizations)
+            * [Malcolm Dashboard Reference](dashboards-reference.md)
             * [Screenshots](#PrebuiltVisualizationsGallery)
         + [Building visualizations and dashboards](#BuildDashboard)
             * [Screenshots](#NewVisualizationsGallery)
@@ -40,7 +41,9 @@ The **Discover** view enables users to view events on a record-by-record basis (
 
 Malcolm comes with dozens of prebuilt visualizations and dashboards for the network traffic represented by each of the Zeek log types. Click **Dashboard** to see a list of these dashboards. As is the case with all OpenSearch Dashboards visualizations, all of the charts, graphs, maps, and tables are interactive and can be clicked on to narrow or expand the scope of the data under investigation. Similarly, click **Visualize** to explore the prebuilt visualizations used to build the dashboards.
 
-Inspiration for many of Malcolm's prebuilt visualizations for Zeek logs was originally drawn from [Security Onion](https://github.com/Security-Onion-Solutions/securityonion)'s excellent Kibana dashboards.
+See [**Malcolm Dashboard Reference**](dashboards-reference.md) for a complete breakdown of all available dashboards and their visualizations, including what each dashboard monitors, what data and protocols it covers, and how to interpret individual panels — from high-level security overviews and threat intelligence to protocol-specific views spanning IT, ICS, and IoT traffic.
+
+Nearly a decade ago, inspiration for many of Malcolm's prebuilt visualizations for Zeek logs was originally drawn from [Security Onion](https://github.com/Security-Onion-Solutions/securityonion)'s excellent Kibana dashboards.
 
 #### <a name="PrebuiltVisualizationsGallery"></a>Screenshots
 

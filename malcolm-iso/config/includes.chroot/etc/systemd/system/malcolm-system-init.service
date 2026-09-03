@@ -1,0 +1,15 @@
+[Unit]
+Description=Perform Malcolm system initialization
+After=local-fs.target docker.service network.target
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/malcolm-system-init.sh
+RemainAfterExit=yes
+TimeoutStartSec=0
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

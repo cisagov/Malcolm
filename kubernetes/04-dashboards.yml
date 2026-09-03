@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: dashboards-container
-        image: ghcr.io/idaholab/malcolm/dashboards:26.04.1
+        image: ghcr.io/idaholab/malcolm/dashboards:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -50,6 +50,8 @@ spec:
               name: ssl-env
           - configMapRef:
               name: opensearch-env
+          - configMapRef:
+              name: dashboards-env
         livenessProbe:
           exec:
             command:
@@ -64,6 +66,7 @@ spec:
             name: dashboards-var-local-catrust-volume
           - mountPath: /var/local/curlrc/secretmap
             name: dashboards-opensearch-curlrc-secret-volume
+      terminationGracePeriodSeconds: 20
       volumes:
         - name: dashboards-var-local-catrust-volume
           configMap:

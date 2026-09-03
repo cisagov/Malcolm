@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: opensearch-container
-        image: ghcr.io/idaholab/malcolm/opensearch:26.04.1
+        image: ghcr.io/idaholab/malcolm/opensearch:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -74,9 +74,10 @@ spec:
           - name: opensearch-config-persist-volume
             mountPath: /usr/share/opensearch/config/persist
             subPath: "opensearch"
+      terminationGracePeriodSeconds: 180
       initContainers:
       - name: opensearch-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

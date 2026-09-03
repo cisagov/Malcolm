@@ -46,8 +46,8 @@ class TestMalcolmConfigCore(unittest.TestCase):
             self.fail(f"get_value raised an exception: {e}")
 
     def test_get_value_nonexistent_key(self):
-        """Test getting value for non-existent key."""
-        # Should return None for non-existent key
+        """Test getting value for nonexistent key."""
+        # Should return None for nonexistent key
         value = self.config.get_value("NONEXISTENT_KEY")
         self.assertIsNone(value)
 

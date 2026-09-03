@@ -50,18 +50,19 @@ Malcolm leverages the following excellent open source tools, among others:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
+    * [CERT.LV](https://cert.lv/en/about-us)'s (the Cyber Incident Response Institution of the Republic of Latvia) [spicy-iec104 parser](https://github.com/cert-lv/spicy-iec104), which is a fork of [George Makrakis](https://github.com/georgemakrakis)' work.
     * [ICS protocol analyzers](https://github.com/cisagov/ICSNPP) for Zeek published by Idaho National Lab and DHS CISA
     * Numerous packages from [Corelight, Inc.](https://github.com/corelight)
-    * FoxIO's [JA4+](https://blog.foxio.io/ja4%2B-network-fingerprinting) network fingerprinting plugin
+    * FoxIO's [JA4+](https://blog.foxio.io/ja4%2B-network-fingerprinting) network fingerprinting algorithms. JA4+ algorithms (used by the Zeek and Arkime components of Malcolm) have licensing requirements under the [FoxIO License](https://github.com/FoxIO-LLC/ja4/blob/main/LICENSE). See also the [FoxIO license FAQ](https://github.com/FoxIO-LLC/ja4/blob/main/License%20FAQ.md#open-source-combinations).
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
-    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) scripts
+    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/bzar) scripts
     * NCSA's [bro-is-darknet](https://github.com/ncsa/bro-is-darknet) and [bro-simple-scan](https://github.com/ncsa/bro-simple-scan)
     * [ATT&CK-based Control-system Indicator Detection (ACID)](https://github.com/cisagov/acid) indicators from DHS and MITRE
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
     * Seiso's [zeek-kafka](https://github.com/SeisoLLC/zeek-kafka), a Zeek log writer that publishes to Kafka
     * Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
-* [Debian Live](https://www.debian.org/devel/debian-live/) - the framework used to build the x86_64 [installer ISOs](malcolm-iso.md#ISO) and the [Raspberry Pi sensor image](hedgehog-raspi-build.md#HedgehogRaspiBuild)
+* [Debian Live](https://www.debian.org/devel/debian-live/) - the framework used to build the x86_64 [installer ISOs](malcolm-iso.md#ISO) and the [Raspberry Pi sensor image](hedgehog-raspi.md#HedgehogRaspiBuild)
 
 ![Malcolm Components](./images/malcolm_components.png)

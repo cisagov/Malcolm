@@ -307,13 +307,13 @@
                 "AuthenticationService": {
                   "type": "integer"
                 },
-                "AvailabeSpaceDeltaStr": {
+                "AvailableSpaceDeltaStr": {
                   "type": "keyword"
                 },
-                "AvailabeSpaceMaxStr": {
+                "AvailableSpaceMaxStr": {
                   "type": "keyword"
                 },
-                "AvailabeSpaceMinStr": {
+                "AvailableSpaceMinStr": {
                   "type": "keyword"
                 },
                 "AvcEnabled": {

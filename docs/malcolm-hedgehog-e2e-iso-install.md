@@ -103,9 +103,9 @@ At the end of the installation process, users will be prompted with a few self-e
 
 * **Format non-OS drive(s) for artifact storage?** *(Note that if the [**Encrypted Quick Install**](#ISOInstallMalcolm) installation option was chosen, any non-OS drives formatted for artifact storage will also be configured with full-disk encryption)*
 * **Disable IPv6?**
-* **Automatically login to the GUI session?**
+* **Automatically log in to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
-* **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
+* **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stigs/general_purpose_operating_system_security_requirements_guide/2024-07-02/finding/V-203595)?** *(only applies when installed on U.S. government information systems)*
 * **Allow SSH password authentication?** *(Caution: password authentication is less secure than public/private key pairs)*
 
 Following these prompts, the installer will reboot and the Malcolm base operating system will boot.
@@ -251,47 +251,49 @@ Select an item number to configure, or an action:
 │   ├── 39. Allow Arkime WISE Configuration (current: No)
 │   └── 40. Enable Arkime WISE (current: Yes)
 ├── 41. Enable Suricata Analysis (current: Yes)
-│   └── 42. Enable Suricata Rule Updates (current: Yes)
-├── 43. Enable Zeek Analysis (current: Yes)
-│   ├── 44. Enable Zeek ICS/OT Analyzers (current: Yes)
-│   │   └── 45. Enable Zeek ICS "Best Guess" (current: Yes)
-│   ├── 46. File Extraction Mode (current: interesting)
-│   │   ├── 47. Extracted File Percent Threshold (current: 0)
-│   │   ├── 48. Extracted File Size Threshold (current: 100G)
-│   │   ├── 49. File Preservation (current: quarantined)
-│   │   ├── 50. File scanning workers (current: 1)
-│   │   ├── 51. Preserved Files HTTP Server (current: Yes)
-│   │   │   ├── 52. Downloaded Preserved File Password (current: ********)
-│   │   │   └── 53. Zip Downloads (current: Yes)
-│   │   ├── 54. Scan with Strelka (current: Yes)
-│   │   └── 55. Update Scan Rules (current: Yes)
-│   └── 56. Use Threat Feeds for Zeek Intelligence (current: Yes)
-│       ├── 57. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
-│       ├── 58. Intel::item_expiration Timeout (current: -1min)
-│       ├── 59. Pull Threat Intelligence Feeds on Startup (current: Yes)
-│       └── 60. Threat Indicator "Since" Period (current: 24 hours ago)
-│       ├── 61. Use Intel on Live Traffic (current: Yes)
-│       └── 62. Use Intel on Uploaded PCAP (current: Yes)
-├── 63. Enrich with Reverse DNS Lookups (current: Yes)
-├── 64. Enrich with Manufacturer (OUI) Lookups (current: Yes)
-├── 65. Enrich with Frequency Scoring (current: Yes)
-├── 66. NetBox Mode (current: Local)
-│   ├── 67. Auto-Create Subnet Prefixes (current: Yes)
-│   ├── 68. Auto-Populate NetBox Inventory (current: Yes)
-│   ├── 69. NetBox Enrichment (current: Yes)
-│   ├── 70. NetBox IP Autopopulation Filter (current: empty)
-│   └── 71. NetBox Site Name (current: Malcolm)
-├── 72. Expose Malcolm Service Ports (current: No)
-├── 73. Network Traffic Node Name (current: host)
-└── 74. Capture Live Network Traffic (current: Yes)
-    ├── 75. Analyze Live Traffic with Suricata (current: Yes)
-    ├── 76. Analyze Live Traffic with Zeek (current: Yes)
-    ├── 77. Capture Filter (current: empty)
-    ├── 78. Capture Interface(s) (current: eth0)
-    ├── 79. Capture Live Traffic with netsniff-ng (current: Yes)
-    ├── 80. Capture Live Traffic with tcpdump (current: No)
-    ├── 81. Gather Traffic Capture Statistics (current: Yes)
-    └── 82. Optimize Interface Settings for Capture (current: Yes)
+│   ├── 42. Enable Suricata Rule Updates (current: Yes)
+│   └── 43. Disabled Suricata SIDs (current: empty)
+├── 44. Enable Zeek Analysis (current: Yes)
+│   ├── 45. Enable Zeek ICS/OT Analyzers (current: Yes)
+│   │   └── 46. Enable Zeek ICS "Best Guess" (current: Yes)
+│   ├── 47. File Extraction Mode (current: interesting)
+│   │   ├── 48. Extracted File Percent Threshold (current: 0)
+│   │   ├── 49. Extracted File Size Threshold (current: 100G)
+│   │   ├── 50. File Preservation (current: quarantined)
+│   │   ├── 51. File scanning workers (current: 1)
+│   │   ├── 52. Enabled Strelka Scanners (current: default)
+│   │   ├── 53. Preserved Files HTTP Server (current: Yes)
+│   │   │   ├── 54. Downloaded Preserved File Password (current: ********)
+│   │   │   └── 55. Zip Downloads (current: Yes)
+│   │   ├── 56. Scan with Strelka (current: Yes)
+│   │   └── 57. Update Scan Rules (current: Yes)
+│   └── 58. Use Threat Feeds for Zeek Intelligence (current: Yes)
+│       ├── 59. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
+│       ├── 60. Intel::item_expiration Timeout (current: -1min)
+│       ├── 61. Pull Threat Intelligence Feeds on Startup (current: Yes)
+│       └── 62. Threat Indicator "Since" Period (current: 24 hours ago)
+│       ├── 63. Use Intel on Live Traffic (current: Yes)
+│       └── 64. Use Intel on Uploaded PCAP (current: Yes)
+├── 65. Enrich with Reverse DNS Lookups (current: Yes)
+├── 66. Enrich with Manufacturer (OUI) Lookups (current: Yes)
+├── 67. Enrich with Frequency Scoring (current: Yes)
+├── 68. NetBox Mode (current: Local)
+│   ├── 69. Auto-Create Subnet Prefixes (current: Yes)
+│   ├── 70. Auto-Populate NetBox Inventory (current: Yes)
+│   ├── 71. NetBox Enrichment (current: Yes)
+│   ├── 72. NetBox IP Autopopulation Filter (current: empty)
+│   └── 73. NetBox Site Name (current: Malcolm)
+├── 74. Expose Malcolm Service Ports (current: No)
+├── 75. Network Traffic Node Name (current: host)
+└── 76. Capture Live Network Traffic (current: Yes)
+    ├── 77. Analyze Live Traffic with Suricata (current: Yes)
+    ├── 78. Analyze Live Traffic with Zeek (current: Yes)
+    ├── 79. Capture Filter (current: empty)
+    ├── 80. Capture Interface(s) (current: eth0)
+    ├── 81. Capture Live Traffic with netsniff-ng (current: Yes)
+    ├── 82. Capture Live Traffic with tcpdump (current: No)
+    ├── 83. Gather Traffic Capture Statistics (current: Yes)
+    └── 84. Optimize Interface Settings for Capture (current: Yes)
 
 --- Actions ---
   s. Save and Continue
@@ -309,7 +311,7 @@ For some settings, additional sub-items will become available when that setting 
 │   ├── 45. File Extraction Mode (current: none)
 │   └── 46. Use Threat Feeds for Zeek Intelligence (current: Yes)
 …
-nter item number or action: 45
+Enter item number or action: 45
 File Extraction Mode (current: none)
 1: none
 2: known
@@ -407,7 +409,7 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - **OpenSearch Memory** and **Logstash Memory**
         + Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 24 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
     - **Logstash Workers**
-        + This setting is used to tune the performance and resource utilization of the the `logstash` container: it represents the number of worker threads for each parsing/enrichment pipeline used by Logstash for log processing. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
+        + This setting is used to tune the performance and resource utilization of the `logstash` container: it represents the number of worker threads for each parsing/enrichment pipeline used by Logstash for log processing. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
 * **Require HTTPS Connections**
     - Malcolm uses [TLS](authsetup.md#TLSCerts) encryption for its web browser-accessible user interfaces. Setting **Y** for this option is almost always preferred. The only situation where **N** would be appropriate would be when running Malcolm behind a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates automatically and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm. Users should ensure they understand these implications and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying the local firewall configuration, when setting this to **N**.
 * **IPv4 for nginx Resolver Directive** and **IPv6 for nginx Resolver Directive**
@@ -417,7 +419,7 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
 * **Use Default Storage Location**
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This option and its sub-items allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
 * **Clean Up Artifacts**
-    - Choose **Y** to expose the the following sub-items used to [manage the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
+    - Choose **Y** to expose the following sub-items used to [manage the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
     - **Delete Old Indices** and **Index Prune Threshold**
         - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
     - **Delete Old PCAP** and **Delete PCAP Threshold**
@@ -444,8 +446,10 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
     - **Enable Suricata Rule Updates**
         + If the Malcolm instance has Internet connectivity, select **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm. This setting also applies to the rules used for live analysis when **Analyze Live Traffic with Suricata** is enabled.
+    - **Disabled Suricata SIDs**
+        + This value accepts a comma-separated list of rule SIDs with which to populate Suricata's [`disable.conf`](https://docs.suricata.io/en/latest/rule-management/suricata-update.html#controlling-which-rules-are-used), allowing users to turn off individual detection rules that are noisy, irrelevant, or causing false alarms without editing the rule files themselves.
 * **Enable Zeek Analysis**
-    - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
+    - This option is used to enable [Zeek](https://zeek.org/) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
     - These options are used to configure [**automatic file extraction and scanning**](file-scanning.md#ZeekFileExtraction):
         - **File Extraction Mode**
             * This determines which files Zeek should extract for scanning:
@@ -459,6 +463,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
             * Choosing **Y** enables scanning of Zeek-extracted files with [Strelka](https://target.github.io/strelka/#/).
         + **File scanning workers**
             * This specifies the number of [Strelka](https://target.github.io/strelka/#/) backend instances performing file scanning concurrently.
+        + **Enabled Strelka Scanners**
+            * Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be enabled/disabled by including/excluding the scanner's name from this comma-separated list, which may contain scanner names and/or the string `default` for the built-in list of scanners (see `MALCOLM_STRELKA_SCANNERS_DEFAULT` in [`malcolm_constants.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/malcolm_constants.py)). Values may be combined (e.g., `default,ScanStrings`).
         + **Extracted File Percent Threshold** and **Extracted File Size Threshold**
             * Files extracted by Zeek can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
         + **File Preservation**
@@ -506,8 +512,10 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
         + Select **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
     - **NetBox Enrichment**
         + Select **Y** to [cross-reference](asset-interaction-analysis.md#AssetInteractionAnalysis) network traffic logs against the NetBox asset inventory.
+    - **NetBox-Enriched Log Types**
+        + Defines which types of logs will be [enriched](asset-interaction-analysis.md#AssetInteractionAnalysis) via NetBox: a comma-separated list which may contain `provider.dataset` pairs (e.g., `zeek.dns`), the string `default` for the [built-in list]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment/21_netbox.conf) of log types, `ics` (or `ot`) to enrich OT/ICS traffic, or `all` to enrich all logs. Values may be combined (e.g., `default,ics`).
     - **NetBox Site Name**
-        + NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used for NetBox enrichment lookups performed by Logstash and will be associated with traffic Malcolm itself [captures on local interfaces](live-analysis.md#LocalPCAP).
+        + NetBox has the concept of [sites](https://netboxlabs.com/docs/netbox/features/facilities/#sites); this default site name will be used for NetBox enrichment lookups performed by Logstash and will be associated with traffic Malcolm itself [captures on local interfaces](live-analysis.md#LocalPCAP).
     - **NetBox IP Autopopulation Filter**
         + Defines the filter for [subnets considered for autopopulation](asset-interaction-analysis.md#NetBoxAutoPopSubnets), which can be used to excluding IP ranges (such as dynamic address ranges used by DHCP) which should not trigger autopopulation in NetBox.
 * **Expose Malcolm Service Ports**
@@ -556,7 +564,7 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - **Gather Traffic Capture Statistics**
         + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users enable this setting, Malcolm will gather capture statistics for [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats) to populate the **Packet Capture Statistics** dashboard.
     - **Optimize Interface Settings for Capture**
-        + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and this option is enabled, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s) to improve performance; this should be enabled if the interface(s) are being used for capture **only**, otherwise select **N**. If unsure, users should probably answer **N**.
+        + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and this option is enabled, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s) to improve performance; this should be enabled if the interface(s) are being used for capture **only**; otherwise, select **N**. If unsure, users should probably answer **N**.
 
 ### <a name="MalcolmAuthSetup"></a> Setting up Authentication
 
@@ -620,7 +628,7 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
     * **Primary Document Store**
         * The [document store type](opensearch-instances.md#OpenSearchInstance) (either `opensearch-remote` or `elasticsearch-remote`) of the Malcolm aggregator
     * **Remote Malcolm Hostname or IP**
-        * Specifying the IP address or hostname of the Malcolm aggregator here will automatically populate the following items (or, they can be set or overriden individually):
+        * Specifying the IP address or hostname of the Malcolm aggregator here will automatically populate the following items (or, they can be set or overridden individually):
             * **Primary OpenSearch/Elasticsearch URL**
                 * The URL of the remote OpenSearch/Elasticsearch instance to be used as the data store (e.g., `https://malcolm.example.org:9200` or `https://service.whatever.org/elasticsearch/`)
             * **Logstash Host**
@@ -670,7 +678,7 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
 …
 ```
 
-The `auth_setup` script on Hedgehog Linux has a **Receive client certifictes from Malcolm** option corresponding to Malcolm's **Transfer self-signed client certificates to a remote log forwarder** option described [above](#MalcolmAuthSetup). In order for a Hedgehog Linux to securely communicate with Malcolm, it needs the client certificates generated when users answered **Y** to **(Re)generate self-signed certificates for a remote log forwarder** during that setup. Malcolm can facilitate the secure transfer of these to a sensor running Hedgehog.
+The `auth_setup` script on Hedgehog Linux has a **Receive client certificates from Malcolm** option corresponding to Malcolm's **Transfer self-signed client certificates to a remote log forwarder** option described [above](#MalcolmAuthSetup). In order for a Hedgehog Linux to securely communicate with Malcolm, it needs the client certificates generated when users answered **Y** to **(Re)generate self-signed certificates for a remote log forwarder** during that setup. Malcolm can facilitate the secure transfer of these to a sensor running Hedgehog.
 
 Select **Receive client certificates from Malcolm**, then press **OK** when prompted "Run auth_setup on Malcolm and select 'Transfer self-signed client certificates...'".
 
@@ -686,11 +694,11 @@ Note Malcolm's IP address (`192.168.122.5` in the screenshot above) and the sing
 
 ![SSL Certificate Transfer, Hedgehog Side - 03](./images/screenshots/ssl-cert-transfer-05.png)
 
-After a few seconds a progress bar will update and show the files have been 100% transfered. They are automatically saved into the `~/Malcolm/filebeat/certs` directory on the sensor.
+After a few seconds a progress bar will update and show the files have been 100% transferred. They are automatically saved into the `~/Malcolm/filebeat/certs` directory on the sensor.
 
 ![SSL Certificate Transfer, Hedgehog Side - 03](./images/screenshots/ssl-cert-transfer-07.png)
 
-Once the has been completed, users can click the "play" icon (▷) in the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm under the [Hedgehog run profile](live-analysis.md#Profiles).
+Once completed, users can click the "play" icon (▷) in the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm under the [Hedgehog run profile](live-analysis.md#Profiles).
 
 ### <a name="HedgehogMalcolmPorts"></a> TCP Ports Required for Malcolm ↔ Hedgehog Communication
 

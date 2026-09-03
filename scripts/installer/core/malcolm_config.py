@@ -363,12 +363,12 @@ class MalcolmConfig(ObservableStoreMixin):
 
         if os.path.isdir(templates_dir):
             # if any *.env file doesn't exist, use the template *.env.example files as defaults
-            for env_exampl_file in glob.glob(os.path.join(templates_dir, '*.env.example')):
-                env_file = os.path.join(config_dir, os.path.basename(env_exampl_file[: -len('.example')]))
+            for env_example_file in glob.glob(os.path.join(templates_dir, '*.env.example')):
+                env_file = os.path.join(config_dir, os.path.basename(env_example_file[: -len('.example')]))
                 if not os.path.isfile(env_file):
-                    shutil.copyfile(env_exampl_file, env_file)
+                    shutil.copyfile(env_example_file, env_file)
                     InstallerLogger.info(
-                        f"Created {os.path.basename(env_file)} from {os.path.basename(env_exampl_file)}"
+                        f"Created {os.path.basename(env_file)} from {os.path.basename(env_example_file)}"
                     )
 
         else:
@@ -491,12 +491,16 @@ class MalcolmConfig(ObservableStoreMixin):
                 continue
             if isinstance(typed_value, (list, tuple)) and (len(typed_value) == len(env_var_obj.config_items)):
                 for item_key, tv in zip(env_var_obj.config_items, typed_value):
-                    if tv == "" or tv is None:
+                    if tv is None:
+                        continue
+                    if tv == "" and not ((item := self._items.get(item_key)) and item.accept_blank):
                         continue
                     candidates[item_key].append((env_var_obj.key, tv))
             else:
                 for item_key in env_var_obj.config_items:
-                    if typed_value == "" or typed_value is None:
+                    if typed_value is None:
+                        continue
+                    if typed_value == "" and not ((item := self._items.get(item_key)) and item.accept_blank):
                         continue
                     candidates[item_key].append((env_var_obj.key, typed_value))
         return candidates
@@ -545,7 +549,9 @@ class MalcolmConfig(ObservableStoreMixin):
             if len(options) > 1 and winner_env_key is not None:
                 losers = [ek for (ek, _) in options if ek != winner_env_key]
                 InstallerLogger.debug(f"env conflict for {item_key}: picked {winner_env_key} over {losers}")
-            if winner_value is None or winner_value == "":
+            if winner_value is None:
+                continue
+            if winner_value == "" and not ((item := self._items.get(item_key)) and item.accept_blank):
                 continue
             try:
                 self.apply_default(item_key, winner_value, ignore_errors=True)
@@ -950,8 +956,8 @@ class MalcolmConfig(ObservableStoreMixin):
         for key, item in self._items.items():
             value = item.get_value()
 
-            # Skip None values and empty strings to avoid validation issues on import
-            if value is None or (isinstance(value, str) and value == ""):
+            # Skip None values and empty strings (for non-accept_blank items) to avoid validation issues on import
+            if value is None or (isinstance(value, str) and value == "" and not item.accept_blank):
                 continue
 
             # Convert Enum values to their string representation for serialization

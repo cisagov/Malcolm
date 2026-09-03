@@ -10,10 +10,11 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+set -eo pipefail
+
 IMAGE_NAME=hedgehog
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=trixie
 
 SENSOR_USER=sensor
 SENSOR_GROUP=sensor
@@ -33,7 +34,7 @@ MALCOLM_SRC='/opt/Malcolm'
 WORK_DIR="$(mktemp -d -p "$HOME" -t hedgehog-XXXXXX)"
 
 # Build time dependencies for htpdate
-BUILD_DEPS='build-essential libssl-dev checkinstall'
+BUILD_DEPS='build-essential libssl-dev checkinstall bsdextrautils'
 
 ################################
 ######### Functions ############
@@ -57,23 +58,36 @@ build_htpdate() {
 
     make https
 
-    checkinstall -y -D --nodoc --strip=yes --stripso=yes --install=no --fstrans=no \
-    --pkgname=htpdate --pkgversion=$htpdate_vers --pkgarch="$ARCH" --pkgsource="$htpdate_url" \
-    --pkgrelease="$htpdate_release" --pakdir "$DEBS_DIR"
-
-    # htpdate is installed outside of dpkg with checkinstall
-    make uninstall
+    checkinstall \
+      -y -D \
+      --nodoc \
+      --strip=yes \
+      --stripso=yes \
+      --install=no \
+      --fstrans=yes \
+      --exclude=/usr/bin/install,/bin/install \
+      --pkgname=htpdate \
+      --pkgversion=$htpdate_vers \
+      --pkgarch="$ARCH" \
+      --pkgsource="$htpdate_url" \
+      --pkgrelease="$htpdate_release" \
+      --pakdir "$DEBS_DIR"
 
     cd "${WORK_DIR}"
+
+    dpkg-deb -c "${DEBS_DIR}/htpdate_${htpdate_vers}-${htpdate_release}_${ARCH}.deb"
 
     dpkg -i "${DEBS_DIR}/htpdate_${htpdate_vers}-${htpdate_release}_${ARCH}.deb"
 }
 
 clean_up() {
+    set +e
 
-    # Remove ethernet interface files left by installation
-    # TODO: how will the user configure interfaces now on hedgehog-raspi?
-    rm -f /etc/network/interfaces.d/eth0
+    # Do not remain inside WORK_DIR while deleting it.
+    cd /
+
+    # Remove network interface files left by installation
+    rm -f /etc/network/interfaces.d/*
 
     # Remove this script and any debugging files
     # Comment this out in order to troubleshoot the build process in a chroot
@@ -84,18 +98,21 @@ clean_up() {
     rm -rf $WORK_DIR \
            $SHARED_DIR \
            $MALCOLM_SRC \
-		   /opt/deps \
-		   /opt/hooks \
-		   /opt/patches \
+           /opt/deps \
+           /opt/hooks \
+           /opt/patches \
+           /opt/requirements.txt \
            /root/.bash_history \
            /root/.wget-hsts \
            /root/.cache \
            /root/.local/share/gem \
            /root/.npm \
            "${DEBS_DIR}" \
-		   /tmp/*
+           /tmp/*
     find /var/log/ -type f -print0 2>/dev/null | \
         xargs -0 -r -I XXX bash -c "file 'XXX' | grep -q text && > 'XXX'"
+
+    set -e
 
     # Remove unnecessary build components
     apt-get remove $BUILD_DEPS -y
@@ -107,51 +124,83 @@ clean_up() {
     update-locale LANG=en_US.UTF-8 LANGUAGE=en.UTF-8
     sed -i -e 's/CHARMAP=.*/CHARMAP="UTF-8"/' -e 's/CODESET=.*/CODESET="Lat15"/' /etc/default/console-setup
     dpkg-reconfigure console-setup
-
-    umount -A -f /dev/pts /run /dev /proc /sys
 }
 
 create_user() {
-
-    # Set defaults but it is STRONGLY recommended that these be changed before deploying Sensor
+    # default password (must be changed on first login, see chage below)
     local pass='Hedgehog_Linux'
-    local root_pass='Hedgehog_Linux_Root'
-
+    # create sensor user's group
     groupadd "$SENSOR_GROUP"
-    useradd -m -g "$SENSOR_GROUP" -u 1000 -s /bin/bash -d "$SENSOR_HOME" "$SENSOR_USER"
-    usermod -a -G netdev "$SENSOR_USER"
-
-    echo -n "${SENSOR_USER}:${pass}" | chpasswd --crypt-method YESCRYPT
-    echo -n "root:${root_pass}" | chpasswd --crypt-method YESCRYPT
+    # create sensor user, and add to netdev and sudo group
+    useradd -m -g "$SENSOR_GROUP" -G sudo,netdev -u 1000 -s /bin/bash -d "$SENSOR_HOME" "$SENSOR_USER"
+    # set default password
+    echo "${SENSOR_USER}:${pass}" | chpasswd --crypt-method YESCRYPT
+    # force password change on first login
+    chage -d 0 "$SENSOR_USER"
+    # disable direct root password login
+    passwd -d root
+    passwd -l root
 }
 
 install_deps() {
-
     local deps=''
 
     rm -f "${DEPS_DIR}/"{desktopmanager,live,virtualguest}.list.chroot
     rm -f "${DEPS_DIR}/grub.list.binary"
+
+    local file
     for file in "${DEPS_DIR}/"*.chroot; do
         sed -i '$a\' "$file"
-        deps+=$(tr '\n' ' ' < "$file")
+        deps+="$(tr '\n' ' ' < "$file")"
+    done
+    deps+=' fake-hwclock'
+
+    # Remove packages not relevant to Raspberry Pi images.
+    # rar is excluded because Debian does not provide an ARM package.
+    # htpdate is excluded because the repository version does not support HTTPS.
+    # aide is excluded because the same hardening requirements are not applied.
+    local -a excluded_deps=(
+        aide aide-common efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb
+        gparted gdebi google-perftools gvfs gvfs-daemons gvfs-fuse
+        ghostscript ghostscript-x hfsplus hfsprogs htpdate libgtk2.0-bin
+        menu pmount rar ssh-askpass udisks2 upower user-setup xbitmaps
+        zenity zenity-common libsmbclient samba-common samba-common-bin
+        samba-dsdb-modules samba-libs smbclient
+    )
+
+    local -A excluded=()
+    local -A seen=()
+    local package
+
+    for package in "${excluded_deps[@]}"; do
+        excluded["$package"]=1
     done
 
-    # Remove packages not relevant to RPI
-    # Rar is excluded because Debian doesn't have an ARM package
-    # htpdate removed because repo version doesn't support https
-    # aide is removed as we're not applying the same hardening requirements ot the rpi image
-    declare -a graphical_deps=( aide aide-common efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb )
-    graphical_deps+=( gparted gdebi  google-perftools gvfs gvfs-daemons gvfs-fuse ghostscript ghostscript-x )
-    graphical_deps+=( hfsplus hfsprogs htpdate libgtk2.0-bin menu pmount rar )
-    graphical_deps+=( ssh-askpass udisks2 upower user-setup xbitmaps zenity zenity-common )
-    graphical_deps+=( libsmbclient samba-common samba-common-bin samba-dsdb-modules samba-libs smbclient )
-
-    deps=$(echo ${deps} ${graphical_deps[@]} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' ')
+    local -a filtered_deps=()
+    for package in $deps; do
+        if [[ ! -v "excluded[$package]" && ! -v "seen[$package]" ]]; then
+            filtered_deps+=("$package")
+            seen["$package"]=1
+        fi
+    done
 
     apt-get update
-    # Hedgehog conf files are copied into env before this runs; keep those config files by default
-    apt-get -o Dpkg::Options::="--force-confold" install -q $deps -y --no-install-suggests
+
+    # Hedgehog configuration files are copied into the environment before
+    # this runs; preserve those files by default.
+    apt-get \
+        -o Dpkg::Options::="--force-confold" \
+        install \
+        -q \
+        -y \
+        --no-install-suggests \
+        "${filtered_deps[@]}"
+
     apt-get clean
+
+    if dpkg -s docker-ce >/dev/null 2>&1; then
+        usermod -a -G docker "$SENSOR_USER"
+    fi
 }
 
 install_files() {
@@ -173,8 +222,7 @@ install_files() {
     mkdir -p Malcolm .malcolm-install
     pushd .malcolm-install >/dev/null 2>&1
     echo 'N' | bash "$MALCOLM_SRC/scripts/malcolm_appliance_packager.sh" >/dev/null 2>&1
-    ls malcolm_*.tar.gz
-    tar xzf malcolm_*.tar.gz -C "$SENSOR_HOME"/Malcolm --strip-components 2
+    tar xzf ./malcolm_*.tar.gz -C "$SENSOR_HOME"/Malcolm --strip-components 2
     popd >/dev/null 2>&1
     rm -rf .malcolm-install
     popd >/dev/null 2>&1
@@ -182,9 +230,20 @@ install_files() {
     # Setup OS information
     sensor_ver_file="$SENSOR_HOME/Malcolm/.os-info"
 
+    # mark as first run
+    touch "$SENSOR_HOME"/Malcolm/firstrun
+
     if [[ -f "$SHARED_DIR/version.txt" ]]; then
       SHARED_IMAGE_VERSION="$(cat "$SHARED_DIR/version.txt" | head -n 1)"
       [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
+    fi
+
+    if [[ -f "$SHARED_DIR/docker_images.txt" ]]; then
+      DOCKER_IMAGES_TXZ="$(cat "$SHARED_DIR/docker_images.txt" | head -n 1)"
+      if [[ -r "$SHARED_DIR/$DOCKER_IMAGES_TXZ" ]]; then
+        mv "$SHARED_DIR/$DOCKER_IMAGES_TXZ" /malcolm_images.tar.xz
+        chown root:root /malcolm_images.tar.xz
+      fi
     fi
 
     echo "BUILD_ID=\"$(date +\'%Y-%m-%d\')-${IMAGE_VERSION}\""   > "$sensor_ver_file"
@@ -216,13 +275,11 @@ install_files() {
     # Prepare debs directory for other packages
     mkdir -p "${DEBS_DIR}"
 
-    # Disable ipv6
-    echo 'ipv6.disable=1' > /etc/default/raspi-extra-cmdline
+    # Set kernel parameters
+    echo 'systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem random.trust_cpu=on usbcore.autosuspend=-1 preempt=voluntary ipv6.disable=1' > /etc/default/raspi-extra-cmdline
 
     # Add RPI hostname to /etc/hosts
     echo "127.0.1.1 $(head -n 1 /etc/hostname)" >> /etc/hosts
-
-    # mark as first run
 }
 
 install_hooks() {
@@ -260,13 +317,14 @@ install_hooks() {
 ########## Main ################
 ################################
 
-# Make sure necessary virtual filesystems available in chroot
+# Mount virtual filesystems for the sensor installation phase. These are
+# intentionally separate from the temporary mounts around vmdb2's initial
+# apt step in raspi_master.yaml.
 mount -t proc /proc /proc
 mount -t devtmpfs /dev /dev
 mount -t devpts /dev/pts /dev/pts
 mount -t sysfs /sys /sys
 mount -t tmpfs /run /run
-
 
 [[ -f "$SHARED_DIR/environment.chroot" ]] && \
   . "$SHARED_DIR/environment.chroot"

@@ -63,12 +63,18 @@
                   "type": "keyword"
                 },
                 "inner_vlan": {
-                  "type": "integer"
+                  "type": "keyword"
                 },
                 "ja4l": {
                   "type": "keyword"
                 },
                 "ja4ls": {
+                  "type": "keyword"
+                },
+                "ja4l_delta": {
+                  "type": "keyword"
+                },
+                "ja4ls_delta": {
                   "type": "keyword"
                 },
                 "ja4t": {
@@ -111,7 +117,7 @@
                   "type": "keyword"
                 },
                 "vlan": {
-                  "type": "integer"
+                  "type": "keyword"
                 }
               }
             },
@@ -547,28 +553,28 @@
                 "seen_where": {
                   "type": "keyword"
                 },
-                "confidence" : {
+                "confidence": {
                   "type": "float"
                 },
-                "threat_score" : {
+                "threat_score": {
                   "type": "float"
                 },
-                "verdict" : {
+                "verdict": {
                   "type": "keyword"
                 },
-                "verdict_source" : {
+                "verdict_source": {
                   "type": "keyword"
                 },
-                "associated" : {
+                "associated": {
                   "type": "keyword"
                 },
-                "category" : {
+                "category": {
                   "type": "keyword"
                 },
-                "campaigns" : {
+                "campaigns": {
                   "type": "keyword"
                 },
-                "reports" : {
+                "reports": {
                   "type": "keyword"
                 }
               }
@@ -692,12 +698,6 @@
                   "type": "keyword"
                 },
                 "client_cert_subject": {
-                  "type": "keyword"
-                },
-                "auth_ticket_sha256": {
-                  "type": "keyword"
-                },
-                "new_ticket_sha256": {
                   "type": "keyword"
                 },
                 "cname": {
@@ -2572,10 +2572,16 @@
                     "L": {
                       "type": "keyword"
                     },
+                    "name": {
+                      "type": "keyword"
+                    },
                     "O": {
                       "type": "keyword"
                     },
                     "OU": {
+                      "type": "keyword"
+                    },
+                    "postalCode": {
                       "type": "keyword"
                     },
                     "pseudonym": {
@@ -2588,6 +2594,9 @@
                       "type": "keyword"
                     },
                     "ST": {
+                      "type": "keyword"
+                    },
+                    "street": {
                       "type": "keyword"
                     },
                     "title": {
@@ -2627,6 +2636,9 @@
                 },
                 "certificate_subject": {
                   "properties": {
+                    "businessCategory": {
+                      "type": "keyword"
+                    },
                     "C": {
                       "type": "keyword"
                     },
@@ -2648,7 +2660,16 @@
                     "initials": {
                       "type": "keyword"
                     },
+                    "jurisdictionC": {
+                      "type": "keyword"
+                    },
+                    "jurisdictionST": {
+                      "type": "keyword"
+                    },
                     "L": {
+                      "type": "keyword"
+                    },
+                    "name": {
                       "type": "keyword"
                     },
                     "O": {

@@ -70,6 +70,7 @@ from malcolm_common import (
     ChooseOne,
     ClearScreen,
     DetermineYamlFileFormat,
+    DialogCanceledException,
     DisplayMessage,
     DisplayProgramBox,
     DotEnvDynamic,
@@ -97,6 +98,7 @@ from malcolm_common import (
 
 from malcolm_utils import (
     CountUntilException,
+    bool_to_str,
     deep_get,
     dictsearch,
     EscapeAnsi,
@@ -629,7 +631,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
 
                 dockerCmd = None
 
-                # determine if Malcolm is running; if so, we'll use docker-compose exec, other wise we'll use docker run
+                # determine if Malcolm is running; if so, we'll use docker-compose exec; otherwise, we'll use docker run
                 err, out = run_process(
                     [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', '-q', service],
                     env=osEnv,
@@ -663,7 +665,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     ]
 
                 else:
-                    # Malcolm isn't running, do 'docker run' to spin up a temporary container to run the ocmmand
+                    # Malcolm isn't running, do 'docker run' to spin up a temporary container to run the command
 
                     # "grep" the docker image out of the service's image: value from the docker-compose YML file
                     serviceImage = None
@@ -1124,7 +1126,7 @@ def logs():
     global orchMode
     global shuttingDown
 
-    finishedStartingRegEx = re.compile(r'.+Pipelines\s+running\s+\{.*:non_running_pipelines=>\[\]\}')
+    finishedStartingRegEx = re.compile(r'.+Pipelines\s+running\s+\{.*non_running_pipelines:\s*\[\]\}')
 
     osEnv = os.environ.copy()
     # use local temporary path
@@ -1355,6 +1357,22 @@ def stop(wipe=False):
                                     logging.info(f'Performing RemoveEmptyFolders on "{tmpPath}"')
                                     RemoveEmptyFolders(tmpPath, removeRoot=False)
 
+                # wipe interrupted old zeek intel files as a one-off
+                if (
+                    localPath := LocalPathForContainerBindMount(
+                        "zeek",
+                        dockerComposeYaml,
+                        "/usr/local/zeek/share/zeek/site/intel",
+                        GetMalcolmPath(),
+                    )
+                ) and os.path.isdir(localPath):
+                    for f in Path(localPath).glob("*.zeek." + "?" * 16):
+                        if f.is_file():
+                            try:
+                                f.unlink()
+                            except:
+                                pass
+
                 logging.info("Malcolm has been stopped and its data cleared\n")
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
@@ -1397,23 +1415,35 @@ def start():
 
         # make sure the auth files exist. if we are in an interactive shell and we're
         # missing any of the auth files, prompt to create them now
-        if sys.__stdin__.isatty() and (
-            not MalcolmAuthFilesExist(
+        missingAuthFiles = MalcolmAuthFilesExist(
+            configDir=args.configDir, run_profile=args.composeProfile, auth_method=getNginxAuthMethod()
+        )
+        if sys.__stdin__.isatty() and missingAuthFiles:
+            try:
+                authSetup()
+            except DialogCanceledException:
+                pass
+            missingAuthFiles = MalcolmAuthFilesExist(
                 configDir=args.configDir, run_profile=args.composeProfile, auth_method=getNginxAuthMethod()
             )
-        ):
-            authSetup()
 
         # still missing? sorry charlie
-        if not MalcolmAuthFilesExist(
-            configDir=args.configDir, run_profile=args.composeProfile, auth_method=getNginxAuthMethod()
-        ):
-            raise Exception(
-                'Files relating to authentication and/or secrets are missing, please run ./scripts/auth_setup to generate them'
+        if missingAuthFiles:
+            malcolmPathPrefix = GetMalcolmPath() + os.sep
+            missingAuthFileList = ", ".join(
+                p[len(malcolmPathPrefix) :] if p.startswith(malcolmPathPrefix) else p for p in missingAuthFiles
             )
+            missingAuthMessage = (
+                "Files relating to authentication and/or secrets are missing: "
+                f"{missingAuthFileList}; please run ./scripts/auth_setup to generate them"
+            )
+            DisplayMessage(missingAuthMessage)
+            raise Exception(missingAuthMessage)
 
         # if the OpenSearch keystore doesn't exist exist, create empty ones
-        if not os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore'))):
+        if ((orchMode is not OrchestrationFramework.DOCKER_COMPOSE) or (args.composeProfile == PROFILE_MALCOLM)) and (
+            not os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore')))
+        ):
             keystore_op('opensearch', True, 'create')
 
         # make sure permissions are set correctly for the worker processes
@@ -2077,6 +2107,7 @@ def authSetup():
                             )
                             if password and (password == passwordConfirm):
                                 break
+                            logging.error("Passwords do not match")
 
                     # get previous admin username to remove from htpasswd file if it's changed
                     authEnvFile = os.path.join(args.configDir, 'auth.env')
@@ -2091,7 +2122,7 @@ def authSetup():
                         passwordEncrypted = args.authPasswordOpenssl
                     else:
                         err, out = run_process(
-                            [opensslBin, 'passwd', '-1', '-stdin'],
+                            [opensslBin, 'passwd', '-6', '-stdin'],
                             stdin=password,
                             stderr=False,
                             debug=log_level_is_debug(args.verbose),
@@ -2117,7 +2148,7 @@ def authSetup():
                                 b64encode(passwordEncrypted.encode()).decode("ascii"),
                             ),
                         ],
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+                        stat.S_IRUSR | stat.S_IWUSR,
                     )
 
                     # create or update the htpasswd file
@@ -2143,7 +2174,7 @@ def authSetup():
                             if args.cmdAuthSetupNonInteractive and username and args.authPasswordHtpasswd:
                                 f.write(f'{username}:{args.authPasswordHtpasswd}')
                             for line in htpasswdLines:
-                                # if the admininstrator username has changed, remove the previous administrator username from htpasswd
+                                # if the administrator username has changed, remove the previous administrator username from htpasswd
                                 if (
                                     (usernamePrevious is not None)
                                     and (usernamePrevious != username)
@@ -2289,7 +2320,7 @@ def authSetup():
                                     defaultBehavior=defaultBehavior,
                                 )
 
-                                # test the connection if we're intereractive
+                                # test the connection if we're interactive
                                 if (
                                     not args.cmdAuthSetupNonInteractive
                                     and (
@@ -2423,13 +2454,16 @@ def authSetup():
                             # opt[0] - human readable description
                             # opt[1] - env. file
                             # opt[2] - env. variable name
-                            # opt[3] - can be blank
-                            # opt[4] - is a secret
-                            # opt[5] - default value
+                            # opt[3] - True == is a string, False == is a boolean
+                            # opt[4] - can be blank
+                            # opt[5] - is a secret
+                            # opt[6] - default value
+                            # opt[7] - valid auth mode(s) (set)
                             (
                                 'Keycloak realm',
                                 keycloakEnvFile,
                                 'KEYCLOAK_AUTH_REALM',
+                                True,
                                 False,
                                 False,
                                 (
@@ -2437,11 +2471,16 @@ def authSetup():
                                     if args.authKeycloakRealm
                                     else envValues[keycloakEnvFile].get('KEYCLOAK_AUTH_REALM', 'master')
                                 ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
+                                ),
                             ),
                             (
                                 'Keycloak redirect URI',
                                 keycloakEnvFile,
                                 'KEYCLOAK_AUTH_REDIRECT_URI',
+                                True,
                                 False,
                                 False,
                                 (
@@ -2449,11 +2488,16 @@ def authSetup():
                                     if args.authKeycloakRedirectUri
                                     else envValues[keycloakEnvFile].get('KEYCLOAK_AUTH_REDIRECT_URI', '/index.html')
                                 ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
+                                ),
                             ),
                             (
                                 'Keycloak URL',
                                 keycloakEnvFile,
                                 'KEYCLOAK_AUTH_URL',
+                                True,
                                 False,
                                 False,
                                 (
@@ -2461,17 +2505,40 @@ def authSetup():
                                     if args.authKeycloakUrl
                                     else envValues[keycloakEnvFile]['KEYCLOAK_AUTH_URL']
                                 ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
+                                ),
+                            ),
+                            (
+                                'Verify Keycloak SSL certificate',
+                                keycloakEnvFile,
+                                'KEYCLOAK_SSL_VERIFY',
+                                False,
+                                False,
+                                False,
+                                (
+                                    args.authKeycloakSslVerify
+                                    if args.authKeycloakSslVerify
+                                    else str2bool(envValues[keycloakEnvFile]['KEYCLOAK_SSL_VERIFY'])
+                                ),
+                                ('keycloak_remote',),
                             ),
                             (
                                 'Keycloak client ID',
                                 keycloakEnvFile,
                                 'KEYCLOAK_CLIENT_ID',
                                 True,
+                                True,
                                 False,
                                 (
                                     args.authKeycloakClientId
                                     if args.authKeycloakClientId
                                     else envValues[keycloakEnvFile]['KEYCLOAK_CLIENT_ID']
+                                ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
                                 ),
                             ),
                             (
@@ -2480,10 +2547,15 @@ def authSetup():
                                 'KEYCLOAK_CLIENT_SECRET',
                                 True,
                                 True,
+                                True,
                                 (
                                     args.authKeycloakClientSecret
                                     if args.authKeycloakClientSecret
                                     else envValues[keycloakEnvFile]['KEYCLOAK_CLIENT_SECRET']
+                                ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
                                 ),
                             ),
                             (
@@ -2491,11 +2563,16 @@ def authSetup():
                                 authCommonEnvFile,
                                 'NGINX_REQUIRE_GROUP',
                                 True,
+                                True,
                                 False,
                                 (
                                     args.authRequireGroup
                                     if args.authRequireGroup
                                     else envValues[authCommonEnvFile]['NGINX_REQUIRE_GROUP']
+                                ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
                                 ),
                             ),
                             (
@@ -2503,11 +2580,16 @@ def authSetup():
                                 authCommonEnvFile,
                                 'NGINX_REQUIRE_ROLE',
                                 True,
+                                True,
                                 False,
                                 (
                                     args.authRequireRole
                                     if args.authRequireRole
                                     else envValues[authCommonEnvFile]['NGINX_REQUIRE_ROLE']
+                                ),
+                                (
+                                    'keycloak',
+                                    'keycloak_remote',
                                 ),
                             ),
                             (
@@ -2515,12 +2597,14 @@ def authSetup():
                                 keycloakEnvFile,
                                 'KC_BOOTSTRAP_ADMIN_USERNAME',
                                 True,
+                                True,
                                 False,
                                 (
                                     args.authKeycloakBootstrapUser
                                     if args.authKeycloakBootstrapUser
                                     else envValues[keycloakEnvFile]['KC_BOOTSTRAP_ADMIN_USERNAME']
                                 ),
+                                ('keycloak',),
                             ),
                             (
                                 'Temporary Keycloak admin bootstrap password (blank to retain the previous value)',
@@ -2528,38 +2612,49 @@ def authSetup():
                                 'KC_BOOTSTRAP_ADMIN_PASSWORD',
                                 True,
                                 True,
+                                True,
                                 (
                                     args.authKeycloakBootstrapPassword
                                     if args.authKeycloakBootstrapPassword
                                     else envValues[keycloakEnvFile]['KC_BOOTSTRAP_ADMIN_PASSWORD']
                                 ),
+                                ('keycloak',),
                             ),
                         )
                         # see comment on keyCloakOpts above for definitions
                         for opt in keyCloakOpts:
-                            if (nginxAuthMode == 'keycloak') or (not opt[2].startswith('KC_')):
+                            if nginxAuthMode in opt[7]:
                                 loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opt[0]}')
                                 while loopBreaker.increment():
-                                    tmpVal = (
-                                        AskForString(
-                                            opt[0],
-                                            default=opt[5],
-                                            defaultBehavior=defaultBehavior,
+                                    if opt[3]:
+                                        tmpVal = (
+                                            AskForString(
+                                                opt[0],
+                                                default=opt[6],
+                                                defaultBehavior=defaultBehavior,
+                                            )
+                                            if (opt[5] == False)
+                                            else AskForPassword(
+                                                opt[0],
+                                                default=opt[6],
+                                                defaultBehavior=defaultBehavior,
+                                            )
                                         )
-                                        if (opt[4] == False)
-                                        else AskForPassword(
-                                            opt[0],
-                                            default=opt[5],
-                                            defaultBehavior=defaultBehavior,
+                                    else:
+                                        tmpVal = bool_to_str(
+                                            YesOrNo(
+                                                opt[0],
+                                                default=opt[6],
+                                                defaultBehavior=defaultBehavior,
+                                            )
                                         )
-                                    )
 
-                                    if (len(tmpVal) == 0) and (opt[4] == True):
+                                    if (len(tmpVal) == 0) and (opt[5] == True):
                                         # if this is a password/secret and they
                                         #   leave it blank, retain the old value
-                                        tmpVal = opt[5]
+                                        tmpVal = opt[6]
 
-                                    if (len(tmpVal) > 0) or (opt[3] == True):
+                                    if (len(tmpVal) > 0) or (opt[4] == True):
                                         if envValues[opt[1]][opt[2]] != tmpVal:
                                             changeMade[opt[1]] = True
                                         envValues[opt[1]][opt[2]] = tmpVal
@@ -2788,14 +2883,15 @@ def authSetup():
                             default='',
                             defaultBehavior=defaultBehavior,
                         )
-                        arkimePasswordConfirm = AskForPassword(
-                            f"Arkime password hash secret (again): ",
-                            default='',
-                            defaultBehavior=defaultBehavior,
-                        )
-                        if arkimePassword and (arkimePassword == arkimePasswordConfirm):
-                            break
-                        logging.error("Passwords do not match")
+                        if arkimePassword:
+                            arkimePasswordConfirm = AskForPassword(
+                                f"Arkime password hash secret (again): ",
+                                default='',
+                                defaultBehavior=defaultBehavior,
+                            )
+                            if arkimePassword and (arkimePassword == arkimePasswordConfirm):
+                                break
+                            logging.error("Passwords do not match")
 
                     if (not arkimePassword) and args.cmdAuthSetupNonInteractive and args.authArkimePassword:
                         arkimePassword = args.authArkimePassword
@@ -2891,7 +2987,7 @@ def authSetup():
                                 labels=['Malcolm Server IP', 'Single-use Code Phrase'],
                                 defaultBehavior=defaultBehavior,
                             )
-                            if (len(values) == 2) and (len(values[0]) >= 3) and (len(values[1]) >= 16):
+                            if (len(values) == 2) and (len(values[0]) >= 3) and (len(values[1]) >= 11):
                                 tx_ip = values[0]
                                 rx_token = values[1]
                                 break
@@ -3121,7 +3217,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "26.04.1"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "26.08.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
@@ -3205,7 +3301,7 @@ def main():
         metavar='<string>',
         type=str,
         default='',
-        help='Administrator password hash from "openssl -passwd -1" (for --auth-noninteractive)',
+        help='Administrator password hash from "openssl -passwd -6" (for --auth-noninteractive)',
     )
     authSetupGroup.add_argument(
         '--auth-admin-password-htpasswd',
@@ -3323,6 +3419,15 @@ def main():
         type=str,
         default='',
         help='Keycloak URL',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-ssl-verify',
+        dest='authKeycloakSslVerify',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Verify Keycloak SSL certificate (when --auth-method is keycloak_remote)",
     )
     authSetupGroup.add_argument(
         '--auth-keycloak-client-id',
@@ -3661,7 +3766,7 @@ def main():
         checkEnvFilesAndValues()
         checkWiseFile()
 
-        # stop Malcolm (and wipe data if requestsed)
+        # stop Malcolm (and wipe data if requested)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:
             stop(wipe=args.cmdWipe)
 

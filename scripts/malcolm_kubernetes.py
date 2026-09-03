@@ -282,6 +282,8 @@ CONTAINER_JAVA_OPTS_VARS = defaultdict(lambda: None)
 CONTAINER_JAVA_OPTS_VARS['opensearch'] = 'OPENSEARCH_JAVA_OPTS'
 CONTAINER_JAVA_OPTS_VARS['logstash'] = 'LS_JAVA_OPTS'
 
+TRAEFIK_API_GROUP = "traefik.io"
+
 
 ###################################################################################################
 def replace_namespace(obj, namespace):
@@ -715,6 +717,10 @@ def PrintPodStatus(namespace=None):
     tablify(statusRows, do_sort=True, first_row_is_header=True, do_header_divider=True)
 
 
+def is_traefik_crd(doc):
+    return isinstance(doc, dict) and str(doc.get("apiVersion", "")).startswith(f"{TRAEFIK_API_GROUP}/")
+
+
 def StartMalcolm(
     namespace,
     malcolmPath,
@@ -741,6 +747,7 @@ def StartMalcolm(
         and (yamlImported := YAMLDynamic())
         and (client := kubeImported.client.CoreV1Api())
         and (apiClient := kubeImported.client.ApiClient())
+        and (dynamicClient := kubeImported.dynamic.DynamicClient(apiClient))
     ):
         # create the namespace
         if not dryrun:
@@ -909,8 +916,6 @@ def StartMalcolm(
             else None
         )
 
-        # apply manifests
-        results_dict['create_from_yaml']['dry_run' if dryrun else 'result'] = dict()
         yamlFiles = sorted(
             [
                 f
@@ -924,6 +929,9 @@ def StartMalcolm(
                 )
             ]
         )
+
+        # apply manifests
+        results_dict['create_from_yaml']['dry_run' if dryrun else 'result'] = dict()
         for yamlName in yamlFiles:
             # check to make sure the container in this YAML file belongs to this profile
             containerBelongsInProfile = True
@@ -940,7 +948,7 @@ def StartMalcolm(
                             containerBelongsInProfile = False
                             break
 
-            # apply the manifests in this YAML file, otherwise skip it
+            # apply the manifests in this YAML file; otherwise, skip it
             if containerBelongsInProfile:
 
                 # Some manifests need to have some modifications done to them on-the-fly:
@@ -953,6 +961,7 @@ def StartMalcolm(
                 #           which we retrieve from the container's environment variables we created earlier as configMapRefs.
                 #
                 modified = False
+                traefikDocIndexes = []
                 if manYamlFileContents:
                     for docIdx, doc in enumerate(manYamlFileContents):
 
@@ -1044,7 +1053,7 @@ def StartMalcolm(
                                             ]['securityContext'].pop('capabilities', None)
                                             modified = True
 
-                                        # for resource requests we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
+                                        # for resource requests we're only concerned about containers we've defined by name in CONTAINER_JAVA_OPTS_VARS
                                         #   or that have been specified in kubernetes-container-resources.yml when injectResources is True
                                         if (containerName in CONTAINER_JAVA_OPTS_VARS) or (
                                             containerName in containerResources
@@ -1091,6 +1100,16 @@ def StartMalcolm(
                                                 )
                                                 modified = True
 
+                        if is_traefik_crd(manYamlFileContents[docIdx]):
+                            traefikDocIndexes.append(docIdx)
+
+                traefikDocs = []
+                if traefikDocIndexes:
+                    modified = True
+                    for i in sorted(set(traefikDocIndexes), reverse=True):
+                        traefikDocs.append(manYamlFileContents.pop(i))
+                    traefikDocs.reverse()
+
                 # if we modified the manifest write out the modified YAML to a temporary file
                 with temporary_filename(suffix='.yml') if modified else nullcontext() as tmpYmlFileName:
                     if modified:
@@ -1106,18 +1125,88 @@ def StartMalcolm(
                             outYaml.dump_all(manYamlFileContents, tmpYmlFile)
 
                     if dryrun:
-                        results_dict['create_from_yaml']['dry_run'][os.path.basename(yamlName)] = manYamlFileContents
+                        if manYamlFileContents:
+                            results_dict['create_from_yaml']['dry_run'][
+                                os.path.basename(yamlName)
+                            ] = manYamlFileContents
+                        if traefikDocs:
+                            results_dict['create_traefik_crds']['dry_run'][os.path.basename(yamlName)] = traefikDocs
 
                     else:
                         try:
-                            # load from the temporary file if we made modifications, otherwise load from the original
-                            results_dict['create_from_yaml']['result'][os.path.basename(yamlName)] = (
-                                kubeImported.utils.create_from_yaml(
-                                    apiClient,
-                                    tmpYmlFileName if modified else yamlName,
-                                    namespace=namespace,
+                            if traefikDocs:
+                                # dynamically create custom resources (Traefik CRD ones, for now)
+                                if 'create_traefik_crds' not in results_dict:
+                                    results_dict['create_traefik_crds'] = dict()
+                                if 'result' not in results_dict['create_traefik_crds']:
+                                    results_dict['create_traefik_crds']['result'] = dict()
+
+                                for doc in traefikDocs:
+                                    kind = doc.get("kind")
+                                    apiVersion = doc.get("apiVersion")
+                                    metadata = doc.get("metadata", {})
+                                    name = metadata.get("name")
+                                    docNamespace = metadata.get("namespace")
+
+                                    resultKey = f"{kind}/{name}"
+
+                                    try:
+                                        resource = dynamicClient.resources.get(
+                                            api_version=apiVersion,
+                                            kind=kind,
+                                        )
+
+                                        if docNamespace:
+                                            try:
+                                                resource.get(name=name, namespace=docNamespace)
+                                                results_dict['create_traefik_crds']['result'][resultKey] = (
+                                                    resource.patch(
+                                                        name=name,
+                                                        namespace=docNamespace,
+                                                        body=doc,
+                                                        content_type="application/merge-patch+json",
+                                                    ).to_dict()
+                                                )
+                                            except kubeImported.dynamic.exceptions.NotFoundError:
+                                                results_dict['create_traefik_crds']['result'][resultKey] = (
+                                                    resource.create(
+                                                        namespace=docNamespace,
+                                                        body=doc,
+                                                    ).to_dict()
+                                                )
+                                        else:
+                                            try:
+                                                resource.get(name=name)
+                                                results_dict['create_traefik_crds']['result'][resultKey] = (
+                                                    resource.patch(
+                                                        name=name,
+                                                        body=doc,
+                                                        content_type="application/merge-patch+json",
+                                                    ).to_dict()
+                                                )
+                                            except dynamicImported.dynamic.exceptions.NotFoundError:
+                                                results_dict['create_traefik_crds']['result'][resultKey] = (
+                                                    resource.create(
+                                                        body=doc,
+                                                    ).to_dict()
+                                                )
+
+                                    except Exception as e:
+                                        if 'error' not in results_dict['create_traefik_crds']:
+                                            results_dict['create_traefik_crds']['error'] = dict()
+                                        results_dict['create_traefik_crds']['error'][resultKey] = LoadStrIfJson(
+                                            str(e)
+                                        ) or str(e)
+
+                            if manYamlFileContents:
+                                # load from the temporary file if we made modifications; otherwise, load from the original
+                                results_dict['create_from_yaml']['result'][os.path.basename(yamlName)] = (
+                                    kubeImported.utils.create_from_yaml(
+                                        apiClient,
+                                        tmpYmlFileName if modified else yamlName,
+                                        namespace=namespace,
+                                    )
                                 )
-                            )
                         except kubeImported.client.rest.ApiException as x:
                             if x.status != 409:
                                 if 'error' not in results_dict['create_from_yaml']:
@@ -1165,6 +1254,39 @@ def SafeK8sDelete(
                 results_dict['error'].append(errVal)
 
 
+def SafeK8sDeleteCustomObjects(
+    kubeImported,
+    list_func,
+    delete_func,
+    results_dict,
+    dryrun,
+    name_key=lambda item: deep_get(item, ['metadata', 'name']),
+):
+    try:
+        items = list_func()
+        for item in items.get('items', []):
+            name = name_key(item)
+            if not name:
+                continue
+            try:
+                if not dryrun:
+                    delete_func(name=name)
+                if isinstance(results_dict, dict) and isinstance(results_dict.get('deleted', None), list):
+                    results_dict['deleted'].append(name)
+            except kubeImported.client.rest.ApiException as e:
+                if e.status not in [404, 403, 409]:
+                    if not (errVal := LoadStrIfJson(str(e))):
+                        errVal = str(e)
+                    if errVal and isinstance(results_dict, dict) and isinstance(results_dict.get('error', None), list):
+                        results_dict['error'].append(errVal)
+    except kubeImported.client.rest.ApiException as e:
+        if e.status not in [404, 403, 409]:
+            if not (errVal := LoadStrIfJson(str(e))):
+                errVal = str(e)
+            if errVal and isinstance(results_dict, dict) and isinstance(results_dict.get('error', None), list):
+                results_dict['error'].append(errVal)
+
+
 def StopMalcolm(
     namespace,
     deleteNamespace=False,
@@ -1177,11 +1299,13 @@ def StopMalcolm(
         'configmaps',
         'deployments',
         'ingresses',
+        'ingressroutes',
         'namespace',
         'persistentvolumeclaims',
         'persistentvolumes',
         'secrets',
         'services',
+        'serverstransports',
     ]:
         results_dict[namespace][resourceType] = dict()
         for msgType in ['deleted', 'error']:
@@ -1192,6 +1316,7 @@ def StopMalcolm(
         apps_api = kubeImported.client.AppsV1Api()
         net_api = kubeImported.client.NetworkingV1Api()
         delete_opts = kubeImported.client.V1DeleteOptions(propagation_policy='Foreground')
+        co_api = kubeImported.client.CustomObjectsApi()
 
         for resource in apps_api.list_namespaced_deployment(namespace).items:
             SafeK8sDelete(
@@ -1204,6 +1329,54 @@ def StopMalcolm(
                 body=delete_opts,
             )
 
+        for resource in net_api.list_namespaced_ingress(namespace).items:
+            SafeK8sDelete(
+                kubeImported,
+                net_api.delete_namespaced_ingress,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['ingresses'],
+                dryrun=dryrun,
+            )
+
+        SafeK8sDeleteCustomObjects(
+            kubeImported,
+            lambda: co_api.list_namespaced_custom_object(
+                group=TRAEFIK_API_GROUP,
+                version="v1alpha1",
+                namespace=namespace,
+                plural="ingressroutes",
+            ),
+            lambda name: co_api.delete_namespaced_custom_object(
+                group=TRAEFIK_API_GROUP,
+                version="v1alpha1",
+                namespace=namespace,
+                plural="ingressroutes",
+                name=name,
+            ),
+            results_dict[namespace]['ingressroutes'],
+            dryrun=dryrun,
+        )
+
+        SafeK8sDeleteCustomObjects(
+            kubeImported,
+            lambda: co_api.list_namespaced_custom_object(
+                group=TRAEFIK_API_GROUP,
+                version="v1alpha1",
+                namespace=namespace,
+                plural="serverstransports",
+            ),
+            lambda name: co_api.delete_namespaced_custom_object(
+                group=TRAEFIK_API_GROUP,
+                version="v1alpha1",
+                namespace=namespace,
+                plural="serverstransports",
+                name=name,
+            ),
+            results_dict[namespace]['serverstransports'],
+            dryrun=dryrun,
+        )
+
         for resource in k8s_api.list_namespaced_service(namespace).items:
             if resource.metadata.name == "kubernetes":
                 continue
@@ -1213,16 +1386,6 @@ def StopMalcolm(
                 resource.metadata.name,
                 namespace,
                 results_dict[namespace]['services'],
-                dryrun=dryrun,
-            )
-
-        for resource in net_api.list_namespaced_ingress(namespace).items:
-            SafeK8sDelete(
-                kubeImported,
-                net_api.delete_namespaced_ingress,
-                resource.metadata.name,
-                namespace,
-                results_dict[namespace]['ingresses'],
                 dryrun=dryrun,
             )
 
