@@ -225,6 +225,9 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, s
         if session is None
         else session.get(url, stream=True, allow_redirects=True, verify=ssl_verify)
     )
+    # Don't save error pages to disk as if they were the feed: raise here
+    # like get_url_paths() does (the caller logs and skips the URL).
+    r.raise_for_status()
     with open(tmpDownloadedFileSpec, "wb") as f:
         for chunk in r.iter_content(chunk_size=chunk_bytes):
             if chunk:
