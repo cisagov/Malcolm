@@ -556,7 +556,8 @@ def main():
         workerThreadCount = malcolm_utils.AtomicInt(value=0)
         ThreadPool(
             1,
-            watch_common.ProcessFileEventWorker(
+            watch_common.ProcessFileEventWorker,
+            (
                 [
                     handler,
                     observer,
