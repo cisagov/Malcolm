@@ -309,7 +309,8 @@ def WatchAndProcessDirectory(
         workerThreadCount = AtomicInt(value=0)
         ThreadPool(
             1,
-            ProcessFileEventWorker(
+            ProcessFileEventWorker,
+            (
                 [
                     handler,
                     observer,
