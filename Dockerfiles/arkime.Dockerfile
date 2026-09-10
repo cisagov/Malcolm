@@ -138,6 +138,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       python3-setuptools \
       python3-wheel \
       rsync \
+      tcpdump \
       tini \
       wget \
       zlib1g && \
