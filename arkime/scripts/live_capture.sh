@@ -48,7 +48,7 @@ function tcpdump_fallback() {
     [[ -n "${PCAP_FILTER}" ]] && filter_args+=( "${PCAP_FILTER}" )
 
     echo "Falling back to local tcpdump capture on ${PCAP_IFACE}"
-    pushd /data/pcap >/dev/null 2>&1 || return 1
+    pushd /data/pcap/upload >/dev/null 2>&1 || return 1
 
     for iface in ${PCAP_IFACE//,/ }; do
         /usr/bin/tcpdump \
