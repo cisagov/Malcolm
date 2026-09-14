@@ -56,14 +56,16 @@ if type suricata-update >/dev/null 2>&1; then
         done
       fi
 
-      suricata-update enable-source \
+      if ! suricata-update enable-source \
         "${SOURCE_NAME}" \
         "${SOURCE_PARAMS[@]}" \
         $DEBUG_FLAG \
         --suricata /usr/bin/suricata-offline \
         --data-dir "${SURICATA_MANAGED_DIR:-/var/lib/suricata}" \
         --config "${SURICATA_UPDATE_CONFIG_FILE:-/etc/suricata/update.yaml}" \
-        --suricata-conf "${SURICATA_CONFIG_FILE:-/etc/suricata/suricata.yaml}" 2>&1
+        --suricata-conf "${SURICATA_CONFIG_FILE:-/etc/suricata/suricata.yaml}" 2>&1; then
+        echo "WARNING: failed to enable Suricata source '${SOURCE_NAME}', skipping" >&2
+      fi
     done
   fi
 
