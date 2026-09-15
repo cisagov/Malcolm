@@ -186,7 +186,7 @@ class MalcolmConfig(ObservableStoreMixin):
         return self._dependency_manager.get_dependency_info(key)
 
     def get_env_var_by_item_key(self, key: str) -> List[EnvVariable]:
-        """Lookup the environment variable(s) for a given configuration item key"""
+        """Lookup the environment variable(s) for a given item key"""
         return self._env_mapper.get_env_var_by_item_key(key)
 
     def get_all_config_items(self, modified_only: bool = False) -> Dict[str, ConfigItem]:
@@ -248,6 +248,7 @@ class MalcolmConfig(ObservableStoreMixin):
         key: str,
         value: Any,
         ignore_errors: Optional[bool] = False,
+        track_modified: Optional[bool] = True,
     ) -> None:
         """Set the value of a configuration item.
 
@@ -256,6 +257,8 @@ class MalcolmConfig(ObservableStoreMixin):
             value: New value to set
             ignore_errors: silently ignore errors rather than raising (meaning the
                            value may *not* have been set)
+            track_modified: include the key in the interactive change summary. Imported
+                            values can set this false while still remaining explicit.
 
         Raises:
             ConfigItemNotFoundError: If the key does not exist.
@@ -274,7 +277,7 @@ class MalcolmConfig(ObservableStoreMixin):
             if not success:
                 raise ConfigValueValidationError(key, value, error_message)
 
-            if key not in self._modified_keys:
+            if track_modified and key not in self._modified_keys:
                 self._modified_keys.append(key)
 
             self._notify_observers(key, item.get_value())
@@ -554,7 +557,11 @@ class MalcolmConfig(ObservableStoreMixin):
             if winner_value == "" and not ((item := self._items.get(item_key)) and item.accept_blank):
                 continue
             try:
-                self.apply_default(item_key, winner_value, ignore_errors=True)
+                winner_env = self._env_mapper.get_env_variable(winner_env_key) if winner_env_key else None
+                if winner_env and winner_env.is_authoritative_for(item_key):
+                    self.set_value(item_key, winner_value, ignore_errors=True, track_modified=False)
+                else:
+                    self.apply_default(item_key, winner_value, ignore_errors=True)
             except (ConfigItemNotFoundError, ConfigValueValidationError) as e:
                 if "unittest" not in sys.modules:
                     InstallerLogger.warning(f"Could not set config for {item_key} from env: {e}")
@@ -929,7 +936,7 @@ class MalcolmConfig(ObservableStoreMixin):
         """Get the chain of dependencies that need to be satisfied for an item to be visible.
 
         Args:
-            key: The configuration item key
+            key: Configuration item key
 
         Returns:
             List of keys representing the dependency chain from root to this item

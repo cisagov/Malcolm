@@ -252,8 +252,8 @@ class SettingsFileHandler:
                     if value == CONFIG_ITEM_NONE_SENTINEL:
                         InstallerLogger.debug(f"Skipping configuration item {key} (sentinel value)")
                         continue
-                    # delegate normalization and validation to MalcolmConfig
-                    self.malcolm_config.apply_default(key, value)
+                    # Treat persisted values as explicit without adding them to the interactive change summary.
+                    self.malcolm_config.set_value(key, value, track_modified=False)
                     InstallerLogger.debug(f"Set configuration item {key} = {value}")
                 except Exception as e:
                     InstallerLogger.warning(f"Failed to set configuration item {key}: {e}")
