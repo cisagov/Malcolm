@@ -48,7 +48,7 @@ CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS = ConfigItem(
     widget_type=WidgetType.CHECKBOX,
 )
 
-KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES = ConfigItem(
+CONFIG_ITEM_CLEAN_UP_OLD_INDICES = ConfigItem(
     key=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
     label="Delete Old Indices",
     default_value=False,
@@ -185,7 +185,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_POLICY = ConfigItem(
     label="Enable Arkime Index Management",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Enable index management policies (ILM/ISM) in Arkime? (see https://https://arkime.com/faq#ilm)",
+    question="Enable index management policies (ILM/ISM) in Arkime? (see https://arkime.com/faq#ilm)",
     widget_type=WidgetType.CHECKBOX,
 )
 
