@@ -1,3 +1,5 @@
 *
 !.gitignore
+!__load__.zeek
+!tls-decryption.zeek
 
