@@ -8,27 +8,45 @@ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata ||
 
 # - modify suricata.yaml according to environment variables (as non-root)
 # - if SURICATA_DISABLE_SIDS contains entries for disable.conf, write it and run suricata-update to apply
+# - if periodic rule updates are enabled, perform the first update immediately at startup
 if [[ "$(id -u)" == "0" ]] && [[ -n "$PUSER" ]]; then
-    su -s /bin/bash -p ${PUSER} << 'EOF'
-        /usr/local/bin/suricata_config_populate.py --suricata ${SURICATA_TEST_CONFIG_BIN} ${SURICATA_TEST_CONFIG_VERBOSITY:-} >&2
-        if [[ -n "${SURICATA_DISABLE_SIDS}" ]]; then
-            tr ',' '\n' <<<"${SURICATA_DISABLE_SIDS}" | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if (length) print }' | \
-                while IFS= read -r line; do
-                    grep -qxF "$line" /etc/suricata/disable.conf 2>/dev/null || echo "$line"
-                done >> /etc/suricata/disable.conf
-            SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
-        fi
-EOF
+    SURICATA_SETUP_COMMAND=(su -s /bin/bash -p "${PUSER}")
 else
+    SURICATA_SETUP_COMMAND=(/bin/bash)
+fi
+
+"${SURICATA_SETUP_COMMAND[@]}" << 'EOF'
+    run_startup_rule_update() {
+        local status
+        local timeout_seconds="${SURICATA_UPDATE_STARTUP_TIMEOUT:-120}"
+        if timeout "${timeout_seconds}s" "$@"; then
+            return 0
+        else
+            status=$?
+        fi
+        if [[ "$status" -eq 124 ]]; then
+            echo "WARNING: Suricata rule update did not complete within ${timeout_seconds}s at startup; continuing with existing rules" >&2
+        else
+            echo "WARNING: Suricata rule update failed with status ${status} at startup; continuing with existing rules" >&2
+        fi
+        return 0
+    }
+
     /usr/local/bin/suricata_config_populate.py --suricata ${SURICATA_TEST_CONFIG_BIN} ${SURICATA_TEST_CONFIG_VERBOSITY:-} >&2
     if [[ -n "${SURICATA_DISABLE_SIDS}" ]]; then
         tr ',' '\n' <<<"${SURICATA_DISABLE_SIDS}" | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if (length) print }' | \
             while IFS= read -r line; do
                 grep -qxF "$line" /etc/suricata/disable.conf 2>/dev/null || echo "$line"
             done >> /etc/suricata/disable.conf
-        SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+        if [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+            run_startup_rule_update /usr/local/bin/suricata-update-rules.sh
+        else
+            run_startup_rule_update env SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+        fi
+    elif [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+        run_startup_rule_update /usr/local/bin/suricata-update-rules.sh
     fi
-fi
+EOF
 
 # generate 1..n suricata-offline socket instances
 CONFIG_DIR="/etc/supervisor.d"
