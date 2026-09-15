@@ -308,7 +308,11 @@ def install_plugins(args):
                         # look at each Class defined in this code
                         for c in [n for n in node.body if isinstance(n, ast.ClassDef)]:
                             # plugins are classes with "PluginConfig" for a parent
-                            if any([baseClass.id == 'PluginConfig' for baseClass in c.bases]):
+                            if any(
+                                (isinstance(baseClass, ast.Name) and baseClass.id == 'PluginConfig')
+                                or (isinstance(baseClass, ast.Attribute) and baseClass.attr == 'PluginConfig')
+                                for baseClass in c.bases
+                            ):
                                 # this ia a plugin class, so iterate over its members (functions,
                                 #   variables, etc.) to find its name
                                 for item in c.body:
