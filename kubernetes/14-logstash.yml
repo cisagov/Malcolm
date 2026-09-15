@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:26.07.1
+        image: ghcr.io/idaholab/malcolm/logstash-oss:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -108,7 +108,7 @@ spec:
       terminationGracePeriodSeconds: 120
       initContainers:
       - name: logstash-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

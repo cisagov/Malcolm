@@ -186,13 +186,14 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
 
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
       # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
-        sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+      sed -r -i "s/(authMode)\s*=\s*.*/\1=s2s/" "${ARKIME_CONFIG_FILE}"
     fi
 
     # enable ja4+ plugin if it's present
@@ -285,6 +286,9 @@ fi
 if [[ "${ARKIME_EXPOSE_WISE_GUI}"  == "true" ]]; then
   sed "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}" > ./wise.tmp
   sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" ./wise.tmp
+  if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
+    sed -r -i "s/(authMode)\s*=\s*.*/\1=s2s/" ./wise.tmp
+  fi
   if [[ "${ARKIME_ALLOW_WISE_GUI_CONFIG}"  == "true" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|"  ./wise.tmp
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseini/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"

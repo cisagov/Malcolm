@@ -20,11 +20,14 @@ on:
       maxmind_alternate_url:
         required: false
 
+concurrency:
+  group: docker-build-push-scan-${{ inputs.service }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   docker:
     runs-on: ${{ matrix.os }}
     permissions:
-      actions: write
       packages: write
       contents: read
       security-events: write
@@ -40,13 +43,6 @@ jobs:
             platform: linux/arm64
 
     steps:
-      -
-        name: Cancel previous run in progress
-        uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # v0.13.1
-        with:
-          ignore_sha: true
-          all_but_latest: true
-          access_token: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

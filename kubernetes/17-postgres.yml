@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:26.07.1
+        image: ghcr.io/idaholab/malcolm/postgresql:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -80,7 +80,7 @@ spec:
       terminationGracePeriodSeconds: 60
       initContainers:
       - name: postgres-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -112,7 +112,7 @@ else
   DISABLE_IPV6_VAL=1
 fi
 
-echo "net.ipv6.conf.all.disable_ipv6 = $DISABLE_IPV6_VAL" >> /etc/sysctl.d/99-ipv6.conf 2>/dev/null || true
+echo "-net.ipv6.conf.all.disable_ipv6 = $DISABLE_IPV6_VAL" >> /etc/sysctl.d/99-ipv6.conf 2>/dev/null || true
 sed -i "s/\(ipv6\.disable=\)[[:digit:]]\+/\1$DISABLE_IPV6_VAL/g" /etc/default/grub 2>/dev/null || true
 
 echo "malcolm/disable_ipv6=$RET" > /tmp/malcolm.answer

@@ -61,7 +61,7 @@ if [[ -d "${WORKDIR}" ]]; then
 
   if [[ -n "${MAXMIND_GEOIP_DB_ACCOUNT_ID}" ]] && [[ -n "${MAXMIND_GEOIP_DB_LICENSE_KEY}" ]]; then
     for DB in ASN Country City; do
-      curl -f -s -S -L -u "${MAXMIND_GEOIP_DB_ACCOUNT_ID}:${MAXMIND_GEOIP_DB_LICENSE_KEY}" -o "GeoLite2-${DB}.mmdb.tar.gz" "https://download.maxmind.com/geoip/databases/GeoLite2-${DB}/download?suffix=tar.gz" 2>/dev/null && \
+      curl -f -s -S -L --connect-timeout 15 --max-time 60 -u "${MAXMIND_GEOIP_DB_ACCOUNT_ID}:${MAXMIND_GEOIP_DB_LICENSE_KEY}" -o "GeoLite2-${DB}.mmdb.tar.gz" "https://download.maxmind.com/geoip/databases/GeoLite2-${DB}/download?suffix=tar.gz" 2>/dev/null && \
         tar xf "GeoLite2-${DB}.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 2>/dev/null && \
         chmod 644 "GeoLite2-${DB}.mmdb" && \
         rm -f "GeoLite2-${DB}.mmdb.tar.gz"
@@ -71,7 +71,7 @@ if [[ -d "${WORKDIR}" ]]; then
   if [[ -n "${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL}" ]]; then
     for DB in ASN Country City; do
       if [[ ! -s "GeoLite2-${DB}.mmdb" ]]; then
-        curl -f -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL}/GeoLite2-${DB}.mmdb.tar.gz" 2>/dev/null && \
+        curl -f -s -S -L --connect-timeout 15 --max-time 60 -o "GeoLite2-$DB.mmdb.tar.gz" "${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL}/GeoLite2-${DB}.mmdb.tar.gz" 2>/dev/null && \
           tar xf "GeoLite2-${DB}.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 2>/dev/null && \
           chmod 644 "GeoLite2-${DB}.mmdb" && \
           rm -f "GeoLite2-${DB}.mmdb.tar.gz"

@@ -46,11 +46,11 @@ ENV DASHBOARDS_TIMEPICKER_FROM=$DASHBOARDS_TIMEPICKER_FROM
 ENV DASHBOARDS_TIMEPICKER_TO=$DASHBOARDS_TIMEPICKER_TO
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION="0.2.47"
+ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
-ENV YQ_VERSION="4.53.3"
+ENV YQ_VERSION="4.53.6"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV ECS_RELEASES_URL="https://api.github.com/repos/elastic/ecs/releases/latest"

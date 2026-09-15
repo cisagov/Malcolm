@@ -10,9 +10,8 @@ import sys
 import time
 from .sysquery import sys_service as sys_s
 from collections import defaultdict
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, abort, request
 from flask import Flask
-from flask_cors import CORS
 
 '''
     Application Configuration
@@ -21,7 +20,26 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))  # refers to application_t
 APP_STATIC = os.path.join(APP_ROOT, 'static')
 
 app = Flask(__name__)
-CORS(app)
+
+'''
+    Same-origin enforcement
+
+    This app is served to, and only ever intended to be called from, its own
+    kiosk page running on the same origin (typically a touchscreen with no
+    keyboard, so we deliberately do not put credentials/auth in front of it).
+    Browsers attach the Sec-Fetch-Site header to fetch/XHR requests and page
+    JavaScript cannot override it, so we use it to reject any request that
+    did not originate from this same page. This is why CORS(app) is not used:
+    this app should never accept cross-origin requests.
+'''
+
+
+@app.before_request
+def enforce_same_origin_for_mutations():
+    if request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
+        if request.headers.get('Sec-Fetch-Site') != 'same-origin':
+            abort(403)
+
 
 '''
     Logging configuration

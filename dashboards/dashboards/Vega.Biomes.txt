@@ -1,0 +1,1867 @@
+/*
+Authors:
+  Dave Klingler
+  Nicholas Donovan
+  Shelby Hiens
+  Jordan Waggoner
+
+
+Questions:
+  - Functionality on the IP address filter
+    - Should the filter only filter on src instead that way we can see any destination from an IP (it does this sometimes??)
+  - In-Viz filters are added due to opensearch filters refreshing the whole page whenever they are updated/deleted (SBH)
+
+Todo:
+  - Change fracCenter/start/end calls to compute in dataset (NGD)
+
+*/
+
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "autosize": {"type": "fit-x", "resize": true, "contains": "padding"},
+  "config": {
+    "signals": [
+      {
+        "name": "test",
+        "update": "-if(width < 1060, 120, 80)"
+      }
+    ],
+    "legend": {
+      "layout": {
+        "bottom": {
+          "anchor": "end",
+          "offset": {"signal": "-if(width < 1060, 120, 80)"}
+        }
+      }
+    }
+  },
+  "signals": [
+    {
+      "name": "height",
+      "init": "clamp(containerSize()[1], 460, containerSize()[1]) - 10"
+    },
+    {
+      "name": "width",
+      "init": "clamp(containerSize()[0], 850, containerSize()[0])"
+    },
+    {
+      "name": "topPad",
+      "init": "36"
+    },
+    {
+      "name": "bottomPad",
+      "init": "if(width < 1060, 108 + 40, 108)"
+    },
+    {
+      "name": "usableHeight",
+      "init": "height + padding.bottom - topPad - bottomPad"
+    },
+    {"name": "leftPad", "value": 40},
+    {"name": "rightPad", "value": 40},
+    {"name": "usableWidth", "update": "width - leftPad - rightPad"},
+    {
+      "name": "goldenRatio",
+      "value": "0.6180339887"
+    },
+    {
+      "name": "linkColorLegendMapping",
+      "update": "{'ICS-GEN': 'ICS-General', 'DMZ-GEN': 'DMZ-General', 'GEN-GEN': 'General-General', 'GEN-DMZ': 'General-DMZ', 'GEN-ICS': 'General-ICS'}"
+    },
+    {
+      "name": "zoneColorLegendMapping",
+      "update": "{'GEN': 'General'}"
+    },
+    {"name": "textPrimary", "value": "#e2e8f0"},
+    {"name": "legendTitle", "value": "#94a3b8"},
+    {"name": "legendLabel", "value": "#e2e8f0"},
+    {"name": "tooltipBg", "value": "#020617"},
+    {"name": "tooltipText", "value": "#e2e8f0"},
+    {"name": "tooltipMuted", "value": "#cbd5e1"},
+    {
+      "name": "minConnections",
+      "value": 1,
+      "bind": {"input": "range", "min": 1, "max": 20, "step": 1, "name": "Min Connections: "}
+    },
+    {
+      "name": "ipFilter",
+      "value": "",
+      "bind": {
+        "input": "text",
+        "debounce": 800, // waits before updating
+        "placeholder": "e.g. 10.0.0.0",
+        "name": "IP Filter: "
+      }
+    },
+    {   // keeping these filters until the persistent IP/filters problem is solved
+      "name": "protoFilter",
+      "value": "",
+      "bind": {
+        "input": "search",
+        "placeholder": "e.g. bacnet",
+        "name": "Protocol Filter: ",
+        "debounce": 800
+      }
+    },
+    {
+      "name": "excludeSubnets",
+      "value": "",
+      "bind": {
+        "input": "search",
+        "placeholder": "e.g. 192.168.1",
+        "name": "Exclude Subnet: ",
+        "debounce": 800
+      }
+    },
+    {
+      "name": "excludeProtos",
+      "value": "",
+      "bind": {
+        "input": "search",
+        "placeholder": "e.g. dns",
+        "name": "Exclude Protocol: ",
+        "debounce": 800
+      }
+    },
+    {
+      "name": "showFilesOnly",
+      "value": false,
+      "bind": {
+        "input": "checkbox", "name": "Show Files Only"
+      }
+    },
+    // {
+    //   "name": "hideFileLinks",
+    //   "value": false,
+    //   "bind": {
+    //     "input": "checkbox", "name": "Hide File Links"
+    //   }
+    // },
+    {
+      "name": "lineType",
+      "value": "double",
+      "bind": {
+        "input": "radio", "options": ["double", "arrow"], "labels": ["Double Line", "Arrows"], "name": "Line Type"
+      }
+    },
+    // This can also be implemented with opensearch filter adds, thoughts?
+    {
+      "name": "ipType",
+      "value": "both",
+      "bind": {
+        "input": "radio", "options": ["both", "ipv4", "ipv6"], "labels": ["Both", "IPv4", "IPv6"], "name": "IP Type"
+      }
+    },
+    {
+      "name": "genIcsOnly", "value": false,
+      "on": [{"events": "@genics-btn:click, @genics-label:click", "update": "!genIcsOnly"}]
+    },
+    {
+      "name": "dmzIcsOnly", "value": false,
+      "on": [{"events": "@dmzics-btn:click, @dmzics-label:click", "update": "!dmzIcsOnly"}]
+    },
+    {
+      "name": "fullChainOnly", "value": false,
+      "on": [{"events": "@chain-btn:click, @chain-label:click", "update": "!fullChainOnly"}]
+    },
+    {
+      "name": "hideSameZoneLinks", "value": false,
+      "on": [{"events": "@samezone-btn:click, @samezone-label:click", "update": "!hideSameZoneLinks"}]
+    },
+    {
+      "name": "dragStartX",
+      "value": 0,
+      "on": [{"events": "@nodeSymbols:mousedown", "update": "x()", "force": true}]
+    },
+    {
+      "name": "dragStartY",
+      "value": 0,
+      "on": [{"events": "@nodeSymbols:mousedown", "update": "y()", "force": true}]
+    },
+    {
+      "name": "suppressClick",
+      "value": false,
+      "on": [
+        {"events": "@nodeSymbols:mousedown", "update": "false", "force": true},
+        {
+          "events": "window:mousemove",
+          "update": "dragActive && dragId != null && (abs(x() - dragStartX) > 3 || abs(y() - dragStartY) > 3) ? true : suppressClick",
+          "force": true
+        }
+      ]
+    },
+    {
+      "name": "clickedNode",
+      "value": null,
+      "on": [
+        {
+          "events": "@nodeSymbols:click",
+          "update": "suppressClick || !datum || !datum.id || datum.hasFiles ? clickedNode : clickedNode === datum.id ? null : datum.id",
+          "force": true
+        },
+        {
+          "events": "@collapsedBadge:click",
+          "update": "suppressClick ? clickedNode : null",
+          "force": true
+        }
+      ]
+    },
+    {
+      "name": "selectedFileNode",
+      "value": null,
+      "on": [
+        {
+          "events": "@nodeSymbols:click",
+          "update": "suppressClick || !datum || !datum.hasFiles ? selectedFileNode : (selectedFileNode === datum.id ? null : datum.id)",
+          "force": true
+        },
+        {
+          "events": "@file-detail-close:click",
+          "update": "null",
+          "force": true
+        }
+      ]
+    },
+    {
+      "name": "dragId",
+      "value": null,
+      "on": [
+        {"events": "@nodeSymbols:mousedown", "update": "datum && datum.id ? datum.id : null", "force": true},
+        {"events": "window:mouseup", "update": "null", "force": true}
+      ]
+    },
+    {
+      "name": "dragActive",
+      "value": false,
+      "on": [
+        {"events": "@nodeSymbols:mousedown", "update": "datum && datum.id ? true : false", "force": true},
+        {"events": "window:mouseup", "update": "false", "force": true}
+      ]
+    },
+    {
+      "name": "dragX",
+      "value": 0,
+      "on": [
+        {"events": "@nodeSymbols:mousedown", "update": "datum && isValid(datum.drawX) ? datum.drawX : dragX", "force": true},
+        {"events": "window:mousemove", "update": "dragActive && dragId != null ? clamp(x(), 20, width - 20) : dragX", "force": true}
+      ]
+    },
+    {
+      "name": "dragY",
+      "value": 0,
+      "on": [
+        {"events": "@nodeSymbols:mousedown", "update": "datum && isValid(datum.drawY) ? datum.drawY : dragY", "force": true},
+        {"events": "window:mousemove", "update": "dragActive && dragId != null ? clamp(y(), 50, height - 20) : dragY", "force": true}
+      ]
+    },
+    {
+      "name": "hoverNode",
+      "value": null,
+      "on": [
+        {"events": "@nodeSymbols:mouseover", "update": "dragActive ? null : datum"},
+        {"events": "@nodeSymbols:mouseout", "update": "null"}
+      ]
+    },
+    {
+      "name": "tooltipX",
+      "value": 0,
+      "on": [
+        {"events": "@nodeSymbols:mousemove", "update": "x()"},
+        {"events": "@nodeSymbols:mouseover", "update": "x()"}
+      ]
+    },
+    {
+      "name": "tooltipY",
+      "value": 0,
+      "on": [
+        {"events": "@nodeSymbols:mousemove", "update": "y()"},
+        {"events": "@nodeSymbols:mouseover", "update": "y()"}
+      ]
+    },
+    {"name": "nodeRadius", "value": 9},
+    {"name": "cellPad", "value": 16}
+  ],
+  "data": [
+    {
+      "name": "raw",
+      "url": {
+        "index": "arkime_sessions3-*",
+        "body": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "must": [
+                {"exists": {"field": "source.device.purdue_zone"}},
+                {"exists": {"field": "destination.device.purdue_zone"}},
+                "%dashboard_context-must_clause%"
+              ],
+              "must_not": ["%dashboard_context-must_not_clause%"],
+              "filter": [
+                {"exists": {"field": "source.ip"}},
+                {"exists": {"field": "destination.ip"}},
+                {"range": {"firstPacket": {"%timefilter%": true}}},
+                "%dashboard_context-filter_clause%"
+              ]
+            }
+          },
+          "aggs": {
+            "connections": {
+              "composite": {
+                "size": 30000,
+                "sources": [
+                  {"src": {"terms": {"field": "source.ip"}}},
+                  {"dst": {"terms": {"field": "destination.ip"}}}
+                ]
+              },
+              "aggs": {
+                "src_purdue": {"terms": {"field": "source.device.purdue_zone"}},
+                "dst_purdue": {"terms": {"field": "destination.device.purdue_zone"}},
+                "protocols": {"terms": {"field": "network.protocol"}},
+                "network_types": {"terms": {"field": "network.type", "size": 5}}
+              }
+            }
+          }
+        }
+      },
+      "format": {"property": "aggregations.connections.buckets"},
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.doc_count >= minConnections"
+        },
+        {
+          "type": "project",
+          "fields": ["key.src", "key.dst", "doc_count", "protocols.buckets", "network_types.buckets", "src_purdue.buckets", "dst_purdue.buckets"],
+          "as": ["src", "dst", "count", "protocols", "network_types", "src_purdue_zone", "dst_purdue_zone"]
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.src_purdue_zone, 'key')[0]",
+          "as": "src_purdue_zone"
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.dst_purdue_zone, 'key')[0]",
+          "as": "dst_purdue_zone"
+        },
+        {
+          "type": "formula",
+          "expr": "[datum.src_purdue_zone, datum.dst_purdue_zone]",
+          "as": "purdue_zone"
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.network_types, 'key')",
+          "as": "network_types"
+        },
+        {
+          "type": "formula",
+          "expr": "pluck(datum.protocols, 'key')",
+          "as": "protocol_keys"
+        },
+        {
+          "type": "filter",
+          "expr": "!ipFilter || test(lower(ipFilter), lower(datum.src + datum.dst))"
+        },
+        {
+          "type": "filter",
+          "expr": "ipType === 'both' || indexof(datum.network_types, ipType) !== -1"
+        },
+        {
+          "type": "filter",
+          "expr": "protoFilter === '' || indexof(lower(join(datum.protocol_keys, ',')), lower(protoFilter)) >= 0"
+        },
+        {"type": "formula", "as": "protoStr", "expr": "join(datum.protocol_keys, ',')" },
+      ]
+    },
+    {
+      "name": "subnet-prefilter",
+      "source": "raw",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "excludeSubnets === '' || (indexof(datum.src, excludeSubnets) < 0 && indexof(datum.dst, excludeSubnets) < 0)"
+        },
+      ]
+    },
+    {
+      "name": "filtered-raw",
+      "source": "raw",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "excludeSubnets === '' || (indexof(datum.src, excludeSubnets) < 0 && indexof(datum.dst, excludeSubnets) < 0) || length(data('subnet-prefilter')) < 1"
+        },
+        {
+          "type": "filter",
+          "expr": "excludeProtos === '' || indexof(lower(datum.protoStr), lower(excludeProtos)) < 0"
+        },
+      ]
+    },
+    {
+      "name": "files-raw",
+      "url": {
+        "index": "arkime_sessions3-*",
+        "body": {
+          "size": 500,
+          "_source": [
+            "source.ip",
+            "destination.ip",
+            "file.name",
+            "file.mime_type",
+            "file.size",
+            "file.hash.sha256",
+            "file.hash.sha1",
+            "file.hash.md5",
+            "file.hash.ssdeep",
+            "event.risk_score",
+            "event.severity_tags",
+            "zeek.files.seen_bytes",
+            "strelka.result.file.name",
+            "strelka.result.flags",
+            "strelka.result.scanners",
+            "timestamp"
+          ],
+          "query": {
+            "bool": {
+              "filter": [
+                { "term": { "event.category": "file" } },
+                { "exists": { "field": "source.ip" } },
+                { "exists": { "field": "destination.ip" } }
+              ]
+            }
+          },
+          "sort": [{ "timestamp": "desc" }]
+        }
+      },
+      "format": { "property": "hits.hits" },
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "isValid(datum._source) && isValid(datum._source.source) && isValid(datum._source.destination) && isValid(datum._source.source.ip) && isValid(datum._source.destination.ip)"
+        },
+        { "type": "formula", "as": "src", "expr": "datum._source.source.ip" },
+        { "type": "formula", "as": "dst", "expr": "datum._source.destination.ip" },
+        {
+          "type": "formula",
+          "as": "fname",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.name) ? (isArray(datum._source.file.name) ? datum._source.file.name[0] : datum._source.file.name) : (isValid(datum._source.strelka) && isValid(datum._source.strelka.result) && isValid(datum._source.strelka.result.file) ? datum._source.strelka.result.file.name : '(unnamed)')"
+        },
+        {
+          "type": "formula",
+          "as": "mime",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.mime_type) ? (isArray(datum._source.file.mime_type) ? datum._source.file.mime_type[0] : datum._source.file.mime_type) : 'unknown'"
+        },
+        {
+          "type": "formula",
+          "as": "fsize",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.size) ? datum._source.file.size : (isValid(datum._source.zeek) && isValid(datum._source.zeek.files) && isValid(datum._source.zeek.files.seen_bytes) ? datum._source.zeek.files.seen_bytes : null)"
+        },
+        {
+          "type": "formula",
+          "as": "score",
+          "expr": "isValid(datum._source.event) && isValid(datum._source.event.risk_score) ? datum._source.event.risk_score : 0"
+        },
+        {
+          "type": "formula",
+          "as": "sevTag",
+          "expr": "isValid(datum._source.event) && isValid(datum._source.event.severity_tags) ? (isArray(datum._source.event.severity_tags) ? datum._source.event.severity_tags[0] : datum._source.event.severity_tags) : ''"
+        },
+        {
+          "type": "formula",
+          "as": "avFlag",
+          "expr": "isValid(datum._source.strelka) && isValid(datum._source.strelka.result) && isValid(datum._source.strelka.result.flags) && isArray(datum._source.strelka.result.flags) && length(datum._source.strelka.result.flags) > 0"
+        },
+        {
+          "type": "formula",
+          "as": "sha256",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.hash) && isValid(datum._source.file.hash.sha256) ? (isArray(datum._source.file.hash.sha256) ? datum._source.file.hash.sha256[0] : datum._source.file.hash.sha256) : ''"
+        },
+        {
+          "type": "formula",
+          "as": "sha1",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.hash) && isValid(datum._source.file.hash.sha1) ? (isArray(datum._source.file.hash.sha1) ? datum._source.file.hash.sha1[0] : datum._source.file.hash.sha1) : ''"
+        },
+        {
+          "type": "formula",
+          "as": "md5",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.hash) && isValid(datum._source.file.hash.md5) ? (isArray(datum._source.file.hash.md5) ? datum._source.file.hash.md5[0] : datum._source.file.hash.md5) : ''"
+        },
+        {
+          "type": "formula",
+          "as": "ssdeep",
+          "expr": "isValid(datum._source.file) && isValid(datum._source.file.hash) && isValid(datum._source.file.hash.ssdeep) ? (isArray(datum._source.file.hash.ssdeep) ? datum._source.file.hash.ssdeep[0] : datum._source.file.hash.ssdeep) : ''"
+        },
+        {
+          "type": "formula",
+          "as": "scanners",
+          "expr": "isValid(datum._source.strelka) && isValid(datum._source.strelka.result) && isValid(datum._source.strelka.result.scanners) && isArray(datum._source.strelka.result.scanners) ? join(datum._source.strelka.result.scanners, ', ') : ''"
+        },
+        {
+          "type": "formula",
+          "as": "flagsStr",
+          "expr": "isValid(datum._source.strelka) && isValid(datum._source.strelka.result) && isValid(datum._source.strelka.result.flags) && isArray(datum._source.strelka.result.flags) ? join(datum._source.strelka.result.flags, ', ') : ''"
+        },
+        { "type": "formula", "as": "ts", "expr": "isValid(datum._source['timestamp']) ? datum._source['timestamp'] : null" },
+        // { "type": "filter", "expr": "datum.score >= minRiskScore" },
+        {
+          "type": "filter",
+          "expr": "excludeSubnets === '' || (indexof(datum.src, excludeSubnets) < 0 && indexof(datum.dst, excludeSubnets) < 0 || length(data('subnet-prefilter')) < 1)"
+        },
+        // {
+        //   "type": "filter",
+        //   "expr": "ipFilter === '' || indexof(datum.src, ipFilter) >= 0 || indexof(datum.dst, ipFilter) >= 0"
+        // }
+        {
+          "type": "filter",
+          "expr": "!ipFilter || test(lower(ipFilter), lower(datum.src + datum.dst))"
+        },
+      ]
+    },
+    {
+      "name": "ipToProtocol",
+      "source": "filtered-raw",
+      "transform": [
+        {
+          "type": "fold",
+          "fields": ["src", "dst"],
+          "as": ["_", "ip"]
+        },
+        // {
+        //   "type": "formula",
+        //   "expr": "isArray(datum.purdue_zone) && length(datum.purdue_zone) ? datum.purdue_zone : [null]",
+        //   "as": "purdue_zone_keys"
+        // },
+        // {
+        //   "type": "flatten",
+        //   "fields": ["purdue_zone"],
+        //   "as": ["purdue_zone"]
+        // },
+        {
+          "type": "filter",
+          "expr": "datum.purdue_zone != null"
+        },
+        {
+          "type": "aggregate",
+          "groupby": ["ip", "purdue_zone"]
+        },
+        // {
+        //   "type": "aggregate",
+        //   "groupby": ["ip"],
+        //   "fields": ["purdue_zone"],
+        //   "ops": ["values"],
+        //   "as": ["rows"]
+        // },
+        // {
+        //   "type": "formula",
+        //   "expr": "pluck(datum.rows, 'purdue_zone')",
+        //   "as": "purdue_zone"
+        // },
+        // {
+        //   "type": "project",
+        //   "fields": ["ip", "purdue_zone"]
+        // }
+      ]
+    },
+    {
+      "name": "ipToProtocols",
+      "source": "filtered-raw",
+      "transform": [
+        {
+          "type": "fold",
+          "fields": ["src", "dst"],
+          "as": ["_", "ip"]
+        },
+        {
+          "type": "aggregate",
+          "groupby": ["ip"],
+          "fields": ["count"],
+          "ops": ["sum"],
+          "as": ["count"]
+        },
+        {
+          "type": "lookup",
+          "from": "ipToProtocol",
+          "key": "ip",
+          "fields": ["ip"],
+          "values": ["purdue_zone"],
+          "as": ["purdue_zone"]
+        },
+        // {
+        //   "type": "formula",
+        //   "expr": "isValid(datum.purdue_zone) ? datum.purdue_zone : []",
+        //   "as": "purdue_zone"
+        // },
+        {
+          "type": "formula",
+          "expr": "indexof(datum.purdue_zone, 'ot') === 0",
+          "as": "is_ics"
+        },
+        {
+          "type": "formula",
+          "expr": "indexof(datum.purdue_zone, 'dmz') === 0",
+          "as": "is_dmz"
+        },
+        {
+          "type": "formula",
+          "expr": "indexof(datum.purdue_zone, 'it') === 0",
+          "as": "is_gen"
+        },
+        {
+          "type": "formula",
+          "expr": "if(datum.is_ics, 'ICS', if(datum.is_dmz, 'DMZ', if(datum.is_gen, 'GEN', null)))",
+          "as": "zone"
+        }
+      ]
+    },
+    {
+      "name": "zone-ips",
+      "source": "filtered-raw",
+      "transform": [
+        {
+          "type": "lookup",
+          "from": "ipToProtocols",
+          "key": "ip",
+          "fields": ["dst"],
+          "values": ["zone"],
+          "as": ["dst_zone"],
+          "default": false
+        },
+        {
+          "type": "lookup",
+          "from": "ipToProtocols",
+          "key": "ip",
+          "fields": ["src"],
+          "values": ["zone"],
+          "as": ["src_zone"],
+          "default": false
+        },
+        {
+          "type": "formula",
+          "expr": "datum.src_zone + '-' + datum.dst_zone",
+          "as": "zone"
+        }
+      ]
+    },
+    {
+      "name": "degrees",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "fold", "fields": ["src", "dst"], "as": ["_", "id"]},
+        {"type": "joinaggregate", "groupby": ["id"], "ops": ["count"], "as": ["degree"]}
+      ]
+    },
+    {
+      "name": "dmz-ics-ips",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "filter", "expr": "datum.zone === 'DMZ-ICS' || datum.zone === 'ICS-DMZ'"},
+        // todo keep empty until needed to save memory
+        {"type": "fold", "fields": ["src", "dst"], "as": ["_", "ip"]},
+        {"type": "aggregate", "groupby": ["ip"]}
+      ]
+    },
+    {
+      "name": "general-ics-ips",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "filter", "expr": "datum.zone === 'GEN-ICS' || datum.zone === 'ICS-GEN'"},
+        {"type": "fold", "fields": ["src", "dst"], "as": ["_", "ip"]},
+        {"type": "aggregate", "groupby": ["ip"]}
+      ]
+    },
+    {
+      "name": "cross-zone-ips",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "filter", "expr": "datum.src_zone !== datum.dst_zone"},
+        {"type": "fold", "fields": ["src", "dst"], "as": ["_", "ip"]},
+        {"type": "aggregate", "groupby": ["ip"]}
+      ]
+    },
+    {
+      "name": "same-zone-ips",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "filter", "expr": "datum.src_zone === datum.dst_zone"},
+        {"type": "fold", "fields": ["src", "dst"], "as": ["_", "ip"]},
+        {"type": "aggregate", "groupby": ["ip"]}
+      ]
+    },
+    {
+      "name": "only-same-zone-ips",
+      "source": "same-zone-ips",
+      "transform": [
+        {
+          "type": "lookup",
+          "from": "cross-zone-ips",
+          "key": "ip",
+          "fields": ["ip"],
+          "values": ["ip"],
+          "as": ["is_cross_zone"],
+          "default": null
+        },
+        {"type": "filter", "expr": "datum.is_cross_zone === null"}
+      ]
+    },
+    {
+      // todo simplify
+      "name": "full-chain-ips",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "filter", "expr": "datum.zone === 'DMZ-ICS' || datum.zone === 'ICS-DMZ'"},
+        // todo keep empty until needed to save memory
+        {"type": "formula", "as": "dmz_ip", "expr": "datum.src"},
+        {"type": "formula", "as": "ics_ip", "expr": "datum.dst"},
+        {"type": "lookup", "from": "zone-ips", "key": "dst", "fields": ["dmz_ip"], "as": ["gen_to_dmz_edge"]},
+        {
+          "type": "filter",
+          "expr": "datum.gen_to_dmz_edge != null && datum.gen_to_dmz_edge.src_zone === 'GEN'"
+        },
+        {"type": "formula", "as": "general_ip", "expr": "datum.gen_to_dmz_edge.src"},
+        {"type": "fold", "fields": ["general_ip", "dmz_ip", "ics_ip"], "as": ["_", "ip"]},
+        {"type": "aggregate", "groupby": ["ip"]}
+      ]
+    },
+    {
+      "name": "sections",
+      "source": "ipToProtocols",
+      "transform": [
+        {"type": "aggregate", "groupby": ["zone"], "ops": ["count"], "as": ["nodeCount"]},
+        {"type": "formula", "as": "order", "expr": "indexof(['GEN','DMZ','ICS'], datum.zone)"},
+        {"type": "formula", "as": "label", "expr": "slice([['General', 'Network'], 'DMZ', 'ICS / OT'], datum.order)[0]"},
+        {"type": "collect", "sort": {"field": "order"}},
+        {"type": "formula", "as": "cell", "expr": "2*nodeRadius + cellPad"},
+        {"type": "formula", "as": "maxRows", "expr": "max(1, floor(usableHeight / datum.cell))"},
+        {"type": "formula", "as": "cols", "expr": "max(1, ceil(datum.nodeCount / datum.maxRows))"},
+        {
+          "type": "window", "sort": {"field": "order"}, "ops": ["sum"], "fields": ["cols"], "as": ["cumCols"],
+          "frame": [null, 0]
+        },
+        {"type": "joinaggregate", "ops": ["sum"], "fields": ["cols"], "as": ["totalCols"]},
+        {"type": "formula", "as": "fracEnd", "expr": "datum.cumCols / datum.totalCols"},
+        {"type": "formula", "as": "fracStart", "expr": "(datum.cumCols - datum.cols) / datum.totalCols"},
+        {"type": "formula", "as": "fracCenter", "expr": "(datum.fracStart + datum.fracEnd) / 2"}
+      ]
+    },
+    {
+      "name": "nodes",
+      "source": "ipToProtocols",
+      "transform": [
+        {"type": "formula", "as": "id", "expr": "datum.ip"},
+        {
+          "type": "lookup",
+          "from": "sections",
+          "key": "zone",
+          "fields": ["zone"],
+          "values": ["fracStart", "fracEnd", "fracCenter", "nodeCount"],
+          "as": ["fracStart", "fracEnd", "fracCenter", "zoneCount"]
+        },
+        {"type": "lookup", "from": "degrees", "key": "id", "fields": ["ip"], "values": ["degree"], "as": ["degree"]},
+        {"type": "formula", "as": "degree", "expr": "isValid(datum.degree) ? datum.degree : 0"},
+        {
+          "type": "window",
+          "groupby": ["zone"],
+          "sort": {"field": "degree", "order": "descending"},
+          "ops": ["row_number"],
+          "as": ["degRank"]
+        },
+        {"type": "formula", "as": "k0", "expr": "datum.degRank - 1"},
+        {"type": "formula", "as": "bandLeft", "expr": "leftPad + datum.fracStart * usableWidth"},
+        {"type": "formula", "as": "bandW", "expr": "(datum.fracEnd - datum.fracStart) * usableWidth"},
+        {"type": "formula", "as": "cell", "expr": "2 * nodeRadius + cellPad"},
+        {"type": "formula", "as": "maxRows", "expr": "max(1, floor(usableHeight / datum.cell))"},
+        {"type": "formula", "as": "cols", "expr": "max(1, ceil(datum.zoneCount / datum.maxRows))"},
+        {"type": "formula", "as": "rows", "expr": "ceil(datum.zoneCount / datum.cols)"},
+        {"type": "formula", "as": "col", "expr": "floor(datum.k0 / datum.rows)"},
+        {"type": "formula", "as": "row", "expr": "datum.k0 % datum.rows"},
+        {"type": "formula", "as": "colW", "expr": "datum.bandW / datum.cols"},
+        // Align nodes with the highest degree rank to the inside
+        {"type": "formula", "as": "side", "expr": "datum.fracCenter < 0.5 ? -1 : (datum.fracCenter > 0.5 ? 1 : 0)"},
+        {
+          "type": "formula", "as": "colOriented",
+          "expr": "datum.side > 0 ? datum.col : (datum.side < 0 ? (datum.cols - 1 - datum.col) : (floor((datum.cols - 1) / 2) + ((datum.col % 2 === 1) ? 1 : -1) * ceil(datum.col / 2)))"
+        },
+        {"type": "formula", "as": "jitterSpread", "expr": "0.8"},
+        {"type": "formula", "as": "jitterFrac", "expr": "(datum.row * goldenRatio) % 1"},
+        {"type": "formula", "as": "jitterX", "expr": "(datum.jitterFrac - 0.5) * datum.colW * datum.jitterSpread"},
+        {
+          "type": "formula",
+          "as": "baseX",
+          "expr": "datum.bandLeft + (datum.colOriented + 0.5) * datum.colW + datum.jitterX"
+        },
+        {
+          "type": "formula",
+          "as": "baseY",
+          "expr": "datum.rows === 1 ? topPad + usableHeight/2 : topPad + (datum.row + 0.5) / datum.rows * usableHeight + ((datum.k % 2) === 0 ? -6 : 6)"
+        }
+      ]
+    },
+    {
+      "name": "nodePositions",
+      "values": [],
+      "on": [
+        {"trigger": "dragActive && dragId != null", "remove": "datum && datum.id === dragId"},
+        {"trigger": "dragActive && dragId != null", "insert": "{id: dragId, drawX: dragX, drawY: dragY}"}
+      ]
+    },
+    {
+      "name": "displayNodes",
+      "source": "nodes",
+      "transform": [
+        {"type": "lookup", "from": "nodePositions", "key": "id", "fields": ["id"], "as": ["savedPos"]},
+        {"type": "formula", "as": "drawX", "expr": "datum.savedPos ? datum.savedPos.drawX : datum.baseX"},
+        {"type": "formula", "as": "drawY", "expr": "datum.savedPos ? datum.savedPos.drawY : datum.baseY"}
+      ]
+    },
+    {
+      "name": "file-agg-by-node",
+      "source": "files-raw",
+      "transform": [
+        { "type": "formula", "as": "n1", "expr": "datum.src" },
+        { "type": "formula", "as": "n2", "expr": "datum.dst" },
+        {
+          "type": "fold",
+          "fields": ["n1", "n2"],
+          "as": ["role", "ip"]
+        },
+        {
+          "type": "aggregate",
+          "groupby": ["ip"],
+          "fields": ["score", "score"],
+          "ops": ["max", "count"],
+          "as": ["maxScore", "fileCount"]
+        }
+      ]
+    },
+    {
+      "name": "exclusive-neighbors",
+      "source": "filtered-raw", //todo raw
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "clickedNode != null && (datum.src === clickedNode || datum.dst === clickedNode) && indata('displayNodes','id',datum.src) && indata('displayNodes','id',datum.dst)"
+        },
+        {"type": "formula", "as": "neighbor_ip", "expr": "datum.src === clickedNode ? datum.dst : datum.src"},
+        {"type": "aggregate", "groupby": ["neighbor_ip"], "ops": ["count"], "as": ["occurrences"]},
+        {"type": "formula", "as": "collapsed_ip", "expr": "datum.neighbor_ip"}
+      ]
+    },
+    {
+      "name": "collapsed-node-ids",
+      "source": "exclusive-neighbors",
+      "transform": [
+        {"type": "formula", "as": "id", "expr": "datum.collapsed_ip"}
+      ]
+    },
+    {
+      "name": "visibleNodes",
+      "source": "displayNodes",
+      "transform": [
+        {"type": "filter", "expr": "!indata('collapsed-node-ids','id',datum.id)"},
+        // (dmzIcsOnly and isDmzIcs(zone)) or (fullChainOnly and isFullChain(record)) or not (dmzIcsOnly or fullChainOnly)
+        {
+          "type": "filter",
+          "expr": "(dmzIcsOnly && indata('dmz-ics-ips', 'ip', datum.ip)) || (fullChainOnly && indata('full-chain-ips', 'ip', datum.ip)) || (genIcsOnly && indata('general-ics-ips', 'ip', datum.ip)) || (hideSameZoneLinks && !indata('only-same-zone-ips', 'ip', datum.ip)) || !(dmzIcsOnly || fullChainOnly || genIcsOnly || hideSameZoneLinks) "
+        },
+        { "type": "filter", "expr": "!indata('collapsed-node-ids','id',datum.id)" },
+        {
+          "type": "lookup",
+          "from": "file-agg-by-node",
+          "key": "ip",
+          "fields": ["id"],
+          "as": ["fileInfo"]
+        },
+        { "type": "formula", "as": "hasFiles", "expr": "datum.fileInfo != null" },
+        { "type": "filter", "expr": "!showFilesOnly || datum.hasFiles" }
+      ]
+    },
+    {
+      "name": "links-base",
+      "source": "zone-ips",
+      "transform": [
+        {"type": "lookup", "from": "visibleNodes", "key": "id", "fields": ["src"], "as": ["sourceNode"]},
+        {"type": "lookup", "from": "visibleNodes", "key": "id", "fields": ["dst"], "as": ["targetNode"]},
+        {"type": "filter", "expr": "datum.sourceNode != null && datum.targetNode != null"},
+        {"type": "formula", "as": "pairKey", "expr": "datum.src + '|' + datum.dst"},
+        {"type": "formula", "as": "reverseKey", "expr": "datum.dst + '|' + datum.src"}
+      ]
+    },
+    {
+      "name": "file-links",
+      "source": "files-raw",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "indata('visibleNodes','id',datum.src) && indata('visibleNodes','id',datum.dst)"
+        },
+        { "type": "formula", "as": "pairKey", "expr": "datum.src + '|' + datum.dst" },
+        {
+          "type": "aggregate",
+          "groupby": ["pairKey", "src", "dst"],
+          "fields": ["score", "score"],
+          "ops": ["max", "count"],
+          "as": ["maxScore", "fileCount"]
+        },
+        {
+          "type": "lookup",
+          "from": "visibleNodes",
+          "key": "id",
+          "fields": ["src"],
+          "as": ["sourceNode"]
+        },
+        {
+          "type": "lookup",
+          "from": "visibleNodes",
+          "key": "id",
+          "fields": ["dst"],
+          "as": ["targetNode"]
+        },
+        { "type": "filter", "expr": "datum.sourceNode != null && datum.targetNode != null" }
+      ]
+    },
+    {
+      "name": "collapsed-count",
+      "source": "collapsed-node-ids",
+      "transform": [
+        {"type": "aggregate", "ops": ["count"], "as": ["total"]}
+      ]
+    },
+    {
+      "name": "links",
+      "source": "links-base",
+      "transform": [
+        { "type": "filter", "expr": "!showFilesOnly || indata('file-links','pairKey',datum.pairKey)" },
+        {
+          "type": "lookup",
+          "from": "links-base",
+          "key": "pairKey",
+          "fields": ["reverseKey"],
+          "as": ["reverseEdge"]
+        },
+        { "type": "formula", "as": "hasReverse", "expr": "datum.reverseEdge != null" },
+        {
+          "type": "lookup",
+          "from": "file-links",
+          "key": "pairKey",
+          "fields": ["pairKey"],
+          "as": ["fileLinkInfo"]
+        },
+        { "type": "formula", "as": "hasFileLink", "expr": "datum.fileLinkInfo != null" },
+        { "type": "formula", "as": "offset", "expr": "datum.hasFileLink ? (datum.hasReverse ? 5 : 0) : (datum.hasReverse ? 10 : 0)" },        {"type": "formula", "as": "dx", "expr": "datum.targetNode.drawX - datum.sourceNode.drawX"},
+        {"type": "formula", "as": "dy", "expr": "datum.targetNode.drawY - datum.sourceNode.drawY"},
+        {"type": "formula", "as": "len", "expr": "sqrt(datum.dx*datum.dx + datum.dy*datum.dy)"},
+        {
+          "type": "formula", "as": "nx",
+          "expr": "if(lineType === 'double', if(datum.len > 0, -datum.dy / datum.len, 0), datum.len > 0 ? datum.dx / datum.len : 0)"
+        },
+        {
+          "type": "formula", "as": "ny",
+          "expr": "if(lineType === 'double', if(datum.len > 0, datum.dx / datum.len, 0), datum.len > 0 ? datum.dy / datum.len : 0)"
+        },
+        {
+          "type": "formula", "as": "offset",
+          "expr": "if(lineType === 'double', if(datum.hasReverse, 10, 0), sqrt(700 / PI))"
+        }, // todo
+        {"type": "formula", "as": "lineX1", "expr": "datum.sourceNode.drawX + datum.nx * datum.offset"},
+        {"type": "formula", "as": "lineY1", "expr": "datum.sourceNode.drawY + datum.ny * datum.offset"},
+        {"type": "formula", "as": "lineX2", "expr": "datum.targetNode.drawX + datum.nx * datum.offset"},
+        {"type": "formula", "as": "lineY2", "expr": "datum.targetNode.drawY + datum.ny * datum.offset"},
+        // todo check these
+        {
+          "type": "formula", "as": "lineX2",
+          "expr": "if(lineType === 'arrow', datum.targetNode.drawX - datum.nx * datum.offset, datum.lineX2)"
+        },
+        {
+          "type": "formula", "as": "lineY2",
+          "expr": "if(lineType === 'arrow', datum.targetNode.drawY - datum.ny * datum.offset, datum.lineY2)"
+        },
+        {"type": "formula", "as": "angleDeg", "expr": "atan2(datum.dy, datum.dx) * 180 / PI"},
+        {"type": "formula", "as": "strokeW", "expr": "scale('link-width', datum.count)"}
+        {
+          "type": "formula",
+          "as": "link_color",
+          "expr": "datum.hasFileLink ? '#3b82f6' : (datum.sourceNode.zone === 'General' ? '#22c55e' : datum.sourceNode.zone === 'DMZ' ? '#eab308' : '#dc2626')"
+        },
+        {
+          "type": "formula",
+          "as": "link_dash",
+          "expr": "datum.hasFileLink ? [6,3] : []"
+        },
+        {
+          "type": "formula",
+          "as": "link_width_val",
+          "expr": "datum.hasFileLink ? (2 + min(datum.fileLinkInfo.fileCount, 4)) : clamp(scale('link-width', datum.conn_count), 0.5, 8)"
+        }
+      ]
+    },
+    {
+      "name": "collapsed-badge",
+      "source": "displayNodes",
+      "transform": [
+        {"type": "filter", "expr": "clickedNode != null && datum.id === clickedNode"},
+        {"type": "formula", "as": "collapsed_count", "expr": "length(data('collapsed-node-ids'))"}
+      ]
+    },
+    {
+      "name": "tooltip-chain",
+      "source": "filtered-raw", // todo raw
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "hoverNode != null && (datum.src === hoverNode.ip || datum.dst === hoverNode.ip)"
+        },
+        {"type": "lookup", "from": "visibleNodes", "key": "id", "fields": ["src"], "as": ["srcNode"]},
+        {"type": "lookup", "from": "visibleNodes", "key": "id", "fields": ["dst"], "as": ["dstNode"]},
+        {"type": "filter", "expr": "datum.srcNode != null && datum.dstNode != null"},
+        {
+          "type": "formula", "as": "chain_str",
+          "expr": "datum.srcNode.zone + ' (' + datum.src + ') -> ' + datum.dstNode.zone + ' (' + datum.dst + ')'"
+        },
+        {"type": "formula", "as": "proto_str", "expr": "join(slice(datum.protocol_keys, 0, 3), ', ')"},
+        {
+          "type": "formula", "as": "traffic_str",
+          "expr": "datum.count + ' conn' + (datum.count !== 1 ? 's' : '')"
+        },
+        {"type": "window", "ops": ["row_number"], "as": ["row"]},
+        {"type": "filter", "expr": "datum.row <= 6"}
+      ]
+    },
+    {
+      "name": "tooltip-files",
+      "source": "files-raw",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "hoverNode != null && (datum.src === hoverNode.ip || datum.dst === hoverNode.ip)"
+        },
+        {
+          "type": "formula",
+          "as": "file_str",
+          "expr": "datum.fname + ' (' + datum.mime + ', score ' + datum.score + (datum.avFlag ? ', AV hit' : '') + ')'"
+        },
+        { "type": "window", "ops": ["row_number"], "as": ["row"] },
+        { "type": "filter", "expr": "datum.row <= 4" }
+      ]
+    },
+    {
+      "name": "file-detail",
+      "source": "files-raw",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "selectedFileNode != null && (datum.src === selectedFileNode || datum.dst === selectedFileNode)"
+        },
+        {
+          "type": "formula",
+          "as": "sizeStr",
+          "expr": "isValid(datum.fsize) ? (datum.fsize > 1000000 ? format(datum.fsize / 1000000, '.1f') + ' MB' : format(datum.fsize / 1000, '.0f') + ' KB') : 'unknown size'"
+        },
+        {
+          "type": "formula",
+          "as": "direction_str",
+          "expr": "datum.src === selectedFileNode ? 'sent to ' + datum.dst : 'received from ' + datum.src"
+        },
+        { "type": "window", "ops": ["row_number"], "as": ["fileRow"] },
+        { "type": "filter", "expr": "datum.fileRow <= 8" }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "link-width",
+      "type": "log",
+      "base": 10,
+      "domain": {"data": "zone-ips", "field": "count"},
+      "range": [1, 8],
+      "clamp": true
+    },
+    {
+      "name": "zone-symbol",
+      "type": "ordinal",
+      "domain": ["GEN", "DMZ", "ICS"],
+      "range": ["circle", "square", "diamond"]
+    },
+    {
+      "name": "zone-color",
+      "type": "ordinal",
+      "domain": ["GEN", "DMZ", "ICS"],
+      "range": ["#22c55e", "#eab308", "#dc2626"]
+    },
+    {
+      "name": "link-color", "type": "ordinal",
+      "domain": [
+        "ICS-ICS", "ICS-DMZ", "ICS-GEN",
+        "DMZ-ICS", "DMZ-DMZ", "DMZ-GEN",
+        "GEN-ICS", "GEN-DMZ", "GEN-GEN"
+      ],
+      "range": [
+        "#dc2626", "#e36d17", "#b8562e",
+        "#e36d17", "#eab308", "#86bc33",
+        "#b8562e", "#86bc33", "#22c55e"
+      ]
+    },
+    {"name": "size", "type": "sqrt", "domain": {"data": "nodes", "field": "count"}, "range": [60, 500]}
+  ],
+  "legends": [
+    {
+      "stroke": "link-color",
+      "title": "Edge pair",
+      "orient": "bottom",
+      "symbolType": "stroke",
+      "columns": 3,
+      "symbolStrokeWidth": 3,
+      "padding": 10,
+      "encode": {
+        "title": {"update": {"fontSize": {"value": 14}}},
+        "labels": {
+          "update": {
+            // "fill": {"value": "#7777"},
+            "fontSize": {"value": 13},
+            "text": {
+              // "signal": "linkColorLegendMapping[datum.value] || datum.label"  // SBH: need to fix due to opensearch update
+              "signal": "datum.label"
+            }
+          }
+        }
+      }
+    },
+    {
+      "fill": "zone-color",
+      "title": "Network Zone",
+      "orient": "bottom",
+      "padding": 10,
+      "encode": {
+        "title": {"update": {"fontSize": {"value": 14}}},
+        "symbols": {"update": {"fillOpacity": {"value": 0.9}, "size": {"value": 120}}},
+        "labels": {
+          "update": {
+            // "fill": {"value": "#7777"},
+            "fontSize": {"value": 13},
+            // "text": {"signal": "zoneColorLegendMapping[datum.value] || datum.label"} // SBH: need to fix due to opensearch update
+            "text": {"signal": "datum.label"}
+          }
+        }
+      }
+    }
+  ],
+  "marks": [
+    {
+      "type": "group",
+      "name": "biomesGroup",
+      "signals": [
+        {"name": "height", "update": "usableHeight + topPad + bottomPad"}
+      ],
+      "encode": {
+        "enter": {"width": {"signal": "width"}, "height": {"signal": "height"}},
+        "update": {"width": {"signal": "width"}, "height": {"signal": "height"}}
+      },
+      "marks": [
+        {
+          "type": "rect",
+          "from": {"data": "sections"},
+          "zindex": 0,
+          "encode": {
+            "update": {
+              "x": {"signal": "if (datum.fracStart === 0, 0, leftPad + datum.fracStart * usableWidth)"},
+              "x2": {"signal": "if (datum.fracEnd === 1, width, leftPad + datum.fracEnd * usableWidth)"},
+              "y": {"value": 0},
+              "y2": {"signal": "height"},
+              "fill": {"scale": "zone-color", "field": "zone"}, "fillOpacity": {"value": 0.07},
+              "stroke": {"scale": "zone-color", "field": "zone"}, "strokeWidth": {"value": 0.5}
+            }
+          }
+        },
+        {
+          "type": "text",
+          "zindex": 1,
+          "from": {"data": "sections"},
+          "encode": {
+            "update": {
+              "x": {"signal": "leftPad + usableWidth * datum.fracCenter"},
+              "y": {"value": 25},
+              "text": {"field": "label"},
+              "fill": {"scale": "zone-color", "field": "zone"},
+              "fontSize": {"value": 16},
+              "fontWeight": {"value": "bold"},
+              "align": {"value": "center"}
+            }
+          }
+        },
+        {
+          "type": "rule", "zindex": 2,
+          "from": {"data": "links"},
+          "encode": {
+            "update": {
+              "x": {"field": "lineX1"},
+              "y": {"field": "lineY1"},
+              "x2": {"field": "lineX2"},
+              "y2": {"field": "lineY2"},
+              "stroke": {"scale": "link-color", "field": "zone"},
+              //              "stroke": {
+              //                "signal": "datum.src_zone === datum.dst_zone ? scale('zone-color', datum.src_zone) : {gradient: 'linear', x1: 0, y1: 0, x2: 1, y2: 0, stops: [{offset: 0, color: scale('zone-color', datum.src_zone)}, {offset: 1, color: scale('zone-color', datum.dst_zone)}]}"
+              //              },
+              "strokeWidth": {"scale": "link-width", "field": "count"}, // {"field": "strokeW"}
+              "opacity": {"signal": "datum.hasReverse ? 0.9 : 0.75"}
+              //  "strokeDash": {"signal": "if(lineType === 'arrow' && !datum.hasReverse,  [8,2], [1,0])"}
+            }
+          }
+        },
+        {
+          "type": "symbol", "zindex": 2,
+          "from": {"data": "links"},
+          "encode": {
+            "update": {
+              "x": {"field": "lineX2"},
+              "y": {"field": "lineY2"},
+              "shape": {"value": "triangle-right"},
+              "angle": {"field": "angleDeg"},
+              "size": {"signal": "pow(datum.strokeW * 3, 2)"},
+              "fill": {"scale": "link-color", "field": "zone"},
+              "opacity": {"signal": "if(lineType === 'arrow', datum.hasReverse ? 0.9 : 0.75, 0)"}
+            }
+          }
+        },
+        {
+          "type": "symbol", "zindex": 2,
+          "from": {"data": "links"},
+          "encode": {
+            "update": {
+              "x": {"field": "lineX1"},
+              "y": {"field": "lineY1"},
+              "shape": {"value": "triangle-right"},
+              "angle": {"signal": "datum.angleDeg + 180"},
+              "size": {"signal": "pow(datum.strokeW * 3, 2)"},
+              "fill": {"scale": "link-color", "field": "zone"},
+              "stroke": { "field": "link_color" },
+              "strokeDash": { "field": "link_dash" },
+              "strokeWidth": { "field": "link_width_val" },
+              "opacity": {"signal": "datum.hasFileLink ? 0.95 : (datum.hasReverse && lineType === 'arrow' ? 0.9 : 0)"}
+            }
+          }
+        },
+        {
+          "name": "nodeSymbols",
+          "type": "symbol",
+          "zindex": 3,
+          "from": {"data": "visibleNodes"},
+          "encode": {
+            "update": {
+              "x": {"field": "drawX"},
+              "y": {"field": "drawY"},
+              "size": {"signal": "datum.id === clickedNode ? 700 : 400"},
+              "cursor": {"value": "pointer"},
+              "fill": {"scale": "zone-color", "field": "zone"},
+              "fillOpacity": {"signal": "datum.id === clickedNode ? 1 : 0.9"},
+              "stroke": { "signal": "datum.hasFiles ? '#6366f1' : '#ffffff'" },
+              "strokeWidth": { "signal": "datum.id === clickedNode ? 3 : (datum.hasFiles ? 2.5 : 1.5)" },
+              "shape": {"scale": "zone-symbol", "field": "zone"}
+            }
+          }
+        },
+        {
+          "type": "symbol",
+          "zindex": 3,
+          "interactive": false,
+          "from": { "data": "visibleNodes" },
+          "encode": {
+            "update": {
+              "x": { "field": "drawX" },
+              "y": { "field": "drawY" },
+              "dx": { "value": 11 },
+              "dy": { "value": -11 },
+              "size": { "value": 70 },
+              "shape": { "value": "circle" },
+              "fill": { "value": "#6366f1" },
+              "stroke": { "value": "#ffffff" },
+              "strokeWidth": { "value": 1 },
+              "opacity": { "signal": "datum.hasFiles ? 1 : 0" }
+            }
+          }
+        },
+        {
+          "type": "text", "zindex": 4,
+          "from": {"data": "visibleNodes"},
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {"field": "drawX"},
+              "y": {"field": "drawY"},
+              "dy": {"value": 19},
+              "text": {"field": "ip"},
+              "fontSize": {"value": 11},
+              "fontWeight": {"value": "bold"},
+              // "fill": {"signal": "textPrimary"}, // SBH: No text fill so VEGA auto converts color depending on light/dark mode
+              "align": {"value": "center"},
+              "limit": {"value": 120}
+            }
+          }
+        },
+        {
+          "name": "collapsedBadge",
+          "type": "symbol",
+          "zindex": 5,
+          "from": {"data": "collapsed-badge"},
+          "encode": {
+            "update": {
+              "x": {"field": "drawX"},
+              "y": {"field": "drawY"},
+              "dy": {"value": -22},
+              "size": {"value": 300},
+              "shape": {"value": "circle"},
+              "fill": {"value": "#6366f1"},
+              "fillOpacity": {"value": 0.95},
+              "stroke": {"value": "#ffffff"},
+              "strokeWidth": {"value": 1.5},
+              "cursor": {"value": "pointer"},
+              "opacity": {"signal": "datum.collapsed_count > 0 ? 1 : 0"}
+            }
+          }
+        },
+        {
+          "type": "text", "zindex": 6,
+          "from": {"data": "collapsed-badge"},
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {"field": "drawX"},
+              "y": {"field": "drawY"},
+              "dy": {"value": -18},
+              "text": {"signal": "datum.collapsed_count > 0 ? '+' + datum.collapsed_count : ''"},
+              "fontSize": {"value": 9},
+              "fontWeight": {"value": "bold"},
+              "fill": {"value": "#ffffff"},
+              "align": {"value": "center"},
+              "baseline": {"value": "middle"},
+              "opacity": {"signal": "datum.collapsed_count > 0 ? 1 : 0"}
+            }
+          }
+        },
+        //  {
+        //  "type": "rect", "name": "theme-btn", "zindex": 5,
+        //  "encode": {
+        //  "update": {
+        //  "x": {"value": 10}, "y": {"value": 10},
+        //  "width": {"value": 150}, "height": {"value": 28},
+        //  "fill": {"signal": "darkMode ? '#1e293b' : '#e2e8f0'"},
+        //  "stroke": {"value": "#6366f1"}, "strokeWidth": {"value": 1},
+        //  "cornerRadius": {"value": 4}, "cursor": {"value": "pointer"}
+        //  }
+        //  }
+        //  },
+        //  {
+        //  "type": "text", "name": "theme-label", "zindex": 6,
+        //  "encode": {
+        //  "update": {
+        //  "x": {"value": 85}, "y": {"value": 24},
+        //  "text": {"signal": "darkMode ? 'Light Mode' : 'Dark Mode'"},
+        //  "fontSize": {"value": 11}, "fontWeight": {"value": "bold"},
+        //  "fill": {"signal": "darkMode ? '#a5b4fc' : '#4f46e5'"},
+        //  "align": {"value": "center"}, "cursor": {"value": "pointer"}
+        //  }
+        //  }
+        //  },
+        {
+          "type": "rect", "name": "genics-btn", "zindex": 5,
+          "encode": {
+            "update": {
+              "x": {"value": 10}, "y": {"signal": "height - 28 - 10"},
+              "width": {"value": 150}, "height": {"value": 28},
+              "fill": {"signal": "genIcsOnly ? '#143c7d' : '#1e293b'"},
+              "stroke": {"value": "#6366f1"}, "strokeWidth": {"value": 1},
+              "cornerRadius": {"value": 4}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "text", "name": "genics-label", "zindex": 6,
+          "encode": {
+            "update": {
+              "x": {"value": 85}, "y": {"signal": "height - 24"},
+              "text": {"signal": "'General<->ICS Only: ' + if(genIcsOnly, 'ON', 'OFF')"},
+              "fontSize": {"value": 11}, "fontWeight": {"value": "bold"},
+              "fill": {"signal": "genIcsOnly ? '#a5b4fc' : '#94a3b8'"},
+              "align": {"value": "center"}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "rect", "name": "dmzics-btn", "zindex": 5,
+          "encode": {
+            "update": {
+              "width": {"value": 150}, "height": {"value": 28},
+              "x": {"value": 170}, "y": {"signal": "height - 28 - 10"},
+              //  "fill": {"signal": "dmzIcsOnly ? '#854d0e' : (darkMode ? '#1e293b' : '#e2e8f0')"},
+              "fill": {"signal": "dmzIcsOnly ? '#854d0e' : '#1e293b'"},
+              "stroke": {"value": "#eab308"}, "strokeWidth": {"value": 1},
+              "cornerRadius": {"value": 4}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "text", "name": "dmzics-label", "zindex": 6,
+          "encode": {
+            "update": {
+              "x": {"value": 245}, "y": {"signal": "height - 24"},
+              "text": {"signal": "'DMZ<->ICS: ' + if(dmzIcsOnly, 'ON', 'OFF')"},
+              "fontSize": {"value": 11}, "fontWeight": {"value": "bold"},
+              //  "fill": {"signal": "dmzIcsOnly ? '#fde047' : (darkMode ? '#94a3b8' : '#374151')"},
+              "fill": {"signal": "dmzIcsOnly ? '#fde047' : '#94a3b8'"},
+              "align": {"value": "center"}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "rect", "name": "chain-btn", "zindex": 5,
+          "encode": {
+            "update": {
+              "x": {"value": 330}, "y": {"signal": "height - 28 - 10"},
+              "width": {"value": 150}, "height": {"value": 28},
+              //  "fill": {"signal": "fullChainOnly ? '#166534' : (darkMode ? '#1e293b' : '#e2e8f0')"},
+              "fill": {"signal": "fullChainOnly ? '#166534' : '#1e293b'"},
+              "stroke": {"value": "#22c55e"}, "strokeWidth": {"value": 1},
+              "cornerRadius": {"value": 4}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "text", "name": "chain-label", "zindex": 6,
+          "encode": {
+            "update": {
+              "x": {"value": 407}, "y": {"signal": "height - 24"},
+              "text": {"signal": "fullChainOnly ? 'Full Chains Only: ON' : 'Full Chains Only: OFF'"},
+              "fontSize": {"value": 11}, "fontWeight": {"value": "bold"},
+              //  "fill": {"signal": "fullChainOnly ? '#86efac' : (darkMode ? '#94a3b8' : '#374151')"},
+              "fill": {"signal": "fullChainOnly ? '#86efac' : '#94a3b8'"},
+              "align": {"value": "center"}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "rect", "name": "samezone-btn", "zindex": 5,
+          "encode": {
+            "update": {
+              "x": {"value": 490}, "y": {"signal": "height - 28 - 10"},
+              "width": {"value": 150}, "height": {"value": 28},
+              //  "fill": {"signal": "fullChainOnly ? '#166534' : (darkMode ? '#1e293b' : '#e2e8f0')"},
+              "fill": {"signal": "hideSameZoneLinks ? '#6b21a8' : '#1e293b'"},
+              "stroke": {"value": "#a855f7"}, "strokeWidth": {"value": 1},
+              "cornerRadius": {"value": 4}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "text", "name": "samezone-label", "zindex": 6,
+          "encode": {
+            "update": {
+              "x": {"value": 565}, "y": {"signal": "height - 24"},
+              "text": {"signal": "'Same Zone Links: ' + if(!hideSameZoneLinks, 'ON', 'OFF')"},
+              "fontSize": {"value": 11}, "fontWeight": {"value": "bold"},
+              //  "fill": {"signal": "fullChainOnly ? '#86efac' : (darkMode ? '#94a3b8' : '#374151')"},
+              "fill": {"signal": "hideSameZoneLinks ? '#d8b4fe' : '#94a3b8'"},
+              "align": {"value": "center"}, "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        // {
+        //   "type": "rect",
+        //   "name": "filesonly-toggle",
+        //   "zindex": 6,
+        //   "encode": {
+        //     "update": {
+        //       "x": { "value": 244 },
+        //       "y": { "signal": "height - 32" },
+        //       "width": { "value": 16 },
+        //       "height": { "value": 16 },
+        //       "cornerRadius": { "value": 3 },
+        //       // "fill": { "signal": "showFilesOnly ? '#6366f1' : (darkMode ? '#1e293b' : '#e2e8f0')" },
+        //       "stroke": { "value": "#6366f1" },
+        //       "strokeWidth": { "value": 1 },
+        //       "cursor": { "value": "pointer" }
+        //     },
+        //     "hover": { "fillOpacity": { "value": 0.8 } }
+        //   }
+        // },
+        {
+          "type": "text",
+          "zindex": 7,
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": { "value": 252 },
+              "y": { "signal": "height - 24" },
+              "text": { "signal": "showFilesOnly ? '✓' : ''" },
+              "fontSize": { "value": 12 },
+              "fontWeight": { "value": "bold" },
+              "fill": { "value": "#ffffff" },
+              "align": { "value": "center" },
+              "baseline": { "value": "middle" }
+            }
+          }
+        },
+        // {
+        //   "type": "text",
+        //   "zindex": 6,
+        //   "encode": {
+        //     "update": {
+        //       "x": { "value": 266 },
+        //       "y": { "signal": "height - 22" },
+        //       "text": { "value": "Files only" },
+        //       "fontSize": { "value": 11 },
+        //       // "fill": { "signal": "darkMode ? '#94a3b8' : '#374151'" },
+        //       "baseline": { "value": "middle" },
+        //       "cursor": { "value": "pointer" }
+        //     }
+        //   }
+        // },
+
+        // {
+        //   "type": "rect",
+        //   "name": "hidefiles-toggle",
+        //   "zindex": 6,
+        //   "encode": {
+        //     "update": {
+        //       "x": { "value": 348 },
+        //       "y": { "signal": "height - 32" },
+        //       "width": { "value": 16 },
+        //       "height": { "value": 16 },
+        //       "cornerRadius": { "value": 3 },
+        //       // "fill": { "signal": "hideFileLinks ? '#6366f1' : (darkMode ? '#1e293b' : '#e2e8f0')" },
+        //       "stroke": { "value": "#6366f1" },
+        //       "strokeWidth": { "value": 1 },
+        //       "cursor": { "value": "pointer" }
+        //     },
+        //     "hover": { "fillOpacity": { "value": 0.8 } }
+        //   }
+        // },
+        // {
+        //   "type": "text",
+        //   "zindex": 7,
+        //   "interactive": false,
+        //   "encode": {
+        //     "update": {
+        //       "x": { "value": 356 },
+        //       "y": { "signal": "height - 24" },
+        //       "text": { "signal": "hideFileLinks ? '✓' : ''" },
+        //       "fontSize": { "value": 12 },
+        //       "fontWeight": { "value": "bold" },
+        //       "fill": { "value": "#ffffff" },
+        //       "align": { "value": "center" },
+        //       "baseline": { "value": "middle" }
+        //     }
+        //   }
+        // },
+        // {
+        //   "type": "text",
+        //   "zindex": 6,
+        //   "encode": {
+        //     "update": {
+        //       "x": { "value": 370 },
+        //       "y": { "signal": "height - 22" },
+        //       "text": { "value": "Hide file links" },
+        //       "fontSize": { "value": 11 },
+        //       // "fill": { "signal": "darkMode ? '#94a3b8' : '#374151'" },
+        //       "baseline": { "value": "middle" },
+        //       "cursor": { "value": "pointer" }
+        //     }
+        //   }
+        // },
+        {
+          "type": "group", "name": "custom-tooltip", "zindex": 7,
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {"signal": "min(max(tooltipX + 14, 8), width - 340)"},
+              "y": {"signal": "min(max(tooltipY + 14, 8), height - 220)"},
+              "width": {"value": 330},
+              "height": {"signal": "hoverNode ? min(80 + 22 * length(data('tooltip-chain')) + 20 * length(data('tooltip-files')), 260) : 0"},
+              "opacity": {"signal": "hoverNode && selectedFileNode == null ? 1 : 0"}
+            }
+          },
+          "marks": [
+            {
+              "type": "rect",
+              "encode": {
+                "update": {
+                  "width": {"value": 330},
+                  "height": {"signal": "hoverNode ? min(80 + 22 * length(data('tooltip-chain')) + 20 * length(data('tooltip-files')), 260) : 0"},
+                  "fill": {"signal": "tooltipBg"},
+                  "fillOpacity": {"signal": "hoverNode ? 0.96 : 0"},
+                  "stroke": {"signal": "hoverNode ? scale('zone-color', hoverNode.zone) : 'transparent'"},
+                  "strokeOpacity": {"signal": "hoverNode ? 1 : 0"},
+                  "strokeWidth": {"value": 1.5},
+                  "cornerRadius": {"value": 6}
+                }
+              }
+            },
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "x": {"value": 10}, "y": {"value": 20},
+                  "text": {"signal": "hoverNode ? hoverNode.zone + ' Node' : ''"},
+                  "fill": {"signal": "hoverNode ? scale('zone-color', hoverNode.zone) : '#fff'"},
+                  "fontSize": {"value": 12}, "fontWeight": {"value": "bold"}
+                }
+              }
+            },
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "x": {"value": 10}, "y": {"value": 40},
+                  "text": {"signal": "hoverNode ? 'IP: ' + hoverNode.ip : ''"},
+                  "fill": {"signal": "tooltipText"}, "fontSize": {"value": 11}
+                }
+              }
+            },
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "x": {"value": 10}, "y": {"value": 60},
+                  "text": {"signal": "hoverNode ? 'Zone connections:' : ''"},
+                  "fill": {"signal": "tooltipMuted"}, "fontSize": {"value": 11}
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": {"data": "tooltip-chain"},
+              "encode": {
+                "update": {
+                  "x": {"value": 14},
+                  "y": {"signal": "78 + (datum.row - 1) * 22"},
+                  "text": {
+                    "signal": "'- ' + datum.chain_str + ' [' + datum.traffic_str + (datum.proto_str ? ', ' + datum.proto_str : '') + ']'"
+                  },
+                  "fill": {"signal": "tooltipText"},
+                  "fontSize": {"value": 10},
+                  "limit": {"value": 308}
+                }
+              }
+            },
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "x": { "value": 10 },
+                  "y": { "signal": "84 + 22 * length(data('tooltip-chain'))" },
+                  "text": { "signal": "hoverNode && length(data('tooltip-files')) > 0 ? 'Files (click node for full detail):' : ''" },
+                  "fill": { "signal": "tooltipMuted" },
+                  "fontSize": { "value": 11 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "tooltip-files" },
+              "encode": {
+                "update": {
+                  "x": { "value": 14 },
+                  "y": { "signal": "100 + 22 * length(data('tooltip-chain')) + (datum.row - 1) * 20" },
+                  "text": { "signal": "'- ' + datum.file_str" },
+                  "fill": { "value": "#f87171" },
+                  "fontSize": { "value": 10 },
+                  "limit": { "value": 308 }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "name": "file-detail-panel",
+          "zindex": 9,
+          "encode": {
+            "update": {
+              "x": { "value": 10 },
+              "y": { "value": 60 },
+              "width": { "value": 420 },
+              "height": { "signal": "selectedFileNode != null ? min(70 + 118 * length(data('file-detail')), height - 70) : 0" },
+              "opacity": { "signal": "selectedFileNode != null ? 1 : 0" }
+            }
+          },
+          "marks": [
+            {
+              "type": "rect",
+              "encode": {
+                "update": {
+                  "width": { "value": 420 },
+                  "height": { "signal": "selectedFileNode != null ? min(70 + 118 * length(data('file-detail')), height - 70) : 0" },
+                  "fill": { "signal": "tooltipBg" },
+                  "fillOpacity": { "signal": "selectedFileNode != null ? 0.98 : 0" },
+                  "stroke": { "value": "#3b82f6" },
+                  "strokeOpacity": { "signal": "selectedFileNode != null ? 1 : 0" },
+                  "strokeWidth": { "value": 1.5 },
+                  "cornerRadius": { "value": 8 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "x": { "value": 14 },
+                  "y": { "value": 22 },
+                  "text": { "signal": "selectedFileNode != null ? 'Files for ' + selectedFileNode : ''" },
+                  "fill": { "value": "#3b82f6" },
+                  "fontSize": { "value": 13 },
+                  "fontWeight": { "value": "bold" }
+                }
+              }
+            },
+            {
+              "type": "rect",
+              "name": "file-detail-close",
+              "encode": {
+                "update": {
+                  "x": { "value": 392 },
+                  "y": { "value": 8 },
+                  "width": { "value": 20 },
+                  "height": { "value": 20 },
+                  "cornerRadius": { "value": 4 },
+                  // "fill": { "signal": "darkMode ? '#1e293b' : '#e2e8f0'" },
+                  "stroke": { "value": "#3b82f6" },
+                  "strokeWidth": { "value": 1 },
+                  "cursor": { "value": "pointer" },
+                  "opacity": { "signal": "selectedFileNode != null ? 1 : 0" }
+                },
+                "hover": { "fill": { "value": "#312e81" } }
+              }
+            },
+            {
+              "type": "text",
+              "interactive": false,
+              "encode": {
+                "update": {
+                  "x": { "value": 402 },
+                  "y": { "value": 18 },
+                  "text": { "value": "×" },
+                  // "fill": { "signal": "darkMode ? '#e2e8f0' : '#111827'" },
+                  "fontSize": { "value": 14 },
+                  "fontWeight": { "value": "bold" },
+                  "align": { "value": "center" },
+                  "baseline": { "value": "middle" },
+                  "opacity": { "signal": "selectedFileNode != null ? 1 : 0" }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "encode": {
+                "update": {
+                  "x": { "value": 14 },
+                  "y": { "value": 40 },
+                  "text": { "signal": "selectedFileNode != null ? length(data('file-detail')) + ' file(s) shown (max 8)' : ''" },
+                  "fill": { "signal": "tooltipMuted" },
+                  "fontSize": { "value": 10 }
+                }
+              }
+            },
+            {
+              "type": "rect",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 10 },
+                  "y": { "signal": "58 + (datum.fileRow - 1) * 118" },
+                  "width": { "value": 400 },
+                  "height": { "value": 110 },
+                  // "fill": { "signal": "darkMode ? '#0f172a' : '#f1f5f9'" },
+                  "stroke": { "signal": "datum.score >= 75 ? '#dc2626' : datum.score >= 40 ? '#eab308' : '#334155'" },
+                  "strokeWidth": { "value": 1 },
+                  "cornerRadius": { "value": 5 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 18 },
+                  "y": { "signal": "76 + (datum.fileRow - 1) * 118" },
+                  "text": { "field": "fname" },
+                  "fill": { "signal": "tooltipText" },
+                  "fontSize": { "value": 11 },
+                  "fontWeight": { "value": "bold" },
+                  "limit": { "value": 380 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 18 },
+                  "y": { "signal": "92 + (datum.fileRow - 1) * 118" },
+                  "text": { "signal": "datum.direction_str + '  ·  ' + datum.mime + '  ·  ' + datum.sizeStr" },
+                  "fill": { "signal": "tooltipMuted" },
+                  "fontSize": { "value": 9 },
+                  "limit": { "value": 380 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 18 },
+                  "y": { "signal": "106 + (datum.fileRow - 1) * 118" },
+                  "text": { "signal": "'sha256: ' + (datum.sha256 != '' ? datum.sha256 : 'n/a')" },
+                  "fill": { "signal": "tooltipText" },
+                  "fontSize": { "value": 8 },
+                  "limit": { "value": 380 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 18 },
+                  "y": { "signal": "118 + (datum.fileRow - 1) * 118" },
+                  "text": { "signal": "'sha1: ' + (datum.sha1 != '' ? datum.sha1 : 'n/a') + '   md5: ' + (datum.md5 != '' ? datum.md5 : 'n/a')" },
+                  "fill": { "signal": "tooltipText" },
+                  "fontSize": { "value": 8 },
+                  "limit": { "value": 380 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 18 },
+                  "y": { "signal": "132 + (datum.fileRow - 1) * 118" },
+                  "text": { "signal": "'risk: ' + datum.score + (datum.sevTag != '' ? '  ·  ' + datum.sevTag : '') + (datum.avFlag ? '  ·  AV: ' + datum.flagsStr : '')" },
+                  "fill": { "signal": "datum.score >= 75 ? '#f87171' : datum.score >= 40 ? '#facc15' : tooltipMuted" },
+                  "fontSize": { "value": 8 },
+                  "limit": { "value": 380 }
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": { "data": "file-detail" },
+              "encode": {
+                "update": {
+                  "x": { "value": 18 },
+                  "y": { "signal": "144 + (datum.fileRow - 1) * 118" },
+                  "text": { "signal": "datum.ts != null ? timeFormat(datum.ts, '%Y-%m-%d %H:%M:%S') : ''" },
+                  "fill": { "signal": "tooltipMuted" },
+                  "fontSize": { "value": 8 },
+                  "limit": { "value": 380 }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

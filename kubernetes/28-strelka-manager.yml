@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: strelka-manager-container
-        image: ghcr.io/idaholab/malcolm/strelka-manager:26.07.1
+        image: ghcr.io/idaholab/malcolm/strelka-manager:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -21,7 +21,7 @@ USER root
 
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.53.3"
+ENV YQ_VERSION="4.53.6"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

@@ -8,44 +8,50 @@
     <link href="upload/filepond/dist/filepond.css" rel="stylesheet">
     <link href="upload/@jcubic/tagger/tagger.css" rel="stylesheet">
     <style>
-        .tagger > ul > li:not(.tagger-new) > :first-child {
-            background: #369763 !important;
-            border: 1px none #369763 !important;
-            border-radius: 12px !important;
+        :root {
+            --malcolm-primary: #0d6efd;
+            --malcolm-bg: #f8f9fa;
+            --malcolm-border: #dee2e6;
+            --malcolm-text: #212529;
+            --malcolm-muted: #6c757d;
         }
-        .tagger > ul > li:not(.tagger-new) > span,
-        .tagger > ul > li:not(.tagger-new) > a > span {
-            color: white !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol' !important;
+        .page-shell,
+        .upload-card,
+        .upload-options,
+        .tag-field,
+        .site-dropdown,
+        .button,
+        #malcolm-details {
+            box-sizing: border-box;
         }
-        .tagger > ul > li:not(.tagger-new) a,
-        .tagger > ul > li:not(.tagger-new) a:visited {
-            color: white !important;
+        body {
+            margin: 0;
+            background: var(--malcolm-bg);
+            color: var(--malcolm-text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
         }
-        .tagger {
-            border-radius: 12px !important;
+        .page-shell {
+            width: min(960px, calc(100% - 32px));
+            margin: 48px auto 24px;
         }
-        .tagger + .tagger {
-            margin-top: 10px;
-        }
-        .button {
-          background-color: #369763;
-          border: none;
-          color: white;
-          padding: 10px;
-          text-align: center;
-          text-decoration: none;
-          display: inline-block;
-          font-size: 14px;
-          margin: 4px 2px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol' !important;
-        }
-        .button_rounded {
-            border-radius: 12px;
+        .upload-card {
+            background: #fff;
+            border: 1px solid var(--malcolm-border);
+            border-radius: 8px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 32px;
         }
         .panel-title {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            margin: 18px 0 6px;
             text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .panel-subtitle {
+            margin: 0 0 28px;
+            color: var(--malcolm-muted);
+            text-align: center;
+            font-size: 1rem;
         }
         .center {
             display: block;
@@ -53,80 +59,163 @@
             margin-right: auto;
         }
         .imgcenter {
-            width: 50%;
+            width: min(520px, 70%);
+            height: auto;
+        }
+        .upload-options {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .tag-field {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .tagger {
+            min-height: 46px;
+            border: 1px solid var(--malcolm-border) !important;
+            border-radius: 6px !important;
+            background: #fff;
+        }
+        .tagger > ul > li:not(.tagger-new) > :first-child {
+            background: var(--malcolm-primary) !important;
+            border: 1px solid var(--malcolm-primary) !important;
+            border-radius: 999px !important;
+        }
+        .tagger > ul > li:not(.tagger-new) > span,
+        .tagger > ul > li:not(.tagger-new) > a > span,
+        .tagger > ul > li:not(.tagger-new) a,
+        .tagger > ul > li:not(.tagger-new) a:visited {
+            color: #fff !important;
+        }
+        .tagger + .tagger {
+            margin-top: 10px;
         }
         .site-dropdown {
-            display: none; /* hide initially */
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-            border-radius: 12px;
-            border: 1px solid #909497;
-            font-size: 14px;
-            padding: 12px;
+            display: none;
+            min-height: 46px;
+            max-width: 260px;
+            border: 1px solid var(--malcolm-border);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--malcolm-text);
+            font: inherit;
+            padding: 10px 36px 10px 12px;
         }
-
+        .button {
+            display: inline-block;
+            min-height: 42px;
+            margin: 4px 0 18px;
+            border: 1px solid #369763;
+            border-radius: 6px;
+            background: #369763;
+            color: #fff;
+            font: inherit;
+            font-weight: 600;
+            padding: 9px 16px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .button:disabled {
+            border-color: #ced4da;
+            background: #e9ecef;
+            color: var(--malcolm-muted);
+            cursor: not-allowed;
+        }
+        .filepond--root {
+            margin-bottom: 0;
+        }
         footer {
             display: flex;
             justify-content: center;
             padding: 20px;
+            color: var(--malcolm-muted);
         }
         #malcolm-readiness-container {
             position: relative;
             display: inline-block;
             text-align: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            cursor: pointer;
         }
-        /* Tooltip styling */
         #malcolm-details {
             display: none;
-            text-align: left;
             position: absolute;
-            background-color: #f9f9f9;
-            color: #333;
-            border: 1px solid #ccc;
-            padding: 10px;
+            left: 50%;
+            bottom: calc(100% + 8px);
+            transform: translateX(-50%);
+            min-width: 280px;
+            border: 1px solid var(--malcolm-border);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--malcolm-text);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            padding: 12px;
             font-size: 14px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1;
+            text-align: left;
             white-space: normal;
+            z-index: 1;
         }
-        /* Show tooltip on hover */
-        #malcolm-readiness-container:hover #malcolm-details {
+        #malcolm-readiness-container:hover #malcolm-details,
+        #malcolm-readiness-container:focus-within #malcolm-details {
             display: block;
         }
-        /* Grid layout for aligning key-value pairs */
         #malcolm-details ul {
             display: grid;
-            grid-template-columns: auto auto; /* Two columns */
-            gap: 5px 10px; /* Spacing between rows and columns */
+            grid-template-columns: 1fr auto;
+            gap: 5px 14px;
             margin: 0;
             padding: 0;
-            list-style: none; /* Remove default list styling */
+            list-style: none;
         }
         #malcolm-details ul li {
             margin: 0;
             padding: 0;
         }
+        @media (max-width: 640px) {
+            .page-shell {
+                width: min(100% - 20px, 960px);
+                margin-top: 20px;
+            }
+            .upload-card {
+                padding: 20px;
+            }
+            .panel-title {
+                font-size: 1.6rem;
+            }
+            .imgcenter {
+                width: min(520px, 90%);
+            }
+            .upload-options {
+                flex-direction: column;
+            }
+            .site-dropdown {
+                width: 100%;
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body>
-    <img class="center imgcenter" src="upload/Malcolm_banner.png">
-    <h1 class="panel-title">Network Traffic Artifact Upload</h1>
+    <main class="page-shell">
+        <section class="upload-card">
+            <img class="center imgcenter" src="upload/Malcolm_banner.png" alt="Malcolm">
+            <h1 class="panel-title">Network Traffic Artifact Upload</h1>
+            <p class="panel-subtitle">Upload PCAP files, archived Zeek logs, or other supported analysis artifacts.</p>
 
-    <form id="commit_files" action="server/php/submit.php" method="post" enctype="multipart/form-data">
-
-        <div style="display: flex;">
-            <div style="flex-grow: 1;"><input type="text" name="tags"/></div>
-            <div>
-                <select name="site-dropdown" id="site-dropdown" class="site-dropdown" title="NetBox site">
-                    <!-- Options will be populated dynamically -->
-                </select>
-            </div>
-        </div>
-        <br>
-        <button type="submit" id="commit_button" class="button button_rounded">Commit Uploaded Files</button>
-        <input type="file" name="filepond[]" multiple>
-
-    </form>
+            <form id="commit_files" action="server/php/submit.php" method="post" enctype="multipart/form-data">
+                <div class="upload-options">
+                    <div class="tag-field"><input type="text" name="tags" aria-label="User-defined tags"/></div>
+                    <select name="site-dropdown" id="site-dropdown" class="site-dropdown" title="NetBox site" aria-label="NetBox site">
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+                <button type="submit" id="commit_button" class="button">Commit Uploaded Files</button>
+                <input type="file" name="filepond[]" multiple>
+            </form>
+        </section>
+    </main>
 
     <script src="upload/@jcubic/tagger/tagger.js"></script>
     <script src="upload/filepond/dist/filepond.js"></script>
@@ -135,13 +224,9 @@
     <script src="upload/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
 
     <script>
-
         window.addEventListener("DOMContentLoaded", function () {
-
             const form_button = document.getElementById("commit_button");
             form_button.disabled = true;
-            form_button.style.backgroundColor = '#cccccc';
-            form_button.style.color = '#666666';
 
             FilePond.registerPlugin(
                 FilePondPluginFileMetadata,
@@ -185,30 +270,24 @@
             form.addEventListener("submit", setFileTags);
             function setFileTags(e) {
                 const files = pond.getFiles();
-                valid = ((files) && (files.length > 0) && (!form_button.disabled));
+                const valid = ((files) && (files.length > 0) && (!form_button.disabled));
                 if (!valid) {
                     e.preventDefault();
                 }
                 return valid;
             }
 
-            pond.on('addfilestart', (file) => {
+            pond.on('addfilestart', () => {
                 form_button.disabled = true;
-                form_button.style.backgroundColor = '#cccccc';
-                form_button.style.color = '#666666';
             });
             pond.on('processfiles', () => {
                 form_button.disabled = false;
-                form_button.style.backgroundColor = '#369763';
-                form_button.style.color = '#ffffff';
             });
             function checkSubmitEnabler() {
                 const files = pond.getFiles();
-                const isLoading = files.filter(x=>x.status !== 5).length !== 0;
+                const isLoading = files.filter(x => x.status !== 5).length !== 0;
                 if ((files.length > 0) && (!isLoading)) {
                     form_button.disabled = false;
-                    form_button.style.backgroundColor = '#369763';
-                    form_button.style.color = '#ffffff';
                 }
             }
             setInterval(checkSubmitEnabler, 5000);
@@ -269,7 +348,6 @@
                     });
             }
 
-
             const readinessIndicator = document.getElementById('malcolm-summary');
             const readinessDetailsContainer = document.getElementById('malcolm-details');
 
@@ -304,14 +382,13 @@
                 fetchNetBoxSites();
                 fetchMalcolmReadiness();
             });
-
-        })
+        });
     </script>
-<footer>
-    <div id="malcolm-readiness-container">
-        <span id="malcolm-summary"></span>
-        <div id="malcolm-details"></div>
-    </div>
-</footer>
+    <footer>
+        <div id="malcolm-readiness-container" tabindex="0">
+            <span id="malcolm-summary"></span>
+            <div id="malcolm-details"></div>
+        </div>
+    </footer>
 </body>
 </html>

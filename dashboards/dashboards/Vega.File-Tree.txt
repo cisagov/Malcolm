@@ -391,27 +391,52 @@
         "debounce": 1200
       }
     },
+    // --- Index helper signals ---
+    // Sandbox-safe replacements for array[computedIndex] lookups below.
+    // indexof() itself is fine; it's the bracket access on the result that
+    // the OpenSearch 3.8.0 Vega sandbox blocks as dynamic computed property
+    // access. slice(arr, i, i+1)[0] does the same job with a literal index.
+    {
+      "name": "fileNameIndex",
+      "update": "indexof(pluck(data('table'), 'file_name'), userInput)"
+    },
     // Find the node ID for the file name in the table
     {
       "name": "getNodeID_filename",   // finds the node ID based off the file name
-      "update": "userInput === pluck(data('table'), 'file_name')[indexof(pluck(data('table'), 'file_name'), userInput)] ? pluck(data('table'), 'node')[indexof(pluck(data('table'), 'file_name'), userInput)] : null"
+      "update": "userInput === slice(pluck(data('table'), 'file_name'), fileNameIndex, fileNameIndex+1)[0] ? slice(pluck(data('table'), 'node'), fileNameIndex, fileNameIndex+1)[0] : null"
+    },
+    {
+      "name": "rootFileNameIndex",
+      "update": "indexof(pluck(data('table'), 'root_file_name'), userInput)"
     },
     {
       "name": "getNodeID_filename2",    // finds the node ID based off the root file name if no file.name matches the userInput
-      "update": "!isValid(getNodeID_filename) ? pluck(data('table'), 'root')[indexof(pluck(data('table'), 'root_file_name'), userInput)] : getNodeID_filename"
+      "update": "!isValid(getNodeID_filename) ? slice(pluck(data('table'), 'root'), rootFileNameIndex, rootFileNameIndex+1)[0] : getNodeID_filename"
+    },
+    {
+      "name": "nodeIndex",
+      "update": "indexof(pluck(data('table'), 'node'), userInput)"
     },
     {
       "name": "nodeID",   // finds the node ID if the node ID was entered instead of a file name
-      "update": "!isValid(getNodeID_filename2) ? pluck(data('table'), 'node')[indexof(pluck(data('table'), 'node'), userInput)] : getNodeID_filename2"
+      "update": "!isValid(getNodeID_filename2) ? slice(pluck(data('table'), 'node'), nodeIndex, nodeIndex+1)[0] : getNodeID_filename2"
+    },
+    {
+      "name": "nodeIDIndex",
+      "update": "indexof(pluck(data('table'), 'node'), nodeID)"
     },
     {
       "name": "getRootID",
-      "update": "pluck(data('table'), 'root')[indexof(pluck(data('table'), 'node'), nodeID)]"
+      "update": "slice(pluck(data('table'), 'root'), nodeIDIndex, nodeIDIndex+1)[0]"
+    },
+    {
+      "name": "rootIDIndex",
+      "update": "indexof(pluck(data('table'), 'node'), getRootID)"
     },
     {
       "name": "initialRoot",
-      "update": "pluck(data('table'), 'node')[indexof(pluck(data('table'), 'node'), getRootID)]"
-    }
+      "update": "slice(pluck(data('table'), 'node'), rootIDIndex, rootIDIndex+1)[0]"
+    },
     // Finds the index of the root file
     {
       "name": "rootIndex",
@@ -479,7 +504,7 @@
       // Save previous n
       {
         "name": "nPrev",
-        "update": "toNumber(nHist.length > 1 ? nHist[nHist.length-2] : nHist[0])"
+        "update": "toNumber(nHist.length > 1 ? slice(nHist, nHist.length-2, nHist.length-1)[0] : nHist[0])"
       },
       // When n shrinks we need to clear the graph and rebuild the tree
       {
@@ -966,7 +991,12 @@
         },
         {
           "type": "formula",
-          "expr": " datum.effectiveParent === pluck(data('visited'), 'node')[indexof(pluck(data('visited'), 'node'), datum.effectiveParent)] ? pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'node'), datum.effectiveParent)] : null",
+          "expr": "indexof(pluck(data('visited'), 'node'), datum.effectiveParent)",
+          "as": "parentIndex"
+        },
+        {
+          "type": "formula",
+          "expr": " datum.effectiveParent === slice(pluck(data('visited'), 'node'), datum.parentIndex, datum.parentIndex+1)[0] ? slice(pluck(data('visited'), 'identifier'), datum.parentIndex, datum.parentIndex+1)[0] : null",
           "as": "parentIdentifier"
         },
         {
@@ -1213,7 +1243,6 @@
       {
         // Render the tree inside a group to allow us to manipulate the entire position
         //Group mark made to standardize positioning of marks in visualization
-        "type": "group",
         "type": "group",
         "name": "treeGroup",
         "encode": {

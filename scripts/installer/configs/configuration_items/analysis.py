@@ -12,7 +12,7 @@ including Zeek analysis, Suricata analysis, and file extraction configuration.
 
 from scripts.malcolm_constants import WidgetType
 
-from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_AUTO_ARKIME,
     KEY_CONFIG_ITEM_AUTO_FREQ,
@@ -22,6 +22,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_MALCOLM_ICS,
     KEY_CONFIG_ITEM_REVERSE_DNS,
     KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE,
+    KEY_CONFIG_ITEM_SURICATA_DISABLE_SIDS,
     KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS,
 )
 
@@ -59,6 +60,25 @@ CONFIG_ITEM_SURICATA_UPDATE_RULES = ConfigItem(
     validator=lambda x: isinstance(x, bool),
     question="Download updated Suricata signatures periodically?",
     widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_SURICATA_DISABLE_SIDS = ListOfStringsConfigItem(
+    key=KEY_CONFIG_ITEM_SURICATA_DISABLE_SIDS,
+    label="Disabled Suricata SIDs",
+    default_value=[],
+    validator=lambda value: (
+        lambda valid_item: (
+            value == ""
+            or valid_item(value)
+            or (isinstance(value, (list, tuple, set)) and all(valid_item(item) for item in value))
+        )
+    )(
+        lambda item: (isinstance(item, int) and not isinstance(item, bool) and item > 0)
+        or (isinstance(item, str) and item.isascii() and item.isdigit() and int(item) > 0)
+    ),
+    question="Comma-separated list of Suricata SIDs to disable",
+    widget_type=WidgetType.TEXT,
+    accept_blank=True,
 )
 
 CONFIG_ITEM_ZEEK_DISABLE_ICS_ALL = ConfigItem(

@@ -983,6 +983,16 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
+    KEY_CONFIG_ITEM_PIPELINE_SCANNERS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_PIPELINE_ENABLED,
+                KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            ],
+            condition=lambda enabled, mode: bool(enabled) and (mode != FileExtractionMode.NONE.value),
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
     KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
@@ -1380,6 +1390,18 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # ANALYSIS DEPENDENCIES
     # -------------------------------------------------------------------------
     KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            ui_parent=KEY_CONFIG_ITEM_AUTO_SURICATA,
+        ),
+        value=ValueRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
+            condition=True,
+            default_value=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_SURICATA_DISABLE_SIDS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
             condition=lambda auto, live: bool(auto) or bool(live),

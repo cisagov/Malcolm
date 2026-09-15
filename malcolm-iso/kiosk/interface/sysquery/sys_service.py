@@ -26,9 +26,28 @@ def get_compose_file():
     return None
 
 
+'''
+    Allowlisted kiosk operations.
+
+    The kiosk UI only ever needs to trigger a small, fixed set of operations
+    (start/stop/status/wipe, all of which are symlinks to control.py). Rather
+    than accepting an arbitrary string from the request and splitting it into
+    an argv list, we map the exact strings the UI sends to fixed argv lists
+    here. Anything that doesn't match one of these keys exactly is rejected
+    before it ever reaches subprocess, regardless of what called this
+    endpoint or why.
+'''
+ALLOWED_COMMANDS = {
+    "start --quiet": [os.path.join('scripts', 'start'), '--quiet'],
+    "stop": [os.path.join('scripts', 'stop')],
+    "status": [os.path.join('scripts', 'status')],
+    "wipe": [os.path.join('scripts', 'wipe')],
+}
+
+
 def service(command):
-    if isinstance(command, str) and (command := command.split(" ")):
-        command[0] = os.path.join('scripts', command[0])
+    if not isinstance(command, str) or (command := ALLOWED_COMMANDS.get(command)) is None:
+        return {"success": False, "err": "Unrecognized or disallowed command"}
 
     if command and (compose_file := get_compose_file()):
         original_cwd = os.getcwd()

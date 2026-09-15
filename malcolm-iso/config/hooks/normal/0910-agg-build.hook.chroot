@@ -206,11 +206,15 @@ chmod 755 /usr/local/bin/kubectl
 chown root:root /usr/local/bin/kubectl
 ###
 
+chmod 0755 /usr/local/bin/*.sh /usr/local/bin/system-quickstart.py
+
+systemctl enable malcolm-system-init.service
+
 # run kiosk system process information daemon under systemd
 if [ -f /opt/kiosk/kiosk.service ]; then
   mv /opt/kiosk/kiosk.service /etc/systemd/system/kiosk.service
   chown root:root /etc/systemd/system/kiosk.service
   chmod 644 /etc/systemd/system/kiosk.service
   systemctl daemon-reload
-  systemctl enable kiosk
+  systemctl enable kiosk.service
 fi

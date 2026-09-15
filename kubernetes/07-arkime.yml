@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:26.07.1
+        image: ghcr.io/idaholab/malcolm/arkime:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -92,7 +92,7 @@ spec:
       terminationGracePeriodSeconds: 30
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:26.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

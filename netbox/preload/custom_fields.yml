@@ -1,0 +1,16 @@
+purdue_zone:
+  type: select
+  label: Purdue Zone
+  description: A user-defined security zone (e.g. IT, OT, DMZ) used to group networked devices for connection mapping.
+  required: false
+  filter_logic: exact
+  weight: 30
+  is_cloneable: true
+  on_objects:
+  - dcim.models.Device
+  - ipam.models.Prefix
+  - virtualization.models.VirtualMachine
+  choice_set:
+  - [it, IT]
+  - [ot, OT]
+  - [dmz, DMZ]

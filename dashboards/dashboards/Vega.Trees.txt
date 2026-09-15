@@ -7,6 +7,8 @@
     References:
       https://vega.github.io/vega/docs/
       https://vega.github.io/vega/examples/tree-layout/
+    Commit:
+      Corresponds to 2640541 in SMILE-Analytics/trees/release
   **/
   ##  Set up Vega specification definitions
   ##  Pay attention to Vega additions after V5
@@ -480,9 +482,11 @@
         ]
       },
       // Save previous n
+      // slice(arr, i, i+1)[0] replaces arr[i] since bracket access with a
+      // computed index is blocked by the OpenSearch 3.8.0 Vega sandbox
       {
         "name": "nPrev",
-        "update": "toNumber(nHist.length > 1 ? nHist[nHist.length-2] : nHist[0])"
+        "update": "toNumber(nHist.length > 1 ? slice(nHist, nHist.length-2, nHist.length-1)[0] : nHist[0])"
       },
       // When n shrinks we need to clear the graph and rebuild the tree
       {
@@ -761,11 +765,13 @@
                   {
                     "match":{
                       "event.provider":"zeek",
-                    },
+                    }
+                  },
+                  {
                     "match":{
                       "event.dataset":"conn",
                     }
-                  }
+                  },
                   "%dashboard_context-must_clause%"
                 ],
                 "must_not": [
@@ -1025,9 +1031,16 @@
           "expr": "datum.src + '+' + datum.dst",
           "as": "identifier"
         },
+        // Index-helper formula: computed once, reused below via slice()
+        // instead of visited[...][idx], which the sandbox blocks
         {
           "type": "formula",
-          "expr": " datum.src === pluck(data('visited'), 'dst')[indexof(pluck(data('visited'), 'dst'), datum.src)] ? pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'dst'), datum.src)] : null",
+          "expr": "indexof(pluck(data('visited'), 'dst'), datum.src)",
+          "as": "srcIndex"
+        },
+        {
+          "type": "formula",
+          "expr": " datum.src === slice(pluck(data('visited'), 'dst'), datum.srcIndex, datum.srcIndex+1)[0] ? slice(pluck(data('visited'), 'identifier'), datum.srcIndex, datum.srcIndex+1)[0] : null",
           "as": "parentIdentifier"
         },
         {
@@ -1069,10 +1082,16 @@
           "expr": "datum.parentDepth + 1",
           "as": "depth"
         },
+        // Second index-helper formula for the parentIdentifier lookup below
+        {
+          "type": "formula",
+          "expr": "indexof(pluck(data('visited'), 'identifier'), datum.parentIdentifier)",
+          "as": "parentIdentifierIndex"
+        },
         // Grab the parent node timestamp and insert into current node metadata
         {
           "type": "formula",
-          "expr": "(datum.src === pluck(data('visited'), 'dst')[indexof(pluck(data('visited'), 'dst'), datum.src)]) && (datum.parentIdentifier === pluck(data('visited'), 'identifier')[indexof(pluck(data('visited'), 'identifier'), datum.parentIdentifier)]) ? pluck(data('visited'), 'timestamp')[indexof(pluck(data('visited'), 'dst'), datum.src)] : null",
+          "expr": "(datum.src === slice(pluck(data('visited'), 'dst'), datum.srcIndex, datum.srcIndex+1)[0]) && (datum.parentIdentifier === slice(pluck(data('visited'), 'identifier'), datum.parentIdentifierIndex, datum.parentIdentifierIndex+1)[0]) ? slice(pluck(data('visited'), 'timestamp'), datum.srcIndex, datum.srcIndex+1)[0] : null",
           "as": "parentTime"
         },
         // time filter - filter out past timestamps (nodes)
@@ -1269,128 +1288,127 @@
           "expr": "isValid((datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min)) ? (datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min) : 1 ", //evaluates whether the normal number is valid, defaults to 1
           "as": "byteAvg_normal"
         },
-        ]
+      ]
+    },
+  ],
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 3: Scales -------------------------------------------------------------------------------------------------------
+  ##  Maps data values to either categorical data or numerical data to change the way the data presents visually
+  "scales": [
+    // Assign a color for each layer
+    {
+      "name": "color",
+      "type": "linear",
+      "range": {
+        "scheme": {"signal": "nodeColor"} // built in color scheme from Vega // observable10  set1 tableu1
       },
-    ],
-    ## --------------------------------------------------------------------------------------------------------------------------
-    ##  SECTION 3: Scales -------------------------------------------------------------------------------------------------------
-    ##  Maps data values to either categorical data or numerical data to change the way the data presents visually
-    "scales": [
-      // Assign a color for each layer
-      {
-        "name": "color",
-        "type": "linear",
-        "range": {
-          "scheme": {"signal": "nodeColor"} // built in color scheme from Vega // observable10  set1 tableu1
-        },
-        "domain": [0,15], // hardcoded to fix infinite depth error
-        "zero": true
+      "domain": [0,15], // hardcoded to fix infinite depth error
+      "zero": true
+    },
+    {
+      "name": "dash_scale",
+      "type": "ordinal",
+      "domain": ["0 bytes transferred", "> 0 bytes transferred"],
+      "range": [[5,2], null]
+    },
+    {
+    //  Scale to determine x visual bounds after user attempts to zoom or drag mouse
+    // used to scale the x value for marks
+      "name": "xscale",
+      "zero": false,
+      "domain": {
+        "signal": "xdom"
       },
-      {
-        "name": "dash_scale",
-        "type": "ordinal",
-        "domain": ["0 bytes transferred", "> 0 bytes transferred"],
-        "range": [[5,2], null]
+      "range": {
+        "signal": "xrange"
+      }
+    },
+    {
+    //  Scale to determine y visual bounds after user attempts to zoom or drag mouse
+    // used to scale the y value for marks
+      "name": "yscale",
+      "zero": false,
+      "domain": {
+        "signal": "ydom"
       },
-      {
-      //  Scale to determine x visual bounds after user attempts to zoom or drag mouse
-      // used to scale the x value for marks
-        "name": "xscale",
-        "zero": false,
-        "domain": {
-          "signal": "xdom"
-        },
-        "range": {
-          "signal": "xrange"
-        }
-      },
-      {
-      //  Scale to determine y visual bounds after user attempts to zoom or drag mouse
-      // used to scale the y value for marks
-        "name": "yscale",
-        "zero": false,
-        "domain": {
-          "signal": "ydom"
-        },
-        "range": {
-          "signal": "yrange"
-        }
-      },
-    ],
+      "range": {
+        "signal": "yrange"
+      }
+    },
+  ],
 
-    ## --------------------------------------------------------------------------------------------------------------------------
-    ##  SECTION 5: Marks --------------------------------------------------------------------------------------------------------
-    ##  Determines how the data visually appears in the visualization
-    "marks": [
-      {
-        // Render the tree inside a group to allow us to manipulate the entire position
-        //Group mark made to standardize positioning of marks in visualization
-        "type": "group",
-        "type": "group",
-        "name": "treeGroup",
-        "encode": {
-          "enter": {
-            // Offset to make first IP visible
-            "x": {
-              "value": 400
-            },
-            "height": {
-              "signal": "height-100"
-            },
-            "width": {
-              "signal": "width"
-            }
+  ## --------------------------------------------------------------------------------------------------------------------------
+  ##  SECTION 5: Marks --------------------------------------------------------------------------------------------------------
+  ##  Determines how the data visually appears in the visualization
+  "marks": [
+    {
+      // Render the tree inside a group to allow us to manipulate the entire position
+      //Group mark made to standardize positioning of marks in visualization
+      "type": "group",
+      "name": "treeGroup",
+      "encode": {
+        "enter": {
+          // Offset to make first IP visible
+          "x": {
+            "value": 400
+          },
+          "height": {
+            "signal": "height-100"
+          },
+          "width": {
+            "signal": "width"
           }
-        },
-        "title": {
-          "text": "IP Connections Tree Hierarchy From Source",
-          "orient": "top",
-          "align": "center"
-        },
-        "marks": [
-          // Draw the paths
-          {
-            "type": "path",
-            "name": "nodePath",
-            "zindex": 0,
-            "from": {
-              "data": "links",
-            },
-            "encode": {
-              "update": {
-                "path": {
-                  "field": "path"
-                },
-                "stroke": {
-                  "value": "#7777"
-                },
-                "strokeDash":[
-                  {
-                  "test":"datum.byteAvg == 0",
-                  "value": [10,5]
-                  },
-                  {
-                    "signal": "null"
-                  }
-                ],
-                "strokeWidth": {"signal": "5 + (datum.byteAvg_normal * (20-5))"}
+        }
+      },
+      "title": {
+        "text": "IP Connections Tree Hierarchy From Source",
+        "orient": "top",
+        "align": "center"
+      },
+      "marks": [
+        // Draw the paths
+        {
+          "type": "path",
+          "name": "nodePath",
+          "zindex": 0,
+          "from": {
+            "data": "links",
+          },
+          "encode": {
+            "update": {
+              "path": {
+                "field": "path"
               },
-              "hover": {
-                "cursor": {
-                  "value": "pointer"
+              "stroke": {
+                "value": "#7777"
+              },
+              "strokeDash":[
+                {
+                "test":"datum.byteAvg == 0",
+                "value": [10,5]
                 },
-                // Changes the link color on hover
-                "stroke": {
-                  "value": "#aaa"
-                },
-                "tooltip": {
-                  "signal": "{'Time': toString(datum.target.date_obj),'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'dst_segment')), 'Byte Avg': datum.byteAvg}",
+                {
+                  "signal": "null"
                 }
-              }
+              ],
+              "strokeWidth": {"signal": "5 + (datum.byteAvg_normal * (20-5))"}
             },
-            "transform":[
-              // redefine the source/target x/y positions after mouse moves so the links know where to be drawn
-              {
+            "hover": {
+              "cursor": {
+                "value": "pointer"
+              },
+              // Changes the link color on hover
+              "stroke": {
+                "value": "#aaa"
+              },
+              "tooltip": {
+                "signal": "{'Time': toString(datum.target.date_obj),'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'dst_segment')), 'Byte Avg': datum.byteAvg}",
+              }
+            }
+          },
+          "transform":[
+            // redefine the source/target x/y positions after mouse moves so the links know where to be drawn
+            {
               "type": "linkpath",
               "orient": "horizontal",
               "shape": "diagonal",
@@ -1398,277 +1416,277 @@
               "sourceY": {"expr": "scale('yscale', datum.datum.source.y)"},
               "targetX": {"expr": "scale('xscale', datum.datum.target.x)"},
               "targetY": {"expr": "scale('yscale', datum.datum.target.y)"}
-              },
-            ]
-          },
-          {
-          "type": "text",     // ip title for enrichment box
-          "from": {"data": "links"},
-            "encode": {
-              "enter": {
-                // "align": {"value": "left"},
-                "baseline": {"value": "top"},
-                // "fill": {"value": "white"}, //JCR, changes color of IPs addrs in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
-                "opacity": {"value": 0},
-              },
-              "update": {
-                "x": {"value": -395},
-                "y": {"value": 20},
-                "text": {"signal": "enrichmentSrc + ' - ' + enrichmentDst"},
-                "font": {"value": "Arial"},
-                "fontStyle": {"value": "bold"},
-                "fontSize": {"value": 16},
-                "opacity": {"signal": "isArray(enrichmentSrc) ? 1 : 0" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1
-              },
+            },
+          ]
+        },
+        {
+        "type": "text",     // ip title for enrichment box
+        "from": {"data": "links"},
+          "encode": {
+            "enter": {
+              // "align": {"value": "left"},
+              "baseline": {"value": "top"},
+              // "fill": {"value": "white"}, //JCR, changes color of IPs addrs in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
+              "opacity": {"value": 0},
+            },
+            "update": {
+              "x": {"value": -395},
+              "y": {"value": 20},
+              "text": {"signal": "enrichmentSrc + ' - ' + enrichmentDst"},
+              "font": {"value": "Arial"},
+              "fontStyle": {"value": "bold"},
+              "fontSize": {"value": 16},
+              "opacity": {"signal": "isArray(enrichmentSrc) ? 1 : 0" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1
+            },
+          }
+        },
+        {
+        "type": "text",     // header for conn state, bytes, protocols
+          "encode": {
+            "enter": {
+              // "align": {"value": "left"},
+              "baseline": {"value": "top"},
+              // "fill": {"value": "white"}, //JCR, changes color of onn state, bytes, protocols label in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
+              "opacity": {"value": 0},
+            },
+            "update": {
+              "x": {"value": -395},
+              "y": {"value": 40},
+              "text": {"value": "Conn State   Bytes             Protocol"},
+              "font": {"value": "Arial"},
+              "fontStyle": {"value": "bold"},
+              "fontSize": {"value": 15},
+              "opacity": {"signal": "isArray(tooltip3) ? 1 : 0" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1
+            },
+          }
+        },
+        {
+        "type": "text",     // conn state text in enrichment box
+          "encode": {
+            "enter": {
+              // "align": {"value": "left"},
+              "baseline": {"value": "top"},
+              "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
+            },
+            "update": {
+              "x": {"value": -395},
+              "y": {"value": 60},
+              "text": {"signal": "isArray(tooltip2) ? tooltip2 : 'Hover over node for node enrichment.' "}, // checks if node enrichments is populated, if not display user instructions
+              "font": {"value": "Arial"},
+              "fontSize": {"value": 15},
+              "opacity": 1,
             }
-          },
-          {
-          "type": "text",     // header for conn state, bytes, protocols
+          }
+        },
+        {
+          "type": "text",     // total byte data text in enrichment box
             "encode": {
               "enter": {
-                // "align": {"value": "left"},
-                "baseline": {"value": "top"},
-                // "fill": {"value": "white"}, //JCR, changes color of onn state, bytes, protocols label in enrichment box that appear on link hover. Removing hardcoded colo lets it change with the Malcolm theme
-                "opacity": {"value": 0},
-              },
-              "update": {
-                "x": {"value": -395},
-                "y": {"value": 40},
-                "text": {"value": "Conn State   Bytes             Protocol"},
-                "font": {"value": "Arial"},
-                "fontStyle": {"value": "bold"},
-                "fontSize": {"value": 15},
-                "opacity": {"signal": "isArray(tooltip3) ? 1 : 0" } // checks if enrichmentSrc is an array - if Array then text is an IP value and won't be [object Object] when opacity == 1
-              },
-            }
-          },
-          {
-          "type": "text",     // conn state text in enrichment box
-            "encode": {
-              "enter": {
-                // "align": {"value": "left"},
                 "baseline": {"value": "top"},
                 "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
               },
               "update": {
-                "x": {"value": -395},
+                "x": {"value": -303},
                 "y": {"value": 60},
-                "text": {"signal": "isArray(tooltip2) ? tooltip2 : 'Hover over node for node enrichment.' "}, // checks if node enrichments is populated, if not display user instructions
+                "text": {"signal": "byte_data"},
                 "font": {"value": "Arial"},
                 "fontSize": {"value": 15},
-                "opacity": 1,
+                "opacity": {"signal": "isArray(byte_data) ? 1 : 0" } // checks if byte_data is an array - if Array then text is an byte value and won't be [object Object] when opacity == 1
               }
             }
-          },
-          {
-            "type": "text",     // total byte data text in enrichment box
-              "encode": {
-                "enter": {
-                  "baseline": {"value": "top"},
-                  "fill": {"value": "#159d8d"} // JCR, changd to match Malcolm color scheme
-                },
-                "update": {
-                  "x": {"value": -303},
-                  "y": {"value": 60},
-                  "text": {"signal": "byte_data"},
-                  "font": {"value": "Arial"},
-                  "fontSize": {"value": 15},
-                  "opacity": {"signal": "isArray(byte_data) ? 1 : 0" } // checks if byte_data is an array - if Array then text is an byte value and won't be [object Object] when opacity == 1
-                }
-              }
-          },
-          {
-          "type": "text",     // protocol text in enrichment box
-            "encode": {
-              "enter": {
-                "baseline": {"value": "top"},
-                "fill": {"value": "#159d8d"}, // JCR, changed to match Malcolm color scheme
-              },
-              "update": {
-                "x": {"signal": "isArray(tooltip3) ? -208 : -395"},
-                "y": {"signal": "isArray(tooltip3) ? 60 : 75"},
-                "text": {"signal": "isArray(tooltip3) ? tooltip3 : 'Hover over link for link enrichment.' "}, // checks if link enrichments is populated, if not display user instructions
-                "font": {"value": "Arial"},
-                "fontSize": {"value": 15},
-                "opacity": 1,
-              }
-            }
-          },
-          {
-            "type": "text",     // nonexistent IP warning text
-            "zindex": 0,
-            "encode": {
-                "enter": {
-                  "baseline": {"value": "center"},
-                  "orient": "bottom"
-                  // "fill": {"value": "#172430"}, // JCR, if color isn't hardcoded them the color changes based on Malcolm theme
-                },
-                "update": {
-                  "x": {"value": -400},
-                  "y": {"signal": "height-200"},
-                  "text": {"value": "IP address not found. Try adjusting the time range."},
-                  "font": {"value": "Arial"},
-                  "fontStyle": {"value": "bold"},
-                  "fontSize": {"signal": "titleFontSize"},
-                  "opacity": {"signal": "nonexistentIPWarning === true ? 0 : 1" } // if IP exists in table then do not show error, otherwise show the error
-                }
-              }
-          },
-          // Draw the nodes
-          {
-            "type": "symbol",
-            "name": "node",
-            "zindex": 10,
-            "from": {
-              "data": "visibleTree"
+        },
+        {
+        "type": "text",     // protocol text in enrichment box
+          "encode": {
+            "enter": {
+              "baseline": {"value": "top"},
+              "fill": {"value": "#159d8d"}, // JCR, changed to match Malcolm color scheme
             },
-            "encode": {
+            "update": {
+              "x": {"signal": "isArray(tooltip3) ? -208 : -395"},
+              "y": {"signal": "isArray(tooltip3) ? 60 : 75"},
+              "text": {"signal": "isArray(tooltip3) ? tooltip3 : 'Hover over link for link enrichment.' "}, // checks if link enrichments is populated, if not display user instructions
+              "font": {"value": "Arial"},
+              "fontSize": {"value": 15},
+              "opacity": 1,
+            }
+          }
+        },
+        {
+          "type": "text",     // nonexistent IP warning text
+          "zindex": 0,
+          "encode": {
               "enter": {
-                "size": {
-                  "value": 300
-                },
-                "stroke": {
-                  "value": "black"
-                },
-              },
-              "hover": {
-                "cursor": {
-                  "value": "pointer"
-                },
+                "baseline": {"value": "center"},
+                "orient": "bottom"
+                // "fill": {"value": "#172430"}, // JCR, if color isn't hardcoded them the color changes based on Malcolm theme
               },
               "update": {
-                // Make collapsed nodes larger
-                "size": [
-                  {
-                    "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
-                    "signal": "300 * 1.5"
-                  },
-                  {
-                    "signal": "300"
-                  }
-                ],
-                // Stroke collapsed nodes
-                "strokeDash": [
-                  {
-                    "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
-                    "signal": "[5,3]"
-                  },
-                  {
-                    "signal": "null"
-                  }
-                ],
-                "strokeWidth": [
-                  {
-                    "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
-                    "signal": "4"
-                  },
-                  {
-                    "signal": "0"
-                  }
-                ],
-                "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
-                "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
-                // Make collapsed nodes darker
-                "fill": [
-                  {
-                    "test": "indata('collapsyNodes', 'identifier', datum.identifier)", // || device_data.ip == datum.dst",
-                    "signal": "rgb(rgb(scale('color', datum.depth)).r * 0.7, rgb(scale('color', datum.depth)).g * 0.7, rgb(scale('color', datum.depth)).b * 0.7)"
-                  },
-                  {
-                    "scale": "color",
-                    "field": "depth"
-                  }
-                ],
-                // tooltip must be declared in update instead of hover to prevent ip collisions
-                "tooltip": {
-                  "signal": "device_info",
-                },
+                "x": {"value": -400},
+                "y": {"signal": "height-200"},
+                "text": {"value": "IP address not found. Try adjusting the time range."},
+                "font": {"value": "Arial"},
+                "fontStyle": {"value": "bold"},
+                "fontSize": {"signal": "titleFontSize"},
+                "opacity": {"signal": "nonexistentIPWarning === true ? 0 : 1" } // if IP exists in table then do not show error, otherwise show the error
+              }
+            }
+        },
+        // Draw the nodes
+        {
+          "type": "symbol",
+          "name": "node",
+          "zindex": 10,
+          "from": {
+            "data": "visibleTree"
+          },
+          "encode": {
+            "enter": {
+              "size": {
+                "value": 300
               },
+              "stroke": {
+                "value": "black"
+              },
+            },
+            "hover": {
+              "cursor": {
+                "value": "pointer"
+              },
+            },
+            "update": {
+              // Make collapsed nodes larger
+              "size": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
+                  "signal": "300 * 1.5"
+                },
+                {
+                  "signal": "300"
+                }
+              ],
+              // Stroke collapsed nodes
+              "strokeDash": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
+                  "signal": "[5,3]"
+                },
+                {
+                  "signal": "null"
+                }
+              ],
+              "strokeWidth": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)",
+                  "signal": "4"
+                },
+                {
+                  "signal": "0"
+                }
+              ],
+              "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
+              "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
+              // Make collapsed nodes darker
+              "fill": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier)", // || device_data.ip == datum.dst",
+                  "signal": "rgb(rgb(scale('color', datum.depth)).r * 0.7, rgb(scale('color', datum.depth)).g * 0.7, rgb(scale('color', datum.depth)).b * 0.7)"
+                },
+                {
+                  "scale": "color",
+                  "field": "depth"
+                }
+              ],
+              // tooltip must be declared in update instead of hover to prevent ip collisions
+              "tooltip": {
+                "signal": "device_info",
+              },
+            },
 
-            }
+          }
+        },
+        {
+          // IP address labels for the nodes
+          "type": "text",
+          "name": "nodeLabel",
+          "zindex": 10,
+          "from": {
+            "data": "visibleTree"
           },
-          {
-            // IP address labels for the nodes
-            "type": "text",
-            "name": "nodeLabel",
-            "zindex": 10,
-            "from": {
-              "data": "visibleTree"
+          "encode": {
+            "enter": {
+              "text": {
+                "signal": "split(datum.identifier,'+')[1]"
+              },
+              "fontSize": {"value": 15},
+              "font": {"value": "Arial"},
+              "baseline": {
+                "value": "middle"
+              }
             },
-            "encode": {
-              "enter": {
-                "text": {
-                  "signal": "split(datum.identifier,'+')[1]"
+            "update": {
+              "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
+              "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
+              // Collapsed or parents have labels on left
+              "dx": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier) || datum.children",
+                  "signal": "-1 * labelOffset"
                 },
-                "fontSize": {"value": 15},
-                "font": {"value": "Arial"},
-                "baseline": {
-                  "value": "middle"
+                {
+                  "signal": "labelOffset"
                 }
-              },
-              "update": {
-                "x": {"signal": "scale('xscale', datum.x)" }, // x value is scaled to account for mouse behavior
-                "y": {"signal": "scale('yscale', datum.y)"}, // y value is scaled to account for mouse behavior
-                // Collapsed or parents have labels on left
-                "dx": [
-                  {
-                    "test": "indata('collapsyNodes', 'identifier', datum.identifier) || datum.children",
-                    "signal": "-1 * labelOffset"
-                  },
-                  {
-                    "signal": "labelOffset"
-                  }
-                ],
-                "align": [
-                  {
-                    "test": "indata('collapsyNodes', 'identifier', datum.identifier) || datum.children",
-                    "signal": "'right'"
-                  },
-                  {
-                    "signal": "'left'"
-                  }
-                ],
-                "opacity": 1
-              },
-              "hover": {
-                "cursor": {
-                  "value": "pointer"
+              ],
+              "align": [
+                {
+                  "test": "indata('collapsyNodes', 'identifier', datum.identifier) || datum.children",
+                  "signal": "'right'"
+                },
+                {
+                  "signal": "'left'"
                 }
+              ],
+              "opacity": 1
+            },
+            "hover": {
+              "cursor": {
+                "value": "pointer"
               }
             }
           }
-      ]
-      }
-    ],
-    "legends": [
-      {
-        "title": "Average Bytes",
-        "orient": "none",
-        "titleColor": { "value": "#159d8d" },
-        "labelColor": { "value": "#159d8d" },
-        // "fillColor": { "value": "#172430" }, // JCR, left empty for auto theme color
-        "padding": { "value": 5 },
-        "strokeDash": "dash_scale",
-        "symbolType": "stroke",
-        "symbolStrokeWidth": 3,
-        "symbolSize": 400,
-        "legendX": 0,
-        "legendY": { "signal": "legend_height + 150" },
-
-        "encode": {
-          "symbols": {
-            "update": {
-              // "stroke": { "value": "#dfe5ef" },
-              "fillOpacity": { "value": 0 }
-            }
-          },
-          "title": {
-            "update": {
-              "fontSize": { "value": 14 }
-            }
-          },
-          "labels": { "update": { "fontSize": { "value": 14 } } }
         }
+     ]
+    }
+  ],
+  "legends": [
+    {
+      "title": "Average Bytes",
+      "orient": "none",
+      "titleColor": { "value": "#159d8d" },
+      "labelColor": { "value": "#159d8d" },
+      // "fillColor": { "value": "#172430" }, // JCR, left empty for auto theme color
+      "padding": { "value": 5 },
+      "strokeDash": "dash_scale",
+      "symbolType": "stroke",
+      "symbolStrokeWidth": 3,
+      "symbolSize": 400,
+      "legendX": 0,
+      "legendY": { "signal": "legend_height + 150" },
+
+      "encode": {
+        "symbols": {
+          "update": {
+            // "stroke": { "value": "#dfe5ef" },
+            "fillOpacity": { "value": 0 }
+          }
+        },
+        "title": {
+          "update": {
+            "fontSize": { "value": 14 }
+          }
+        },
+        "labels": { "update": { "fontSize": { "value": 14 } } }
       }
-    ]
-  }
+    }
+  ]
+}

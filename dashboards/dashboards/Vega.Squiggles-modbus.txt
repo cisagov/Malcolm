@@ -380,15 +380,8 @@
         "update": "data('markDataset') ? pluck(data('markDataset'), 'dataset') : ['']"
         },
         {
-        "name": "markNames",
-        "value": {
-            "modbus_detailed": "Modbus Writes",
-            "bacnet_property": "BACnet - Analog/Binary IO"
-        }
-        },
-        {
-        "name": "markDatasetName",
-        "update": "length(markDataset) > 1 ? markDataset : markNames[markDataset[0]] ? markNames[markDataset[0]] : markDataset"
+          "name": "markDatasetName",
+          "update": "length(markDataset) > 1 ? markDataset : (markDataset[0] === 'modbus_detailed' ? 'Modbus Writes' : markDataset[0])"
         }
     ],
     ## --------------------------------------------------------------------------------------------------------------------------

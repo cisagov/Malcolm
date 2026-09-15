@@ -63,16 +63,36 @@ def _extract_raw_stream(archive, dest, archive_mime=None):
     open_fn = ARCHIVE_RAW_STREAM_MIMES[archive_mime if archive_mime else magic.from_file(archive, mime=True)]
     outname = _strip_compression_ext(archive)
     outpath = os.path.join(dest, outname)
+    total_bytes = 0
     with open_fn(archive, 'rb') as src, open(outpath, 'wb') as dst:
         while chunk := src.read(65536):
+            total_bytes += len(chunk)
+            if total_bytes > ARCHIVE_EXTRACT_MAX_TOTAL_BYTES:
+                raise ArchiveBombError(
+                    f"archive exceeds size limit ({ARCHIVE_EXTRACT_MAX_TOTAL_BYTES} bytes) "
+                    f"during decompression of {os.path.basename(archive)!r}"
+                )
             dst.write(chunk)
 
 
 def _extract_lzip(archive, dest):
     outname = _strip_compression_ext(archive)
     outpath = os.path.join(dest, outname)
+    total_bytes = 0
+    proc = subprocess.Popen(['lzip', '-d', '-c', archive], stdout=subprocess.PIPE)
     with open(outpath, 'wb') as dst:
-        subprocess.run(['lzip', '-d', '-c', archive], stdout=dst, check=True)
+        while chunk := proc.stdout.read(65536):
+            total_bytes += len(chunk)
+            if total_bytes > ARCHIVE_EXTRACT_MAX_TOTAL_BYTES:
+                proc.kill()
+                raise ArchiveBombError(
+                    f"archive exceeds size limit ({ARCHIVE_EXTRACT_MAX_TOTAL_BYTES} bytes) "
+                    f"during decompression of {os.path.basename(archive)!r}"
+                )
+            dst.write(chunk)
+    proc.wait()
+    if proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode, 'lzip')
 
 
 def _extract_libarchive(archive, dest):
@@ -86,59 +106,58 @@ def _extract_libarchive(archive, dest):
     total_bytes = 0
     real_dest = os.path.realpath(dest)
 
-    try:
-        with malcolm_utils.pushd(dest):
-            with libarchive.read.file_reader(archive) as a:
-                for entry in a:
-                    count += 1
-                    total_bytes += getattr(entry, 'size', 0) or 0
-                    depth = entry.pathname.rstrip('/').count('/')
+    with malcolm_utils.pushd(dest):
+        with libarchive.read.file_reader(archive) as a:
+            for entry in a:
+                count += 1
+                total_bytes += getattr(entry, 'size', 0) or 0
+                depth = entry.pathname.rstrip('/').count('/')
 
-                    if count > ARCHIVE_EXTRACT_MAX_ENTRIES:
-                        raise ArchiveBombError(
-                            f"archive exceeds entry limit ({ARCHIVE_EXTRACT_MAX_ENTRIES}): "
-                            f"stopped at entry {count} ({entry.pathname!r})"
-                        )
-                    if depth > ARCHIVE_EXTRACT_MAX_DEPTH:
-                        raise ArchiveBombError(
-                            f"archive exceeds depth limit ({ARCHIVE_EXTRACT_MAX_DEPTH}): {entry.pathname!r} is {depth} levels deep"
-                        )
-                    if total_bytes > ARCHIVE_EXTRACT_MAX_TOTAL_BYTES:
-                        raise ArchiveBombError(
-                            f"archive exceeds size limit ({ARCHIVE_EXTRACT_MAX_TOTAL_BYTES} bytes): "
-                            f"stopped at entry {count} ({entry.pathname!r})"
-                        )
+                if count > ARCHIVE_EXTRACT_MAX_ENTRIES:
+                    raise ArchiveBombError(
+                        f"archive exceeds entry limit ({ARCHIVE_EXTRACT_MAX_ENTRIES}): "
+                        f"stopped at entry {count} ({entry.pathname!r})"
+                    )
+                if depth > ARCHIVE_EXTRACT_MAX_DEPTH:
+                    raise ArchiveBombError(
+                        f"archive exceeds depth limit ({ARCHIVE_EXTRACT_MAX_DEPTH}): {entry.pathname!r} is {depth} levels deep"
+                    )
+                if total_bytes > ARCHIVE_EXTRACT_MAX_TOTAL_BYTES:
+                    raise ArchiveBombError(
+                        f"archive exceeds size limit ({ARCHIVE_EXTRACT_MAX_TOTAL_BYTES} bytes): "
+                        f"stopped at entry {count} ({entry.pathname!r})"
+                    )
 
-                    if entry.isdir:
-                        # Validate resolved path stays within dest before creating;
-                        # os.makedirs with a raw entry.pathname has no traversal
-                        # protection unlike file entries handled via ARCHIVE_EXTRACT_FLAGS.
-                        target = os.path.realpath(os.path.join(dest, entry.pathname))
-                        if target != real_dest and not target.startswith(real_dest + os.sep):
-                            raise ArchiveBombError(
-                                f"directory traversal detected: {entry.pathname!r} resolves outside dest"
-                            )
-                        os.makedirs(target, exist_ok=True)
-                        continue
+                if entry.isdir:
+                    # Validate resolved path stays within dest before creating;
+                    # os.makedirs with a raw entry.pathname has no traversal
+                    # protection unlike file entries handled via ARCHIVE_EXTRACT_FLAGS.
+                    target = os.path.realpath(os.path.join(dest, entry.pathname))
+                    if target != real_dest and not target.startswith(real_dest + os.sep):
+                        raise ArchiveBombError(
+                            f"directory traversal detected: {entry.pathname!r} resolves outside dest"
+                        )
+                    os.makedirs(target, exist_ok=True)
+                    continue
 
-                    libarchive.extract.extract_entries([entry], flags=ARCHIVE_EXTRACT_FLAGS)
-    except ArchiveBombError:
-        shutil.rmtree(dest, ignore_errors=True)
-        raise
+                libarchive.extract.extract_entries([entry], flags=ARCHIVE_EXTRACT_FLAGS)
 
 
 def safe_extract(archive, dest):
     os.makedirs(dest, exist_ok=False)
     file_mime_type = magic.from_file(archive, mime=True)
-
-    if TAR_COMPRESSED_EXTS.search(archive):
-        _extract_libarchive(archive, dest)
-    elif file_mime_type in ARCHIVE_RAW_STREAM_MIMES:
-        _extract_raw_stream(archive, dest, file_mime_type)
-    elif file_mime_type == 'application/x-lzip':
-        _extract_lzip(archive, dest)
-    else:
-        _extract_libarchive(archive, dest)
+    try:
+        if TAR_COMPRESSED_EXTS.search(archive):
+            _extract_libarchive(archive, dest)
+        elif file_mime_type in ARCHIVE_RAW_STREAM_MIMES:
+            _extract_raw_stream(archive, dest, file_mime_type)
+        elif file_mime_type == 'application/x-lzip':
+            _extract_lzip(archive, dest)
+        else:
+            _extract_libarchive(archive, dest)
+    except ArchiveBombError:
+        shutil.rmtree(dest, ignore_errors=True)
+        raise
 
 
 if len(sys.argv) != 3:

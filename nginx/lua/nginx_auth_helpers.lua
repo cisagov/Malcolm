@@ -157,10 +157,27 @@ end
 
 -- Normalize a raw request URI for RBAC matching.
 -- Uses request_uri (pre-rewrite) rather than ngx.var.uri (post-rewrite), but
--- collapses path traversal sequences so that patterns like /x/../upload/
--- cannot bypass role checks.
+-- decodes percent-encoding, collapses repeated slashes, collapses path
+-- traversal sequences, and lowercases the result so that RBAC pattern
+-- matching agrees with how nginx itself will decode/normalize/case-fold
+-- the URI when selecting a location block. Without this, an authenticated
+-- low-privilege user could reach a role-restricted location (e.g. /htadmin)
+-- by percent-encoding, slash-doubling, or case-varying the path, since
+-- nginx's location dispatch normalizes before matching but this function
+-- previously did not.
 local function normalize_uri_for_rbac(raw_uri)
     local path = raw_uri:match("^[^?]+") or ""
+
+    -- Percent-decode BEFORE traversal/slash collapsing, so encoded
+    -- traversal sequences (e.g. %2e%2e%2f) can't sneak past the collapse
+    -- step undetected. ngx.unescape_uri does a single decode pass, matching
+    -- nginx's own single-pass decoding (no double-decode mismatch either way).
+    path = ngx.unescape_uri(path)
+
+    -- Collapse repeated slashes. nginx's merge_slashes defaults to "on" and
+    -- affects location matching, but don't rely on inherited config here.
+    path, _ = path:gsub("/+", "/")
+
     -- Collapse /../ sequences in a loop until stable
     local n
     repeat
@@ -170,6 +187,14 @@ local function normalize_uri_for_rbac(raw_uri)
     repeat
         path, n = path:gsub("^/%.%./", "/")
     until n == 0
+
+    -- Case-fold: nginx's htadmin/admin_login location is matched with the
+    -- case-insensitive `~*` modifier, but path_role_envs patterns are matched
+    -- with case-sensitive ngx.re.find (no "i" flag). Lowercasing here — the
+    -- single place both call sites source their match string from — keeps
+    -- matching consistent without touching every ngx.re.find/match call site.
+    path = path:lower()
+
     return path
 end
 

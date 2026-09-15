@@ -47,32 +47,51 @@ function CleanDefaultAccounts() {
 }
 
 # disable automatic running of some services
+# disable automatic running of some services
 function DisableServices() {
-  for ACTION in stop disable; do
-    for SERVICE in apt-daily-upgrade.service \
-                   apt-daily-upgrade.timer \
-                   apt-daily.service \
-                   apt-daily.timer \
-                   clamav-clamonacc.service \
-                   clamav-daemon.socket \
-                   clamav-daemon.service \
-                   clamav-freshclam.service \
-                   ctrl-alt-del.target \
-                   filebeat.service \
-                   fluent-bit.service \
-                   htpdate.service \
-                   ntpsec.service \
-                   sendmail.service \
-                   supervisor.service \
-                   suricata.service; do
-      systemctl "$ACTION" "$SERVICE" >/dev/null 2>&1 || true
-    done
+  local service
+  local -a services=(
+    apt-daily-upgrade.service
+    apt-daily-upgrade.timer
+    apt-daily.service
+    apt-daily.timer
+    clamav-clamonacc.service
+    clamav-daemon.socket
+    clamav-daemon.service
+    clamav-freshclam-once.service
+    clamav-freshclam-once.timer
+    clamav-freshclam.service
+    ctrl-alt-del.target
+    fluent-bit.service
+    htpdate.service
+    ModemManager.service
+    ntpsec.service
+    sendmail.service
+  )
+
+  local -a networkd_units=(
+    systemd-networkd.service
+    systemd-networkd-wait-online.service
+    systemd-networkd.socket
+    systemd-networkd-varlink.socket
+    systemd-networkd-varlink-metrics.socket
+    systemd-networkd-resolve-hook.socket
+  )
+
+  for service in "${services[@]}"; do
+    systemctl stop "$service" >/dev/null 2>&1 || true
+    systemctl disable "$service" >/dev/null 2>&1 || true
+    systemctl reset-failed "$service" >/dev/null 2>&1 || true
   done
-  for ACTION in disable remove; do
-    for SERVICE in clamav-daemon \
-                   clamav-freshclam; do
-      update-rc.d -f "$SERVICE" "$ACTION" >/dev/null 2>&1 || true
-    done
+
+  for service in clamav-daemon clamav-freshclam; do
+    update-rc.d -f "$service" remove >/dev/null 2>&1 || true
+  done
+
+  for service in "${networkd_units[@]}"; do
+    systemctl disable --now "$service" >/dev/null 2>&1 || true
+    systemctl mask "$service" >/dev/null 2>&1 || true
+    systemctl reset-failed "$service" >/dev/null 2>&1 || true
   done
 }
 
@@ -89,37 +108,34 @@ function InjectSkeleton() {
   fi
 }
 
-# if the network configuration files for the interfaces haven't been set to come up on boot, configure that
-function InitializeSensorNetworking() {
-  unset NEED_NETWORKING_RESTART
+function SetNetworkingServiceTimeout() {
+  local wants_path='/etc/systemd/system/network-online.target.wants/networking.service'
+  local dropin_dir='/etc/systemd/system/networking.service.d'
+  local dropin_file="${dropin_dir}/timeout.conf"
+  local changed=false
 
-  # /etc/network/interfaces.d/sensor will manage network interfaces, not /etc/network/interfaces
-  # interfaces are configured by the system admin via system-quickstart.py.
-  NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
-  if [ $NET_IFACES_LINES -gt 4 ] ; then
-    echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces
-    NEED_NETWORKING_RESTART=0
+  # Remove an incorrectly created regular file. A .wants entry must be a symlink.
+  if [[ -e "$wants_path" ]] && [[ ! -L "$wants_path" ]]; then
+    rm -f "$wants_path"
+    changed=true
   fi
 
-  if [[ ! -f /etc/network/interfaces.d/sensor ]]; then
-    for IFACE_NAME in "${!IFACES[@]}"; do
-      echo "auto $IFACE_NAME" >> /etc/network/interfaces.d/sensor
-      echo "allow-hotplug $IFACE_NAME" >> /etc/network/interfaces.d/sensor
-      echo "iface $IFACE_NAME inet manual" >> /etc/network/interfaces.d/sensor
-      echo "  pre-up ip link set dev \$IFACE up" >> /etc/network/interfaces.d/sensor
-      echo "  post-down ip link set dev \$IFACE down" >> /etc/network/interfaces.d/sensor
-      echo "" >> /etc/network/interfaces.d/sensor
-    done
-    NEED_NETWORKING_RESTART=0
+  mkdir -p "$dropin_dir"
+
+  if [[ ! -f "$dropin_file" ]] ||
+     ! grep --quiet '^TimeoutStartSec=1min$' "$dropin_file"; then
+    cat >"$dropin_file" <<'EOF'
+[Service]
+TimeoutStartSec=1min
+EOF
+    changed=true
   fi
 
-  if ! grep --quiet ^TimeoutStartSec=1min /etc/systemd/system/network-online.target.wants/networking.service; then
-    # only wait 1 minute during boot for network interfaces to come up
-    sed -i 's/^\(TimeoutStartSec\)=.*/\1=1min/' /etc/systemd/system/network-online.target.wants/networking.service
-    NEED_NETWORKING_RESTART=0
+  if "$changed"; then
+    systemctl daemon-reload
   fi
 
-  [[ -n $NEED_NETWORKING_RESTART ]] && systemctl restart networking
+  return 0
 }
 
 function InitializeAggregatorNetworking() {
@@ -132,11 +148,7 @@ function InitializeAggregatorNetworking() {
     NEED_NETWORKING_RESTART=0
   fi
 
-  if ! grep --quiet ^TimeoutStartSec=1min /etc/systemd/system/network-online.target.wants/networking.service; then
-    # only wait 1 minute during boot for network interfaces to come up
-    sed -i 's/^\(TimeoutStartSec\)=.*/\1=1min/' /etc/systemd/system/network-online.target.wants/networking.service
-    NEED_NETWORKING_RESTART=0
-  fi
+  SetNetworkingServiceTimeout
 
   [[ -n $NEED_NETWORKING_RESTART ]] && systemctl restart networking
 }

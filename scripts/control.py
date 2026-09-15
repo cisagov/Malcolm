@@ -2987,7 +2987,7 @@ def authSetup():
                                 labels=['Malcolm Server IP', 'Single-use Code Phrase'],
                                 defaultBehavior=defaultBehavior,
                             )
-                            if (len(values) == 2) and (len(values[0]) >= 3) and (len(values[1]) >= 16):
+                            if (len(values) == 2) and (len(values[0]) >= 3) and (len(values[1]) >= 11):
                                 tx_ip = values[0]
                                 rx_token = values[1]
                                 break
@@ -3217,7 +3217,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "26.07.1"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "26.08.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',

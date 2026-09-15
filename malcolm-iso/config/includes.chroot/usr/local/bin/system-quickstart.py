@@ -40,7 +40,8 @@ MSG_TIME_SYNC_TEST_SUCCESS = 'Server time retrieved successfully!\n\n'
 MSG_TIME_SYNC_TYPE = 'Select time synchronization method'
 SSHD_CONFIG_FILE = "/etc/ssh/sshd_config"
 TIME_SYNC_HTPDATE = 'htpdate'
-TIME_SYNC_HTPDATE_COMMAND = '/usr/sbin/htpdate -4 -a -l -s'
+TIME_SYNC_HTPDATE_INITIAL_COMMAND = '/usr/sbin/htpdate -4 -l -s'
+TIME_SYNC_HTPDATE_PERIODIC_COMMAND = '/usr/sbin/htpdate -4 -a -l'
 TIME_SYNC_HTPDATE_CRON = '/etc/cron.d/htpdate'
 TIME_SYNC_HTPDATE_DEFAULT_URL = 'https://1.1.1.1:443'
 TIME_SYNC_HTPDATE_DEFAULT_INTERVAL = 15
@@ -281,11 +282,13 @@ def main():
                         f.write('SHELL=/bin/bash\n')
                         f.write('PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\n')
                         f.write('\n')
-                        f.write(f'*/{htpdate_interval} * * * * root {TIME_SYNC_HTPDATE_COMMAND} {http_url}\n')
+                        f.write(f'*/{htpdate_interval} * * * * root {TIME_SYNC_HTPDATE_PERIODIC_COMMAND} {http_url}\n')
                         f.write('\n')
 
                     # now actually do the sync "for real" one time (so we can get in sync before waiting for the interval)
-                    ecode, sync_output = run_subprocess(f"{TIME_SYNC_HTPDATE_COMMAND} {http_url}")
+                    ecode, sync_output = run_subprocess(f"{TIME_SYNC_HTPDATE_INITIAL_COMMAND} {http_url}")
+                    if ecode == 0 and os.path.isfile('/usr/sbin/fake-hwclock'):
+                        run_subprocess('/usr/sbin/fake-hwclock save')
                     emsg_str = '\n'.join(sync_output)
                     code = d.msgbox(text=f"{MSG_TIME_SYNC_CONFIG_SUCCESS if (ecode == 0) else ''}{emsg_str}")
 
@@ -335,8 +338,16 @@ def main():
                     run_subprocess('/bin/systemctl stop ntpsec')
                     run_subprocess('/bin/systemctl enable ntpsec')
                     ecode, start_output = run_subprocess('/bin/systemctl start ntpsec', stderr=True)
+
                     if ecode == 0:
-                        code = d.msgbox(text=f"{MSG_TIME_SYNC_CONFIG_SUCCESS}")
+                        wait_ecode, _ = run_subprocess(
+                            '/usr/sbin/ntpwait -n 5 -s 2',
+                            stderr=True,
+                        )
+                        if wait_ecode == 0 and os.path.isfile('/usr/sbin/fake-hwclock'):
+                            run_subprocess('/usr/sbin/fake-hwclock save')
+
+                        code = d.msgbox(text=MSG_TIME_SYNC_CONFIG_SUCCESS)
                     else:
                         code = d.msgbox(text=MSG_MESSAGE_ERROR.format('\n'.join(start_output)))
 

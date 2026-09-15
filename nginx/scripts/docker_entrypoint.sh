@@ -482,7 +482,6 @@ if [[ ! -f ${NGINX_CONF_DIR}/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpassw
   rm -rf /tmp/auth/* || true
 fi
 
-# do environment variable substitutions from $NGINX_TEMPLATES_DIR to $NGINX_CONFD_DIR
 # NGINX_DASHBOARDS_... are a special case as they have to be crafted a bit based on a few variables
 set +e
 
@@ -530,9 +529,96 @@ export NGINX_DASHBOARDS_PREFIX
 export NGINX_DASHBOARDS_PROXY_PASS
 export NGINX_DASHBOARDS_PROXY_URL="$(echo "$(echo "$NGINX_DASHBOARDS_PROXY_PASS" | sed 's@/$@@')/$(echo "$NGINX_DASHBOARDS_PREFIX" | sed 's@^/@@')" | sed 's@/$@@')"
 
-# now process the environment variable substitutions
+# do environment variable substitutions from $NGINX_TEMPLATES_DIR to $NGINX_CONFD_DIR
+function normalize_bool() {
+  local name="$1"
+  local value="${!name-}"
+
+  case "${value,,}" in
+    1|true|yes|on)
+      value=true
+      ;;
+    0|false|no|off)
+      value=false
+      ;;
+    *)
+      echo "$name must be true or false, got: $value" >&2
+      exit 1
+      ;;
+  esac
+
+  printf -v "$name" '%s' "$value"
+  export "$name"
+}
+
+function validate_nginx_template_value() {
+  local name="$1"
+  local value="${!name-}"
+
+  if [[ $value =~ [[:cntrl:]] ||
+        $value == *'"'* ||
+        $value == *'\'* ||
+        $value == *'$'* ]]; then
+    echo "$name contains characters unsafe for generated nginx configuration" >&2
+    exit 1
+  fi
+}
+
+# Validate variables used while rendering nginx configuration templates.
+# Keep these lists coordinated with files in $NGINX_TEMPLATES_DIR.
+
+# normalize these to true/false if they have other truthy/falsy values
+ARKIME_SSL="${ARKIME_SSL:-true}"
+ROLE_BASED_ACCESS="${ROLE_BASED_ACCESS:-false}"
+normalize_bool ARKIME_SSL
+normalize_bool ROLE_BASED_ACCESS
+
+# reject invalid characters in these ones
+for VAR in \
+  MALCOLM_NETWORK_INDEX_PATTERN \
+  NGINX_DASHBOARDS_PREFIX \
+  NGINX_DASHBOARDS_PROXY_PASS \
+  NGINX_DASHBOARDS_PROXY_URL \
+  NGINX_X_FORWARDED_PROTO_OVERRIDE \
+  NGINX_CSP_FORM_ACTION_EXTRA \
+  ROLE_ADMIN \
+  ROLE_CAPTURE_SERVICE
+do
+  validate_nginx_template_value "$VAR"
+done
+
+# only substitute environment variables that are allowed
+TEMPLATE_VARS='
+${DOLLAR}
+${MALCOLM_NETWORK_INDEX_PATTERN}
+${NGINX_DASHBOARDS_PREFIX}
+${NGINX_DASHBOARDS_PROXY_PASS}
+${NGINX_DASHBOARDS_PROXY_URL}
+${NGINX_X_FORWARDED_PROTO_OVERRIDE}
+${NGINX_CSP_FORM_ACTION_EXTRA}
+${ARKIME_SSL}
+${ROLE_ADMIN}
+${ROLE_BASED_ACCESS}
+${ROLE_CAPTURE_SERVICE}
+'
+
 for TEMPLATE in "$NGINX_TEMPLATES_DIR"/*.conf.template; do
-  DOLLAR=$ envsubst < "$TEMPLATE" > "$NGINX_CONFD_DIR/$(basename "$TEMPLATE"| sed 's/\.template$//')"
+  OUTPUT="$NGINX_CONFD_DIR/$(basename "$TEMPLATE" | sed 's/\.template$//')"
+  OUTPUT_TMP="${OUTPUT}.tmp"
+
+  if ! DOLLAR='$' envsubst "$TEMPLATE_VARS" \
+    < "$TEMPLATE" \
+    > "$OUTPUT_TMP"; then
+    echo "Failed to process nginx template: $TEMPLATE" >&2
+    rm -f "$OUTPUT_TMP"
+    exit 1
+  fi
+
+  if ! mv -f "$OUTPUT_TMP" "$OUTPUT"; then
+    echo "Failed to install rendered nginx template: $OUTPUT" >&2
+    rm -f "$OUTPUT_TMP"
+    exit 1
+  fi
 done
 
 if [[ -z "${NGINX_RESOLVER_OVERRIDE:-}" ]]; then

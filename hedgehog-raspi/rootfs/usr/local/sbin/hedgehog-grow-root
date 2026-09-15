@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euo pipefail
+
+readonly STATE_DIR='/var/lib/hedgehog'
+readonly STATE_FILE="${STATE_DIR}/root-filesystem-expanded"
+
+root_source="$(findmnt -nro SOURCE /)"
+root_partition="$(readlink -f "$root_source")"
+
+parent_name="$(lsblk -nro PKNAME "$root_partition")"
+partition_number="$(lsblk -nro PARTN "$root_partition")"
+
+if [[ -z "$parent_name" || -z "$partition_number" ]]; then
+    echo "Could not determine parent disk or partition number for $root_partition" >&2
+    exit 1
+fi
+
+parent_disk="/dev/$parent_name"
+
+echo "Expanding root partition $root_partition on $parent_disk"
+
+# Exit code 1 can mean either failure or that no change was necessary.
+# Capture the output so we can distinguish those cases.
+growpart_output="$(
+    growpart "$parent_disk" "$partition_number" 2>&1
+)" || {
+    growpart_status=$?
+
+    if grep -q '^NOCHANGE:' <<<"$growpart_output"; then
+        :
+    else
+        echo "$growpart_output" >&2
+        exit "$growpart_status"
+    fi
+}
+
+echo "$growpart_output"
+
+case "$(findmnt -nro FSTYPE /)" in
+    ext2|ext3|ext4)
+        resize2fs "$root_partition"
+        ;;
+    *)
+        echo "Unsupported root filesystem type: $(findmnt -nro FSTYPE /)" >&2
+        exit 1
+        ;;
+esac
+
+install -d -m 0755 "$STATE_DIR"
+printf 'expanded %s on %s at %s\n' \
+    "$root_partition" \
+    "$parent_disk" \
+    "$(date --iso-8601=seconds)" \
+    >"$STATE_FILE"

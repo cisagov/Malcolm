@@ -18,6 +18,10 @@ map ${DOLLAR}host ${DOLLAR}proxy_x_forwarded_proto_override {
   default "$NGINX_X_FORWARDED_PROTO_OVERRIDE";
 }
 
+map ${DOLLAR}host ${DOLLAR}form_action_extra {
+  default "$NGINX_CSP_FORM_ACTION_EXTRA";
+}
+
 map $ARKIME_SSL ${DOLLAR}arkime_protocol {
   default https;
   "false" http;

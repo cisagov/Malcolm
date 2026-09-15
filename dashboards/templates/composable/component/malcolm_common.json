@@ -18,6 +18,9 @@
                 "uninventoried": {
                   "type": "keyword"
                 },
+                "purdue_zone": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -56,6 +59,9 @@
                   "type": "integer"
                 },
                 "name": {
+                  "type": "keyword"
+                },
+                "purdue_zone": {
                   "type": "keyword"
                 },
                 "site": {
@@ -127,6 +133,9 @@
             "uninventoried": {
               "type": "keyword"
             },
+            "purdue_zone": {
+              "type": "keyword"
+            },
             "mac": {
               "type": "keyword"
             },
@@ -181,6 +190,9 @@
                 "uninventoried": {
                   "type": "keyword"
                 },
+                "purdue_zone": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -219,6 +231,9 @@
                   "type": "integer"
                 },
                 "name": {
+                  "type": "keyword"
+                },
+                "purdue_zone": {
                   "type": "keyword"
                 },
                 "site": {

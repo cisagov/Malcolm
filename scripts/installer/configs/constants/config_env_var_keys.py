@@ -120,6 +120,7 @@ KEY_ENV_PUID = "PUID"  # process User ID
 KEY_ENV_PROFILE_KEY = PROFILE_KEY
 
 KEY_ENV_SURICATA_UPDATE_RULES = "SURICATA_UPDATE_RULES"  # Suricata signature updates (via suricata-update)
+KEY_ENV_SURICATA_DISABLE_SIDS = "SURICATA_DISABLE_SIDS"  # List of Suricata SIDs to disable
 KEY_ENV_SURICATA_DISABLE_ICS_ALL = "SURICATA_DISABLE_ICS_ALL"  # disable/enable ICS analyzers
 KEY_ENV_SURICATA_LIVE_CAPTURE = "SURICATA_LIVE_CAPTURE"  # live traffic analysis with Suricata
 KEY_ENV_SURICATA_STATS_ENABLED = "SURICATA_STATS_ENABLED"  # live capture statistics for Suricata
@@ -167,6 +168,7 @@ KEY_ENV_PIPELINE_ENABLED = (
     "PIPELINE_DISABLED"  # Pipeline DISABLED (note that this is boolean is reversed from the installer logic)
 )
 KEY_ENV_PIPELINE_WORKERS = "STRELKA_BACKEND_PROCS"
+KEY_ENV_PIPELINE_SCANNERS = "STRELKA_SCANNERS"
 
 
 def get_env_key_dict():

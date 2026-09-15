@@ -18,6 +18,8 @@ processors_common: &common_processors
       fields:
         - from: "file"
           to: "_keep_file"
+        - from: "log.file.path"
+          to: "_keep_log_file_path"
       ignore_missing: true
   - drop_fields:
       fields:
@@ -27,6 +29,8 @@ processors_common: &common_processors
       fields:
         - from: "_keep_file"
           to: "file"
+        - from: "_keep_log_file_path"
+          to: "log.file.path"
       ignore_missing: true
   - script:
       lang: javascript

@@ -1,8 +1,8 @@
 git+https://github.com/netbox-community/netbox-healthcheck-plugin@v${NETBOX_HEALTHCHECK_VERSION}
 git+https://github.com/netbox-community/netbox-topology-views@v${NETBOX_TOPOLOGY_VERSION}
 git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}
-cryptography==48.0.1
-GitPython==3.1.50
+cryptography==50.0.0
+GitPython==3.1.59
 Jinja2==3.1.6
 paramiko==5.0.0
 pillow==12.3.0
@@ -11,7 +11,7 @@ pynetbox==7.5.0
 python-magic==0.4.27
 python-slugify==8.0.4
 randomcolor==0.4.4.6
-setuptools==80.9.0
+setuptools==83.0.0
 supervisor==4.3.0
 wheel==0.46.2
 uv==0.11.15

@@ -34,7 +34,7 @@ MALCOLM_SRC='/opt/Malcolm'
 WORK_DIR="$(mktemp -d -p "$HOME" -t hedgehog-XXXXXX)"
 
 # Build time dependencies for htpdate
-BUILD_DEPS='build-essential libssl-dev checkinstall'
+BUILD_DEPS='build-essential libssl-dev checkinstall bsdextrautils'
 
 ################################
 ######### Functions ############
@@ -58,19 +58,33 @@ build_htpdate() {
 
     make https
 
-    checkinstall -y -D --nodoc --strip=yes --stripso=yes --install=no --fstrans=no \
-    --pkgname=htpdate --pkgversion=$htpdate_vers --pkgarch="$ARCH" --pkgsource="$htpdate_url" \
-    --pkgrelease="$htpdate_release" --pakdir "$DEBS_DIR"
-
-    # htpdate is installed outside of dpkg with checkinstall
-    make uninstall
+    checkinstall \
+      -y -D \
+      --nodoc \
+      --strip=yes \
+      --stripso=yes \
+      --install=no \
+      --fstrans=yes \
+      --exclude=/usr/bin/install,/bin/install \
+      --pkgname=htpdate \
+      --pkgversion=$htpdate_vers \
+      --pkgarch="$ARCH" \
+      --pkgsource="$htpdate_url" \
+      --pkgrelease="$htpdate_release" \
+      --pakdir "$DEBS_DIR"
 
     cd "${WORK_DIR}"
+
+    dpkg-deb -c "${DEBS_DIR}/htpdate_${htpdate_vers}-${htpdate_release}_${ARCH}.deb"
 
     dpkg -i "${DEBS_DIR}/htpdate_${htpdate_vers}-${htpdate_release}_${ARCH}.deb"
 }
 
 clean_up() {
+    set +e
+
+    # Do not remain inside WORK_DIR while deleting it.
+    cd /
 
     # Remove network interface files left by installation
     rm -f /etc/network/interfaces.d/*
@@ -84,9 +98,9 @@ clean_up() {
     rm -rf $WORK_DIR \
            $SHARED_DIR \
            $MALCOLM_SRC \
-		   /opt/deps \
-		   /opt/hooks \
-		   /opt/patches \
+           /opt/deps \
+           /opt/hooks \
+           /opt/patches \
            /opt/requirements.txt \
            /root/.bash_history \
            /root/.wget-hsts \
@@ -94,9 +108,11 @@ clean_up() {
            /root/.local/share/gem \
            /root/.npm \
            "${DEBS_DIR}" \
-		   /tmp/*
+           /tmp/*
     find /var/log/ -type f -print0 2>/dev/null | \
         xargs -0 -r -I XXX bash -c "file 'XXX' | grep -q text && > 'XXX'"
+
+    set -e
 
     # Remove unnecessary build components
     apt-get remove $BUILD_DEPS -y
@@ -137,6 +153,7 @@ install_deps() {
         sed -i '$a\' "$file"
         deps+="$(tr '\n' ' ' < "$file")"
     done
+    deps+=' fake-hwclock'
 
     # Remove packages not relevant to Raspberry Pi images.
     # rar is excluded because Debian does not provide an ARM package.
@@ -299,6 +316,15 @@ install_hooks() {
 ################################
 ########## Main ################
 ################################
+
+# Mount virtual filesystems for the sensor installation phase. These are
+# intentionally separate from the temporary mounts around vmdb2's initial
+# apt step in raspi_master.yaml.
+mount -t proc /proc /proc
+mount -t devtmpfs /dev /dev
+mount -t devpts /dev/pts /dev/pts
+mount -t sysfs /sys /sys
+mount -t tmpfs /run /run
 
 [[ -f "$SHARED_DIR/environment.chroot" ]] && \
   . "$SHARED_DIR/environment.chroot"

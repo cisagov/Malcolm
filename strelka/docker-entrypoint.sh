@@ -68,18 +68,62 @@ if [[ -f "${BACKEND_YAML_FILE}" ]] && [[ -d "${BACKEND_SCANNERS_DIR}" ]] && [[ -
   # Include enabled scanners (based on STRELKA_SCANNERS) from /etc/strelka/scanners
   yq -i '.scanners = {}' "${BACKEND_YAML_FILE}"
 
-  IFS=',' read -r -a RAW_ENABLED_SCANNERS <<< "${STRELKA_SCANNERS}"
+  declare -a DEFAULT_STRELKA_SCANNERS=()
 
-  # Clean out whitespace/empty elements from the scanners list, if any
-  for i in "${!RAW_ENABLED_SCANNERS[@]}"; do
-    TRIMMED_SCANNER="$(printf '%s' "${RAW_ENABLED_SCANNERS[$i]}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
-    if [[ -n "${TRIMMED_SCANNER}" ]]; then
-      ENABLED_SCANNER_SET["${TRIMMED_SCANNER}"]=1
+  DEFAULTS_FILE="$(mktemp)" || exit 1
+  trap 'rm -f "$DEFAULTS_FILE"' EXIT
+
+  if ! PYTHONPATH=/usr/local/bin python3 - <<'PY' >"$DEFAULTS_FILE"
+import sys
+
+from malcolm_constants import MALCOLM_STRELKA_SCANNERS_DEFAULT
+
+if not isinstance(MALCOLM_STRELKA_SCANNERS_DEFAULT, (list, tuple)):
+    raise TypeError("MALCOLM_STRELKA_SCANNERS_DEFAULT must be a list or tuple")
+
+for scanner in MALCOLM_STRELKA_SCANNERS_DEFAULT:
+    if not isinstance(scanner, str):
+        raise TypeError(f"scanner name must be a string, got {type(scanner).__name__}")
+    if "\0" in scanner:
+        raise ValueError("scanner names cannot contain NUL characters")
+
+    sys.stdout.buffer.write(scanner.encode("utf-8") + b"\0")
+PY
+  then
+    echo "Unable to load default Strelka scanners from malcolm_constants.py" >&2
+    exit 1
+  fi
+
+  mapfile -d '' -t DEFAULT_STRELKA_SCANNERS <"$DEFAULTS_FILE"
+  rm -f "$DEFAULTS_FILE"
+  trap - EXIT
+
+  IFS=',' read -r -a RAW_ENABLED_SCANNERS <<< "${STRELKA_SCANNERS:-}"
+
+  for RAW_SCANNER in "${RAW_ENABLED_SCANNERS[@]}"; do
+    TRIMMED_SCANNER="${RAW_SCANNER#"${RAW_SCANNER%%[![:space:]]*}"}"
+    TRIMMED_SCANNER="${TRIMMED_SCANNER%"${TRIMMED_SCANNER##*[![:space:]]}"}"
+
+    [[ -z "$TRIMMED_SCANNER" ]] && continue
+
+    if [[ "$TRIMMED_SCANNER" == "default" ]]; then
+      SCANNERS_TO_ADD=("${DEFAULT_STRELKA_SCANNERS[@]}")
+    else
+      SCANNERS_TO_ADD=("$TRIMMED_SCANNER")
     fi
+
+    for SCANNER in "${SCANNERS_TO_ADD[@]}"; do
+      [[ -n "$SCANNER" ]] && ENABLED_SCANNER_SET["$SCANNER"]=1
+    done
   done
 
   # Build a regex for exact top-level key matching inside yq
-  ENABLED_SCANNERS_REGEX="^($(printf '%s\n' "${!ENABLED_SCANNER_SET[@]}" | paste -sd'|' -))$"
+  ENABLED_SCANNERS_REGEX="$(
+    printf '%s\n' "${!ENABLED_SCANNER_SET[@]}" |
+      sort |
+      paste -sd'|' -
+  )"
+  ENABLED_SCANNERS_REGEX="^(${ENABLED_SCANNERS_REGEX})$"
 
   # Process each scanner file
   for SCANNER_FILE in "${BACKEND_SCANNERS_DIR}"/*.yaml "${BACKEND_SCANNERS_DIR}"/*.yml; do

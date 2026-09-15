@@ -251,47 +251,49 @@ Select an item number to configure, or an action:
 │   ├── 39. Allow Arkime WISE Configuration (current: No)
 │   └── 40. Enable Arkime WISE (current: Yes)
 ├── 41. Enable Suricata Analysis (current: Yes)
-│   └── 42. Enable Suricata Rule Updates (current: Yes)
-├── 43. Enable Zeek Analysis (current: Yes)
-│   ├── 44. Enable Zeek ICS/OT Analyzers (current: Yes)
-│   │   └── 45. Enable Zeek ICS "Best Guess" (current: Yes)
-│   ├── 46. File Extraction Mode (current: interesting)
-│   │   ├── 47. Extracted File Percent Threshold (current: 0)
-│   │   ├── 48. Extracted File Size Threshold (current: 100G)
-│   │   ├── 49. File Preservation (current: quarantined)
-│   │   ├── 50. File scanning workers (current: 1)
-│   │   ├── 51. Preserved Files HTTP Server (current: Yes)
-│   │   │   ├── 52. Downloaded Preserved File Password (current: ********)
-│   │   │   └── 53. Zip Downloads (current: Yes)
-│   │   ├── 54. Scan with Strelka (current: Yes)
-│   │   └── 55. Update Scan Rules (current: Yes)
-│   └── 56. Use Threat Feeds for Zeek Intelligence (current: Yes)
-│       ├── 57. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
-│       ├── 58. Intel::item_expiration Timeout (current: -1min)
-│       ├── 59. Pull Threat Intelligence Feeds on Startup (current: Yes)
-│       └── 60. Threat Indicator "Since" Period (current: 24 hours ago)
-│       ├── 61. Use Intel on Live Traffic (current: Yes)
-│       └── 62. Use Intel on Uploaded PCAP (current: Yes)
-├── 63. Enrich with Reverse DNS Lookups (current: Yes)
-├── 64. Enrich with Manufacturer (OUI) Lookups (current: Yes)
-├── 65. Enrich with Frequency Scoring (current: Yes)
-├── 66. NetBox Mode (current: Local)
-│   ├── 67. Auto-Create Subnet Prefixes (current: Yes)
-│   ├── 68. Auto-Populate NetBox Inventory (current: Yes)
-│   ├── 69. NetBox Enrichment (current: Yes)
-│   ├── 70. NetBox IP Autopopulation Filter (current: empty)
-│   └── 71. NetBox Site Name (current: Malcolm)
-├── 72. Expose Malcolm Service Ports (current: No)
-├── 73. Network Traffic Node Name (current: host)
-└── 74. Capture Live Network Traffic (current: Yes)
-    ├── 75. Analyze Live Traffic with Suricata (current: Yes)
-    ├── 76. Analyze Live Traffic with Zeek (current: Yes)
-    ├── 77. Capture Filter (current: empty)
-    ├── 78. Capture Interface(s) (current: eth0)
-    ├── 79. Capture Live Traffic with netsniff-ng (current: Yes)
-    ├── 80. Capture Live Traffic with tcpdump (current: No)
-    ├── 81. Gather Traffic Capture Statistics (current: Yes)
-    └── 82. Optimize Interface Settings for Capture (current: Yes)
+│   ├── 42. Enable Suricata Rule Updates (current: Yes)
+│   └── 43. Disabled Suricata SIDs (current: empty)
+├── 44. Enable Zeek Analysis (current: Yes)
+│   ├── 45. Enable Zeek ICS/OT Analyzers (current: Yes)
+│   │   └── 46. Enable Zeek ICS "Best Guess" (current: Yes)
+│   ├── 47. File Extraction Mode (current: interesting)
+│   │   ├── 48. Extracted File Percent Threshold (current: 0)
+│   │   ├── 49. Extracted File Size Threshold (current: 100G)
+│   │   ├── 50. File Preservation (current: quarantined)
+│   │   ├── 51. File scanning workers (current: 1)
+│   │   ├── 52. Enabled Strelka Scanners (current: default)
+│   │   ├── 53. Preserved Files HTTP Server (current: Yes)
+│   │   │   ├── 54. Downloaded Preserved File Password (current: ********)
+│   │   │   └── 55. Zip Downloads (current: Yes)
+│   │   ├── 56. Scan with Strelka (current: Yes)
+│   │   └── 57. Update Scan Rules (current: Yes)
+│   └── 58. Use Threat Feeds for Zeek Intelligence (current: Yes)
+│       ├── 59. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
+│       ├── 60. Intel::item_expiration Timeout (current: -1min)
+│       ├── 61. Pull Threat Intelligence Feeds on Startup (current: Yes)
+│       └── 62. Threat Indicator "Since" Period (current: 24 hours ago)
+│       ├── 63. Use Intel on Live Traffic (current: Yes)
+│       └── 64. Use Intel on Uploaded PCAP (current: Yes)
+├── 65. Enrich with Reverse DNS Lookups (current: Yes)
+├── 66. Enrich with Manufacturer (OUI) Lookups (current: Yes)
+├── 67. Enrich with Frequency Scoring (current: Yes)
+├── 68. NetBox Mode (current: Local)
+│   ├── 69. Auto-Create Subnet Prefixes (current: Yes)
+│   ├── 70. Auto-Populate NetBox Inventory (current: Yes)
+│   ├── 71. NetBox Enrichment (current: Yes)
+│   ├── 72. NetBox IP Autopopulation Filter (current: empty)
+│   └── 73. NetBox Site Name (current: Malcolm)
+├── 74. Expose Malcolm Service Ports (current: No)
+├── 75. Network Traffic Node Name (current: host)
+└── 76. Capture Live Network Traffic (current: Yes)
+    ├── 77. Analyze Live Traffic with Suricata (current: Yes)
+    ├── 78. Analyze Live Traffic with Zeek (current: Yes)
+    ├── 79. Capture Filter (current: empty)
+    ├── 80. Capture Interface(s) (current: eth0)
+    ├── 81. Capture Live Traffic with netsniff-ng (current: Yes)
+    ├── 82. Capture Live Traffic with tcpdump (current: No)
+    ├── 83. Gather Traffic Capture Statistics (current: Yes)
+    └── 84. Optimize Interface Settings for Capture (current: Yes)
 
 --- Actions ---
   s. Save and Continue
@@ -444,6 +446,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
     - **Enable Suricata Rule Updates**
         + If the Malcolm instance has Internet connectivity, select **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm. This setting also applies to the rules used for live analysis when **Analyze Live Traffic with Suricata** is enabled.
+    - **Disabled Suricata SIDs**
+        + This value accepts a comma-separated list of rule SIDs with which to populate Suricata's [`disable.conf`](https://docs.suricata.io/en/latest/rule-management/suricata-update.html#controlling-which-rules-are-used), allowing users to turn off individual detection rules that are noisy, irrelevant, or causing false alarms without editing the rule files themselves.
 * **Enable Zeek Analysis**
     - This option is used to enable [Zeek](https://zeek.org/) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
     - These options are used to configure [**automatic file extraction and scanning**](file-scanning.md#ZeekFileExtraction):
@@ -459,6 +463,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
             * Choosing **Y** enables scanning of Zeek-extracted files with [Strelka](https://target.github.io/strelka/#/).
         + **File scanning workers**
             * This specifies the number of [Strelka](https://target.github.io/strelka/#/) backend instances performing file scanning concurrently.
+        + **Enabled Strelka Scanners**
+            * Individual Strelka [scanners](https://target.github.io/strelka/#/?id=scanner-list) can be enabled/disabled by including/excluding the scanner's name from this comma-separated list, which may contain scanner names and/or the string `default` for the built-in list of scanners (see `MALCOLM_STRELKA_SCANNERS_DEFAULT` in [`malcolm_constants.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/malcolm_constants.py)). Values may be combined (e.g., `default,ScanStrings`).
         + **Extracted File Percent Threshold** and **Extracted File Size Threshold**
             * Files extracted by Zeek can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
         + **File Preservation**

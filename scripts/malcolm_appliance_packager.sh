@@ -249,10 +249,8 @@ if "$MKDIR" "$DESTDIR"; then
   popd >/dev/null 2>&1
   popd >/dev/null 2>&1
   popd >/dev/null 2>&1
-  popd >/dev/null 2>&1
 else
   echo "Unable to create temporary directory \"$DESTDIR\""
-  popd >/dev/null 2>&1
   popd >/dev/null 2>&1
   exit 1
 fi

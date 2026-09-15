@@ -78,7 +78,12 @@ _base_config +CAPTURE_FLAG:
     | .configuration.exposeSFTP = ${SFTP_EXPOSE:-false}
     | .configuration.extractedFileMaxPercentThreshold = ${EXTRACTED_FILE_TOTAL_DISK_USAGE_PERCENT_THRESHOLD:-100}
     | .configuration.extractedFileMaxSizeThreshold = "${EXTRACTED_FILE_MAX_SIZE_THRESHOLD:-1T}"
-    | .configuration.extraTags = "${EXTRA_TAGS:-}"
+    | .configuration.extraTags = (
+        "${EXTRA_TAGS:-}"
+        | split(",")
+        | map(gsub("^[[:space:]]+|[[:space:]]+$"; ""))
+        | map(select(length > 0))
+      )
     | .configuration.filebeatTcpDefaults = ${FILEBEAT_TCP_EXPOSE:-false}
     | .configuration.fileCarveHttpServeEncryptKey = "${EXTRACTED_FILE_SERVER_PASSWORD:-infected}"
     | .configuration.fileCarveHttpServer = ${EXTRACTED_FILE_SERVER:-true}
@@ -116,6 +121,12 @@ _base_config +CAPTURE_FLAG:
     | .configuration.netboxMode = "${NETBOX:-local}"
     | .configuration.netboxSiteName = "${NETBOX_SITE_NAME:-Malcolm}"
     | .configuration.netboxUrl = "${NETBOX_URL}"
+    | .configuration.logstashNetBoxEnrichedDatasets = (
+        "${LOGSTASH_NETBOX_ENRICHMENT_DATASETS:-default}"
+        | split(",")
+        | map(gsub("^[[:space:]]+|[[:space:]]+$"; ""))
+        | map(select(length > 0))
+      )
     | .configuration.nginxResolverIpv4 = ${NGINX_RESOLVER_IPV4:-true}
     | .configuration.nginxResolverIpv6 = ${NGINX_RESOLVER_IPV6:-false}
     | .configuration.nginxSSL = ${HTTPS:-true}
@@ -128,17 +139,34 @@ _base_config +CAPTURE_FLAG:
     | .configuration.osMemory = "${OPENSEARCH_MEMORY}"
     | .configuration.pcapDir = "${PCAP_PATH}"
     | .configuration.pcapFilter = "${CAPTURE_FILTER}"
-    | .configuration.pcapIface = "${CAPTURE_IFACE}"
+    | .configuration.pcapIface = (
+        "${CAPTURE_IFACE:-}"
+        | split(",")
+        | map(gsub("^[[:space:]]+|[[:space:]]+$"; ""))
+        | map(select(length > 0))
+      )
     | .configuration.pcapNetSniff = ${CAPTURE_NETSNIFF}
     | .configuration.pcapNodeName = "${NODE_NAME:-$(hostname -s)}"
     | .configuration.pcapTcpDump = ${CAPTURE_TCPDUMP}
     | .configuration.pipelineEnabled = ${PIPELINE_ENABLED:-true}
+    | .configuration.pipelineScanners = (
+        "${STRELKA_SCANNERS:-}"
+        | split(",")
+        | map(gsub("^[[:space:]]+|[[:space:]]+$"; ""))
+        | map(select(length > 0))
+      )
     | .configuration.pipelineWorkers = ${PIPELINE_WORKERS:-1}
     | .configuration.processGroupId = ${PGID:-$(id -g)}
     | .configuration.processUserId = ${PUID:-$(id -u)}
     | .configuration.reverseDns = ${REVERSE_DNS:-false}
     | .configuration.suricataLogDir = "${SURICATA_PATH}"
     | .configuration.suricataRuleUpdate = ${SURICATA_RULE_UPDATE:-false}
+    | .configuration.suricataDisableSids = (
+        "${SURICATA_DISABLE_SIDS:-}"
+        | split(",")
+        | map(gsub("^[[:space:]]+|[[:space:]]+$"; ""))
+        | map(select(length > 0))
+      )
     | .configuration.syslogTcpPort = ${SYSLOG_PORT_TCP:-0}
     | .configuration.syslogUdpPort = ${SYSLOG_PORT_UDP:-0}
     | .configuration.traefikEntrypoint = "${TRAEFIK_ENTRYPOINT}"
@@ -161,6 +189,8 @@ _base_config +CAPTURE_FLAG:
 
   jq -f "${JQ_FILE}" "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
 
+  [[ "$DEBUG" == "true" ]] && jq < "${SETTINGS_FILE}" >&2
+
   python3 ./scripts/install.py --verbose "${DEBUG}" --configure --non-interactive \
     --configure-file "${MALCOLM_COMPOSE_FILE:-docker-compose.yml}" \
     --environment-dir-output "${MALCOLM_CONFIG_DIR:-config}" \
@@ -181,7 +211,6 @@ _base_config +CAPTURE_FLAG:
           "opensearch.env:MALCOLM_NETWORK_INDEX_SUFFIX=${MALCOLM_NETWORK_INDEX_SUFFIX:-'%{%y%m%d}'}" \
           "opensearch.env:MALCOLM_OTHER_INDEX_ALIAS=${MALCOLM_OTHER_INDEX_ALIAS:-malcolm_other}" \
           "opensearch.env:MALCOLM_OTHER_INDEX_SUFFIX=${MALCOLM_OTHER_INDEX_SUFFIX:-'%{%y%m%d}'}" \
-          "suricata.env:SURICATA_DISABLE_SIDS=${SURICATA_DISABLE_SIDS:-}" \
           "suricata-offline.env:SURICATA_AUTO_ANALYZE_PCAP_PROCESSES=${SURICATA_AUTO_ANALYZE_PCAP_PROCESSES:-2}" \
           "suricata-offline.env:SURICATA_AUTO_ANALYZE_PCAP_THREADS=${SURICATA_AUTO_ANALYZE_PCAP_THREADS:-0}" \
           "upload-common.env:MALCOLM_API_DEBUG=${MALCOLM_API_DEBUG:-false}" \

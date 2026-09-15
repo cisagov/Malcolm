@@ -158,6 +158,9 @@ _LIST_OF_STRING_VARS = [
     KEY_ENV_EXTRA_TAGS,
     KEY_ENV_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES,
     KEY_ENV_PCAP_IFACE,
+    KEY_ENV_PCAP_IFACE,
+    KEY_ENV_SURICATA_DISABLE_SIDS,
+    KEY_ENV_PIPELINE_SCANNERS,
 ]
 
 
@@ -639,6 +642,9 @@ class EnvMapper:
 
             # Suricata
             self.env_var_by_map_key[KEY_ENV_SURICATA_UPDATE_RULES].config_items = [KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_DISABLE_SIDS].config_items = [
+                KEY_CONFIG_ITEM_SURICATA_DISABLE_SIDS
+            ]
             self.env_var_by_map_key[KEY_ENV_SURICATA_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
             self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].config_items = [
                 KEY_CONFIG_ITEM_LIVE_SURICATA,
@@ -718,6 +724,7 @@ class EnvMapper:
             ]
             self.env_var_by_map_key[KEY_ENV_PIPELINE_ENABLED].config_items = [KEY_CONFIG_ITEM_PIPELINE_ENABLED]
             self.env_var_by_map_key[KEY_ENV_PIPELINE_WORKERS].config_items = [KEY_CONFIG_ITEM_PIPELINE_WORKERS]
+            self.env_var_by_map_key[KEY_ENV_PIPELINE_SCANNERS].config_items = [KEY_CONFIG_ITEM_PIPELINE_SCANNERS]
 
             self.env_var_by_map_key[KEY_ENV_PIPELINE_RULES_UPDATE].config_items = [
                 KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE

@@ -63,7 +63,7 @@
                   "type": "keyword"
                 },
                 "inner_vlan": {
-                  "type": "integer"
+                  "type": "keyword"
                 },
                 "ja4l": {
                   "type": "keyword"
@@ -117,7 +117,7 @@
                   "type": "keyword"
                 },
                 "vlan": {
-                  "type": "integer"
+                  "type": "keyword"
                 }
               }
             },

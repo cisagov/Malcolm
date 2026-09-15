@@ -53,7 +53,10 @@ if ( [[ ! -f "$CERT_FILE" ]] || [[ ! -f "$KEY_FILE" ]] ) && [[ -x /usr/local/bin
   popd >/dev/null 2>&1
 fi
 
-# download and/or update geo updates
+# download and/or update geo updates (see not in initarkime.sh about these proxy vars)
+[[ -n "${HTTP_PROXY:-}" && -z "${http_proxy:-}" ]] && export http_proxy="$HTTP_PROXY"
+[[ -n "${HTTPS_PROXY:-}" && -z "${https_proxy:-}" ]] && export https_proxy="$HTTPS_PROXY"
+[[ -n "${NO_PROXY:-}" && -z "${no_proxy:-}" ]] && export no_proxy="$NO_PROXY"
 $ARKIME_DIR/bin/arkime_update_geo.sh
 
 # calculate tags

@@ -247,6 +247,17 @@ function _cleanup {
 }
 
 ###############################################################################
+# normalize croc's terminal output and suppress update notices
+function _filter_croc_output {
+    LC_ALL=C sed -u -E \
+        -e $'s/.*\r//' \
+        -e '/^A newer croc version is available:/d' \
+        -e '\|^Run: curl https://getcroc\.com \| bash$|d' \
+        -e '/^Or open:$/d' \
+        -e '\|^[[:space:]]*https://getcroc\.com/\?code=|d'
+}
+
+###############################################################################
 
 trap "_cleanup" EXIT
 
@@ -284,7 +295,9 @@ if [[ -n "${PORTS}" ]] && [[ "${MODE}" == "tx" ]] && (( $# > 0 )); then
     [[ -n "${SEND_RELAY_IP}" ]] && RELAY_ARGS=(--relay "${SEND_RELAY_IP}:${FIRST_PORT}")
 
     # run croc
-    "${CROC_BIN}" --yes --ignore-stdin --overwrite ${DEBUG_FLAG} "${CURVE_ARGS[@]}" "${RELAY_ARGS[@]}" send "${HASH_ARGS[@]}" "$@"
+    "${CROC_BIN}" --yes --ignore-stdin --overwrite --disable-clipboard ${DEBUG_FLAG} \
+        "${CURVE_ARGS[@]}" "${RELAY_ARGS[@]}" send \
+        "${HASH_ARGS[@]}" "$@" 2>&1 | _filter_croc_output
 
 elif [[ -n "${PORTS}" ]] && ( [[ "${MODE}" == "rx" ]] && [[ -n "${TOKEN}" ]] && ( [[ -z "${LOCAL_RELAY}" ]] || [[ -n "${SERVER}" ]] ) ); then
     # we have ports defined, have requested receive mode, have been given a token, and either have a relay IP or are not using a local relay
@@ -293,7 +306,9 @@ elif [[ -n "${PORTS}" ]] && ( [[ "${MODE}" == "rx" ]] && [[ -n "${TOKEN}" ]] && 
 
     # run croc
     export CROC_SECRET="${TOKEN}"
-    "${CROC_BIN}" --yes --ignore-stdin --overwrite ${DEBUG_FLAG} "${CURVE_ARGS[@]}" "${RELAY_ARGS[@]}" "${OUTPUT_ARGS[@]}"
+    "${CROC_BIN}" --yes --ignore-stdin --overwrite --disable-clipboard ${DEBUG_FLAG} \
+        "${CURVE_ARGS[@]}" "${RELAY_ARGS[@]}" \
+        "${OUTPUT_ARGS[@]}" 2>&1 | _filter_croc_output
 
 else
     _help >&2

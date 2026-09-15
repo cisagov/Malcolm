@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:9.4.3
+FROM docker.elastic.co/beats/filebeat-oss:9.5.2
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -72,14 +72,14 @@ ARG FILEBEAT_SYSLOG_TCP_LISTEN=false
 ARG FILEBEAT_SYSLOG_UDP_LISTEN=false
 ARG PCAP_NODE_NAME=malcolm
 
-ENV SUPERCRONIC_VERSION="0.2.47"
+ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION="4.53.3"
+ENV YQ_VERSION="4.53.6"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV EVTX_VERSION="0.12.2"

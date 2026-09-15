@@ -75,6 +75,8 @@ passwd: password updated successfully
 
 Once Hedgehog Linux has booted, [configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) can proceed using Malcolm's [`./scripts/configure` script](ubuntu-install-example.md#UIOpts).
 
+Since Hedgehog on Raspberry Pi does not have a graphical user interface, users should utilize NetworkManager's command-line utilities such as [`nmcli`](https://networkmanager.dev/docs/api/latest/nmcli.html) or [`nmtui`](https://networkmanager.dev/docs/api/latest/nmtui.html) to [configure network interfaces](malcolm-hedgehog-e2e-iso-install.md#NetConf).
+
 ## <a name="HedgehogRaspiPerformance"></a>Performance Considerations
 
 Due to the Raspberry Pi's hardware and resource constraints, there are a few things to take into consideration:

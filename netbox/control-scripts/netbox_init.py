@@ -29,6 +29,19 @@ orig_path = os.getcwd()
 
 
 ###################################################################################################
+def map_valkey_env_to_redis():
+    # Mirror redis_valkey_env_map.sh from the container ENTRYPOINT chain. When this script is
+    # invoked via "docker compose exec" / kubectl exec (e.g., control.py netboxRestore), the
+    # exec session gets only the compose/pod-spec environment: variables exported by entrypoint
+    # scripts are absent, so REDIS_* would be unset and every manage.py subprocess would load a
+    # Django configuration with default (wrong) cache/RQ settings. Like the shell wrapper, an
+    # already-present REDIS_* variable wins (setdefault only fills in missing keys).
+    for key, value in list(os.environ.items()):
+        if key.startswith('VALKEY_'):
+            os.environ.setdefault('REDIS_' + key[len('VALKEY_') :], value)
+
+
+###################################################################################################
 def parse_args():
     parser = argparse.ArgumentParser(
         description='\n'.join([]),
@@ -434,6 +447,13 @@ def perform_migrations(netbox_venv_py, manage_script):
                     success = False
 
         # create users_user for superuser
+        # Run the script via runpy inside a small --command stub rather than piping it on
+        # stdin: stdin goes through code.InteractiveConsole, which prints tracebacks and
+        # exits 0, silently masking failures (e.g., the missing superuser token after
+        # TRUNCATE users_user CASCADE). An exception raised inside run_path propagates out
+        # of the --command exec and manage.py exits nonzero. The traceback scan is
+        # belt-and-suspenders in case some failure mode still exits 0.
+        su_script = '/usr/local/bin/netbox_superuser_create.py'
         cmd = [
             netbox_venv_py,
             os.path.basename(manage_script),
@@ -441,10 +461,12 @@ def perform_migrations(netbox_venv_py, manage_script):
             "--no-color",
             "--interface",
             "python",
+            "--command",
+            f"import runpy; runpy.run_path({su_script!r}, run_name='__main__')",
         ]
-        with open('/usr/local/bin/netbox_superuser_create.py', 'r') as f:
-            err, results = malcolm_utils.run_process(cmd, logger=logging, stdin=f.read())
-        if (err == 0) and results:
+        err, results = malcolm_utils.run_process(cmd, logger=logging)
+        results_str = "\n".join(results) if isinstance(results, (list, tuple)) else str(results)
+        if (err == 0) and results and ('Traceback' not in results_str):
             logging.info(f'success setting up superuser: {results}')
         else:
             logging.error(f'{err} setting up superuser: {results}')
@@ -483,10 +505,18 @@ def restore_database_backup(args, netbox_venv_py, manage_script):
     successes = []
     try:
         stop_netbox()
-        successes.append(execute_restore_commands(args, database_file))
-        start_netbox()
-        successes.append(perform_migrations(netbox_venv_py, manage_script))
-        restore_media_directory(args, database_file)
+        try:
+            successes.append(execute_restore_commands(args, database_file))
+            # run migrations (and, more importantly, superuser/token recreation) BEFORE
+            # bringing granian back up: execute_restore_commands truncates users_user,
+            # so starting the API first would serve a window (>= startsecs) during which
+            # no users or tokens exist and clients get 403s. None of these steps needs
+            # the NetBox service itself, only postgreSQL.
+            successes.append(perform_migrations(netbox_venv_py, manage_script))
+            restore_media_directory(args, database_file)
+        finally:
+            # bring the service back up even if the restore failed partway
+            start_netbox()
     except Exception as e:
         logging.error(f"{type(e).__name__} restoring {os.path.basename(database_file)}: {e}")
 
@@ -1000,6 +1030,10 @@ runpy.run_path({str(tmp_import_script)!r}, run_name="__main__")
 ###################################################################################################
 # main
 def main():
+    # normalize VALKEY_*/REDIS_* before anything spawns a manage.py subprocess, in case we
+    # were invoked outside the container's ENTRYPOINT chain (e.g., docker/kubectl exec)
+    map_valkey_env_to_redis()
+
     args = parse_args()
 
     netbox_venv_py = os.path.join(os.path.join(os.path.join(args.netbox_dir, 'venv'), 'bin'), 'python')
@@ -1009,6 +1043,13 @@ def main():
     # if there is a database backup .gz in the preload directory, load it up (preferring the newest
     # if there are multiple) instead of populating via API
     preload_database_success = restore_database_backup(args, netbox_venv_py, manage_script)
+
+    # if a backup file was explicitly requested (vs. discovered in the preload directory) and the
+    # restore failed, exit nonzero so callers (control.py netboxRestore) actually see the failure
+    # instead of reporting a clean restore over a database with no superuser token
+    if args.preload_backup_file and not preload_database_success:
+        logging.error(f"Restore of {os.path.basename(args.preload_backup_file)} failed")
+        sys.exit(1)
 
     # only proceed to do the regular population if if we didn't preload a database backup, or
     #   if we attempted (and failed) but they didn't explicitly specify a backup file

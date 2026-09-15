@@ -50,10 +50,6 @@ steps:
       - __FIRMWARE_COMPONENT_OLD__
     unless: rootfs_unpacked
 
-  # Mount /proc, /sys, /dev, /dev/pts, and other virtual filesystems
-  # required by package maintainer scripts and initramfs generation.
-  - virtual-filesystems: tag-root
-
   - create-file: /etc/apt/sources.list
     contents: |+
       deb http://deb.debian.org/debian __RELEASE__ main contrib __FIRMWARE_COMPONENT__ __FIRMWARE_COMPONENT_OLD__
@@ -72,6 +68,26 @@ steps:
     src: rootfs/etc/initramfs-tools/scripts/local-bottom/rpi-resizerootfs
     perm: 0755
     unless: rootfs_unpacked
+
+  - __EXTRA_PRE_APT_STEPS__
+
+  # The initial package installation occurs before sensor_install.sh runs.
+  # Mount the virtual filesystems needed by package maintainer scripts here,
+  # without using vmdb2's virtual-filesystems step, which interferes with the
+  # separately mounted /boot/firmware partition in this image recipe.
+  - shell: |
+      set -eu
+      mkdir -p \
+        "${ROOT?}/proc" \
+        "${ROOT?}/sys" \
+        "${ROOT?}/dev/pts" \
+        "${ROOT?}/run"
+      mount -t proc proc "${ROOT?}/proc"
+      mount -t devtmpfs devtmpfs "${ROOT?}/dev"
+      mount -t devpts devpts "${ROOT?}/dev/pts"
+      mount -t sysfs sysfs "${ROOT?}/sys"
+      mount -t tmpfs tmpfs "${ROOT?}/run"
+    root-fs: tag-root
 
   - apt: install
     packages:
@@ -95,6 +111,17 @@ steps:
     tag: tag-root
     unless: rootfs_unpacked
 
+  # Unmount only the temporary virtual filesystems mounted above. The
+  # firmware partition remains mounted at /boot/firmware.
+  - shell: |
+      set -eu
+      umount "${ROOT?}/run"
+      umount "${ROOT?}/sys"
+      umount "${ROOT?}/dev/pts"
+      umount "${ROOT?}/dev"
+      umount "${ROOT?}/proc"
+    root-fs: tag-root
+
   - cache-rootfs: tag-root
     unless: rootfs_unpacked
 
@@ -109,18 +136,23 @@ steps:
       install -m 644 -o root -g root rootfs/etc/network/interfaces.d/eth0 "${ROOT?}/etc/network/interfaces.d/eth0"
       install -m 600 -o root -g root rootfs/etc/network/interfaces.d/wlan0 "${ROOT?}/etc/network/interfaces.d/wlan0"
 
+      install -m 755 -o root -g root rootfs/usr/local/sbin/hedgehog-grow-root "${ROOT?}/usr/local/sbin/hedgehog-grow-root"
+      install -m 644 -o root -g root rootfs/etc/systemd/system/hedgehog-grow-root.service "${ROOT?}/etc/systemd/system/"
+      mkdir -p "${ROOT?}/etc/systemd/system/multi-user.target.wants/"
+      ln -sf /etc/systemd/system/hedgehog-grow-root.service "${ROOT?}/etc/systemd/system/multi-user.target.wants/hedgehog-grow-root.service"
+
       install -m 755 -o root -g root rootfs/usr/local/sbin/rpi-set-sysconf "${ROOT?}/usr/local/sbin/rpi-set-sysconf"
       install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-set-sysconf.service "${ROOT?}/etc/systemd/system/"
       install -m 644 -o root -g root rootfs/boot/firmware/sysconf.txt "${ROOT?}/boot/firmware/sysconf.txt"
       mkdir -p "${ROOT?}/etc/systemd/system/basic.target.requires/"
-      ln -s /etc/systemd/system/rpi-set-sysconf.service "${ROOT?}/etc/systemd/system/basic.target.requires/rpi-set-sysconf.service"
+      ln -sf /etc/systemd/system/rpi-set-sysconf.service "${ROOT?}/etc/systemd/system/basic.target.requires/rpi-set-sysconf.service"
 
       install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/"
       mkdir -p "${ROOT?}/etc/systemd/system/multi-user.target.requires/"
-      ln -s /etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-reconfigure-raspi-firmware.service"
+      ln -sf /etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-reconfigure-raspi-firmware.service"
 
       install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-generate-ssh-host-keys.service "${ROOT?}/etc/systemd/system/"
-      ln -s /etc/systemd/system/rpi-generate-ssh-host-keys.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-generate-ssh-host-keys.service"
+      ln -sf /etc/systemd/system/rpi-generate-ssh-host-keys.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-generate-ssh-host-keys.service"
       rm -f "${ROOT?}"/etc/ssh/ssh_host_*_key*
 
       __EXTRA_ROOT_SHELL_CMDS__
@@ -147,11 +179,42 @@ steps:
   # sure we don't lose label-based booting.
   - chroot: tag-root
     shell: |
-      sed -i 's/root=/console=__SERIAL_CONSOLE__ root=/' /boot/firmware/cmdline.txt
-      sed -i 's#root=/dev/mmcblk0p2#root=LABEL=RASPIROOT#' /boot/firmware/cmdline.txt
-      sed -i 's/^#ROOTPART=.*/ROOTPART=LABEL=RASPIROOT/' /etc/default/raspi*-firmware
+      # raspi-firmware may generate a root device based on the build
+      # environment, such as /dev/mmcblk0p2 or /dev/mapper/loop0p2.
+      # Always replace the complete root= argument with the filesystem label.
+      sed -E -i \
+        's#(^|[[:space:]])root=[^[:space:]]+#\1root=LABEL=RASPIROOT#' \
+        /boot/firmware/cmdline.txt
+
+      # Add the serial console only if raspi-firmware did not already add it.
+      if ! grep -Eq \
+        '(^|[[:space:]])console=__SERIAL_CONSOLE__([[:space:]]|$)' \
+        /boot/firmware/cmdline.txt; then
+        sed -E -i \
+          's#(^|[[:space:]])root=#\1console=__SERIAL_CONSOLE__ root=#' \
+          /boot/firmware/cmdline.txt
+      fi
+
+      sed -i \
+        's/^#ROOTPART=.*/ROOTPART=LABEL=RASPIROOT/' \
+        /etc/default/raspi*-firmware
 
       __EXTRA_CHROOT_SHELL_CMDS__
+
+      # Validate the final kernel command line.
+      grep -Eq \
+        '(^|[[:space:]])root=LABEL=RASPIROOT([[:space:]]|$)' \
+        /boot/firmware/cmdline.txt
+
+      if grep -Eq \
+        '(^|[[:space:]])root=/dev/(mapper|loop|mmcblk)' \
+        /boot/firmware/cmdline.txt; then
+        echo "Unexpected device-specific root in cmdline.txt:" >&2
+        cat /boot/firmware/cmdline.txt >&2
+        exit 1
+      fi
+
+      __FINAL_CHROOT_SHELL_CMDS__
 
   # TODO(https://github.com/larswirzenius/vmdb2/issues/24): remove once vmdb
   # clears /etc/resolv.conf on its own.

@@ -14,7 +14,7 @@ This document outlines the steps needed to configure and use GitHub runners to b
 
 Users should log into GitHub and navigate to their Malcolm fork. Click **⚙ Settings** along the top of the page, then open the **▶ Actions** menu from the left panel and select **General**.
 
-Select **Allow *username*, and select non-*username*, actions and reusable workflows** and check the boxes for **Allow actions created by GitHub** and **Allow actions by Marketplace verified creators**. Malcolm's workflows also use a third-party action ([styfle/cancel-workflow-action](https://github.com/styfle/cancel-workflow-action)) for canceling running workflows when new ones are started, so add the text `styfle/cancel-workflow-action@*,` under **Allow specified actions and reusable workflows**. Click **Save** underneath that section.
+Select **Allow *username*, and select non-*username*, actions and reusable workflows** and check the boxes for **Allow actions created by GitHub** and **Allow actions by Marketplace verified creators**.
 
 Under **Fork pull request workflows from outside collaborators**, select **Require approval for all outside collaborators** (or read [Approving workflow runs from public forks](https://docs.github.com/en/actions/managing-workflow-runs/approving-workflow-runs-from-public-forks) and make another selection). Click **Save** for that section.
 

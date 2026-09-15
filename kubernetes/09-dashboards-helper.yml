@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: dashboards-helper-container
-        image: ghcr.io/idaholab/malcolm/dashboards-helper:26.07.1
+        image: ghcr.io/idaholab/malcolm/dashboards-helper:26.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

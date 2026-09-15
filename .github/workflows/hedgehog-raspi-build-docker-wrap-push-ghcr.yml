@@ -31,7 +31,6 @@ jobs:
     uses: ./.github/workflows/raspi-build-push.yml
 
     permissions:
-      actions: write
       packages: write
       contents: read
       security-events: write

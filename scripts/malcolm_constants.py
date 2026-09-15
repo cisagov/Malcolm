@@ -56,7 +56,7 @@ class PresentationMode(Enum):
 ###################################################################################################
 # Constants for Malcolm image prefix and dotfile secret key
 MALCOLM_IMAGE_PREFIX = "ghcr.io/idaholab/malcolm/"
-MALCOLM_VERSION = "26.07.1"
+MALCOLM_VERSION = "26.08.0"
 
 ###################################################################################################
 # Constants for Malcolm configmap directory replacer
@@ -347,6 +347,71 @@ MALCOLM_ENRICHABLE_LOG_TYPES_DEFAULT = [
     "zeek.software",
     "zeek.ssh",
     "zeek.weird",
+]
+
+MALCOLM_STRELKA_SCANNERS_DEFAULT = [
+    "ScanBatch",
+    "ScanBmpEof",
+    "ScanBzip2",
+    "ScanClamav",
+    "ScanDmg",
+    "ScanDocx",
+    "ScanDonut",
+    "ScanEmail",
+    "ScanEncryptedDoc",
+    "ScanEncryptedZip",
+    "ScanEntropy",
+    "ScanExiftool",
+    "ScanGifEof",
+    "ScanGzip",
+    "ScanHtml",
+    "ScanIqy",
+    "ScanIso",
+    "ScanJarManifest",
+    "ScanJavascript",
+    "ScanJnlp",
+    "ScanJpegEof",
+    "ScanJson",
+    "ScanLibarchive",
+    "ScanLnk",
+    "ScanLsb",
+    "ScanLzma",
+    "ScanMacho",
+    "ScanManifest",
+    "ScanMsi",
+    "ScanOle",
+    "ScanOnenote",
+    "ScanPdf",
+    "ScanPe",
+    "ScanPgp",
+    "ScanPhp",
+    "ScanPkcs7",
+    "ScanPlist",
+    "ScanPngEof",
+    "ScanPyinstaller",
+    "ScanQr",
+    "ScanRar",
+    "ScanRpm",
+    "ScanRtf",
+    "ScanSevenZip",
+    "ScanSwf",
+    "ScanTar",
+    "ScanTnef",
+    "ScanTranscode",
+    "ScanUdf",
+    "ScanUpx",
+    "ScanUrl",
+    "ScanVb",
+    "ScanVba",
+    "ScanVhd",
+    "ScanVsto",
+    "ScanXar",
+    "ScanXl4ma",
+    "ScanXml",
+    "ScanYara",
+    "ScanZip",
+    "ScanZlib",
+    "ScanZstd",
 ]
 
 

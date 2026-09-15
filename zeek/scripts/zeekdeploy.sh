@@ -229,6 +229,21 @@ else
   echo "CommandTimeout = $ZEEK_COMMAND_TIMEOUT" >> ./zeekctl.cfg
 fi
 
+# Enable ZAM
+# https://docs.zeek.org/en/master/advanced/scripting/optimization.html
+ZEEK_ZAM="${ZEEK_ZAM:-false}"
+if [[ "$ZEEK_ZAM" = "true" ]]; then
+  if grep --quiet ^ZeekArgs ./zeekctl.cfg; then
+    grep --quiet -- '-O ZAM' ./zeekctl.cfg || sed -i '/^ZeekArgs/ s/$/ -O ZAM/' ./zeekctl.cfg
+  else
+    echo "ZeekArgs = -O ZAM" >> ./zeekctl.cfg
+  fi
+else
+  if grep --quiet -- '-O ZAM' ./zeekctl.cfg; then
+    sed -i -E '/^ZeekArgs/ s/[[:space:]]*-O ZAM//' ./zeekctl.cfg
+  fi
+fi
+
 # completely rewrite node.cfg for one worker per interface
 # see idaholab/Malcolm#36 for details on fine-tuning
 

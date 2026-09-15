@@ -67,12 +67,38 @@ backports_suite = '%s-backports' % suite
 if version in ['4', '5']:
     serial = 'ttyS1,115200'
 
-# CMA fixup (TODO: does this apply to Rpi5?):
-extra_chroot_shell_cmds = []
-if version == '4':
-    extra_chroot_shell_cmds = [
-        "sed -i 's/cma=64M //' /boot/firmware/cmdline.txt",
+# Model-specific recipe steps that must run before the initial kernel install.
+extra_pre_apt_steps = []
+if version == '5':
+    extra_pre_apt_steps = [
+        '# Pi 5 USB is provided through RP1. Include and preload the complete',
+        '# controller and storage chain so the root filesystem can be on USB.',
+        '- shell: |',
+        '    mkdir -p "${ROOT?}/etc/dracut.conf.d"',
+        '  root-fs: tag-root',
+        '',
+        '- create-file: /etc/dracut.conf.d/raspi-usb.conf',
+        '  contents: |',
+        '    hostonly="no"',
+        '    force_drivers+=" irq_bcm2712_mip rp1_pci xhci_hcd xhci_plat_hcd usb_storage uas sd_mod scsi_mod "',
+        '',
+        '# Force the D-step Pi 5 device tree. Keeping this in raspi-firmware-custom',
+        '# ensures later kernel and firmware updates preserve the setting.',
+        '- create-file: /etc/default/raspi-firmware-custom',
+        '  contents: |',
+        '    device_tree=bcm2712-d-rpi-5-b.dtb',
     ]
+
+extra_chroot_shell_cmds = []
+final_chroot_shell_cmds = []
+
+# raspi-firmware adds cma=64M by default. Remove it for Raspberry Pi 4,
+# where Debian warns that explicitly setting CMA may prevent boot.
+# Raspberry Pi 5 has been tested successfully with the default value.
+if version == '4':
+    extra_chroot_shell_cmds.append(
+        "sed -E -i 's/(^|[[:space:]])cma=64M([[:space:]]|$)/\\1/' /boot/firmware/cmdline.txt"
+    )
 
 # Hostname:
 hostname = 'Hedgehog-rpi-%s' % version
@@ -90,6 +116,30 @@ extra_chroot_shell_cmds.extend(
         'bash -o pipefail -x /root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
     ]
 )
+
+if version == '5':
+    extra_chroot_shell_cmds.extend(
+        [
+            # Regenerate after all sensor packages and hooks have run so both
+            # /boot and /boot/firmware contain the final RP1-capable initramfs.
+            'update-initramfs -u -k all',
+            "grep -Fxq 'device_tree=bcm2712-d-rpi-5-b.dtb' /boot/firmware/config.txt",
+            "for initrd in /boot/initrd.img-*; do "
+            "lsinitrd \"$initrd\" | grep -q '/irq-bcm2712-mip[.]ko' || exit 1; "
+            "lsinitrd \"$initrd\" | grep -q '/rp1_pci[.]ko' || exit 1; "
+            "done",
+        ]
+    )
+
+# sensor_install.sh leaves these mounted so any final initramfs generation
+# runs in a supported environment. Unmount them only after all chroot work.
+final_chroot_shell_cmds = [
+    'for target in /dev/pts /run /dev /sys /proc; do',
+    '    if mountpoint -q "$target"; then',
+    '        umount "$target"',
+    '    fi',
+    'done',
+]
 
 ### The following prepares substitutions based on variables set earlier
 
@@ -155,8 +205,10 @@ with open('raspi_master.yaml', 'r') as in_file:
         #            .replace('__GITCOMMIT__', gitcommit) \
         #            .replace('__BUILDTIME__', buildtime)
 
+        out_text = align_replace(out_text, '- __EXTRA_PRE_APT_STEPS__', extra_pre_apt_steps)
         out_text = align_replace(out_text, '__EXTRA_ROOT_SHELL_CMDS__', extra_root_shell_cmds)
         out_text = align_replace(out_text, '__EXTRA_CHROOT_SHELL_CMDS__', extra_chroot_shell_cmds)
+        out_text = align_replace(out_text, '__FINAL_CHROOT_SHELL_CMDS__', final_chroot_shell_cmds)
         out_text = align_replace(out_text, '__BACKPORTS__', backports_stanza.splitlines())
 
         # Try not to keep lines where the placeholder was replaced

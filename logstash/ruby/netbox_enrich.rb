@@ -1136,11 +1136,14 @@ def lookup_prefixes(
           end
           prefixes << { :name => _prefixName,
                         :id => p.fetch(:id, nil),
+                        :cidr => p.fetch(:prefix, nil),
                         :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
                         :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
                         :url => p.fetch(:url, nil),
                         :tags => p.fetch(:tags, nil),
-                        :details => @verbose ? p : nil }
+                        :details => @verbose ? p : nil
+                      # merge in any NetBox custom_fields (e.g. :purdue_zone) as top-level keys; on key collision, keep our hardcoded value over the custom field
+                      }.merge(p.fetch(:custom_fields, {}) || {}) { |_key, base_val, _custom_val| base_val }
         end
         _query[:offset] += _tmp_prefixes.size
         break unless (_tmp_prefixes.size >= @page_size)
@@ -1277,7 +1280,9 @@ def lookup_devices(
                           :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.has_key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
                           :device_type => ((_dtype = _device.fetch(:device_type, nil)) && _dtype&.has_key?(:name)) ? _dtype[:name] : _dtype&.fetch(:display, nil),
                           :manufacturer => ((_manuf = _device.dig(:device_type, :manufacturer)) && _manuf&.has_key?(:name)) ? _manuf[:name] : _manuf&.fetch(:display, nil),
-                          :details => @verbose ? _device : nil }
+                          :details => @verbose ? _device : nil
+                        # merge in any NetBox custom_fields (e.g. :purdue_zone) as top-level keys; on key collision, keep our hardcoded value over the custom field
+                        }.merge(_device.fetch(:custom_fields, {}) || {}) { |_key, base_val, _custom_val| base_val }
           end
         end
         _query[:offset] += _tmp_ip_addresses.size
@@ -1756,6 +1761,35 @@ def netbox_lookup(
     #################################################################################
       # retrieve the list of IP address prefixes containing the search key
       _prefixes = lookup_prefixes(ip_key, site_id, _nb)
+
+      # if we autocreated a device/VM and a containing prefix has a purdue_zone custom
+      #   field set, propagate that value to the new object (most specific prefix wins)
+      if !_autopopulate_device.nil? &&
+         _autopopulate_device.fetch(:id, nil)&.nonzero? &&
+         _prefixes.is_a?(Array) &&
+         (_zone_prefix = _prefixes.select { |p| p.is_a?(Hash) && !p[:purdue_zone].to_s.empty? }
+                                  .max_by { |p| (IPAddr.new(p[:cidr].to_s).prefix rescue -1) }) &&
+         (_purdue_zone = _zone_prefix[:purdue_zone])
+      then
+        begin
+          _zone_patch_data = { :custom_fields => { :purdue_zone => _purdue_zone } }
+          if (_zone_patch_response = _nb.patch("#{_autopopulate_manuf&.fetch(:vm, false) ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_autopopulate_device[:id]}/", _zone_patch_data.to_json, @nb_headers).body) &&
+             _zone_patch_response.is_a?(Hash) &&
+             _zone_patch_response.has_key?(:id)
+          then
+            # reflect the value in this event's enrichment result as well
+            _lookup_result[:purdue_zone] = [ _purdue_zone ] if (@lookup_type == :ip_device) && _lookup_result.is_a?(Hash)
+          elsif @debug
+            puts('netbox_lookup (%{name} @ %{site}): _zone_patch_response: %{result}' % { name: ip_key, site: site_id, result: JSON.generate(_zone_patch_response) })
+          end
+        rescue Faraday::Error => e
+          puts "netbox_lookup purdue_zone patch (#{ip_key}, #{site_id}): #{e.message}" if @debug
+        end
+      end
+
+      # :cidr was only needed for most-specific-prefix selection above; drop it so
+      #   the ip_prefix enrichment output shape is unchanged
+      _prefixes.each { |p| p.delete(:cidr) if p.is_a?(Hash) } if _prefixes.is_a?(Array)
 
       if (_prefixes.nil? || _prefixes.empty?) && @autopopulate_create_prefix
         # we didn't find a prefix containing this private-space IPv4 address and auto-create is true

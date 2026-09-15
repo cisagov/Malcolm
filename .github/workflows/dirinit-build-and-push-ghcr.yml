@@ -16,7 +16,6 @@ jobs:
   docker:
     uses: ./.github/workflows/docker-build-push-scan.yml
     permissions:
-      actions: write
       packages: write
       contents: read
       security-events: write

@@ -48,6 +48,7 @@ This means you can use `body` to populate ECS-style nested fields. For example, 
 
 This endpoint is designed to be used as a custom webhook destination in OpenSearch Alerting. A Mustache message template targeting this endpoint might look like:
 
+{% raw %}
 ```json
 {
   "alert": {
@@ -60,6 +61,7 @@ This endpoint is designed to be used as a custom webhook destination in OpenSear
   }
 }
 ```
+{% endraw %}
 
 The `body` field is a JSON-encoded string containing the aggregation results from the monitor query. The trailing commas produced by Mustache iteration are handled transparently by the parser.
 

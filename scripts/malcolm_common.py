@@ -12,6 +12,7 @@ import os
 import math
 import platform
 import re
+import shutil
 import site
 import ssl
 import string
@@ -94,31 +95,71 @@ except ImportError:
 Dialog = None
 MainDialog = None
 
-# Reasonable dialog bounds; used to reduce awkward wrapping in python-dialog
+# Preferred dialog bounds. Actual bounds are further limited by the terminal.
 _DIALOG_MIN_WIDTH = 50
 _DIALOG_MAX_WIDTH = 140
 _DIALOG_MIN_HEIGHT = 7
 _DIALOG_MAX_HEIGHT = 30
 
+# Leave room for dialog's border/shadow and terminal edges.
+_DIALOG_TERMINAL_WIDTH_MARGIN = 4
+_DIALOG_TERMINAL_HEIGHT_MARGIN = 4
+
 
 def _dialog_size_for(text: str) -> tuple[int, int]:
-    """Compute a suitable (height, width) for a dialog widget.
+    """Compute a dialog size that fits the prompt and current terminal.
 
-    - Width fits the longest line with a small padding.
-    - Height accounts for the number of text lines plus button area.
+    The input value itself may be arbitrarily long; dialog's inputbox scrolls
+    horizontally, so it must not be used to determine the widget width.
     """
     try:
-        if not isinstance(text, str):
-            text = str(text)
+        text = str(text)
+
+        terminal = shutil.get_terminal_size(fallback=(80, 24))
+        max_width = max(
+            1,
+            min(
+                _DIALOG_MAX_WIDTH,
+                terminal.columns - _DIALOG_TERMINAL_WIDTH_MARGIN,
+            ),
+        )
+        max_height = max(
+            1,
+            min(
+                _DIALOG_MAX_HEIGHT,
+                terminal.lines - _DIALOG_TERMINAL_HEIGHT_MARGIN,
+            ),
+        )
+
+        # The configured minimum is only a preference. It cannot exceed the
+        # space actually available in the terminal.
+        min_width = min(_DIALOG_MIN_WIDTH, max_width)
+        min_height = min(_DIALOG_MIN_HEIGHT, max_height)
+
         lines = text.splitlines() or [""]
-        max_line = max((len(line) for line in lines), default=_DIALOG_MIN_WIDTH)
-        width = max(_DIALOG_MIN_WIDTH, min(max_line + 4, _DIALOG_MAX_WIDTH))
-        # base height for buttons + borders; add per text line beyond the first
-        height = _DIALOG_MIN_HEIGHT + max(0, len(lines) - 1)
-        height = max(_DIALOG_MIN_HEIGHT, min(height, _DIALOG_MAX_HEIGHT))
+
+        desired_width = max(
+            _DIALOG_MIN_WIDTH,
+            max((len(line) for line in lines), default=0) + 4,
+        )
+        width = min(desired_width, max_width)
+
+        # Account approximately for prompt lines wrapping at the selected
+        # dialog width. Four columns are reserved for borders/padding.
+        text_width = max(1, width - 4)
+        wrapped_lines = sum(max(1, math.ceil(len(line) / text_width)) for line in lines)
+
+        desired_height = _DIALOG_MIN_HEIGHT + wrapped_lines - 1
+        height = min(max(desired_height, min_height), max_height)
+
         return height, width
+
     except Exception:
-        return (_DIALOG_MIN_HEIGHT, _DIALOG_MIN_WIDTH)
+        terminal = shutil.get_terminal_size(fallback=(80, 24))
+        return (
+            min(_DIALOG_MIN_HEIGHT, max(1, terminal.lines - 4)),
+            min(_DIALOG_MIN_WIDTH, max(1, terminal.columns - 4)),
+        )
 
 
 def _dialog_menu_width_for(choices) -> int:

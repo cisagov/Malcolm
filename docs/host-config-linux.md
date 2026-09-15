@@ -64,7 +64,7 @@ DefaultLimitNOFILE=65535:65535
 DefaultLimitMEMLOCK=infinity
 ```
 
-* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, users could add this line to `/etc/rc.local` (replacing `/dev/sda` with their disk block descriptor):
+* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, users could add this line to `/etc/rc.local` or their system's equivalent (replacing `/dev/sda` with their disk block descriptor):
 
 ```
 # change disk read-ahead value (# of blocks)
