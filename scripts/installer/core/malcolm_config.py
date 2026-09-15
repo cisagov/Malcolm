@@ -554,7 +554,13 @@ class MalcolmConfig(ObservableStoreMixin):
             if winner_value == "" and not ((item := self._items.get(item_key)) and item.accept_blank):
                 continue
             try:
-                self.apply_default(item_key, winner_value, ignore_errors=True)
+                # Values read from persisted .env files are explicit configuration, not
+                # computed defaults. Mark the ConfigItem modified so value dependencies
+                # respect it, but keep it out of the current-session change summary.
+                was_session_modified = item_key in self._modified_keys
+                self.set_value(item_key, winner_value, ignore_errors=True)
+                if not was_session_modified and item_key in self._modified_keys:
+                    self._modified_keys.remove(item_key)
             except (ConfigItemNotFoundError, ConfigValueValidationError) as e:
                 if "unittest" not in sys.modules:
                     InstallerLogger.warning(f"Could not set config for {item_key} from env: {e}")

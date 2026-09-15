@@ -57,6 +57,15 @@ class TestEnvFileImportExisting(unittest.TestCase):
         # "false" for MANAGE_PCAP_FILES translates to False boolean
         self.assertFalse(cfg.get_value(KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP))
 
+        # Persisted values are explicit user configuration. They should be protected from
+        # dependency defaults, but loading them must not make the configuration summary
+        # report them as changes made during the current session.
+        self.assertTrue(cfg.get_item(KEY_CONFIG_ITEM_AUTO_FREQ).is_modified)
+        self.assertTrue(cfg.get_item(KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP).is_modified)
+        session_changes = cfg.get_all_config_items(modified_only=True)
+        self.assertNotIn(KEY_CONFIG_ITEM_AUTO_FREQ, session_changes)
+        self.assertNotIn(KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP, session_changes)
+
 
 if __name__ == "__main__":
     unittest.main()
