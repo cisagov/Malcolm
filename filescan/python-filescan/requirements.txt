@@ -1,4 +1,4 @@
-anyio==4.10.0
+anyio==4.14.2
 asyncclick==8.2.2.2
 dominate==2.9.1
 Flask==3.1.3
