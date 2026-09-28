@@ -96,6 +96,41 @@ OTKB_IEC104_TYPE_IDS = {
   'F_SC_NB_1' => '127'
 }.freeze
 
+# Compact enrichment keeps the fields recommended for general use along with fields already used
+# by Malcolm's OTKB dashboard. Related records are reduced separately below.
+OTKB_COMPACT_FUNCTION_FIELDS = %w[
+  created_at
+  description
+  function_code
+  id
+  message_type
+  name
+  origin_node
+  protocol
+  specification_classifier
+  wireshark_rules
+  zeek_rules
+].freeze
+OTKB_COMPACT_CLASSIFIER_FIELDS = %w[
+  definition
+  defend_id
+  name
+].freeze
+OTKB_COMPACT_PROTOCOL_FIELDS = %w[
+  alternate_names
+  id
+  name
+  wireshark_dissector
+  zeek_parser
+].freeze
+OTKB_COMPACT_PROCEDURE_FIELDS = %w[
+  attack_id
+].freeze
+OTKB_COMPACT_PROCEDURE_RELATION_FIELDS = %w[
+  attack_id
+  name
+].freeze
+
 ##############################################################################################
 # Creates the Faraday connection the first time it is used. Keeping this wrapper lazy allows the
 # pipeline to start when enrichment is disabled or the OTKB URL has not been configured.
@@ -328,6 +363,15 @@ def register(
   @debug_verbose = ['verbose', 'v', 'extra'].include?(_debug_str.to_s.downcase)
   @debug = @debug_verbose || [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_str.to_s.downcase)
 
+  # Compact enrichment is the default because the same OTKB metadata may be repeated across many
+  # events. Verbose mode retains the complete expanded records for deployments that need them.
+  _verbose_str = params['verbose']
+  _verbose_env = params['verbose_env']
+  if _verbose_str.nil? && !_verbose_env.nil?
+    _verbose_str = ENV[_verbose_env]
+  end
+  @otkb_enrichment_verbose = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_verbose_str.to_s.downcase)
+
   # API timing collection is separate from normal debug output because it starts a background
   # reporting thread and retains individual request durations.
   _debug_timings_str = params['debug_timings']
@@ -530,32 +574,43 @@ def filter(
   end
 
   _function = _match['function']
-
-  # Only objects written to the event are copied. The shared snapshot remains frozen and can be
-  # read safely by every filter worker.
-  event.set('[otkb][function]', enrich_otkb_function(_function, _fixture))
-  event.set('[otkb][protocol]', enrich_otkb_citations(_protocol, _fixture))
-
-  # Procedures are optional and may reference assets, software, campaigns, citations, and ATT&CK
-  # IDs. Resolve those relationships only for the selected function.
   _procedures = _fixture['procedures_by_function'].fetch(_function['id'], [])
-  unless _procedures.empty?
-    _enriched_procedures = _procedures.map { |procedure| enrich_otkb_procedure(procedure, _fixture) }
-    event.set('[otkb][procedures]', _enriched_procedures)
-    enrich_threat_from_otkb_procedures(event, _enriched_procedures)
+
+  if @otkb_enrichment_verbose
+    # Verbose mode expands all linked records for users who need the complete OTKB context. Only
+    # objects written to the event are copied, leaving the shared fixture immutable.
+    event.set('[otkb][function]', enrich_otkb_function(_function, _fixture))
+    event.set('[otkb][protocol]', enrich_otkb_citations(_protocol, _fixture))
+
+    unless _procedures.empty?
+      _enriched_procedures = _procedures.map { |procedure| enrich_otkb_procedure(procedure, _fixture) }
+      event.set('[otkb][procedures]', _enriched_procedures)
+    end
+  else
+    # Compact payloads are assembled once per fixture refresh. Copying one prepared payload avoids
+    # resolving citations and linked records, then pruning them again, for every matching event.
+    _compact_enrichment =
+      _fixture.fetch('compact_enrichment_by_function_id', {})[_function['id']]
+    event.set('[otkb]', deep_copy(_compact_enrichment)) if _compact_enrichment.is_a?(Hash)
   end
+
+  # ATT&CK fields are derived from the complete cached procedure records in both output modes.
+  # Compact mode can therefore omit most procedure metadata without losing threat enrichment.
+  enrich_threat_from_otkb_procedures(event, _procedures) unless _procedures.empty?
 
   puts "Matched OTKB function #{_function['id']} (#{_function['name']}) with score #{_match['score']}" if @debug_verbose
 
-  _otkb = event.get('[otkb]')
+  if @otkb_enrichment_verbose
+    _otkb = event.get('[otkb]')
 
-  if _otkb.is_a?(Hash)
-    _otkb = crush(_otkb)
+    if _otkb.is_a?(Hash)
+      _otkb = crush(_otkb)
 
-    if _otkb.empty?
-      event.remove('[otkb]')
-    else
-      event.set('[otkb]', _otkb)
+      if _otkb.empty?
+        event.remove('[otkb]')
+      else
+        event.set('[otkb]', _otkb)
+      end
     end
   end
 
@@ -618,6 +673,86 @@ def enrich_otkb_citations(record, fixture)
     end
   end.compact
   enriched
+end
+
+##############################################################################################
+# Select fields for the compact event representation without modifying the complete fixture
+# record. Empty values are removed once while the snapshot is built.
+def compact_otkb_record(record, fields)
+  return {} unless record.is_a?(Hash)
+
+  selected = fields.each_with_object({}) do |field, result|
+    result[field] = record[field] if record.key?(field)
+  end
+  crush(selected)
+end
+
+##############################################################################################
+# Build one ready-to-copy compact payload for each function. This work happens only when a fixture
+# is loaded, keeping relationship resolution and field selection out of the per-event path.
+def build_compact_otkb_enrichment_by_function_id(
+  functions,
+  procedures_by_function,
+  by_id
+)
+  compact_protocol_by_id = by_id.fetch('otkb.protocol', {}).each_with_object({}) do |(id, protocol), index|
+    index[id] = compact_otkb_record(protocol, OTKB_COMPACT_PROTOCOL_FIELDS)
+  end
+
+  compact_classifier_by_id = by_id.fetch('otkb.otkbclass', {}).each_with_object({}) do |(id, classifier), index|
+    index[id] = compact_otkb_record(classifier, OTKB_COMPACT_CLASSIFIER_FIELDS)
+  end
+
+  compact_related_by_collection = {
+    'asset' => 'otkb.asset',
+    'campaign' => 'otkb.campaign',
+    'software' => 'otkb.software'
+  }.each_with_object({}) do |(field, collection), indexes|
+    indexes[field] = by_id.fetch(collection, {}).each_with_object({}) do |(id, record), index|
+      index[id] = compact_otkb_record(
+        record,
+        OTKB_COMPACT_PROCEDURE_RELATION_FIELDS
+      )
+    end
+  end
+
+  functions.each_with_object({}) do |function, index|
+    next unless function.is_a?(Hash)
+
+    function_id = function['id']
+    next if function_id.nil? || function_id.to_s.empty?
+
+    compact_function = compact_otkb_record(
+      function,
+      OTKB_COMPACT_FUNCTION_FIELDS
+    )
+    classifier = compact_classifier_by_id[function['otkb_classifier']]
+    compact_function['otkb_classifier'] = classifier unless classifier.nil? || classifier.empty?
+
+    payload = {
+      'function' => compact_function
+    }
+
+    protocol = compact_protocol_by_id[function['protocol']]
+    payload['protocol'] = protocol unless protocol.nil? || protocol.empty?
+
+    procedures = procedures_by_function.fetch(function_id, []).filter_map do |procedure|
+      next unless procedure.is_a?(Hash)
+
+      compact_procedure = compact_otkb_record(
+        procedure,
+        OTKB_COMPACT_PROCEDURE_FIELDS
+      )
+      compact_related_by_collection.each_pair do |field, related_index|
+        related = related_index[procedure[field]]
+        compact_procedure[field] = related unless related.nil? || related.empty?
+      end
+      compact_procedure unless compact_procedure.empty?
+    end
+    payload['procedures'] = procedures unless procedures.empty?
+
+    index[function_id] = payload
+  end
 end
 
 ##############################################################################################
@@ -956,6 +1091,12 @@ def build_otkb_json_fixture_snapshot(
   functions_by_protocol = group_records_by_field(functions, 'protocol')
   function_notes_by_function = group_records_by_field(function_notes, 'function')
   procedures_by_function = group_records_by_field(procedures, 'function')
+  compact_enrichment_by_function_id =
+    build_compact_otkb_enrichment_by_function_id(
+      functions,
+      procedures_by_function,
+      by_id
+    )
 
   # Index simple IEC 104 equality rules by numeric ASDU type ID. This lets the
   # filter bypass the generic rule engine for the common IEC 104 match path.
@@ -1019,6 +1160,7 @@ def build_otkb_json_fixture_snapshot(
     'iec104_function_by_type_id' => iec104_function_by_type_id,
     'function_notes_by_function' => function_notes_by_function,
     'procedures_by_function' => procedures_by_function,
+    'compact_enrichment_by_function_id' => compact_enrichment_by_function_id,
     '_loaded_at_monotonic' => loaded_at_monotonic
   }
   unless checksums.nil?
@@ -1263,7 +1405,8 @@ OTKB_INLINE_TEST_FIXTURE = deep_freeze(
         {
           'id' => 'classifier-synthetic',
           'name' => 'Synthetic Classifier',
-          'definition' => 'Invented classifier used only by startup tests.'
+          'definition' => 'Invented classifier used only by startup tests.',
+          'defend_id' => 'd3f:SyntheticCommand'
         }
       ],
       'otkb.function' => [
@@ -1541,6 +1684,7 @@ test 'OTKB enriches a synthetic Zeek event' do
       'enabled' => true,
       'otkb_json_fixture_file' => OTKB_INLINE_TEST_FIXTURE_TEMPFILE.path,
       'cache_ttl' => 0,
+      'verbose' => true,
       'debug' => false,
       'debug_timings' => false
     }
@@ -1590,6 +1734,57 @@ test 'OTKB enriches a synthetic Zeek event' do
       event.get('[threat][technique][subtechnique][id]') == ['T9999.001'] &&
       event.get('[threat][indicator][provider]') == 'preexisting' &&
       cached_function['citations'] == ['citation-synthetic']
+  end
+end
+
+##############################################################################################
+test 'OTKB compact enrichment retains dashboard fields and threat mappings' do
+  parameters do
+    {
+      'enabled' => true,
+      'otkb_json_fixture_file' => OTKB_INLINE_TEST_FIXTURE_TEMPFILE.path,
+      'cache_ttl' => 0,
+      'verbose' => false,
+      'debug' => false,
+      'debug_timings' => false
+    }
+  end
+
+  in_event do
+    {
+      'network' => {
+        'protocol' => 'synproto'
+      },
+      'event' => {
+        'dataset' => 'synthetic'
+      },
+      'zeek' => {
+        'synthetic' => {
+          'operation' => 'READ',
+          'function_code' => 16
+        }
+      }
+    }
+  end
+
+  expect('compact output omits expanded metadata while retaining dashboard fields') do |events|
+    event = events.first
+    function = event.get('[otkb][function]')
+    protocol = event.get('[otkb][protocol]')
+    procedures = event.get('[otkb][procedures]')
+
+    events.length == 1 &&
+      function['id'] == 'function-specific' &&
+      function['otkb_classifier']['name'] == 'Synthetic Classifier' &&
+      function['otkb_classifier']['defend_id'] == 'd3f:SyntheticCommand' &&
+      function['notes'].nil? &&
+      function['citations'].nil? &&
+      protocol['name'] == 'Synthetic Protocol' &&
+      protocol['transport'].nil? &&
+      procedures[0]['attack_id'] == 'TA9999' &&
+      procedures[0]['asset']['name'] == 'Synthetic Controller' &&
+      event.get('[threat][framework]') == 'MITRE ATT&CK for ICS' &&
+      event.get('[threat][tactic][id]') == ['TA9999']
   end
 end
 

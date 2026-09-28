@@ -248,16 +248,34 @@ class OtkbEnrichTestSuite
     JSON.parse(File.read(FIXTURE_PATH))
   end
 
+  def synthetic_checksums(version = 'v1')
+    {
+      'otkb.function' => "synthetic-function-checksum-#{version}",
+      'otkb.protocol' => "synthetic-protocol-checksum-#{version}",
+      'otkb.procedure' => "synthetic-procedure-checksum-#{version}"
+    }
+  end
+
   def new_filter(overrides = {})
     filter_instance = Object.new
     filter_instance.send(:register, DEFAULT_PARAMS.merge(overrides))
     filter_instance
   end
 
-  def build_snapshot(filter_instance = new_filter, loaded_at = nil, body = nil)
+  def build_snapshot(
+    filter_instance = new_filter,
+    loaded_at = nil,
+    body = nil,
+    checksums = nil
+  )
     loaded_at ||= filter_instance.send(:monotonic_time)
     body ||= synthetic_body
-    filter_instance.send(:build_otkb_json_fixture_snapshot, body, loaded_at)
+    filter_instance.send(
+      :build_otkb_json_fixture_snapshot,
+      body,
+      loaded_at,
+      checksums
+    )
   end
 
   def install_snapshot(filter_instance, snapshot = nil)
@@ -280,13 +298,42 @@ class OtkbEnrichTestSuite
       'enabled' => 'ON',
       'otkb_url' => 'https://otkb.invalid/api/v1/',
       'cache_ttl' => '45',
-      'ssl_verify' => 'true'
+      'ssl_verify' => 'true',
+      'verbose' => 'true'
     )
 
     assert_equal(true, filter_instance.instance_variable_get(:@otkb_enabled))
     assert_equal('https://otkb.invalid/api/v1', filter_instance.instance_variable_get(:@otkb_url))
     assert_equal(45, filter_instance.instance_variable_get(:@cache_ttl))
     assert_equal(true, filter_instance.instance_variable_get(:@otkb_ssl_verify))
+    assert_equal(true, filter_instance.instance_variable_get(:@otkb_enrichment_verbose))
+  end
+
+  test 'register defaults to compact mode and reads verbose mode from the environment' do
+    environment_name = 'OTKB_SYNTHETIC_VERBOSE_TEST'
+    previous_value = ENV[environment_name]
+
+    begin
+      ENV.delete(environment_name)
+      compact_filter = new_filter
+      assert_equal(
+        false,
+        compact_filter.instance_variable_get(:@otkb_enrichment_verbose)
+      )
+
+      ENV[environment_name] = 'true'
+      verbose_filter = new_filter('verbose_env' => environment_name)
+      assert_equal(
+        true,
+        verbose_filter.instance_variable_get(:@otkb_enrichment_verbose)
+      )
+    ensure
+      if previous_value.nil?
+        ENV.delete(environment_name)
+      else
+        ENV[environment_name] = previous_value
+      end
+    end
   end
 
   test 'lazy connection configures Token authorization, JSON handling, and SSL verification' do
@@ -433,6 +480,16 @@ class OtkbEnrichTestSuite
     assert_equal(3, snapshot['procedures_by_function'][
       '00000000-0000-4000-8000-000000000302'
     ].length)
+    compact = snapshot['compact_enrichment_by_function_id'][
+      '00000000-0000-4000-8000-000000000302'
+    ]
+    assert_equal('Synthetic Specific Read', compact['function']['name'])
+    assert_equal('D3-SYNTHETIC', compact['function']['otkb_classifier']['defend_id'])
+    assert_nil(compact['function']['notes'])
+    assert_nil(compact['function']['citations'])
+    assert_equal('Synthetic Protocol', compact['protocol']['name'])
+    assert_nil(compact['protocol']['transport'])
+    assert_equal('Synthetic Controller', compact['procedures'][0]['asset']['name'])
     refute(snapshot['by_id']['otkb.asset'][
       '00000000-0000-4000-8000-000000000501'
     ].key?('attack_id'))
@@ -468,7 +525,7 @@ class OtkbEnrichTestSuite
   end
 
   test 'Zeek enrichment selects the most-specific match and expands relationships' do
-    filter_instance = new_filter
+    filter_instance = new_filter('verbose' => true)
     snapshot = install_snapshot(filter_instance)
     event = filter_event(
       filter_instance,
@@ -520,6 +577,66 @@ class OtkbEnrichTestSuite
       snapshot['by_id']['otkb.function'][
         '00000000-0000-4000-8000-000000000302'
       ]['citations']
+    )
+  end
+
+  test 'compact enrichment retains dashboard fields and threat mappings' do
+    filter_instance = new_filter
+    snapshot = install_snapshot(filter_instance)
+    event = filter_event(
+      filter_instance,
+      {
+        'network' => { 'protocol' => 'SYNPROTO' },
+        'event' => { 'dataset' => 'synthetic' },
+        'zeek' => {
+          'synthetic' => {
+            'operation' => 'read',
+            'function_code' => '0x10'
+          }
+        },
+        'threat' => { 'indicator' => { 'provider' => 'preexisting' } }
+      }
+    )
+
+    function = event.get('[otkb][function]')
+    protocol = event.get('[otkb][protocol]')
+    procedures = event.get('[otkb][procedures]')
+
+    assert_equal('00000000-0000-4000-8000-000000000302', function['id'])
+    assert_equal('Synthetic Specific Read', function['name'])
+    assert_equal('Synthetic Classifier', function['otkb_classifier']['name'])
+    assert_equal('D3-SYNTHETIC', function['otkb_classifier']['defend_id'])
+    assert_nil(function['notes'])
+    assert_nil(function['citations'])
+    assert(function['zeek_rules'].is_a?(Hash))
+    assert(function['wireshark_rules'].is_a?(Hash))
+
+    assert_equal('Synthetic Protocol', protocol['name'])
+    assert_nil(protocol['description'])
+    assert_nil(protocol['transport'])
+    assert_nil(protocol['citations'])
+
+    assert_equal(3, procedures.length)
+    assert_equal('TA9999', procedures[0]['attack_id'])
+    assert_equal('Synthetic Controller', procedures[0]['asset']['name'])
+    assert_equal('Synthetic Campaign', procedures[0]['campaign']['name'])
+    assert_equal('Synthetic Utility', procedures[0]['software']['name'])
+    assert_nil(procedures[0]['id'])
+    assert_nil(procedures[0]['description'])
+    assert_nil(procedures[0]['citations'])
+
+    assert_equal('MITRE ATT&CK for ICS', event.get('[threat][framework]'))
+    assert_equal(['TA9999'], event.get('[threat][tactic][id]'))
+    assert_equal(['T9998', 'T9999'], event.get('[threat][technique][id]'))
+    assert_equal(['T9999.001'], event.get('[threat][technique][subtechnique][id]'))
+    assert_equal('preexisting', event.get('[threat][indicator][provider]'))
+
+    function['name'] = 'event-owned compact copy'
+    assert_equal(
+      'Synthetic Specific Read',
+      snapshot['compact_enrichment_by_function_id'][
+        '00000000-0000-4000-8000-000000000302'
+      ]['function']['name']
     )
   end
 
@@ -609,16 +726,22 @@ class OtkbEnrichTestSuite
 
   test 'initial API load uses the expected path and request timeouts' do
     filter_instance = new_filter
-    connection = FakeConnection.new(FakeResponse.new(body: synthetic_body))
+    connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums),
+      FakeResponse.new(body: synthetic_body)
+    )
     filter_instance.instance_variable_set(:@otkb_conn, connection)
 
     snapshot = filter_instance.send(:get_otkb_json_fixture)
 
     assert_equal('synthetic-test-v1', snapshot['version'])
-    assert_equal(1, connection.calls)
-    assert_equal(['sync/json-fixture/'], connection.paths)
+    assert_equal(synthetic_checksums, snapshot['checksums'])
+    assert_equal(2, connection.calls)
+    assert_equal(['sync/checksum/', 'sync/json-fixture/'], connection.paths)
     assert_equal(5, connection.requests[0].options.open_timeout)
     assert_equal(30, connection.requests[0].options.timeout)
+    assert_equal(5, connection.requests[1].options.open_timeout)
+    assert_equal(30, connection.requests[1].options.timeout)
     assert_same(snapshot, $otkb_json_fixture.get)
   end
 
@@ -636,18 +759,59 @@ class OtkbEnrichTestSuite
 
   test 'expired TTL snapshot is replaced by a successful refresh' do
     filter_instance = new_filter('cache_ttl' => 1)
-    old_snapshot = build_snapshot(filter_instance, filter_instance.send(:monotonic_time) - 10)
+    old_snapshot = build_snapshot(
+      filter_instance,
+      filter_instance.send(:monotonic_time) - 10,
+      nil,
+      synthetic_checksums('v1')
+    )
     refreshed_body = synthetic_body
     refreshed_body['version'] = 'synthetic-test-v2'
-    connection = FakeConnection.new(FakeResponse.new(body: refreshed_body))
+    connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums('v2')),
+      FakeResponse.new(body: refreshed_body)
+    )
     filter_instance.instance_variable_set(:@otkb_conn, connection)
     $otkb_json_fixture.set(old_snapshot)
 
     refreshed = filter_instance.send(:get_otkb_json_fixture)
 
     assert_equal('synthetic-test-v2', refreshed['version'])
-    assert_equal(1, connection.calls)
+    assert_equal(synthetic_checksums('v2'), refreshed['checksums'])
+    assert_equal(2, connection.calls)
+    assert_equal(['sync/checksum/', 'sync/json-fixture/'], connection.paths)
     refute(old_snapshot.equal?(refreshed))
+  end
+
+  test 'unchanged checksums advance freshness without loading the full fixture' do
+    filter_instance = new_filter('cache_ttl' => 1)
+    old_snapshot = build_snapshot(
+      filter_instance,
+      filter_instance.send(:monotonic_time) - 10,
+      nil,
+      synthetic_checksums
+    )
+    connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums)
+    )
+    filter_instance.instance_variable_set(:@otkb_conn, connection)
+    $otkb_json_fixture.set(old_snapshot)
+
+    checked = filter_instance.send(:get_otkb_json_fixture)
+
+    assert_equal(1, connection.calls)
+    assert_equal(['sync/checksum/'], connection.paths)
+    assert_equal(old_snapshot['version'], checked['version'])
+    assert_same(old_snapshot['collections'], checked['collections'])
+    assert_same(
+      old_snapshot['compact_enrichment_by_function_id'],
+      checked['compact_enrichment_by_function_id']
+    )
+    assert(
+      checked['_checksum_checked_at_monotonic'] >
+      old_snapshot['_checksum_checked_at_monotonic']
+    )
+    refute(old_snapshot.equal?(checked))
   end
 
   test 'failed refresh retains the old snapshot and suppresses immediate retries' do
@@ -665,10 +829,36 @@ class OtkbEnrichTestSuite
     assert($otkb_json_fixture_retry_after.get > filter_instance.send(:monotonic_time))
   end
 
+  test 'failed full fixture load retains the old checksum baseline' do
+    filter_instance = new_filter('cache_ttl' => 1)
+    old_checksums = synthetic_checksums('v1')
+    old_snapshot = build_snapshot(
+      filter_instance,
+      filter_instance.send(:monotonic_time) - 10,
+      nil,
+      old_checksums
+    )
+    connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums('v2')),
+      Faraday::ConnectionFailed.new('synthetic fixture connection failure')
+    )
+    filter_instance.instance_variable_set(:@otkb_conn, connection)
+    $otkb_json_fixture.set(old_snapshot)
+
+    assert_same(old_snapshot, filter_instance.send(:get_otkb_json_fixture))
+    assert_equal(old_checksums, $otkb_json_fixture.get['checksums'])
+    assert_equal(2, connection.calls)
+    assert_equal(['sync/checksum/', 'sync/json-fixture/'], connection.paths)
+    assert($otkb_json_fixture_retry_after.get > filter_instance.send(:monotonic_time))
+  end
+
   test 'filter clones with the same URL share one cached snapshot' do
     first_filter = new_filter
     second_filter = new_filter
-    first_connection = FakeConnection.new(FakeResponse.new(body: synthetic_body))
+    first_connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums),
+      FakeResponse.new(body: synthetic_body)
+    )
     second_connection = FakeConnection.new
     first_filter.instance_variable_set(:@otkb_conn, first_connection)
     second_filter.instance_variable_set(:@otkb_conn, second_connection)
@@ -677,17 +867,23 @@ class OtkbEnrichTestSuite
     second_snapshot = second_filter.send(:get_otkb_json_fixture)
 
     assert_same(first_snapshot, second_snapshot)
-    assert_equal(1, first_connection.calls)
+    assert_equal(2, first_connection.calls)
     assert_equal(0, second_connection.calls)
   end
 
   test 'filter clones with different base URLs do not share snapshots' do
     first_filter = new_filter('otkb_url' => 'https://one.invalid/api/v1')
     second_filter = new_filter('otkb_url' => 'https://two.invalid/api/v1')
-    first_connection = FakeConnection.new(FakeResponse.new(body: synthetic_body))
+    first_connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums('one')),
+      FakeResponse.new(body: synthetic_body)
+    )
     second_body = synthetic_body
     second_body['version'] = 'synthetic-second-source'
-    second_connection = FakeConnection.new(FakeResponse.new(body: second_body))
+    second_connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums('two')),
+      FakeResponse.new(body: second_body)
+    )
     first_filter.instance_variable_set(:@otkb_conn, first_connection)
     second_filter.instance_variable_set(:@otkb_conn, second_connection)
 
@@ -697,20 +893,24 @@ class OtkbEnrichTestSuite
     assert_equal('https://one.invalid/api/v1', first_snapshot['source_url'])
     assert_equal('https://two.invalid/api/v1', second_snapshot['source_url'])
     assert_equal('synthetic-second-source', second_snapshot['version'])
-    assert_equal(1, first_connection.calls)
-    assert_equal(1, second_connection.calls)
+    assert_equal(2, first_connection.calls)
+    assert_equal(2, second_connection.calls)
   end
 
-  test 'concurrent first use publishes one complete snapshot with one API request' do
+  test 'concurrent first use publishes one complete snapshot with one API refresh sequence' do
     filters = Array.new(8) { new_filter }
-    connection = FakeConnection.new(FakeResponse.new(body: synthetic_body))
+    connection = FakeConnection.new(
+      FakeResponse.new(body: synthetic_checksums),
+      FakeResponse.new(body: synthetic_body)
+    )
     filters.each { |filter_instance| filter_instance.instance_variable_set(:@otkb_conn, connection) }
 
     snapshots = filters.map do |filter_instance|
       Thread.new { filter_instance.send(:get_otkb_json_fixture) }
     end.map(&:value)
 
-    assert_equal(1, connection.calls)
+    assert_equal(2, connection.calls)
+    assert_equal(['sync/checksum/', 'sync/json-fixture/'], connection.paths)
     assert(snapshots.all? { |snapshot| snapshot.equal?(snapshots.first) })
     assert(snapshots.first.frozen?)
   end

@@ -118,6 +118,7 @@ Although the configuration script automates many of the following configuration 
     - `OTKB_ENRICHMENT` - if set to `true`, Logstash will enrich OT/ICS network traffic metadata via the MITRE OT Knowledge Base (see also **`logstash-secret.env`** below)
     - `OTKB_ENRICHMENT_TTL` - the time-to-live (in seconds) for the cached OTKB lookup data before it is refreshed
     - `OTKB_SSL_VERIFY` - if set to `false`, disables SSL certificate verification when connecting to the OTKB API
+    - `OTKB_ENRICHMENT_VERBOSE` - if set to `true`, includes the complete expanded OTKB records in enriched events; otherwise, only the recommended fields and fields used by Malcolm's OTKB dashboard are included
     - `OTKB_ENRICHMENT_DEBUG` - if set to `true`, logs each OTKB API call for debugging
     - `OTKB_ENRICHMENT_DEBUG_TIMINGS` - if set to `true`, collects and logs timing statistics for OTKB API calls
 * **`logstash-secret.env`** - secrets for enriching with the MITRE OT Knowledge Base (see also **`logstash.env`** above)
