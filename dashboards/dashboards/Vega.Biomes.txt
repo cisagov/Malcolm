@@ -14,6 +14,8 @@ Questions:
 Todo:
   - Change fracCenter/start/end calls to compute in dataset (NGD)
 
+Corresponds to SMILE-Analytics/force-directed-biomes@10f328b
+
 */
 
 {
@@ -526,6 +528,11 @@ Todo:
           "fields": ["src", "dst"],
           "as": ["_", "ip"]
         },
+        {
+          "type": "formula",
+          "expr": "datum._ === 'src' ? datum.src_purdue_zone : datum.dst_purdue_zone",
+          "as": "purdue_zone"
+        }
         // {
         //   "type": "formula",
         //   "expr": "isArray(datum.purdue_zone) && length(datum.purdue_zone) ? datum.purdue_zone : [null]",
@@ -1232,9 +1239,9 @@ Todo:
               "angle": {"signal": "datum.angleDeg + 180"},
               "size": {"signal": "pow(datum.strokeW * 3, 2)"},
               "fill": {"scale": "link-color", "field": "zone"},
-              "stroke": { "field": "link_color" },
-              "strokeDash": { "field": "link_dash" },
-              "strokeWidth": { "field": "link_width_val" },
+              // "stroke": { "field": "link_color" },     // makes the green arrows red for some reason
+              // "strokeDash": { "field": "link_dash" },
+              // "strokeWidth": { "field": "link_width_val" },
               "opacity": {"signal": "datum.hasFileLink ? 0.95 : (datum.hasReverse && lineType === 'arrow' ? 0.9 : 0)"}
             }
           }
