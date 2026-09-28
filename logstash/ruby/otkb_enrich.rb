@@ -729,9 +729,31 @@ def get_otkb_json_fixture
     return _fixture if otkb_json_fixture_fresh?(_fixture, _now)
     return _fixture if _now < $otkb_json_fixture_retry_after.get
 
-    # The endpoint returns every OTKB collection in one response. All indexes used during event
-    # processing are rebuilt from that response before the global reference is replaced.
+    # Check the inexpensive checksum endpoint before requesting the complete fixture. The first
+    # API load has no checksum baseline, so it continues through to the full fixture request.
     begin
+      _checksums = get_otkb_json_fixture_checksums
+      _stored_checksums = _fixture['checksums'] if _fixture.is_a?(Hash)
+
+      if _stored_checksums.is_a?(Hash) && _stored_checksums == _checksums
+        # Keep the same immutable fixture data and indexes while advancing the successful check
+        # time used by the TTL. A shallow copy is sufficient because the existing snapshot and
+        # every object reachable from it were frozen before publication.
+        _checksum_checked_at_monotonic = monotonic_time
+        _snapshot = _fixture.merge(
+          'checksum_checked_at' => Time.now.utc.iso8601(6),
+          '_checksum_checked_at_monotonic' => _checksum_checked_at_monotonic
+        ).freeze
+        $otkb_json_fixture.set(_snapshot)
+        $otkb_json_fixture_retry_after.set(0.0)
+
+        puts 'OTKB JSON fixture checksums are unchanged' if @debug
+
+        return _snapshot
+      end
+
+      # At least one collection was added, removed, or changed. Rebuild all indexes from the new
+      # complete fixture before replacing the global reference.
       _response = @otkb_conn.get('sync/json-fixture/') do |request|
         request.options.open_timeout = 5
         request.options.timeout = 30
@@ -741,7 +763,11 @@ def get_otkb_json_fixture
               "OTKB fixture request returned HTTP #{_response.status}"
       end
 
-      _snapshot = build_otkb_json_fixture_snapshot(_response.body, _now)
+      _snapshot = build_otkb_json_fixture_snapshot(
+        _response.body,
+        monotonic_time,
+        _checksums
+      )
       $otkb_json_fixture.set(_snapshot)
       $otkb_json_fixture_retry_after.set(0.0)
 
@@ -769,6 +795,41 @@ def get_otkb_json_fixture
       _fixture
     end
   end
+end
+
+##############################################################################################
+# Request and validate the collection checksum map used to decide whether the complete fixture
+# needs to be downloaded. The checksum format itself belongs to the server, so only the response
+# shape and nonempty string values are enforced here.
+def get_otkb_json_fixture_checksums
+  response = @otkb_conn.get('sync/checksum/') do |request|
+    request.options.open_timeout = 5
+    request.options.timeout = 30
+  end
+  unless response.success?
+    raise Faraday::Error,
+          "OTKB checksum request returned HTTP #{response.status}"
+  end
+
+  checksums = response.body.is_a?(String) ? JSON.parse(response.body) : response.body
+  unless checksums.is_a?(Hash) && !checksums.empty?
+    raise TypeError, 'OTKB checksum response must be a nonempty object'
+  end
+
+  normalized_checksums = {}
+  checksums.each_pair do |collection_name, checksum|
+    unless collection_name.is_a?(String) &&
+           !collection_name.empty? &&
+           checksum.is_a?(String) &&
+           !checksum.empty?
+      raise TypeError,
+            'OTKB checksum response must contain nonempty string keys and values'
+    end
+
+    normalized_checksums[collection_name] = checksum
+  end
+
+  normalized_checksums
 end
 
 ##############################################################################################
@@ -837,14 +898,18 @@ def otkb_json_fixture_fresh?(fixture, now)
   return true if @otkb_conn.nil?
   return true if @cache_ttl.zero?
 
-  loaded_at = fixture['_loaded_at_monotonic']
-  loaded_at.is_a?(Numeric) && (now - loaded_at) < @cache_ttl
+  checked_at = fixture['_checksum_checked_at_monotonic'] || fixture['_loaded_at_monotonic']
+  checked_at.is_a?(Numeric) && (now - checked_at) < @cache_ttl
 end
 
 ##############################################################################################
 # Validate and normalize the API response, build the indexes used by filter, and freeze the final
 # object before publishing it through the global atomic reference.
-def build_otkb_json_fixture_snapshot(response_body, loaded_at_monotonic)
+def build_otkb_json_fixture_snapshot(
+  response_body,
+  loaded_at_monotonic,
+  checksums = nil
+)
   body = response_body.is_a?(String) ? JSON.parse(response_body) : response_body
   raise TypeError, 'OTKB JSON fixture response must be an object' unless body.is_a?(Hash)
 
@@ -956,6 +1021,11 @@ def build_otkb_json_fixture_snapshot(response_body, loaded_at_monotonic)
     'procedures_by_function' => procedures_by_function,
     '_loaded_at_monotonic' => loaded_at_monotonic
   }
+  unless checksums.nil?
+    snapshot['checksums'] = checksums
+    snapshot['checksum_checked_at'] = loaded_at.iso8601(6)
+    snapshot['_checksum_checked_at_monotonic'] = loaded_at_monotonic
+  end
 
   deep_freeze(snapshot)
 end
