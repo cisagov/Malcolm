@@ -95,6 +95,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     cd /tmp && \
       curl -sSL "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" | tar xzvf - -C ./filepond-server --strip-components 1 && \
       rsync -a --include="*/" --include="*.php" --exclude="*" ./filepond-server/ /var/www/upload/server/php/ && \
+      python3 -c 'import pathlib,sys; p=pathlib.Path("/var/www/upload/server/php/FilePond.class.php"); s=p.read_text(); old="[^a-zA-Z0-9\\_\\s]"; new="[^a-zA-Z0-9\\_\\s.]"; n=s.count(old); sys.exit("FilePond.class.php sanitize_filename_part pattern not found or ambiguous (count=%d); vendored library may have changed, update this patch" % n) if n != 1 else p.write_text(s.replace(old, new))' && \
       FILEPOND_INDEX_PHP="/var/www/upload/server/php/index.php"; \
         FILEPOND_INDEX_TMP="$(mktemp "${FILEPOND_INDEX_PHP}.XXXXXX")"; \
         awk ' \
