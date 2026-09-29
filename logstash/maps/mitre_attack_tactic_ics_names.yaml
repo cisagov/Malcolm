@@ -1,0 +1,12 @@
+"TA0100": "Collection"
+"TA0101": "Command_and_Control"
+"TA0102": "Discovery"
+"TA0103": "Evasion"
+"TA0104": "Execution"
+"TA0105": "Impact"
+"TA0106": [ "Impair_Process_Control", "Impair_Process" ]
+"TA0107": [ "Inhibit_Response_Function", "Inhibit_Response" ]
+"TA0108": "Initial_Access"
+"TA0109": "Lateral_Movement"
+"TA0110": "Persistence"
+"TA0111": "Privilege_Escalation"

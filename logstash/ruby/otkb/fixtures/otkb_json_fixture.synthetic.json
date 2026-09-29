@@ -1,0 +1,238 @@
+{
+  "_notice": "SYNTHETIC TEST DATA ONLY. This file contains no production fixture content.",
+  "version": "synthetic-test-v1",
+  "generated_at": "2000-01-01T00:00:00.000000+00:00Z",
+  "data": {
+    "otkb.reference": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Synthetic Reference",
+        "description": "Invented reference used only by the self-contained test fixture."
+      }
+    ],
+    "otkb.author": [],
+    "otkb.citation": [
+      {
+        "id": "00000000-0000-4000-8000-000000000011",
+        "reference": "00000000-0000-4000-8000-000000000001",
+        "section": "Synthetic Section",
+        "pages": "1-2"
+      }
+    ],
+    "otkb.protocol": [
+      {
+        "id": "00000000-0000-4000-8000-000000000101",
+        "name": "Synthetic Protocol",
+        "alternate_names": [
+          "synproto",
+          "SYNTHETIC-ALT"
+        ],
+        "description": "Invented protocol used only for tests.",
+        "transport": [
+          {
+            "protocol": " TCP ",
+            "port": 12345
+          }
+        ],
+        "citations": [
+          "00000000-0000-4000-8000-000000000011"
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000102",
+        "name": "IEC104",
+        "alternate_names": [
+          "iec104",
+          "IEC 104"
+        ],
+        "description": "Synthetic IEC 104 protocol record.",
+        "transport": [
+          {
+            "protocol": "Tcp",
+            "port": 2404
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000103",
+        "name": "Tie Protocol",
+        "alternate_names": [
+          "tieproto"
+        ],
+        "description": "Invented protocol for deterministic tie-breaking tests.",
+        "transport": []
+      }
+    ],
+    "otkb.term": [],
+    "otkb.otkbclass": [
+      {
+        "id": "00000000-0000-4000-8000-000000000201",
+        "name": "Synthetic Classifier",
+        "definition": "Invented classifier used only by tests.",
+        "hierarchy": "synthetic",
+        "defend_id": "D3-SYNTHETIC"
+      }
+    ],
+    "otkb.function": [
+      {
+        "id": "00000000-0000-4000-8000-000000000301",
+        "name": "Synthetic General Read",
+        "description": "One-leaf rule used to verify match scoring.",
+        "function_code": "SYN-GENERAL",
+        "protocol": "00000000-0000-4000-8000-000000000101",
+        "otkb_classifier": "00000000-0000-4000-8000-000000000201",
+        "citations": [
+          "00000000-0000-4000-8000-000000000011"
+        ],
+        "zeek_rules": {
+          "log": "synthetic.log",
+          "field": "operation",
+          "eq": "READ"
+        },
+        "wireshark_rules": {
+          "field": "synthetic.operation",
+          "eq": "READ"
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000302",
+        "name": "Synthetic Specific Read",
+        "description": "Two-leaf rule that should outrank the general read rule.",
+        "function_code": "SYN-SPECIFIC",
+        "protocol": "00000000-0000-4000-8000-000000000101",
+        "otkb_classifier": "00000000-0000-4000-8000-000000000201",
+        "citations": [
+          "00000000-0000-4000-8000-000000000011"
+        ],
+        "zeek_rules": {
+          "and": [
+            {
+              "log": "synthetic.log",
+              "field": "operation",
+              "eq": "READ"
+            },
+            {
+              "log": "synthetic.log",
+              "field": "function_code",
+              "eq": "16"
+            }
+          ]
+        },
+        "wireshark_rules": {
+          "and": [
+            {
+              "field": "synthetic.operation",
+              "eq": "READ"
+            },
+            {
+              "field": "synthetic.function_code",
+              "eq": "0x10"
+            }
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000303",
+        "name": "Synthetic IEC 104 Single Point",
+        "description": "Simple equality rule eligible for the IEC 104 direct index.",
+        "function_code": "SYN-IEC104-1",
+        "protocol": "00000000-0000-4000-8000-000000000102",
+        "zeek_rules": {
+          "log": "iec104",
+          "field": "info_obj_type",
+          "eq": "1"
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000304",
+        "name": "Synthetic Tie Winner",
+        "description": "Lexically lower ID should win an equal-score tie.",
+        "function_code": "SYN-TIE-A",
+        "protocol": "00000000-0000-4000-8000-000000000103",
+        "zeek_rules": {
+          "log": "tieproto",
+          "field": "operation",
+          "eq": "PING"
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000305",
+        "name": "Synthetic Tie Runner-up",
+        "description": "Lexically higher ID should lose an equal-score tie.",
+        "function_code": "SYN-TIE-B",
+        "protocol": "00000000-0000-4000-8000-000000000103",
+        "zeek_rules": {
+          "log": "tieproto",
+          "field": "operation",
+          "eq": "PING"
+        }
+      }
+    ],
+    "otkb.functionnote": [
+      {
+        "id": "00000000-0000-4000-8000-000000000401",
+        "function": "00000000-0000-4000-8000-000000000302",
+        "content": "Synthetic note attached to the specific function."
+      }
+    ],
+    "otkb.asset": [
+      {
+        "id": "00000000-0000-4000-8000-000000000501",
+        "name": "Synthetic Controller",
+        "definition": "Invented asset used only by tests.",
+        "attack_id": "   ",
+        "citations": [
+          "00000000-0000-4000-8000-000000000011"
+        ]
+      }
+    ],
+    "otkb.campaign": [
+      {
+        "id": "00000000-0000-4000-8000-000000000601",
+        "name": "Synthetic Campaign",
+        "description": "Invented campaign used only by tests.",
+        "attack_id": null
+      }
+    ],
+    "otkb.software": [
+      {
+        "id": "00000000-0000-4000-8000-000000000701",
+        "name": "Synthetic Utility",
+        "description": "Invented software used only by tests.",
+        "attack_id": "S9999"
+      }
+    ],
+    "otkb.procedure": [
+      {
+        "id": "00000000-0000-4000-8000-000000000801",
+        "function": "00000000-0000-4000-8000-000000000302",
+        "description": "Synthetic tactic procedure.",
+        "attack_id": "TA9999",
+        "asset": "00000000-0000-4000-8000-000000000501",
+        "software": "00000000-0000-4000-8000-000000000701",
+        "campaign": "00000000-0000-4000-8000-000000000601",
+        "citations": [
+          "00000000-0000-4000-8000-000000000011"
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000802",
+        "function": "00000000-0000-4000-8000-000000000302",
+        "description": "Synthetic technique procedure.",
+        "attack_id": "T9998"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000803",
+        "function": "00000000-0000-4000-8000-000000000302",
+        "description": "Synthetic subtechnique procedure.",
+        "attack_id": "T9999.001"
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000804",
+        "function": "00000000-0000-4000-8000-000000000301",
+        "description": "Blank ATT&CK ID normalization record.",
+        "attack_id": ""
+      }
+    ]
+  }
+}

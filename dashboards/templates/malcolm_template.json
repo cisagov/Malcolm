@@ -26,6 +26,7 @@
     "ecs_vulnerability",
     "ecs_user_agent",
     "custom_arkime",
+    "custom_otkb",
     "custom_suricata",
     "custom_zeek",
     "custom_zeek_ot",

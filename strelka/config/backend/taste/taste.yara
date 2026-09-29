@@ -1,4 +1,4 @@
-// import "magic"
+import "magic"
 import "pe"
 
 // Archive Files
@@ -464,22 +464,22 @@ rule email_file {
         $e in (0..2048)
 }
 
-// rule email_file_broad
-// {
-//     meta:
-//         type = "email"
-//     strings:
-//         $ = "Received: "
-//         $ = "Origin-messageId: "
-//         $ = "Return-Path: "
-//         $ = "From: "
-//         $ = "To: "
-//         $ = "Subject: "
-//         $ = "Date: "
-//     condition:
-//         magic.mime_type() == "message/rfc822" or
-//         all of them
-// }
+rule email_file_broad
+{
+    meta:
+        type = "email"
+    strings:
+        $ = "Received: "
+        $ = "Origin-messageId: "
+        $ = "Return-Path: "
+        $ = "From: "
+        $ = "To: "
+        $ = "Subject: "
+        $ = "Date: "
+    condition:
+        magic.mime_type() == "message/rfc822" or
+        all of them
+}
 
 rule tnef_file {
     meta:
@@ -1049,18 +1049,18 @@ rule credit_cards
         any of them
 }
 
-// rule vsto_file
-// {
-//     meta:
-//         description = "Detects Microsoft Office VSTO files"
-//         reference = "https://www.deepinstinct.com/blog/no-macro-no-worries-vsto-being-weaponized-by-threat-actors"
-//         type = "text"
-//     strings:
-//         $ = "urn:schemas-microsoft-com:asm.v1"
-//         $ = /assemblyIdentity name=('|")[\w.]+\.vsto('|")/
-//         $ = /dependencyType=('|")install('|")/
-//         $ = /codebase=('|")[\w.]+\.manifest('|")/
-//     condition:
-//         magic.mime_type() == "text/xml" and
-//         all of them
-// }
+rule vsto_file
+{
+    meta:
+        description = "Detects Microsoft Office VSTO files"
+        reference = "https://www.deepinstinct.com/blog/no-macro-no-worries-vsto-being-weaponized-by-threat-actors"
+        type = "text"
+    strings:
+        $ = "urn:schemas-microsoft-com:asm.v1"
+        $ = /assemblyIdentity name=('|")[\w.]+\.vsto('|")/
+        $ = /dependencyType=('|")install('|")/
+        $ = /codebase=('|")[\w.]+\.manifest('|")/
+    condition:
+        magic.mime_type() == "text/xml" and
+        all of them
+}

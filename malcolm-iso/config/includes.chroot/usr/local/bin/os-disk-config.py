@@ -38,7 +38,6 @@ from malcolm_utils import (
     str2bool,
 )
 
-
 MINIMUM_DEVICE_BYTES = 'minimum_device_bytes'
 MOUNT_ROOT_PATH = 'mount_root_path'
 MOUNT_DIRS = 'mount_dirs'
@@ -106,6 +105,16 @@ class PartitionInfo:
         self.uuid = uuid
         self.mount = mount
 
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"device={self.device!r}, "
+            f"partition={self.partition!r}, "
+            f"mapper={self.mapper!r}, "
+            f"uuid={self.uuid!r}, "
+            f"mount={self.mount!r})"
+        )
+
 
 ###################################################################################################
 # get interactive user response to Y/N question
@@ -153,31 +162,109 @@ def DetermineOSPlatform():
 
 
 ###################################################################################################
-# determine if a device (eg., sda) is an internal (True) or removable (False) device
+def IsRaspberryPi():
+    try:
+        with open('/proc/device-tree/model', 'rb') as f:
+            model = f.read().rstrip(b'\0').decode(errors='replace')
+        is_raspberry_pi = model.startswith('Raspberry Pi')
+        logging.debug("Hardware model: %r; Raspberry Pi=%s", model, is_raspberry_pi)
+        return is_raspberry_pi
+    except OSError as exc:
+        logging.debug("Unable to read Raspberry Pi model: %s", exc)
+        return False
+
+
+###################################################################################################
+def IsDeviceOnBus(name, bus):
+    block_path = os.path.realpath(f'/sys/block/{name}')
+    bus_devices_path = f'/sys/bus/{bus}/devices'
+
+    if not os.path.isdir(bus_devices_path):
+        return False
+
+    for bus_device in os.listdir(bus_devices_path):
+        bus_device_path = os.path.realpath(os.path.join(bus_devices_path, bus_device))
+
+        try:
+            if os.path.commonpath((block_path, bus_device_path)) == bus_device_path:
+                logging.debug(
+                    "%s belongs to %s bus device %s",
+                    name,
+                    bus,
+                    bus_device,
+                )
+                return True
+        except ValueError:
+            continue
+
+    return False
+
+
+###################################################################################################
+# Determine whether a device is eligible for automatic storage configuration.
+#
+# USB devices are normally excluded. Raspberry Pi systems are allowed to use
+# USB storage because USB-attached SSDs are their normal bulk-storage option.
 def IsInternalDevice(name):
     if args.internalDevs and name in args.internalDevs:
+        logging.info("%s explicitly allowed by --internal", name)
         return True
 
-    rootdir_pattern = re.compile(r'^.*?/devices')
+    # Raspberry Pi systems commonly use USB-attached SSDs as storage.
+    # Mounted-device checks later in the script still protect the system disk.
+    if IsRaspberryPi() and IsDeviceOnBus(name, 'usb'):
+        logging.info("%s is USB-attached storage on a Raspberry Pi; allowing it", name)
+        return True
 
-    removableFlagFile = '/sys/block/%s/device/block/%s/removable' % (name, name)
+    removableFlagFile = f'/sys/block/{name}/device/block/{name}/removable'
     if not os.path.isfile(removableFlagFile):
-        removableFlagFile = '/sys/block/%s/removable' % (name)
+        removableFlagFile = f'/sys/block/{name}/removable'
+
     if os.path.isfile(removableFlagFile):
         with open(removableFlagFile) as f:
-            if f.read(1) == '1':
-                return False
+            removable = f.read(1)
 
-    path = rootdir_pattern.sub('', os.readlink('/sys/block/%s' % name))
-    hotplug_buses = ("usb", "ieee1394", "mmc", "pcmcia", "firewire")
-    for bus in hotplug_buses:
-        if os.path.exists('/sys/bus/%s' % bus):
-            for device_bus in os.listdir('/sys/bus/%s/devices' % bus):
-                device_link = rootdir_pattern.sub('', os.readlink('/sys/bus/%s/devices/%s' % (bus, device_bus)))
-                if re.search(device_link, path):
-                    return False
+        if removable == '1':
+            logging.debug("%s reports removable=1; excluding it", name)
+            return False
+
+    for bus in ("usb", "ieee1394", "mmc", "pcmcia", "firewire"):
+        if IsDeviceOnBus(name, bus):
+            logging.debug("%s is attached through hotplug bus %s; excluding it", name, bus)
+            return False
 
     return True
+
+
+###################################################################################################
+def GetDeviceMounts(device):
+    ecode, output = run_subprocess(
+        f'/bin/lsblk --json --tree --output name,path,mountpoint {device}',
+        stdout=True,
+        stderr=True,
+    )
+
+    if ecode != 0:
+        logging.error("Unable to inspect mounts for %s: %s", device, output)
+        return None
+
+    try:
+        block_info = json.loads('\n'.join(output))
+    except (TypeError, ValueError) as exc:
+        logging.error("Unable to parse lsblk output for %s: %s", device, exc)
+        return None
+
+    mounts = []
+
+    def collect(entries):
+        for entry in entries or []:
+            mountpoint = entry.get('mountpoint')
+            if mountpoint:
+                mounts.append(mountpoint)
+            collect(entry.get('children'))
+
+    collect(block_info.get('blockdevices'))
+    return sorted(set(mounts))
 
 
 ###################################################################################################
@@ -296,7 +383,7 @@ def main():
     logging.debug(f"Arguments: {args}")
 
     if not args.osMode:
-        args.osMode = DetermineOSPlatform()
+        args.osMode = DetermineOSPlatform() or OS_MODE_MALCOLM
 
     if args.osMode in (OS_MODE_MALCOLM, OS_MODE_HEDGEHOG):
         osMode = args.osMode
@@ -401,10 +488,28 @@ def main():
 
     # determine candidate storage devices, which are any disks that do not have a mount point associated with
     # it in any way, (no partitions, mappings, etc. that are mounted) and is at least 100 gigabytes
-    for device, entries in allDisks.items():
-        deviceMounts = list(set([par.mount for par in entries if par.mount is not None]))
-        if (len(deviceMounts) == 0) and (GetDeviceSize(device) >= OS_PARAMS[osMode][MINIMUM_DEVICE_BYTES]):
-            candidateDevs.append(device)
+    for device in allDisks:
+        deviceMounts = GetDeviceMounts(device)
+
+        # Failure to determine mount state excludes the device.
+        if deviceMounts is None:
+            logging.warning("%s skipped because its mount state is unknown", device)
+            continue
+
+        if deviceMounts:
+            logging.info("%s skipped because it has active mounts: %s", device, deviceMounts)
+            continue
+
+        deviceSize = GetDeviceSize(device)
+        if deviceSize < OS_PARAMS[osMode][MINIMUM_DEVICE_BYTES]:
+            logging.info(
+                "%s skipped because %s is below the minimum size",
+                device,
+                sizeof_fmt(deviceSize),
+            )
+            continue
+
+        candidateDevs.append(device)
 
     # sort candidate devices largest to smallest
     candidateDevs = sorted(candidateDevs, key=lambda x: GetDeviceSize(x), reverse=True)
@@ -427,6 +532,22 @@ def main():
             if (not args.interactive) or YesOrNo(
                 f'Partition and format {device}{" (dry-run)" if args.dryrun else ""}?'
             ):
+
+                currentMounts = GetDeviceMounts(device)
+                if currentMounts is None:
+                    logging.error(
+                        "Skipping %s because its mount state could not be verified",
+                        device,
+                    )
+                    continue
+                elif currentMounts:
+                    logging.error(
+                        "Skipping %s because it became mounted: %s",
+                        device,
+                        currentMounts,
+                    )
+                    continue
+
                 if args.dryrun:
                     logging.info(f"Partitioning {device} (dry run only)...")
                     logging.info(

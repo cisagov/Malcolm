@@ -132,7 +132,7 @@ create_user() {
     # create sensor user's group
     groupadd "$SENSOR_GROUP"
     # create sensor user, and add to netdev and sudo group
-    useradd -m -g "$SENSOR_GROUP" -G sudo,netdev -u 1000 -s /bin/bash -d "$SENSOR_HOME" "$SENSOR_USER"
+    useradd -m -g "$SENSOR_GROUP" -G sudo,netdev,plugdev,video -u 1000 -s /bin/bash -d "$SENSOR_HOME" "$SENSOR_USER"
     # set default password
     echo "${SENSOR_USER}:${pass}" | chpasswd --crypt-method YESCRYPT
     # force password change on first login

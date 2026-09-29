@@ -2,7 +2,7 @@
 
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:26.08.0
+    image: ghcr.io/idaholab/malcolm/opensearch:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -73,7 +73,7 @@ services:
       start_period: 180s
     stop_grace_period: 3m
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:26.08.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -124,7 +124,7 @@ services:
       start_period: 30s
     stop_grace_period: 20s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:26.08.0
+    image: ghcr.io/idaholab/malcolm/dashboards:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -167,7 +167,7 @@ services:
       start_period: 210s
     stop_grace_period: 20s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:26.08.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -202,6 +202,7 @@ services:
     - ./config/beats-common.env
     - ./config/lookup-common.env
     - ./config/logstash.env
+    - ./config/logstash-secret.env
     depends_on:
     - opensearch
     ports:
@@ -258,7 +259,7 @@ services:
       start_period: 600s
     stop_grace_period: 2m
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:26.08.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -346,7 +347,7 @@ services:
       start_period: 60s
     stop_grace_period: 30s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:26.08.0
+    image: ghcr.io/idaholab/malcolm/arkime:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -413,7 +414,7 @@ services:
       start_period: 210s
     stop_grace_period: 30s
   arkime-live:
-    image: ghcr.io/idaholab/malcolm/arkime:26.08.0
+    image: ghcr.io/idaholab/malcolm/arkime:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -488,7 +489,7 @@ services:
       start_period: 210s
     stop_grace_period: 30s
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:26.08.0
+    image: ghcr.io/idaholab/malcolm/zeek:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -549,7 +550,7 @@ services:
       start_period: 60s
     stop_grace_period: 30s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:26.08.0
+    image: ghcr.io/idaholab/malcolm/zeek:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -610,7 +611,7 @@ services:
       start_period: 60s
     stop_grace_period: 30s
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:26.08.0
+    image: ghcr.io/idaholab/malcolm/suricata:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -670,7 +671,7 @@ services:
       start_period: 120s
     stop_grace_period: 30s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:26.08.0
+    image: ghcr.io/idaholab/malcolm/suricata:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -734,7 +735,7 @@ services:
       start_period: 120s
     stop_grace_period: 30s
   filescan:
-    image: ghcr.io/idaholab/malcolm/filescan:26.08.0
+    image: ghcr.io/idaholab/malcolm/filescan:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -790,7 +791,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   strelka-backend:
-    image: ghcr.io/idaholab/malcolm/strelka-backend:26.08.0
+    image: ghcr.io/idaholab/malcolm/strelka-backend:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -842,7 +843,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   strelka-frontend:
-    image: ghcr.io/idaholab/malcolm/strelka-frontend:26.08.0
+    image: ghcr.io/idaholab/malcolm/strelka-frontend:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -885,7 +886,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   strelka-manager:
-    image: ghcr.io/idaholab/malcolm/strelka-manager:26.08.0
+    image: ghcr.io/idaholab/malcolm/strelka-manager:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -927,7 +928,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:26.08.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -978,7 +979,7 @@ services:
       start_period: 60s
     stop_grace_period: 30s
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:26.08.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -1028,7 +1029,7 @@ services:
       start_period: 90s
     stop_grace_period: 20s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:26.08.0
+    image: ghcr.io/idaholab/malcolm/file-upload:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1069,7 +1070,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:26.08.0
+    image: ghcr.io/idaholab/malcolm/htadmin:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1113,7 +1114,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:26.08.0
+    image: ghcr.io/idaholab/malcolm/freq:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1146,7 +1147,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:26.08.0
+    image: ghcr.io/idaholab/malcolm/netbox:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1217,7 +1218,7 @@ services:
       start_period: 120s
     stop_grace_period: 20s
   postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:26.08.0
+    image: ghcr.io/idaholab/malcolm/postgresql:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1256,7 +1257,7 @@ services:
       start_period: 20m
     stop_grace_period: 1m
   valkey:
-    image: ghcr.io/idaholab/malcolm/valkey:26.08.0
+    image: ghcr.io/idaholab/malcolm/valkey:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -1298,7 +1299,7 @@ services:
       start_period: 45s
     stop_grace_period: 20s
   valkey-cache:
-    image: ghcr.io/idaholab/malcolm/valkey:26.08.0
+    image: ghcr.io/idaholab/malcolm/valkey:26.09.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -1335,7 +1336,7 @@ services:
       start_period: 45s
     stop_grace_period: 20s
   api:
-    image: ghcr.io/idaholab/malcolm/api:26.08.0
+    image: ghcr.io/idaholab/malcolm/api:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1382,7 +1383,7 @@ services:
       start_period: 60s
     stop_grace_period: 20s
   keycloak:
-    image: ghcr.io/idaholab/malcolm/keycloak:26.08.0
+    image: ghcr.io/idaholab/malcolm/keycloak:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1420,7 +1421,7 @@ services:
       start_period: 45s
     stop_grace_period: 30s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:26.08.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:26.09.0
     profiles: ["malcolm"]
     logging:
       driver: local

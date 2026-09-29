@@ -1,7 +1,7 @@
 "Collection": "TA0009"
 "Command_and_Control": "TA0011"
 "Credential_Access": "TA0006"
-"Defense_Evasion": "TA0005"
+"Defense_Impairment": "TA0112"
 "Discovery": "TA0007"
 "Execution": "TA0002"
 "Exfiltration": "TA0010"
@@ -15,3 +15,4 @@
 "Privilege_Escalation": "TA0004"
 "Reconnaissance": "TA0043"
 "Resource_Development": "TA0042"
+"Stealth": "TA0005"

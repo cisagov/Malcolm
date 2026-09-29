@@ -1,0 +1,494 @@
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "otkb": {
+          "properties": {
+            "function": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "date"
+                },
+                "updated_at": {
+                  "type": "date"
+                },
+                "origin_node": {
+                  "type": "keyword"
+                },
+                "user": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
+                },
+                "function_code": {
+                  "type": "integer"
+                },
+                "message_type": {
+                  "type": "keyword"
+                },
+                "specification_classifier": {
+                  "type": "keyword"
+                },
+                "zeek_rules": {
+                  "type": "flat_object"
+                },
+                "wireshark_rules": {
+                  "type": "flat_object"
+                },
+                "protocol": {
+                  "type": "keyword"
+                },
+                "citations": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "pages": {
+                      "type": "keyword"
+                    },
+                    "section": {
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "otkb_classifier": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "definition": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "fields": {
+                        "text": {
+                          "type": "text",
+                          "norms": false
+                        }
+                      }
+                    },
+                    "defend_id": {
+                      "type": "keyword"
+                    },
+                    "hierarchy": {
+                      "type": "integer"
+                    },
+                    "parent": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "notes": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "content": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "fields": {
+                        "text": {
+                          "type": "text",
+                          "norms": false
+                        }
+                      }
+                    },
+                    "function": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "protocol": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "date"
+                },
+                "updated_at": {
+                  "type": "date"
+                },
+                "origin_node": {
+                  "type": "keyword"
+                },
+                "user": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "alternate_names": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
+                },
+                "transport": {
+                  "properties": {
+                    "port": {
+                      "type": "integer"
+                    },
+                    "protocol": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "wireshark_dissector": {
+                  "type": "keyword"
+                },
+                "zeek_parser": {
+                  "type": "keyword"
+                },
+                "citations": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "pages": {
+                      "type": "keyword"
+                    },
+                    "section": {
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "procedures": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "date"
+                },
+                "updated_at": {
+                  "type": "date"
+                },
+                "origin_node": {
+                  "type": "keyword"
+                },
+                "user": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
+                },
+                "attack_id": {
+                  "type": "keyword"
+                },
+                "function": {
+                  "type": "keyword"
+                },
+                "citations": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "pages": {
+                      "type": "keyword"
+                    },
+                    "section": {
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "asset": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "definition": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "fields": {
+                        "text": {
+                          "type": "text",
+                          "norms": false
+                        }
+                      }
+                    },
+                    "attack_id": {
+                      "type": "keyword"
+                    },
+                    "citations": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        },
+                        "created_at": {
+                          "type": "date"
+                        },
+                        "updated_at": {
+                          "type": "date"
+                        },
+                        "origin_node": {
+                          "type": "keyword"
+                        },
+                        "user": {
+                          "type": "keyword"
+                        },
+                        "pages": {
+                          "type": "keyword"
+                        },
+                        "section": {
+                          "type": "keyword"
+                        },
+                        "reference": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "software": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "fields": {
+                        "text": {
+                          "type": "text",
+                          "norms": false
+                        }
+                      }
+                    },
+                    "attack_id": {
+                      "type": "keyword"
+                    },
+                    "citations": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        },
+                        "created_at": {
+                          "type": "date"
+                        },
+                        "updated_at": {
+                          "type": "date"
+                        },
+                        "origin_node": {
+                          "type": "keyword"
+                        },
+                        "user": {
+                          "type": "keyword"
+                        },
+                        "pages": {
+                          "type": "keyword"
+                        },
+                        "section": {
+                          "type": "keyword"
+                        },
+                        "reference": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "campaign": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "origin_node": {
+                      "type": "keyword"
+                    },
+                    "user": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "fields": {
+                        "text": {
+                          "type": "text",
+                          "norms": false
+                        }
+                      }
+                    },
+                    "attack_id": {
+                      "type": "keyword"
+                    },
+                    "citations": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        },
+                        "created_at": {
+                          "type": "date"
+                        },
+                        "updated_at": {
+                          "type": "date"
+                        },
+                        "origin_node": {
+                          "type": "keyword"
+                        },
+                        "user": {
+                          "type": "keyword"
+                        },
+                        "pages": {
+                          "type": "keyword"
+                        },
+                        "section": {
+                          "type": "keyword"
+                        },
+                        "reference": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

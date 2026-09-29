@@ -8,27 +8,48 @@ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata ||
 
 # - modify suricata.yaml according to environment variables (as non-root)
 # - if SURICATA_DISABLE_SIDS contains entries for disable.conf, write it and run suricata-update to apply
+# - if periodic rule updates are enabled, perform the first update immediately at startup
 if [[ "$(id -u)" == "0" ]] && [[ -n "$PUSER" ]]; then
-    su -s /bin/bash -p ${PUSER} << 'EOF'
-        /usr/local/bin/suricata_config_populate.py --suricata ${SURICATA_TEST_CONFIG_BIN} ${SURICATA_TEST_CONFIG_VERBOSITY:-} >&2
-        if [[ -n "${SURICATA_DISABLE_SIDS}" ]]; then
-            tr ',' '\n' <<<"${SURICATA_DISABLE_SIDS}" | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if (length) print }' | \
-                while IFS= read -r line; do
-                    grep -qxF "$line" /etc/suricata/disable.conf 2>/dev/null || echo "$line"
-                done >> /etc/suricata/disable.conf
-            SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
-        fi
-EOF
+    SURICATA_SETUP_COMMAND=(su -s /bin/bash -p "${PUSER}")
 else
+    SURICATA_SETUP_COMMAND=(/bin/bash)
+fi
+
+"${SURICATA_SETUP_COMMAND[@]}" << 'EOF'
+    run_startup_rule_update() {
+        local status
+        local timeout_seconds="${SURICATA_UPDATE_STARTUP_TIMEOUT:-300}"
+        if timeout "${timeout_seconds}s" "$@"; then
+            return 0
+        else
+            status=$?
+        fi
+        if [[ "$status" -eq 124 ]]; then
+            echo "WARNING: Suricata rule update did not complete within ${timeout_seconds}s at startup; continuing with existing rules" >&2
+        else
+            echo "WARNING: Suricata rule update failed with status ${status} at startup; continuing with existing rules" >&2
+        fi
+        return 0
+    }
+
     /usr/local/bin/suricata_config_populate.py --suricata ${SURICATA_TEST_CONFIG_BIN} ${SURICATA_TEST_CONFIG_VERBOSITY:-} >&2
+    if [[ -f "${SURICATA_UPDATE_CONFIG_FILE:-/etc/suricata/update.yaml}" ]]; then
+        yq -i '.sources = []' "${SURICATA_UPDATE_CONFIG_FILE:-/etc/suricata/update.yaml}"
+    fi
     if [[ -n "${SURICATA_DISABLE_SIDS}" ]]; then
         tr ',' '\n' <<<"${SURICATA_DISABLE_SIDS}" | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if (length) print }' | \
             while IFS= read -r line; do
                 grep -qxF "$line" /etc/suricata/disable.conf 2>/dev/null || echo "$line"
             done >> /etc/suricata/disable.conf
-        SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_ETOPEN=false /usr/local/bin/suricata-update-rules.sh
+        if [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+            run_startup_rule_update /usr/local/bin/suricata-update-rules.sh
+        else
+            run_startup_rule_update env SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false /usr/local/bin/suricata-update-rules.sh
+        fi
+    elif [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
+        run_startup_rule_update /usr/local/bin/suricata-update-rules.sh
     fi
-fi
+EOF
 
 # generate 1..n suricata-offline socket instances
 CONFIG_DIR="/etc/supervisor.d"
@@ -44,6 +65,19 @@ if [[ -d "$CONFIG_DIR" ]] && [[ -f "$CONFIG_DIR"/"$SURICATA_SOCKET_TEMPLATE_FILE
     fi
     sed -e "s/[$]INSTANCEID/${INSTANCEID}/g" "$CONFIG_DIR"/"${SURICATA_SOCKET_TEMPLATE_FILE}" > "$CONFIG_DIR"/"${SURICATA_SOCKET_TEMPLATE_FILE%.*}-$INSTANCEID.conf"
   done
+fi
+
+# Configure Suricata rule update scheduling at container startup so deployments can change
+# the schedule through suricata.env without rebuilding the image. Supercronic expects the
+# standard five-field cron format used by Malcolm's existing midnight-daily schedule.
+SURICATA_UPDATE_CRON_EXPRESSION="${SURICATA_UPDATE_CRON_EXPRESSION:-0 0 * * *}"
+read -r -a SURICATA_UPDATE_CRON_FIELDS <<< "$SURICATA_UPDATE_CRON_EXPRESSION"
+if [[ ${#SURICATA_UPDATE_CRON_FIELDS[@]} -ne 5 ]]; then
+    echo "Invalid SURICATA_UPDATE_CRON_EXPRESSION '$SURICATA_UPDATE_CRON_EXPRESSION'; using '0 0 * * *'" >&2
+    SURICATA_UPDATE_CRON_EXPRESSION="0 0 * * *"
+fi
+if [[ -n "${SUPERCRONIC_CRONTAB:-}" ]]; then
+    printf '%s %s\n' "$SURICATA_UPDATE_CRON_EXPRESSION" "/bin/bash /usr/local/bin/suricata-update-rules.sh" > "$SUPERCRONIC_CRONTAB"
 fi
 
 # start supervisor (which will spawn pcap-suricata, cron, etc.) or whatever the default command is

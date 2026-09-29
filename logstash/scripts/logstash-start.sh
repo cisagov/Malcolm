@@ -20,6 +20,17 @@ TAGS_TO_PARSE_PIPELINE_CFG="/etc/parse_pipelines.yaml"
 # pipeline section in pipelines.yml (then delete 00_config.conf before starting)
 export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
 
+# Optional path to a complete OTKB JSON fixture file. The file is loaded during startup to provide
+# immediate enrichment data and supports file-only operation when the OTKB API is unavailable or
+# unconfigured. When an API URL is also configured, the API refreshes the fixture according to the
+# configured cache TTL.
+OTKB_JSON_FIXTURE_FILE="${OTKB_JSON_FIXTURE_FILE:-/etc/otkb_fixture.json}"
+if [[ -f "${OTKB_JSON_FIXTURE_FILE}" && -s "${OTKB_JSON_FIXTURE_FILE}" ]]; then
+  export OTKB_JSON_FIXTURE_FILE
+else
+  unset OTKB_JSON_FIXTURE_FILE
+fi
+
 # the name of the enrichment pipeline subdirectory under $PIPELINES_DIR
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 

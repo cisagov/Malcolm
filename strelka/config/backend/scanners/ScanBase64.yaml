@@ -2,4 +2,5 @@ ScanBase64:
   - positive:
       flavors:
         - 'base64'
+        - 'base64_pe'
     priority: 5

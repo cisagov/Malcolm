@@ -68,7 +68,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `ghcr.io/idaholab/malcolm/filescan` (based on `python:3`)
 * `ghcr.io/idaholab/malcolm/freq` (based on `debian:13-slim`)
-* `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:11-slim`)
+* `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:13-slim`)
 * `ghcr.io/idaholab/malcolm/keycloak` (based on `quay.io/keycloak/keycloak`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)

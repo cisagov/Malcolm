@@ -157,46 +157,49 @@ end
 
 -- Normalize a raw request URI for RBAC matching.
 -- Uses request_uri (pre-rewrite) rather than ngx.var.uri (post-rewrite), but
--- decodes percent-encoding, collapses repeated slashes, collapses path
--- traversal sequences, and lowercases the result so that RBAC pattern
--- matching agrees with how nginx itself will decode/normalize/case-fold
--- the URI when selecting a location block. Without this, an authenticated
--- low-privilege user could reach a role-restricted location (e.g. /htadmin)
--- by percent-encoding, slash-doubling, or case-varying the path, since
--- nginx's location dispatch normalizes before matching but this function
--- previously did not.
+-- decodes percent-encoding and resolves path segments (dropping empty segments,
+-- . and ..) to match how nginx's ngx_http_parse_complex_uri normalizes the URI
+-- before location selection. Without this, an authenticated low-privilege user
+-- could reach a role-restricted location by percent-encoding, slash-doubling,
+-- case-varying, or inserting dot segments into the path, since nginx's location
+-- dispatch normalizes before matching but this function previously did not.
 local function normalize_uri_for_rbac(raw_uri)
     local path = raw_uri:match("^[^?]+") or ""
 
-    -- Percent-decode BEFORE traversal/slash collapsing, so encoded
-    -- traversal sequences (e.g. %2e%2e%2f) can't sneak past the collapse
-    -- step undetected. ngx.unescape_uri does a single decode pass, matching
-    -- nginx's own single-pass decoding (no double-decode mismatch either way).
+    -- Percent-decode BEFORE segment resolution, so encoded traversal sequences
+    -- (e.g. %2e%2e%2f, %2e) can't sneak past undetected.
     path = ngx.unescape_uri(path)
 
-    -- Collapse repeated slashes. nginx's merge_slashes defaults to "on" and
-    -- affects location matching, but don't rely on inherited config here.
-    path, _ = path:gsub("/+", "/")
-
-    -- Collapse /../ sequences in a loop until stable
-    local n
-    repeat
-        path, n = path:gsub("/[^/]*/%.%./", "/")
-    until n == 0
-    -- Strip any leading /../ sequences that couldn't be collapsed
-    repeat
-        path, n = path:gsub("^/%.%./", "/")
-    until n == 0
+    -- Resolve path segments the same way nginx's ngx_http_parse_complex_uri
+    -- does before location selection: drop empty segments (repeated slashes),
+    -- skip . segments, and pop on .. segments. Do it with a single pass that
+    -- handles all interactions, including interleaved . and .. segments
+    -- (e.g. /x/./../upload, /a/./b/../../upload).
+    local trailing_slash = path:sub(-1) == "/"
+    local segments = {}
+    for segment in (path .. "/"):gmatch("([^/]*)/") do
+        if segment == ".." then
+            if #segments > 0 then
+                table.remove(segments)
+            end
+        elseif segment ~= "." and segment ~= "" then
+            segments[#segments + 1] = segment
+        end
+    end
+    path = "/" .. table.concat(segments, "/")
+    if trailing_slash and #segments > 0 then
+        path = path .. "/"
+    end
 
     -- Case-fold: nginx's htadmin/admin_login location is matched with the
     -- case-insensitive `~*` modifier, but path_role_envs patterns are matched
-    -- with case-sensitive ngx.re.find (no "i" flag). Lowercasing here — the
-    -- single place both call sites source their match string from — keeps
+    -- with case-sensitive ngx.re.find (no "i" flag). Lowercasing here keeps
     -- matching consistent without touching every ngx.re.find/match call site.
     path = path:lower()
 
     return path
 end
+_M._normalize_uri_for_rbac = normalize_uri_for_rbac  -- exported for unit testing only
 
 local role_based_access_enabled = false
 local keycloak_ssl_verify = false

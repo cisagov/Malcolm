@@ -36,7 +36,20 @@ function sanitize_tagged_filename($filename) {
     return (strlen($name) > 0 ? $name : '_') . '.' . $extension;
 }
 
+// Allows periods so multi-part extensions (e.g. capture.pcap.gz, capture.pcapng.xz)
+// survive intact; pathinfo() already isolates the true trailing extension for the
+// BLOCKED_EXTENSIONS check above regardless of how many periods came before it.
 function sanitize_tagged_filename_part($str) {
+    return preg_replace("/[^a-zA-Z0-9\s_\(\),.-]/", "", $str);
+}
+
+// Used on the user-supplied tag prefix only, before it's concatenated with the
+// original filename. Tags never carry extension semantics, so periods are stripped
+// here rather than allowed through: pathinfo() splits on the last period in the
+// *combined* prefix+filename string, so a period inside an untrusted tag could be
+// mistaken for the filename's real extension boundary, especially for uploads with
+// no extension of their own. Keeping tags period-free removes that ambiguity.
+function sanitize_tag_prefix_part($str) {
     return preg_replace("/[^a-zA-Z0-9\s_\(\),-]/", "", $str);
 }
 
@@ -55,7 +68,7 @@ function handle_file_post($files) {
 
     $new_name_prefix = '';
     if (isset($_POST["tags"]) && (strlen($_POST["tags"]) > 0)) {
-        $new_name_prefix = $_POST["tags"] . ",USERTAG,";
+        $new_name_prefix = sanitize_tag_prefix_part($_POST["tags"]) . ",USERTAG,";
     }
     if (isset($_POST["site-dropdown"]) && (strlen($_POST["site-dropdown"]) > 0) && ((is_int($_POST["site-dropdown"])) || (ctype_digit($_POST["site-dropdown"])))) {
         if (strlen($new_name_prefix) > 0) {
@@ -106,7 +119,7 @@ function handle_transfer_ids_post($ids) {
 
         $new_name_prefix = '';
         if (isset($_POST["tags"]) && (strlen($_POST["tags"]) > 0)) {
-            $new_name_prefix = $_POST["tags"] . ",USERTAG,";
+            $new_name_prefix = sanitize_tag_prefix_part($_POST["tags"]) . ",USERTAG,";
         }
         if (isset($_POST["site-dropdown"]) && (strlen($_POST["site-dropdown"]) > 0) && ((is_int($_POST["site-dropdown"])) || (ctype_digit($_POST["site-dropdown"])))) {
             if (strlen($new_name_prefix) > 0) {

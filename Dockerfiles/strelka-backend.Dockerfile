@@ -27,7 +27,7 @@ ENV RULES_UPDATE_ENABLED=$RULES_UPDATE_ENABLED
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.53.6"
+ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV SUPERCRONIC_VERSION="0.2.49"

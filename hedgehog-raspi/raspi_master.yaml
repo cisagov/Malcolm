@@ -104,7 +104,7 @@ steps:
       - ssh
       - wpasupplicant
       - systemd-timesyncd
-      - __LINUX_IMAGE__
+      - __LINUX_PACKAGES__
       - raspi-firmware
       - __WIRELESS_FIRMWARE__
       - __BLUETOOTH_FIRMWARE__
@@ -161,7 +161,12 @@ steps:
   # Copy the relevant device tree files to the boot partition
   - chroot: tag-root
     shell: |
-      install -m 644 -o root -g root __DTB__ /boot/firmware/
+      # Pi 4 gets its DTBs from Debian's kernel package here. Pi 5's matched
+      # downstream DTBs arrive later with the locally built kernel package.
+      for source_dtb in __DTB__; do
+        [ -e "$source_dtb" ] || continue
+        install -m 644 -o root -g root "$source_dtb" /boot/firmware/
+      done
 
   # Clean up archive cache (likely not useful) and lists (likely outdated) to
   # reduce image size by several hundred megabytes.
@@ -179,6 +184,11 @@ steps:
   # sure we don't lose label-based booting.
   - chroot: tag-root
     shell: |
+      # Model-specific work must run first. For Pi 5 this installs the local
+      # downstream kernel package, whose raspi-firmware hook creates the boot
+      # files edited below.
+      __EXTRA_CHROOT_SHELL_CMDS__
+
       # raspi-firmware may generate a root device based on the build
       # environment, such as /dev/mmcblk0p2 or /dev/mapper/loop0p2.
       # Always replace the complete root= argument with the filesystem label.
@@ -199,8 +209,6 @@ steps:
         's/^#ROOTPART=.*/ROOTPART=LABEL=RASPIROOT/' \
         /etc/default/raspi*-firmware
 
-      __EXTRA_CHROOT_SHELL_CMDS__
-
       # Validate the final kernel command line.
       grep -Eq \
         '(^|[[:space:]])root=LABEL=RASPIROOT([[:space:]]|$)' \
@@ -211,6 +219,15 @@ steps:
         /boot/firmware/cmdline.txt; then
         echo "Unexpected device-specific root in cmdline.txt:" >&2
         cat /boot/firmware/cmdline.txt >&2
+        exit 1
+      fi
+
+      # Raspberry Pi firmware requires the entire kernel command line to be
+      # stored on one physical line.
+      cmdline_lines="$(wc -l < /boot/firmware/cmdline.txt)"
+      if [ "$cmdline_lines" -ne 1 ]; then
+        echo "cmdline.txt must contain exactly one line:" >&2
+        nl -ba /boot/firmware/cmdline.txt >&2
         exit 1
       fi
 

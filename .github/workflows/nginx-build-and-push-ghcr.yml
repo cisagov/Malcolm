@@ -21,7 +21,17 @@ on:
   repository_dispatch:
 
 jobs:
+  test-lua:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua
+        run: sudo apt-get install -y --no-install-recommends lua5.4
+      - name: Run normalize_uri_for_rbac regression tests
+        run: lua5.4 nginx/lua/test_normalize_uri.lua
+
   docker:
+    needs: test-lua
     uses: ./.github/workflows/docker-build-push-scan.yml
     permissions:
       packages: write

@@ -75,6 +75,7 @@ def processCsv(inputFileName, outputFileName):
             with open(outputFileName, 'w') as outfile:
                 outfile.write("#fields\tproto\tdport\tname\tdescription\n")
                 for row in reader:
+                    proto, port, service, note = '', '', '', ''
                     match matchedKnownSource:
                         case 'drahgkar':
                             if (row.get('Protocol', '?') != '?') and row.get('Port', None):
@@ -100,7 +101,7 @@ def processCsv(inputFileName, outputFileName):
                         note,
                         flags=re.IGNORECASE,
                     )
-                    name = '' if name.lower() == 'unknown' else name
+                    service = '' if service.lower() == 'unknown' else service
 
                     if (
                         proto

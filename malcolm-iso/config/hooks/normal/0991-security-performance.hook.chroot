@@ -143,10 +143,51 @@ echo "umask 077" >> /etc/profile
 echo "export UMASK=077" >> /etc/profile
 echo "export PYTHONDONTWRITEBYTECODE=1" >> /etc/profile
 
-# put sudoers log into its own logfile
-awk 'FNR==NR{ if (/^Defaults/) p=NR; next} 1; FNR==p{ print "Defaults\t!syslog\nDefaults\tlogfile=/var/log/sudo.log" }' /etc/sudoers /etc/sudoers > /tmp/newsudoers
-mv /tmp/newsudoers /etc/sudoers && chmod 440 /etc/sudoers
-cat << 'EOF' > /etc/logrotate.d/sudoers
+# Configure sudo logging and include /usr/local/bin in sudo's secure PATH.
+sudoers_tmp="$(mktemp /etc/sudoers.tmp.XXXXXX)"
+trap 'rm -f "${sudoers_tmp}"' EXIT
+
+awk '
+    function add_defaults() {
+        print "Defaults\t!syslog"
+        print "Defaults\tlogfile=/var/log/sudo.log"
+        print "Defaults\tsecure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\""
+    }
+
+    FNR == NR {
+        if (/^[[:space:]]*Defaults/) {
+            p = FNR
+        }
+        next
+    }
+
+    !/^[[:space:]]*Defaults[[:space:]]+secure_path[[:space:]]*=/ {
+        print
+    }
+
+    FNR == p {
+        add_defaults()
+        inserted = 1
+    }
+
+    END {
+        if (!inserted) {
+            add_defaults()
+        }
+    }
+' /etc/sudoers /etc/sudoers > "${sudoers_tmp}"
+
+chown root:root "${sudoers_tmp}"
+chmod 0440 "${sudoers_tmp}"
+
+if visudo -cf "${sudoers_tmp}"; then
+    mv "${sudoers_tmp}" /etc/sudoers
+    trap - EXIT
+else
+    exit 1
+fi
+
+cat <<'EOF' > /etc/logrotate.d/sudoers
 /var/log/sudo.log
 {
   weekly
@@ -158,6 +199,9 @@ cat << 'EOF' > /etc/logrotate.d/sudoers
   minsize 100k
 }
 EOF
+
+chown root:root /etc/logrotate.d/sudoers
+chmod 0644 /etc/logrotate.d/sudoers
 
 # tweak some auditd settings
 sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf

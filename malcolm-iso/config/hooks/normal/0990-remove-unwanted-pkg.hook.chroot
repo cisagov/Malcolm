@@ -4,8 +4,7 @@
 apt-get -y --purge remove build-essential sparse $(dpkg --get-selections | grep -v deinstall$ | cut -f1 | grep -P -- '-dev(:\w+)?$' | grep -Pv -- '^(dpkg|libgcc)') || true
 
 # remove unwanted packages
-apt-get -y --purge remove bluez-firmware \
-                          docker-buildx-plugin \
+apt-get -y --purge remove docker-buildx-plugin \
                           docker-ce-rootless-extras \
                           gdebi* \
                           firmware-ast \

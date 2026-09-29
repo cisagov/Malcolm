@@ -3,7 +3,7 @@ network.host: 0.0.0.0
 bootstrap.memory_lock: true
 http:
   cors:
-    enabled: true
+    enabled: false
     allow-origin: "*"
     allow-methods: OPTIONS, HEAD, GET, POST, PUT, DELETE
     allow-headers: "kbn-version, Origin, X-Requested-With, Content-Type, Accept, Engaged-Auth-Token Authorization"

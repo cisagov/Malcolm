@@ -1,0 +1,14 @@
+export GITLAB_URL=https://repo.example.org
+export GITLAB_ACCESS_TOKEN=
+
+export PROJECT_ID=
+export PROJECT_BRANCH=development
+export JOB_ID=create-tar
+
+export OUTPUT_DIR=./artifacts
+export CLEAN_OUTPUT_DIR=true
+export EXTRACT_ARTIFACTS=true
+export LOAD_IMAGE=true
+
+export CONTAINER_ENGINE=docker
+export DOCKER_IMAGE_TAG=

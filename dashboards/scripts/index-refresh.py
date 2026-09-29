@@ -401,6 +401,8 @@ def build_field_format_map(args, fields, prev_field_format_map):
         '.segment.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
         '.reference': lambda: '/refred/{{value}}',
         # exact matches
+        'otkb.protocol.wireshark_dissector': lambda: '/refred/{{value}}',
+        'otkb.protocol.zeek_parser': lambda: '/refred/{{value}}',
         'network.name': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.prefix&lookup=iexact'),
         'related.device_id': lambda: netbox_url('/dcim/devices/{{value}}'),
         'related.device_name': lambda: netbox_url(

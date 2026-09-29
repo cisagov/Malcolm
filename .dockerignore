@@ -34,6 +34,7 @@ kubernetes
 malcolm-iso
 hedgehog-raspi
 nginx/nginx_ldap*.conf
+nginx/lua/test*.lua
 pcap
 _site
 shared/bin/malcolm_constants.py
@@ -53,3 +54,4 @@ netbox/media
 netbox/custom-plugins
 netbox/custom-scripts
 zeek/custom
+logstash/maps/otkb_fixture.json

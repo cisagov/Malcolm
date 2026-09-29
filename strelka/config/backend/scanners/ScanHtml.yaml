@@ -7,3 +7,4 @@ ScanHtml:
     priority: 5
     options:
       max_hyperlinks: 50
+      parser: "lxml"

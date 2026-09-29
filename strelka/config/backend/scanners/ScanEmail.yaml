@@ -7,6 +7,21 @@ ScanEmail:
         - 'email_file_broad'
     priority: 5
     options:
-      create_thumbnail: True
-      thumbnail_header: False
-      thumbnail_size: [500, 500]
+      body_enabled: True
+      body_chars: 200
+      max_links: 50
+      capture_raw_headers: False
+      max_header_length: 2048
+      max_headers_total: 32768
+      header_skip_list:
+        - 'x-microsoft-antispam-message-info'
+        - 'x-ms-exchange-organization-network-message-id'
+        - 'x-clx-response'
+        - 'x-authority-analysis'
+        - 'arc-seal'
+        - 'arc-message-signature'
+      # mailbox_mode: none  # none (default) | copy | parallel
+      # link_rewrite_mode: none  # none (default) | replace | copy | parallel
+      # link_rewrite_urldecode: auto  # auto (default) | on | off
+      # link_rewrite_rules:
+      #   - pattern: 'secure\.gateway\.example/redirect\?url=(?P<url>https?%3A[^&]+)'

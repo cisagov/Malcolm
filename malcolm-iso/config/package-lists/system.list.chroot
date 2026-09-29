@@ -159,6 +159,7 @@ user-setup
 util-linux
 util-linux-extra
 uuid-runtime
+v4l-utils
 vim-tiny
 whois
 xbitmaps

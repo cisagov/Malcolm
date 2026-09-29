@@ -1,7 +1,7 @@
 "Collection": "https://attack.mitre.org/tactics/TA0009/"
 "Command_and_Control": "https://attack.mitre.org/tactics/TA0011/"
 "Credential_Access": "https://attack.mitre.org/tactics/TA0006/"
-"Defense_Evasion": "https://attack.mitre.org/tactics/TA0005/"
+"Defense_Impairment": "https://attack.mitre.org/tactics/TA0112/"
 "Discovery": "https://attack.mitre.org/tactics/TA0007/"
 "Execution": "https://attack.mitre.org/tactics/TA0002/"
 "Exfiltration": "https://attack.mitre.org/tactics/TA0010/"
@@ -15,3 +15,4 @@
 "Privilege_Escalation": "https://attack.mitre.org/tactics/TA0004/"
 "Reconnaissance": "https://attack.mitre.org/tactics/TA0043/"
 "Resource_Development": "https://attack.mitre.org/tactics/TA0042/"
+"Stealth": "https://attack.mitre.org/tactics/TA0005/"

@@ -7,6 +7,14 @@ all: shasums
 BUILD_RELEASES_4 := trixie forky
 BUILD_RELEASES_5 := forky
 
+RPI_KERNEL_REPO ?= https://github.com/raspberrypi/linux.git
+RPI_KERNEL_REF ?= rpi-6.18.y
+RPI_KERNEL_JOBS ?= $(shell nproc)
+RPI_KERNEL_DEB := build/rpi5-kernel.deb
+RPI_KERNEL_BUILD_DEPS := \
+	bc bison build-essential debhelper device-tree-compiler dpkg-dev dwarves \
+	fakeroot flex git libdw-dev libelf-dev libssl-dev python3 rsync
+
 platforms := \
   $(foreach rel,$(BUILD_RELEASES_4),raspi_4_$(rel)) \
   $(foreach rel,$(BUILD_RELEASES_5),raspi_5_$(rel))
@@ -30,16 +38,24 @@ target_platforms:
 
 # Generate targets based on supported model/release combinations.
 define dynamic_yaml_target =
-  raspi_$(1)_$(2).yaml: raspi_master.yaml generate-recipe.py
+  raspi_$(1)_$(2).yaml: raspi_master.yaml generate-recipe.py $(3)
   raspi_$(1)_$(2).yaml:
 	./generate-recipe.py $(1) $(2)
 endef
 
 $(foreach release,$(BUILD_RELEASES_4), \
-  $(eval $(call dynamic_yaml_target,4,$(release))))
+  $(eval $(call dynamic_yaml_target,4,$(release),)))
 
 $(foreach release,$(BUILD_RELEASES_5), \
-  $(eval $(call dynamic_yaml_target,5,$(release))))
+  $(eval $(call dynamic_yaml_target,5,$(release),$(RPI_KERNEL_DEB))))
+
+$(RPI_KERNEL_DEB): build-rpi-kernel.sh
+	apt-get update
+	apt-get install -y --no-install-recommends $(RPI_KERNEL_BUILD_DEPS)
+	RPI_KERNEL_REPO='$(RPI_KERNEL_REPO)' \
+	RPI_KERNEL_REF='$(RPI_KERNEL_REF)' \
+	RPI_KERNEL_JOBS='$(RPI_KERNEL_JOBS)' \
+	./build-rpi-kernel.sh '$@'
 
 %.img.sha256: %.img
 	echo $@
@@ -77,6 +93,8 @@ _clean_logs:
 	rm -f $(addsuffix .log,$(platforms))
 _clean_tarballs:
 	rm -f $(addsuffix .tar.gz,$(platforms))
-clean: _clean_xzimages _clean_images _clean_shasums _clean_yaml _clean_tarballs _clean_logs _clean_bmaps
+_clean_rpi_kernel:
+	rm -rf build/rpi-kernel build/rpi5-kernel.deb
+clean: _clean_xzimages _clean_images _clean_shasums _clean_yaml _clean_tarballs _clean_logs _clean_bmaps _clean_rpi_kernel
 
-.PHONY: _ck_root _build_img clean _clean_images _clean_yaml _clean_tarballs _clean_logs
+.PHONY: _ck_root _build_img clean _clean_images _clean_yaml _clean_tarballs _clean_logs _clean_rpi_kernel

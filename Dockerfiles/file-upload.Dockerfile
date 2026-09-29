@@ -49,7 +49,7 @@ ENV TERM=xterm
 ARG PHP_VERSION=8.4
 ENV PHP_VERSION=$PHP_VERSION
 
-ARG FILEPOND_SERVER_BRANCH=master
+ARG FILEPOND_SERVER_BRANCH=75fea06f898ea5f474227be2daba924d06ba6aee
 ENV FILEPOND_SERVER_BRANCH=$FILEPOND_SERVER_BRANCH
 
 ARG STALE_UPLOAD_DELETE_MIN=360
@@ -95,6 +95,32 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     cd /tmp && \
       curl -sSL "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" | tar xzvf - -C ./filepond-server --strip-components 1 && \
       rsync -a --include="*/" --include="*.php" --exclude="*" ./filepond-server/ /var/www/upload/server/php/ && \
+      python3 -c 'import pathlib,sys; p=pathlib.Path("/var/www/upload/server/php/FilePond.class.php"); s=p.read_text(); old="[^a-zA-Z0-9\\_\\s]"; new="[^a-zA-Z0-9\\_\\s.]"; n=s.count(old); sys.exit("FilePond.class.php sanitize_filename_part pattern not found or ambiguous (count=%d); vendored library may have changed, update this patch" % n) if n != 1 else p.write_text(s.replace(old, new))' && \
+      FILEPOND_INDEX_PHP="/var/www/upload/server/php/index.php"; \
+        FILEPOND_INDEX_TMP="$(mktemp "${FILEPOND_INDEX_PHP}.XXXXXX")"; \
+        awk ' \
+            index($0, "FETCH_REMOTE_FILE") && \
+            index($0, "handle_fetch_remote_file") { \
+                next; \
+            } \
+            !removing && \
+            $0 ~ /^[[:space:]]*function[[:space:]]+handle_fetch_remote_file[[:space:]]*\(/ { \
+                removing = 1; \
+                depth = 0; \
+            } \
+            removing { \
+                line = $0; \
+                opens = gsub(/{/, "{", line); \
+                closes = gsub(/}/, "}", line); \
+                depth += opens - closes; \
+                if (depth == 0) \
+                    removing = 0; \
+                next; \
+            } \
+            { print; } \
+        ' "$FILEPOND_INDEX_PHP" > "$FILEPOND_INDEX_TMP" && \
+        chmod --reference="$FILEPOND_INDEX_PHP" "$FILEPOND_INDEX_TMP" && \
+        mv -- "$FILEPOND_INDEX_TMP" "$FILEPOND_INDEX_PHP" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt  && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \

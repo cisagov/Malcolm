@@ -14,7 +14,7 @@ require 'stringex_lite'
 
 ##############################################################################################
 # Despite the warning against global variables, we are using them here in order to make sure that
-#   we don't have duplicate caches for things cross different clones of the filter,
+#   we don't have duplicate caches for things across different clones of the filter,
 #   which is what happens if you just use @instance_variables. However, we should
 #   be safe because 1) we are using Concurrent::Map to maintain these per-type caches, and
 #   2) because the caches themselves are threadsafe. Note that this will share these values
@@ -77,7 +77,6 @@ class NetBoxConnLazy
   end
 
   def method_missing(method, *args, &block)
-
     puts "#{method}(#{args.map(&:inspect).join(', ')})" if @netboxConnDebug
 
     if $method_timings_logging_thread_running
@@ -136,10 +135,6 @@ def parse_autopopulate_config(raw_config)
     end
 
     range = cidr.to_range
-    unless range.first.private?
-      puts "parse_autopopulate_config skipping non-private CIDR: #{cidr_str}"
-      next
-    end
 
     entries << {
       cidr: cidr,
@@ -541,8 +536,6 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
          end
        end
 
-  return false unless ip.private?
-
   # Determine applicable config: site-specific first, fall back to '*', else allow
   config = config_site_hash[site_id]
   if config.nil? && (site_id.is_a?(Integer) || site_id.to_s.match?(/\A[+-]?\d+\z/)) && (site_id.to_i > 0)
@@ -555,11 +548,11 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
   end
   config = config_site_hash['*'] if config.nil?
 
-  return true if config.nil? || config[:allow_all_private]
+  return ip.private? if config.nil? || config[:allow_all_private]
 
-  # If no positive entries, but negatives exist, allow all except those excluded
+  # If no positive entries, but negatives exist, allow all private IPs except those excluded
   if config[:entries].none? { |e| e[:allow] } && !config[:entries].empty?
-    return !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
+    return ip.private? && !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
   end
 
   # Iterate entries in order; last matching rule wins
@@ -1570,7 +1563,7 @@ def netbox_lookup(
         _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb)
 
         if @autopopulate && (_devices.nil? || _devices.empty?)
-          # no results found, autopopulate enabled, private-space IP address...
+          # no results found, autopopulate enabled, eligible IP address...
           # let's create an entry for this device
           _autopopulate_device,
           _autopopulate_role,
@@ -1787,6 +1780,13 @@ def netbox_lookup(
         end
       end
 
+      # keep only the single most-specific matching prefix (longest cidr prefix length);
+      #   without this, overlapping parent/child prefixes (e.g. 10.0.0.0/8 and 10.0.0.0/24)
+      #   both survive into segment.name/segment.id, producing multi-valued segment fields
+      if (@lookup_type == :ip_prefix) && _prefixes.is_a?(Array) && !_prefixes.empty?
+        _prefixes = [_prefixes.max_by { |p| (IPAddr.new(p[:cidr].to_s).prefix rescue -1) }]
+      end
+
       # :cidr was only needed for most-specific-prefix selection above; drop it so
       #   the ip_prefix enrichment output shape is unchanged
       _prefixes.each { |p| p.delete(:cidr) if p.is_a?(Hash) } if _prefixes.is_a?(Array)
@@ -1810,7 +1810,7 @@ def netbox_lookup(
                                                      _autopopulate_mac,
                                                      _nb)
     end # check if device was created and has ID
-  end # IP address is private IP
+  end # eligible IP address
 
   # yield return value for _lookup_hash getset
   return (!_lookup_result.nil? && !_lookup_result.empty?) ? _lookup_result : nil, _key_ip, _nb&.initialized? || false

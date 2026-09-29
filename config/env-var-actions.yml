@@ -260,6 +260,8 @@ removed_environment_variables:
     - DB_HOST
     - DB_USER
     - DB_PASSWORD
+  suricata:
+    - SURICATA_UPDATE_ETOPEN
   suricata_offline:
     - SURICATA_PCAP_PROCESSOR
   valkey:

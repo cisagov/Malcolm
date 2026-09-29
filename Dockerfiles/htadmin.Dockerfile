@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:13-slim
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -25,28 +25,21 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm
 
-ARG PHP_VERSION=7.4
-ARG MCRYPT_VERSION=1.0.4
+ARG PHP_VERSION=8.4
 ARG BOOTSTRAP_VERSION=3.3.6
 
 ENV PHP_VERSION=$PHP_VERSION
-ENV MCRYPT_VERSION=$MCRYPT_VERSION
 ENV BOOTSTRAP_VERSION=$BOOTSTRAP_VERSION
 
-ENV HTADMIN_URL="https://codeload.github.com/mmguero-dev/htadmin/tar.gz/master"
+ARG HTADMIN_REF=php-8
+ENV HTADMIN_URL="https://codeload.github.com/mmguero-dev/htadmin/tar.gz/refs/heads/$HTADMIN_REF"
 
 RUN apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
       ca-certificates \
       curl \
       jq \
-      libmcrypt-dev \
-      libmcrypt4 \
-      make \
-      mcrypt \
       nginx-light \
-      php-dev \
-      php-pear \
       php$PHP_VERSION-apcu \
       php$PHP_VERSION-cli \
       php$PHP_VERSION-fpm \
@@ -55,9 +48,6 @@ RUN apt-get -q update && \
       rsync \
       supervisor \
       tini && \
-    ( yes '' | pecl channel-update pecl.php.net ) && \
-    ( yes '' | pecl install mcrypt-$MCRYPT_VERSION ) && \
-    ln -s -r /usr/lib/php/20??????/*.so /usr/lib/php/$PHP_VERSION/ && \
     mkdir -p /run/php && \
   cd /tmp && \
     mkdir -p ./htadmin && \
@@ -74,9 +64,6 @@ RUN apt-get -q update && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff" && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff2" && \
   chown -R ${PUSER}:${PGROUP} /var/www && \
-  apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
-    make libmcrypt-dev php-pear php-dev && \
-  apt-get autoremove -y -q && \
   apt-get clean -y -q && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/html
 
