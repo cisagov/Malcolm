@@ -1780,6 +1780,13 @@ def netbox_lookup(
         end
       end
 
+      # keep only the single most-specific matching prefix (longest cidr prefix length);
+      #   without this, overlapping parent/child prefixes (e.g. 10.0.0.0/8 and 10.0.0.0/24)
+      #   both survive into segment.name/segment.id, producing multi-valued segment fields
+      if (@lookup_type == :ip_prefix) && _prefixes.is_a?(Array) && !_prefixes.empty?
+        _prefixes = [_prefixes.max_by { |p| (IPAddr.new(p[:cidr].to_s).prefix rescue -1) }]
+      end
+
       # :cidr was only needed for most-specific-prefix selection above; drop it so
       #   the ip_prefix enrichment output shape is unchanged
       _prefixes.each { |p| p.delete(:cidr) if p.is_a?(Hash) } if _prefixes.is_a?(Array)
