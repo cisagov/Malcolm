@@ -79,7 +79,7 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION="4.53.6"
+ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV EVTX_VERSION="0.12.3"
