@@ -1,0 +1,125 @@
+# AKS storage example for Malcolm.
+#
+# Azure Files CSI provides ReadWriteMany volumes for data shared across pods.
+# Azure Disk CSI provides ReadWriteOnce volumes for OpenSearch data.
+# Adjust requested capacities to match retention and workload requirements.
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcap-claim
+  namespace: malcolm
+spec:
+  storageClassName: azurefile-csi-premium
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zeek-claim
+  namespace: malcolm
+spec:
+  storageClassName: azurefile-csi-premium
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 250Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filescan-claim
+  namespace: malcolm
+spec:
+  storageClassName: azurefile-csi-premium
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suricata-claim
+  namespace: malcolm
+spec:
+  storageClassName: azurefile-csi-premium
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-claim
+  namespace: malcolm
+spec:
+  storageClassName: azurefile-csi-premium
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: runtime-logs-claim
+  namespace: malcolm
+spec:
+  storageClassName: azurefile-csi-premium
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-claim
+  namespace: malcolm
+spec:
+  storageClassName: managed-csi-premium
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-backup-claim
+  namespace: malcolm
+spec:
+  storageClassName: managed-csi-premium
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
