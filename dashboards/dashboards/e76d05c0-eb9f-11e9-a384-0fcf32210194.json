@@ -455,7 +455,7 @@
           "destination.port",
           "event.action",
           "event.result",
-          "zeek.s7comm.pdu_reference",
+          "s7comm.pduref",
           "event.id"
         ],
         "description": "",
@@ -535,7 +535,7 @@
           "zeek.s7comm_read_szl.szl_index",
           "event.action",
           "event.result",
-          "zeek.s7comm.pdu_reference",
+          "s7comm.pduref",
           "event.id"
         ],
         "description": "",
