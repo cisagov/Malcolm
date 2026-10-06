@@ -178,7 +178,7 @@ class EventWatcher:
                 if not healthy:
                     time.sleep(1)
 
-            self.useOpenSearch = connected and healthy
+            self.useOpenSearch = connected and (healthy or not args.opensearchWaitForHealth)
 
         # initialize ZeroMQ context and socket(s) to publish messages to
         self.context = zmq.Context()
@@ -215,17 +215,24 @@ class EventWatcher:
                 # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
                 fileIsDuplicate = False
                 if self.useOpenSearch:
-                    s = (
-                        SearchClass(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
-                        .filter("regexp", node=fr"{args.nodeName}(-upload)?")
-                        .query("wildcard", name=f"*{os.path.sep}{relativePath}")
-                    )
-                    response = s.execute()
-                    for hit in response:
-                        fileInfo = hit.to_dict()
-                        if (ARKIME_FILE_SIZE_FIELD in fileInfo) and (fileInfo[ARKIME_FILE_SIZE_FIELD] == fileSize):
-                            fileIsDuplicate = True
-                            break
+                    try:
+                        s = (
+                            SearchClass(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
+                            .filter("regexp", node=fr"{args.nodeName}(-upload)?")
+                            .query("wildcard", name=f"*{os.path.sep}{relativePath}")
+                        )
+                        response = s.execute()
+                        for hit in response:
+                            fileInfo = hit.to_dict()
+                            if (ARKIME_FILE_SIZE_FIELD in fileInfo) and (fileInfo[ARKIME_FILE_SIZE_FIELD] == fileSize):
+                                fileIsDuplicate = True
+                                break
+                    except Exception as e:
+                        # An unavailable cluster or missing index must not cost us a capture.
+                        self.logger.warning(
+                            f"{scriptName}:\t{args.opensearchMode} duplicate check failed for {pathname}, "
+                            f"processing it anyway: {e}"
+                        )
 
                 if fileIsDuplicate:
                     # this is duplicate file (it's been processed before) so ignore it
