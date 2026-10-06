@@ -217,7 +217,7 @@ class EventWatcher:
                 if self.useOpenSearch:
                     s = (
                         SearchClass(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
-                        .filter("regexp", node=fr"{args.nodeName}(-upload)?")
+                        .filter("terms", node=[args.nodeName, f"{args.nodeName}-upload"])
                         .query("wildcard", name=f"*{os.path.sep}{relativePath}")
                     )
                     response = s.execute()
