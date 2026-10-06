@@ -178,7 +178,7 @@ class EventWatcher:
                 if not healthy:
                     time.sleep(1)
 
-            self.useOpenSearch = connected and healthy
+            self.useOpenSearch = connected and (healthy or not args.opensearchWaitForHealth)
 
         # initialize ZeroMQ context and socket(s) to publish messages to
         self.context = zmq.Context()
