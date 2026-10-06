@@ -111,6 +111,9 @@ class Alias:
         return self
 
     def __init__(self, value: Alias | str) -> None:
+        # __init__ also runs when __new__ returns an existing Alias.
+        if isinstance(value, Alias):
+            return
         assert isinstance(value, str)
         object.__setattr__(self, 'value', value)
 
