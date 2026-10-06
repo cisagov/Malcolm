@@ -99,7 +99,7 @@ def test_nonrunning_autostart_process_is_unhealthy_even_after_expected_exit(endp
 def test_one_failed_program_marks_aggregate_health_unhealthy(endpoint):
     _, rpc = endpoint
     rpc.supervisor.getAllConfigInfo.return_value = [
-        {'name': name, 'autostart': False, 'exitcodes': [0]} for name in ['a', 'b']
+        {'name': name, 'group': 'filescan', 'autostart': False, 'exitcodes': [0]} for name in ['a', 'b']
     ]
     rpc.supervisor.getAllProcessInfo.return_value = [
         {
