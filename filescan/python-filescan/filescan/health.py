@@ -67,9 +67,9 @@ class Program(BaseModel):
     healthy: bool | None = None
 
 
-HAS_STARTED: Final = {'RUNNING', 'EXITED', 'FATAL', 'BACKOFF', 'STOPPING'}
-NOT_RUNNING: Final = {'STOPPED', 'EXITED', 'FATAL', 'BACKOFF'}
-ERRORED: Final = {'FATAL', 'BACKOFF', 'UNKNOWN'}
+HAS_STARTED: Final = {'running', 'exited', 'fatal', 'backoff', 'stopping'}
+NOT_RUNNING: Final = {'stopped', 'exited', 'fatal', 'backoff'}
+ERRORED: Final = {'fatal', 'backoff', 'unknown'}
 
 
 @app.route('/')
@@ -105,7 +105,7 @@ def health() -> Any:
                 prog.start = proc['start']
             if prog.state in NOT_RUNNING:
                 if prog.start:
-                    prog.stop = proc['end']
+                    prog.stop = proc['stop']
                     prog.exitstatus = proc['exitstatus']
             if (
                 (prog.state in ERRORED)
