@@ -184,6 +184,8 @@ def load_filebeat_registries(registry_paths: List[str]) -> List[Tuple[int, int]]
             logging.error(f"Failed to load filebeat registry: {e}")
             continue
 
+        if isinstance(fb_reg, dict):
+            fb_reg = [fb_reg]
         if fb_reg:
             for entry in fb_reg:
                 device = deep_get(entry, ['v', 'FileStateOS', 'device'])
