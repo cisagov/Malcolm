@@ -1037,9 +1037,13 @@ def extract_field_info(properties, source=None):
     """Convert a mapping properties dict into the internal field format."""
     fields = {}
     for name, info in properties.items():
-        # Skip top-level objects that just contain subfields
-        if 'properties' in info and 'type' not in info:
-            continue
+        # Include object descendants using their fully qualified field names.
+        if 'properties' in info:
+            fields.update(
+                (f'{name}.{child}', entry) for child, entry in extract_field_info(info['properties'], source).items()
+            )
+            if 'type' not in info:
+                continue
         entry = {}
         if debugApi:
             info['source'] = source
