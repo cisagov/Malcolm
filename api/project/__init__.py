@@ -411,6 +411,15 @@ def check_roles(req):
         return True
 
 
+def _parse_query_time(value):
+    """Parse a query time, interpreting timezone-free inputs as UTC."""
+    if not value:
+        return None
+    if value.isdigit():
+        return datetime.fromtimestamp(int(value), timezone.utc)
+    return dateparser.parse(value, settings={'TIMEZONE': 'UTC', 'RETURN_AS_TIMEZONE_AWARE': True})
+
+
 def gettimes(args):
     """Parses 'from' and 'to' times out of the provided dictionary, returning
     two datetime objects
@@ -429,22 +438,7 @@ def gettimes(args):
     return start_time, end_time
         datetime objects representing the start and end time for a query
     """
-    if start_time_str := args.get("from"):
-        start_time = (
-            datetime.utcfromtimestamp(int(start_time_str))
-            if start_time_str.isdigit()
-            else dateparser.parse(start_time_str)
-        )
-    else:
-        start_time = None
-    if end_time_str := args.get("to"):
-        end_time = (
-            datetime.utcfromtimestamp(int(end_time_str)) if end_time_str.isdigit() else dateparser.parse(end_time_str)
-        )
-    else:
-        end_time = None
-
-    return start_time, end_time
+    return _parse_query_time(args.get("from")), _parse_query_time(args.get("to"))
 
 
 def getfilters(args):
@@ -619,10 +613,10 @@ def filtertime(search, args, default_from="1 day ago", default_to="now"):
     """
     start_time, end_time = gettimes(args)
     start_time_ms = int(
-        start_time.timestamp() * 1000 if start_time is not None else dateparser.parse(default_from).timestamp() * 1000
+        start_time.timestamp() * 1000 if start_time is not None else _parse_query_time(default_from).timestamp() * 1000
     )
     end_time_ms = int(
-        end_time.timestamp() * 1000 if end_time is not None else dateparser.parse(default_to).timestamp() * 1000
+        end_time.timestamp() * 1000 if end_time is not None else _parse_query_time(default_to).timestamp() * 1000
     )
     return (
         start_time_ms,
