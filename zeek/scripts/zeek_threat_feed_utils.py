@@ -1088,9 +1088,9 @@ def UpdateFromMISP(
                     try:
                         newUrl = urljoin(mispUrl, f'{uri}.json')
                         eventTime = (
-                            datetime.utcfromtimestamp(int(mispJson[uri]['timestamp'])).astimezone(timezone.utc)
+                            datetime.fromtimestamp(int(mispJson[uri]['timestamp']), timezone.utc)
                             if 'timestamp' in mispJson[uri]
-                            else defaultNow
+                            else nowTime
                         )
                         if (since is None) or (eventTime >= since):
                             mispObjectResponse = mispSession.get(
@@ -1134,11 +1134,9 @@ def UpdateFromMISP(
                         for uri in mispManifest:
                             try:
                                 eventTime = (
-                                    datetime.utcfromtimestamp(int(mispManifest[uri]['timestamp'])).astimezone(
-                                        timezone.utc
-                                    )
+                                    datetime.fromtimestamp(int(mispManifest[uri]['timestamp']), timezone.utc)
                                     if 'timestamp' in mispManifest[uri]
-                                    else defaultNow
+                                    else nowTime
                                 )
                                 if (since is None) or (eventTime >= since):
                                     newUrl = f'{mispUrl.strip("/")}/{uri}.json'
