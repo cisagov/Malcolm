@@ -510,9 +510,9 @@ def split_stix_object_path_and_value(
                     else:
                         object_path = ':'.join((comparison.strip(), element[0].strip()))
 
-                    # strip quotes from IoC value
+                    # Decode only the apostrophe/backslash escapes defined by STIX.
                     if element[2].startswith("'") and element[2].endswith("'"):
-                        ioc_value = element[2].strip("'")
+                        ioc_value = re.sub(r"\\(['\\])", r"\1", element[2][1:-1])
                     elif element[2].startswith('"') and element[2].endswith('"'):
                         ioc_value = element[2].strip('"')
                     else:
