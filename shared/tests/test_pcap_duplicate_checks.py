@@ -129,3 +129,30 @@ def test_rejected_file_does_not_query_or_publish(watcher_factory, tmp_path):
     state.watcher.processFile(str(path))
     state.search.assert_not_called()
     state.publisher.send_string.assert_not_called()
+
+
+@pytest.mark.parametrize('wait', [False, True])
+@pytest.mark.parametrize('error_type', [ConnectionError, TimeoutError, RuntimeError])
+def test_failed_duplicate_lookup_still_publishes(watcher_factory, pcap_path, wait, error_type):
+    """A missing index or unavailable cluster must not drop the capture."""
+    state = watcher_factory(wait=wait)
+    state.query.execute.side_effect = error_type('index not ready')
+    state.watcher.processFile(str(pcap_path))
+    state.publisher.send_string.assert_called_once()
+    value = json.loads(state.publisher.send_string.call_args.args[0])
+    assert value['name'] == 'fixture.pcap'
+    assert value['size'] == 24
+    state.watcher.logger.warning.assert_called_once()
+    assert 'processing it anyway' in state.watcher.logger.warning.call_args.args[0]
+
+
+@pytest.mark.parametrize('wait', [False, True])
+def test_duplicate_check_recovers_after_lookup_failure(watcher_factory, pcap_path, wait):
+    """A failed lookup must not permanently disable later duplicate suppression."""
+    state = watcher_factory(wait=wait)
+    duplicate = Mock(to_dict=Mock(return_value={'filesize': 24}))
+    state.query.execute.side_effect = [ConnectionError('warming up'), [duplicate]]
+    state.watcher.processFile(str(pcap_path))
+    state.watcher.processFile(str(pcap_path))
+    assert state.query.execute.call_count == 2
+    state.publisher.send_string.assert_called_once()
