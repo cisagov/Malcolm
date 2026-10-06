@@ -91,10 +91,10 @@ def health() -> Any:
         procs: list[dict] = cast(list[dict], rpc.supervisor.getAllProcessInfo())
         programs: dict[str, list[Program]] = {}
 
-        for cfg, proc in zip(
-            sorted(config, key=lambda e: e['name']),
-            sorted(procs, key=lambda e: e['name']),
-        ):
+        # Configurations can include unloaded groups, and names repeat across groups.
+        config_by_process = {(cfg['group'], cfg['name']): cfg for cfg in config}
+        for proc in sorted(procs, key=lambda e: e['name']):
+            cfg = config_by_process[(proc['group'], proc['name'])]
             prog = Program(
                 name=proc['name'],
                 state=proc['statename'].lower(),
