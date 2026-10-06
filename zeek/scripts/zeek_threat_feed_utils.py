@@ -6,6 +6,7 @@
 # - BSD 3-Clause license: https://github.com/tenzir/threatbus/blob/master/COPYING
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
+from antlr4 import ParseTreeListener
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from collections.abc import Iterable
@@ -436,11 +437,22 @@ def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[STIX_
         return None
 
 
+class _STIXConjunctionListener(ParseTreeListener):
+    """Detect Boolean conjunctions without matching text inside string literals."""
+
+    def __init__(self):
+        self.has_conjunction = False
+
+    def visitTerminal(self, node):
+        if node.getText() == 'AND':
+            self.has_conjunction = True
+
+
 def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -> bool:
     """
-    Predicate to check if a STIX-2 pattern is a point-IoC, i.e., if the pattern
-    only consists of a single EqualityComparisonExpression. However, that EqualityComparisonExpression
-    may contain multiple OR'ed values, e.g.,
+    Check whether a STIX-2 pattern contains only positive point equalities,
+    optionally joined by OR. Conjunctions and non-equality comparisons cannot
+    be represented by independent Zeek intelligence entries. For example,
     "[file:hashes.'SHA-1' = '080989879772b0da6a78be8d38dba1f50279fd22' OR file:hashes.MD5 = 'a04aae944126fc3256cf4cf6de4646fb]"
     @param indicator_type the type of the indicator object
     @param pattern_str The STIX-2 pattern string to inspect
@@ -454,6 +466,8 @@ def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=No
             # =>  cybox_types = ['domain-name']
             il = pattern.inspect()
             cybox_types = list(il.comparisons.keys())
+            conjunctions = _STIXConjunctionListener()
+            pattern.walk(conjunctions)
 
             return (
                 len(il.observation_ops) == 0  # no observation operators
@@ -461,7 +475,8 @@ def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=No
                 and len(il.comparisons) == 1  # only one observable type (comparison) is in use
                 and len(cybox_types) == 1  # must be point-indicator (one field only)
                 and all(y == 3 for y in [len(x) for x in il.comparisons[cybox_types[0]]])  # ('value', '=', 'evil.com')
-                and il.comparisons[cybox_types[0]][0][1] in ("=", "==")  # equality comparison
+                and not conjunctions.has_conjunction
+                and all(x[1] in ("=", "==") for x in il.comparisons[cybox_types[0]])  # positive equalities only
             )
 
         else:
