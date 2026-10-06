@@ -29,7 +29,7 @@ from taxii2client.v21 import Collection as TaxiiCollection_v21
 from taxii2client.v21 import Server as TaxiiServer_v21
 from taxii2client.common import _HTTPConnection as TaxiiHTTPConn
 from threading import Lock
-from time import sleep, mktime
+from time import sleep
 from types import GeneratorType, FunctionType, LambdaType
 from typing import Tuple, Union, Iterator
 from urllib.parse import urljoin, urlparse
@@ -286,10 +286,10 @@ def map_mandiant_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(indicator.mscore)
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
         if hasattr(indicator, 'first_seen'):
-            zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
+            zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(indicator.first_seen.timestamp())
             zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
         if hasattr(indicator, 'last_seen'):
-            zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
+            zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(indicator.last_seen.timestamp())
             zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
         if hasattr(indicator, 'sources'):
             sources.extend(list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry}))
@@ -593,9 +593,9 @@ def map_stix_indicator_to_zeek(
             # some of these are from CFM, what the heck...
             # if 'description' in indicator:
             #   "description": "severity level: Low\n\nCONFIDENCE: High",
-        zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(indicator.created.timetuple()))
+        zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(indicator.created.timestamp())
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
-        zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.modified.timetuple()))
+        zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(indicator.modified.timestamp())
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
         if tags := [x for x in indicator.get('labels', []) if x]:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
@@ -693,9 +693,9 @@ def map_misp_attribute_to_zeek(
             zeekItem[ZEEK_INTEL_META_URL] = url
         zeekItem[ZEEK_INTEL_INDICATOR] = attribute_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
-        zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(attribute.timestamp.timetuple()))
+        zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(attribute.timestamp.timestamp())
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
-        zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(attribute.timestamp.timetuple()))
+        zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(attribute.timestamp.timestamp())
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
         zeekItem[ZEEK_INTEL_META_CATEGORY] = attribute.category.replace(',', '\\x2c')
         if tags:
