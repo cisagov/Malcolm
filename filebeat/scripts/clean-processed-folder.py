@@ -299,15 +299,14 @@ def main() -> None:
         logfmt='%(message)s',
     )
 
-    with open(lock_filename, 'w') as lock_file:
+    # Keep the pathname stable so all runners lock the same inode.
+    with open(lock_filename, 'a') as lock_file:
         try:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except IOError:
             return
         else:
             prune_files()
-        finally:
-            os.remove(lock_filename)
 
 
 if __name__ == '__main__':
