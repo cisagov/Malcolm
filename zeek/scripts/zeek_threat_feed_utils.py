@@ -291,17 +291,36 @@ def map_mandiant_indicator_to_zeek(
         if hasattr(indicator, 'last_seen'):
             zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
             zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
+        # Collect categories from Mandiant source classifications as before.
+        categories = set()
         if hasattr(indicator, 'sources'):
             sources.extend(list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry}))
-            if categories := list(
-                {
-                    category
-                    for item in indicator.sources
-                    if 'category' in item and item['category']
-                    for category in item['category']
-                }
-            ):
-                zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in categories])
+            categories.update(
+                category
+                for item in indicator.sources
+                if 'category' in item and item['category']
+                for category in item['category']
+            )
+
+        # The client lazily loads missing indicator properties through the API.
+        # Read the category enrichment already returned with this page instead
+        # of triggering a separate request for every indicator.
+        if not (skip_attr_map or {}).get('category', False):
+            response = indicator._api_response if isinstance(indicator._api_response, dict) else {}
+            direct_categories = response.get('category')
+            if isinstance(direct_categories, str):
+                direct_categories = [direct_categories]
+            if isinstance(direct_categories, (list, tuple, set)):
+                categories.update(
+                    category.strip()
+                    for category in direct_categories
+                    if isinstance(category, str) and category.strip()
+                )
+
+        if categories:
+            zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join(
+                category.replace(',', '\\x2c') for category in sorted(categories)
+            )
 
         if hasattr(indicator, 'misp'):
             if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
@@ -1291,7 +1310,7 @@ def UpdateFromMandiant(
             include_reports=not skip_attr_map['reports'],
             include_threat_rating=not skip_attr_map['threat_rating'],
             include_misp=not skip_attr_map['misp'],
-            include_category=skip_attr_map['category'],
+            include_category=not skip_attr_map['category'],
         ):
             try:
                 if zeekPrinter.ProcessMandiant(indicator, skip_attr_map=skip_attr_map):
