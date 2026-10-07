@@ -12,6 +12,7 @@ import sys
 import urllib3
 
 from collections import defaultdict
+from decimal import Decimal
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
@@ -246,7 +247,7 @@ def get_indices_for_deletion(args, session, total_size_mb, limit_mb):
     for idx in args.index:
         r = session.get(
             f'{args.opensearch_url}/_cat/indices/{idx}',
-            params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
+            params={'format': 'json', 'bytes': 'b', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
         )
         r.raise_for_status()
         os_info.update((index['i'], index) for index in r.json())
@@ -257,7 +258,7 @@ def get_indices_for_deletion(args, session, total_size_mb, limit_mb):
     size_key = 'pri.store.size' if args.primary_totals else 'store.size'
 
     for index in os_info:
-        idx_size_mb = humanfriendly.parse_size(index[size_key]) // 1_000_000
+        idx_size_mb = Decimal(humanfriendly.parse_size(index[size_key])) / 1_000_000
         if needs_deleted <= 0:
             break
         to_delete.append(index)
@@ -270,10 +271,10 @@ def delete_indices(args, session, indices):
     """Delete the provided indices, or print what would be deleted in dry-run mode."""
     logging.debug(f'{"Would delete" if args.dryrun else "Deleting"}: {indices}')
     size_key = 'pri.store.size' if args.primary_totals else 'store.size'
-    total_free_mb = sum(humanfriendly.parse_size(i[size_key]) // 1_000_000 for i in indices)
+    total_free_bytes = sum(humanfriendly.parse_size(i[size_key]) for i in indices)
     print(
         f'{"Would delete" if args.dryrun else "Deleting"} '
-        f'{humanfriendly.format_size(humanfriendly.parse_size(f"{total_free_mb}mb"))} '
+        f'{humanfriendly.format_size(total_free_bytes)} '
         f'in {len(indices)} indices ({indices[0]["i"]} to {indices[-1]["i"]} '
         f'ordered by {"name" if args.name_sorted else "creation date"})'
     )
