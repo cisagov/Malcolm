@@ -560,6 +560,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ),
         )
     ),
+    KEY_CONFIG_ITEM_DASHBOARDS_DEFAULT_DASHBOARD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda profile, mode: (
+                profile == PROFILE_MALCOLM and mode != SearchEngineMode.ELASTICSEARCH_REMOTE.value
+            ),
+        )
+    ),
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,

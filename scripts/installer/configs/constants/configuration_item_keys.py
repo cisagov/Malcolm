@@ -130,6 +130,7 @@ KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE = "secondaryDocumentStore"
 KEY_CONFIG_ITEM_RUNTIME_BIN = "runtimeBin"
 KEY_CONFIG_ITEM_MALCOLM_PROFILE = "malcolmProfile"
 KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE = "dashboardsDarkMode"
+KEY_CONFIG_ITEM_DASHBOARDS_DEFAULT_DASHBOARD = "dashboardsDefaultDashboard"
 KEY_CONFIG_ITEM_IMAGE_ARCH = "imageArch"
 # This is used for Hedgehog run profile to provide the host/IP for the remote Malcolm instance.
 #   It doesn't correspond to a single .env value, just convenience to not have to enter it in 4 places.
