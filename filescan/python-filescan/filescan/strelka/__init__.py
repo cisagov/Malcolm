@@ -49,6 +49,8 @@ class StrelkaFrontend:
         timeout: float = 60.0,
         chunksize: int = 32768,
     ) -> None:
+        if chunksize <= 0:
+            raise ValueError('chunksize must be positive')
         self.server = f'{host}:{port}'
         if secure or cert:
             cert_data = cert.read_bytes() if cert else None

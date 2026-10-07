@@ -211,6 +211,8 @@ async def chunk_async_data_stream(
     data: SingleOrIterable[bytes],
     chunksize: int,
 ) -> AsyncIterator[bytes]:
+    if chunksize <= 0:
+        raise ValueError('chunksize must be positive')
     save = b''
     async for chunk in as_asynciter(data, bytes):
         save += chunk
