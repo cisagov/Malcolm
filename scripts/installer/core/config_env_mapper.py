@@ -132,6 +132,7 @@ _STRING_VARS = [
     KEY_ENV_NETBOX_DEFAULT_SITE,
     KEY_ENV_NETBOX_MODE,
     KEY_ENV_OPENSEARCH_DASHBOARDS_URL,
+    KEY_ENV_OPENSEARCH_DEFAULT_DASHBOARD,
     KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD,
     KEY_ENV_OPENSEARCH_PRIMARY,
     KEY_ENV_OPENSEARCH_SECONDARY,
@@ -594,6 +595,9 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DASHBOARDS_URL].config_items = [KEY_CONFIG_ITEM_DASHBOARDS_URL]
             self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DASHBOARDS_DARKMODE].config_items = [
                 KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DEFAULT_DASHBOARD].config_items = [
+                KEY_CONFIG_ITEM_DASHBOARDS_DEFAULT_DASHBOARD
             ]
 
             # PCAP capture
