@@ -1,10 +1,10 @@
 """Tests for installer handling of local SELinux mounts and the OpenSearch keystore."""
 
 import os
-from pathlib import Path
 import stat
 import tempfile
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -44,8 +44,9 @@ class TestSelinuxKeystoreTweaks(unittest.TestCase):
                 "bind": {"create_host_path": False}}
 
     def test_keystore_placeholder_created_without_replacing_existing_keystore(self):
-        with patch("scripts.malcolm_common.LoadYaml", return_value=self._compose([self._keystore_mount()])):
-            with patch("os.geteuid", return_value=1000):
+        with patch("scripts.malcolm_common.LoadYaml", return_value=self._compose([self._keystore_mount()])), patch(
+            "os.geteuid", return_value=1000
+        ):
                 result, _ = linux_tweaks.prepare_opensearch_keystore(self.config, self.config_dir, self.platform)
                 self.assertEqual(result, InstallerResult.SUCCESS)
                 self.assertEqual(self.keystore.stat().st_size, 0)
@@ -56,8 +57,9 @@ class TestSelinuxKeystoreTweaks(unittest.TestCase):
         self.assertEqual(self.keystore.read_bytes(), b"existing-keystore-data")
 
     def test_placeholder_uses_configured_uid_gid_when_installed_as_root(self):
-        with patch("scripts.malcolm_common.LoadYaml", return_value=self._compose([self._keystore_mount()])):
-            with patch("os.geteuid", return_value=0), patch("os.chown") as chown:
+        with patch("scripts.malcolm_common.LoadYaml", return_value=self._compose([self._keystore_mount()])), patch(
+            "os.geteuid", return_value=0
+        ), patch("os.chown") as chown:
                 result, _ = linux_tweaks.prepare_opensearch_keystore(self.config, self.config_dir, self.platform)
         self.assertEqual(result, InstallerResult.SUCCESS)
         chown.assert_called_once_with(str(self.keystore), 1000, 1000)
@@ -118,7 +120,7 @@ class TestSelinuxKeystoreTweaks(unittest.TestCase):
         calls = [call.args[0] for call in self.platform.run_process.call_args_list]
         self.assertEqual(calls[0], ["selinuxenabled"])
         self.assertEqual(
-            set(tuple(cmd) for cmd in calls[1:]),
+            {tuple(cmd) for cmd in calls[1:]},
             {
                 ("chcon", "-R", "-t", "container_file_t", str(self.root / "shared")),
                 ("chcon", "-R", "-t", "container_file_t", str(self.keystore)),
