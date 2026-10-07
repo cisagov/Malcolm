@@ -72,8 +72,6 @@ ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 # TODO: STILL NEED TO MAP THESE:
 #   - ZEEK_INTEL_META_ASSOCIATED
-#   - ZEEK_INTEL_META_CAMPAIGNS
-#   - ZEEK_INTEL_META_REPORTS
 #   - ZEEK_INTEL_META_THREAT_SCORE
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
@@ -253,6 +251,35 @@ def mandiant_indicator_as_json_str(indicator, skip_attr_map=None):
         return 'unknown indicator'
 
 
+def _mandiant_related_refs(entries, fields):
+    """Render related campaign/report references as escaped Zeek set items.
+
+    Indicator API response fields are used directly to avoid lazy-loaded SDK
+    properties issuing a separate network request for every indicator.
+    """
+    if not isinstance(entries, (list, tuple)):
+        entries = [entries] if entries else []
+
+    values = set()
+    for entry in entries:
+        if isinstance(entry, dict):
+            value = next(
+                (entry[field] for field in fields if isinstance(entry.get(field), (str, int)) and entry[field]),
+                None,
+            )
+        elif isinstance(entry, (str, int)):
+            value = entry
+        else:
+            continue
+        if value is not None:
+            value = str(value).strip()
+            if value:
+                # No raw delimiters or control characters inside Zeek TSV cells.
+                values.add(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '))
+
+    return '\\x7c'.join(value.replace(',', '\\x2c') for value in sorted(values))
+
+
 def map_mandiant_indicator_to_zeek(
     indicator: mandiant_threatintel.APIResponse,
     skip_attr_map=None,
@@ -302,6 +329,18 @@ def map_mandiant_indicator_to_zeek(
                 }
             ):
                 zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in categories])
+
+        # These fields arrive via include_campaigns/include_reports in the
+        # indicators response. Accessing the SDK attributes here would make
+        # additional lazy-loaded API requests if they were not requested.
+        raw_response = getattr(indicator, '_api_response', None)
+        if isinstance(raw_response, dict):
+            if (not (skip_attr_map or {}).get('campaigns', False)) and raw_response.get('campaigns'):
+                if campaigns := _mandiant_related_refs(raw_response['campaigns'], ('name', 'id')):
+                    zeekItem[ZEEK_INTEL_META_CAMPAIGNS] = campaigns
+            if (not (skip_attr_map or {}).get('reports', False)) and raw_response.get('reports'):
+                if reports := _mandiant_related_refs(raw_response['reports'], ('report_id', 'id', 'title')):
+                    zeekItem[ZEEK_INTEL_META_REPORTS] = reports
 
         if hasattr(indicator, 'misp'):
             if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
