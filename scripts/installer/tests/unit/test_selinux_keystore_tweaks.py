@@ -62,6 +62,12 @@ class TestSelinuxKeystoreTweaks(unittest.TestCase):
         self.assertEqual(result, InstallerResult.SUCCESS)
         chown.assert_called_once_with(str(self.keystore), 1000, 1000)
 
+    def test_unreadable_compose_config_fails_without_creating_keystore(self):
+        with patch("scripts.malcolm_common.LoadYaml", return_value=None):
+            result, _ = linux_tweaks.prepare_opensearch_keystore(self.config, self.config_dir, self.platform)
+        self.assertEqual(result, InstallerResult.FAILURE)
+        self.assertFalse(self.keystore.exists())
+
     def test_keystore_is_not_created_during_dry_run(self):
         self.platform.is_dry_run.return_value = True
         result, _ = linux_tweaks.prepare_opensearch_keystore(self.config, self.config_dir, self.platform)
