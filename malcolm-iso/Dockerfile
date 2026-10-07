@@ -1,4 +1,4 @@
-FROM ghcr.io/mmguero/qemu-live-iso:latest
+FROM ghcr.io/mmguero/qemu-live-iso@sha256:dbc42741c2a6961799dd8da93e163323e7bc2db340f9a11080fd144776828cb1
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
