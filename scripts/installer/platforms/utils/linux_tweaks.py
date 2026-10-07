@@ -393,10 +393,140 @@ def apply_grub_cgroup(
         return InstallerResult.FAILURE, "cgroup kernel parameters exception"
 
 
+
+def _compose_bind_sources(config_dir: str):
+    """Return project-local bind sources, without following mounts outside the install."""
+    import os
+
+    from scripts.malcolm_common import LoadYaml
+
+    install_dir = os.path.realpath(
+        config_dir if os.path.isfile(os.path.join(config_dir, "docker-compose.yml")) else os.path.dirname(config_dir)
+    )
+    compose_file = os.path.join(install_dir, "docker-compose.yml")
+    if not os.path.isfile(compose_file):
+        return []
+
+    compose = LoadYaml(compose_file)
+    mounts = []
+    for service_name, service in (compose.get("services") or {}).items():
+        for volume in service.get("volumes", []):
+            if isinstance(volume, dict) and volume.get("type") == "bind":
+                source, target = volume.get("source"), volume.get("target")
+            elif isinstance(volume, str) and volume.startswith(("./", "../")):
+                parts = volume.split(":")
+                source, target = (parts[0], parts[1]) if len(parts) >= 2 else (None, None)
+            else:
+                continue
+            if not isinstance(source, str) or not isinstance(target, str) or "$" in source:
+                continue
+
+            candidate = os.path.join(install_dir, source)
+            resolved = os.path.realpath(candidate)
+            # Never relabel the installation root itself or external/custom storage.
+            # Reject symlinks so recursive chcon cannot traverse user-managed paths.
+            if (
+                os.path.commonpath((install_dir, resolved)) != install_dir
+                or resolved == install_dir
+                or os.path.islink(candidate)
+            ):
+                continue
+            mounts.append((service_name, target, resolved))
+    return mounts
+
+
+def prepare_opensearch_keystore(malcolm_config, config_dir: str, platform) -> tuple[InstallerResult, str]:
+    """Provide the host file required by Compose's create_host_path:false keystore bind.
+
+    OpenSearch's keystore-bootstrap.sh replaces empty placeholders with a valid
+    keystore when the container starts. Existing keystores must be left untouched.
+    """
+    import os
+    from scripts.installer.configs.constants.configuration_item_keys import (
+        KEY_CONFIG_ITEM_PROCESS_USER_ID,
+        KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
+    )
+
+    if platform.is_dry_run():
+        return InstallerResult.SKIPPED, "Dry run: no keystore created"
+    try:
+        bind_paths = [
+            path
+            for service, target, path in _compose_bind_sources(config_dir)
+            if service == "opensearch"
+            and target == "/usr/share/opensearch/config/persist/opensearch.keystore"
+        ]
+        if not bind_paths:
+            return InstallerResult.SKIPPED, "No local OpenSearch keystore bind"
+        keystore = bind_paths[0]
+        if os.path.lexists(keystore):
+            if not os.path.isfile(keystore):
+                return InstallerResult.FAILURE, f"Keystore bind path is not a regular file: {keystore}"
+            return InstallerResult.SUCCESS, "OpenSearch keystore already present"
+
+        os.makedirs(os.path.dirname(keystore), exist_ok=True)
+        # Exclusive creation protects against replacing any existing keystore.
+        with open(keystore, "xb"):
+            pass
+        os.chmod(keystore, 0o600)
+        if os.geteuid() == 0:
+            uid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID)
+            gid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID)
+            if uid is not None and gid is not None:
+                os.chown(keystore, int(uid), int(gid))
+        logger.info(f"Created OpenSearch keystore bind placeholder: {keystore}")
+        return InstallerResult.SUCCESS, "OpenSearch keystore placeholder created"
+    except OSError as exc:
+        logger.error(f"Could not prepare OpenSearch keystore bind: {exc}")
+        return InstallerResult.FAILURE, "OpenSearch keystore preparation failed"
+
+
+def apply_selinux_volume_contexts(malcolm_config, config_dir: str, platform, ctx) -> tuple[InstallerResult, str]:
+    """Label only project-local Compose bind sources for shared container access.
+
+    Malcolm uses long-form binds with create_host_path:false. Compose's SELinux
+    mount options are unreliable with this form (the mount API cannot relabel).
+    Explicit chcon on actual sources is used instead of :Z, which would make
+    mounts inaccessible to other Malcolm containers sharing the same source.
+    """
+    import os
+    from scripts.malcolm_constants import OrchestrationFramework
+
+    if not should_apply_tweak(ctx, "selinux_volume_contexts"):
+        return InstallerResult.SKIPPED, "SELinux context tweak not selected"
+    if platform.orchestration_mode != OrchestrationFramework.DOCKER_COMPOSE:
+        return InstallerResult.SKIPPED, "Not a Compose installation"
+    if not which("selinuxenabled") or not which("chcon"):
+        return InstallerResult.SKIPPED, "SELinux tools not available"
+    rc, _ = platform.run_process(["selinuxenabled"], stderr=False)
+    if rc != 0:
+        return InstallerResult.SKIPPED, "SELinux disabled"
+    try:
+        # Deduplicate mounts shared between services and never touch external
+        # bind paths, symlinks or the installation root.
+        paths = sorted({
+            path for _, _, path in _compose_bind_sources(config_dir)
+            if os.path.exists(path)
+        })
+        if platform.is_dry_run():
+            logger.info(f"Dry run: would label {len(paths)} local Compose bind sources for SELinux")
+            return InstallerResult.SKIPPED, "Dry run: no SELinux labels applied"
+        for path in paths:
+            status, output = platform.run_process(["chcon", "-R", "-t", "container_file_t", path])
+            if status != 0:
+                logger.error(f"Failed to label SELinux bind source {path}: {output}")
+                return InstallerResult.FAILURE, f"SELinux relabel failed: {path}"
+        logger.info(f"Labeled {len(paths)} local Compose bind sources for SELinux containers")
+        return InstallerResult.SUCCESS, f"Labeled {len(paths)} Compose bind sources"
+    except (OSError, ValueError, TypeError) as exc:
+        logger.error(f"Could not label SELinux bind mounts: {exc}")
+        return InstallerResult.FAILURE, "SELinux bind labeling failed"
+
+
 def apply_all(malcolm_config, config_dir: str, platform, ctx) -> tuple[InstallerResult, str]:
     if not platform.should_run_install_steps():
         return InstallerResult.SKIPPED, "Tweaks skipped (non-install control flow)"
-    for func in (apply_sysctl, apply_security_limits, apply_systemd_limits, apply_grub_cgroup):
+    for func in (apply_sysctl, apply_security_limits, apply_systemd_limits, apply_grub_cgroup, apply_selinux_volume_contexts):
         status, _ = func(malcolm_config, config_dir, platform, ctx)
         if status == InstallerResult.FAILURE:
             return status, "A Linux tweak failed"
