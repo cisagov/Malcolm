@@ -125,6 +125,12 @@ class WorkerPool:
         if self._limiter is not None:
             try:
                 await self._limiter.acquire()
+            except BaseException:
+                # Acquisition may be cancelled before the coroutine can run.
+                if isinstance(coro, types.CoroutineType):
+                    coro.close()
+                raise
+            try:
                 await coro
             finally:
                 self._limiter.release()
