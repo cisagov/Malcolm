@@ -12,7 +12,6 @@ from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.platforms.utils import linux_tweaks
 from scripts.malcolm_constants import OrchestrationFramework
 
-
 KEYSTORE_TARGET = "/usr/share/opensearch/config/persist/opensearch.keystore"
 
 
