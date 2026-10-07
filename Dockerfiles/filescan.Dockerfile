@@ -60,6 +60,10 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 ENV STRELKA_HOST=$STRELKA_HOST
 ENV STRELKA_PORT=$STRELKA_PORT
 ENV FILESCAN_HEALTH_PORT=$FILESCAN_HEALTH_PORT
@@ -122,8 +126,8 @@ RUN set -e ; \
       webfs ; \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
         chmod +x /usr/local/bin/supercronic ; \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
-        chmod 755 /usr/local/bin/yq ; \
+    /usr/local/bin/install-verified-yq.sh /usr/local/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+    rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
     mkdir -p /filescan /filescan/data/files /filescan/data/logs "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" ; \
     cd /tmp && \
       /usr/local/bin/web-ui-asset-download.sh -o "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css" && \

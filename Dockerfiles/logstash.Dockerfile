@@ -51,6 +51,10 @@ ENV PIP_ROOT_USER_ACTION=ignore
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
@@ -81,8 +85,8 @@ RUN set -x && \
         util-linux && \
     curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
         chmod +x /usr/bin/tini && \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/local/bin/yq && \
+    /usr/local/bin/install-verified-yq.sh /usr/local/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+    rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     logstash-plugin install --preserve logstash-output-opensearch && \
         /usr/share/logstash/bin/ruby -e 'path = Dir["/usr/share/logstash/vendor/bundle/jruby/3.4.0/gems/psych-*/lib/psych/class_loader.rb"].first or abort "psych class_loader not found"; text = File.read(path); changed = text.gsub!(/constants\.each do \|const\|\n\s+konst = const_get const\n\s+class_eval <<~RUBY, __FILE__, __LINE__ \+ 1\n\s+def #\{const\.to_s\.downcase\}\n\s+load #\{konst\.inspect\}\n\s+end\n\s+RUBY\n\s+end/, "constants.each do |const|\n      konst = const_get const\n      define_method(const.to_s.downcase) { load konst }\n    end"); abort "psych patch did not apply" unless changed; File.write(path, text)' && \

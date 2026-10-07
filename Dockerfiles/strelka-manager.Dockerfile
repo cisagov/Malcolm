@@ -24,10 +24,14 @@ ENV TERM=xterm
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 RUN apk update --no-cache && \
     apk --no-cache add bash curl jq psmisc rsync shadow su-exec tini && \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
-      chmod 755 /usr/local/bin/yq && \
+    /usr/local/bin/install-verified-yq.sh /usr/local/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+    rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
     addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistent -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty
