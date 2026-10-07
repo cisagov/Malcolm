@@ -409,7 +409,7 @@ def _compose_bind_sources(config_dir: str):
 
     compose = LoadYaml(compose_file)
     if not isinstance(compose, dict) or not isinstance(compose.get("services"), dict):
-        raise ValueError(f"Could not load Compose services from {compose_file}")
+        raise TypeError(f"Could not load Compose services from {compose_file}")
     mounts = []
     for service_name, service in (compose.get("services") or {}).items():
         for volume in service.get("volumes", []):
@@ -445,8 +445,8 @@ def prepare_opensearch_keystore(malcolm_config, config_dir: str, platform) -> tu
     """
     import os
     from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_PROCESS_USER_ID,
         KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
+        KEY_CONFIG_ITEM_PROCESS_USER_ID,
     )
 
     if platform.is_dry_run():
@@ -492,6 +492,7 @@ def apply_selinux_volume_contexts(malcolm_config, config_dir: str, platform, ctx
     mounts inaccessible to other Malcolm containers sharing the same source.
     """
     import os
+
     from scripts.malcolm_constants import OrchestrationFramework
 
     if not should_apply_tweak(ctx, "selinux_volume_contexts"):
