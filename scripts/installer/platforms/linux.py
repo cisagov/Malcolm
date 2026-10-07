@@ -36,8 +36,8 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
 )
 from scripts.installer.configs.constants.enums import (
     DockerComposeInstallMethod,
