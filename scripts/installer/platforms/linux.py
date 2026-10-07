@@ -30,11 +30,15 @@ from scripts.malcolm_constants import (
     PLATFORM_LINUX_ROCKY,
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_LINUX_ZORIN,
+    PROFILE_MALCOLM,
 )
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
 )
-from scripts.installer.configs.constants.configuration_item_keys import KEY_CONFIG_ITEM_RUNTIME_BIN
+from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+)
 from scripts.installer.configs.constants.enums import (
     DockerComposeInstallMethod,
     InstallerResult,
@@ -623,6 +627,20 @@ class LinuxInstaller(BaseInstaller):
         # 4) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if not _ok(shared_actions.update_compose_files(malcolm_config, config_dir, orchestration_file, self, ctx)):
+                return False
+
+        # Ensure the required keystore file bind exists before a Compose start.
+        # The OpenSearch bootstrap script replaces a zero-byte placeholder.
+        if (
+            self.should_run_install_steps()
+            and self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE
+            and malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) == PROFILE_MALCOLM
+        ):
+            from scripts.installer.platforms.utils import linux_tweaks
+
+            status, detail = linux_tweaks.prepare_opensearch_keystore(malcolm_config, config_dir, self)
+            if status == InstallerResult.FAILURE:
+                InstallerLogger.error(detail)
                 return False
 
         # 5) Linux tweaks (only in install mode)
