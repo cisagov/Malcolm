@@ -2157,8 +2157,13 @@ def suggest_os_memory(total_gb: Optional[int] = None) -> str:
     """Return OpenSearch heap suggestion (e.g., "24g")."""
     if total_gb is None:
         total_gb = total_memory_gb()
-    # Rough rule: half of RAM, capped at 31 GiB, min 4 GiB
-    heap_gb = max(4, min(31, total_gb // 2))
+    # On hosts below 12 GiB, reserving half the RAM (minimum 4 GiB)
+    # can leave too little for Logstash, the other containers, and the OS,
+    # especially when swap is disabled. Allow smaller heaps in this range.
+    if total_gb < 12:
+        heap_gb = max(1, min(2, total_gb // 4))
+    else:
+        heap_gb = max(4, min(31, total_gb // 2))
     return f"{heap_gb}g"
 
 
@@ -2176,8 +2181,13 @@ def suggest_ls_memory(total_gb: Optional[int] = None) -> str:
     else:
         heap_mb = total_mb // 4
 
-    # Clamp to [2g, 3g] in MB
-    heap_mb = min(max(heap_mb, 2500), 3 * 1024)
+    if total_gb < 12:
+        # The usual 2.5 GiB minimum competes with OpenSearch on small
+        # hosts. Keep the combined Java heaps low enough to leave headroom.
+        heap_mb = max(512, min(1024, total_mb // 8))
+    else:
+        # Keep the established 2.5-3 GiB recommendations for larger hosts.
+        heap_mb = min(max(heap_mb, 2500), 3 * 1024)
 
     return f"{heap_mb}m"
 
