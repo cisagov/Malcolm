@@ -408,6 +408,8 @@ def _compose_bind_sources(config_dir: str):
         return []
 
     compose = LoadYaml(compose_file)
+    if not isinstance(compose, dict) or not isinstance(compose.get("services"), dict):
+        raise ValueError(f"Could not load Compose services from {compose_file}")
     mounts = []
     for service_name, service in (compose.get("services") or {}).items():
         for volume in service.get("volumes", []):
@@ -476,7 +478,7 @@ def prepare_opensearch_keystore(malcolm_config, config_dir: str, platform) -> tu
                 os.chown(keystore, int(uid), int(gid))
         logger.info(f"Created OpenSearch keystore bind placeholder: {keystore}")
         return InstallerResult.SUCCESS, "OpenSearch keystore placeholder created"
-    except OSError as exc:
+    except (OSError, ValueError, TypeError) as exc:
         logger.error(f"Could not prepare OpenSearch keystore bind: {exc}")
         return InstallerResult.FAILURE, "OpenSearch keystore preparation failed"
 
