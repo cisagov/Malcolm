@@ -224,8 +224,8 @@ def parse_limit_megabytes(args, session):
 
 def get_total_index_size(args, session):
     """Return (total_size_mb, total_index_count) for the given index patterns."""
-    total_mb = 0
-    total_indices = 0
+    # Different selectors can resolve to the same concrete index.
+    index_sizes = {}
     for idx in get_iterable(args.index):
         r = session.get(f'{args.opensearch_url}/{idx}/_stats/store')
         if not r.ok:
@@ -233,27 +233,25 @@ def get_total_index_size(args, session):
             continue
         info = r.json()
         try:
-            total_mb += (
-                info['_all']['primaries' if args.primary_totals else 'total']['store']['size_in_bytes'] // 1_000_000
-            )
-            total_indices += len(info["indices"])
+            for name, index in info['indices'].items():
+                index_sizes[name] = index['primaries' if args.primary_totals else 'total']['store']['size_in_bytes']
         except KeyError:
             continue
-    return total_mb, total_indices
+    return sum(index_sizes.values()) // 1_000_000, len(index_sizes)
 
 
 def get_indices_for_deletion(args, session, total_size_mb, limit_mb):
     """Return list of index info dicts to delete to reduce usage below limit."""
-    os_info = []
+    os_info = {}
     for idx in args.index:
         r = session.get(
             f'{args.opensearch_url}/_cat/indices/{idx}',
             params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
         )
         r.raise_for_status()
-        os_info.extend(r.json())
+        os_info.update((index['i'], index) for index in r.json())
 
-    os_info.sort(key=lambda k: k['i' if args.name_sorted else 'creation.date'])
+    os_info = sorted(os_info.values(), key=lambda k: k['i' if args.name_sorted else 'creation.date'])
     needs_deleted = total_size_mb - limit_mb
     to_delete = []
     size_key = 'pri.store.size' if args.primary_totals else 'store.size'
