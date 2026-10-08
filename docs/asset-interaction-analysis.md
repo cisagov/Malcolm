@@ -144,6 +144,20 @@ If no matching site-specific rule is found, the default rule — defined using a
 
 Malcolm's NetBox inventory is prepopulated with a collection of [community-sourced device type definitions](https://github.com/netbox-community/devicetype-library) which can then be augmented by users [manually](#NetBoxPopManual) or through [preloading](#NetBoxPreload). During passive autopopulation device manufacturer is inferred from organizationally unique identifiers (OUIs), which make up the first three octets of a MAC address. The IEEE Standards Association maintains the [registry of OUIs](https://standards-oui.ieee.org/), which is not necessarily very internally consistent with how organizations specify the name associated with their OUI entry. In other words, there's not a foolproof programmatic way for Malcolm to map MAC address OUI organization names to NetBox manufacturer names, barring creating and maintaining a manual mapping (which would be very large and difficult to keep up-to-date).
 
+**Device-type library import performance:** The full community library can make
+the initial NetBox startup slow. To import only the manufacturers you use, set
+`NETBOX_DEVICETYPE_IMPORT_VENDORS=cisco,arista` (substituting the desired
+device-library vendor slugs) in `config/netbox.env` before starting Malcolm.
+An empty value imports the complete library. After a successful import,
+Malcolm records a completion marker in the **NetBox database** and skips the
+unchanged library on subsequent restarts. Changing the bundled device-library
+content or the selected vendor list automatically triggers a new import.
+Failed or partial imports are retried. To explicitly reimport a previously
+completed library (for example, after deleting types), temporarily set
+`NETBOX_DEVICETYPE_IMPORT_FORCE=true` and restart NetBox, then return it to
+`false`. This cache does not skip custom NetBox initializers or restore
+operations.
+
 Malcolm's [NetBox lookup code]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/ruby/netbox_enrich.rb) used in the log enrichment pipeline attempts to match OUI organization names against the list of NetBox's manufacturers using ["fuzzy string matching"](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance), a technique in which two strings of characters are compared and assigned a similarity score between `0` (completely dissimilar) and `1` (identical). The `NETBOX_DEFAULT_FUZZY_THRESHOLD` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) can be used to tune the threshold for determining a match. A fairly high value is recommended (above `0.85`; `0.95` is the default) to avoid autopopulating the NetBox inventory with devices with manufacturers that don't actually exist in the network being monitored.
 
 Users may select between two behaviors for when the match threshold is not met (i.e., no manufacturer is found in the NetBox database which closely matches the OUI organization name). This behavior is specified by the `NETBOX_DEFAULT_AUTOCREATE_MANUFACTURER` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars):

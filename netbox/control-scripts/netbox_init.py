@@ -16,6 +16,7 @@ import tarfile
 import tempfile
 import time
 import malcolm_utils
+import device_type_import_cache
 from pathlib import Path
 
 from distutils.dir_util import copy_tree
@@ -168,6 +169,21 @@ def parse_args():
         default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH', '/opt/netbox-devicetype-library-import'),
         required=False,
         help="Directory containing NetBox Device-Type-Library-Import project and library repo",
+    )
+    parser.add_argument(
+        '--library-vendors',
+        dest='library_vendors',
+        type=str,
+        default=os.getenv('NETBOX_DEVICETYPE_IMPORT_VENDORS', ''),
+        required=False,
+        help='Optional comma-separated device library vendor slugs; blank imports all vendors',
+    )
+    parser.add_argument(
+        '--force-library-import',
+        dest='force_library_import',
+        action='store_true',
+        default=os.getenv('NETBOX_DEVICETYPE_IMPORT_FORCE', '').strip().lower() in ('1', 'true', 'yes'),
+        help='Re-import the device library even if this library revision was imported before',
     )
     parser.add_argument(
         '--scripts',
@@ -879,35 +895,14 @@ def process_netbox_initializers(args, netbox_venv_py, manage_script):
     return success
 
 
-def process_device_type_library_import(args, netbox_venv_py):
-    success = False
-
-    # ######  Device-Type-Library-Import ###########################################################################
-    if os.path.isdir(args.library_dir):
-        try:
-            with malcolm_utils.pushd(args.library_dir):
-                os_env = os.environ.copy()
-                os_env['NETBOX_URL'] = args.netbox_url
-                os_env['NETBOX_TOKEN'] = args.netbox_token
-                os_env.pop('VIRTUAL_ENV', None)
-                os_env['REPO_URL'] = 'local'
-                os_env['REPO_PATH'] = './repo'
-                cmd = [netbox_venv_py, '-m', 'uv', 'run', '--no-sync', 'nb-dt-import.py']
-                err, results = malcolm_utils.run_process(
-                    cmd,
-                    logger=logging,
-                    env=os_env,
-                )
-                if (err == 0) and results:
-                    logging.debug(f"nb-dt-import.py: {results}")
-                    success = True
-                else:
-                    logging.error(f"{err} running nb-dt-import.py: {results}")
-
-        except Exception as e:
-            logging.error(f"{type(e).__name__} processing library: {e}")
-
-    return success
+def process_device_type_library_import(args, netbox_venv_py, nb):
+    return device_type_import_cache.import_device_type_library(
+        args,
+        netbox_venv_py,
+        nb,
+        malcolm_utils.run_process,
+        malcolm_utils.pushd,
+    )
 
 
 def process_custom_netbox_scripts(args, netbox_venv_py, manage_script):
@@ -1066,7 +1061,7 @@ def main():
     process_custom_netbox_scripts(args, netbox_venv_py, manage_script)
     process_netbox_initializers(args, netbox_venv_py, manage_script)
     if not preload_database_success and (not args.preload_backup_file):
-        process_device_type_library_import(args, netbox_venv_py)
+        process_device_type_library_import(args, netbox_venv_py, nb)
 
 
 ###################################################################################################
