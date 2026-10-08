@@ -74,7 +74,7 @@ ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 #   - ZEEK_INTEL_META_ASSOCIATED
 #   - ZEEK_INTEL_META_CAMPAIGNS
 #   - ZEEK_INTEL_META_REPORTS
-#   - ZEEK_INTEL_META_THREAT_SCORE
+#   - ZEEK_INTEL_META_THREAT_SCORE (other feeds; Mandiant mscore mapped below)
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
 
@@ -282,9 +282,14 @@ def map_mandiant_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_META_DESC] = indicator.id
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
-        if hasattr(indicator, 'mscore'):
-            zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(indicator.mscore)
-            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
+        if hasattr(indicator, 'mscore') and isinstance(indicator.mscore, (int, float)):
+            # The Mandiant M-Score is a 0-100 indicator score; export it to
+            # the currently unused numeric Zeek intel threat_score field as
+            # well as the existing confidence fields for compatibility.
+            if 0 <= indicator.mscore <= 100:
+                zeekItem[ZEEK_INTEL_META_THREAT_SCORE] = str(indicator.mscore)
+                zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(indicator.mscore)
+                zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
         if hasattr(indicator, 'first_seen'):
             zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
             zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
@@ -585,6 +590,12 @@ def map_stix_indicator_to_zeek(
         )
         zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+        # STIX 2.1 confidence is an integer percentage (0-100). Keep it
+        # distinct from threat severity and omit it if the source lacks it.
+        if ('confidence' in indicator) and (confidence := indicator['confidence']) is not None:
+            if isinstance(confidence, int) and 0 <= confidence <= 100:
+                zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(confidence)
+                zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
         if ('name' in indicator) or ('description' in indicator):
             zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
                 [x for x in [indicator.get('name'), indicator.get('description')] if x is not None]
