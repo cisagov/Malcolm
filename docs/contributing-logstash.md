@@ -56,6 +56,32 @@ The script [`scripts/zeek_script_to_malcolm_boilerplate.py`]({{ site.github.repo
 
 Malcolm's Logstash instance will do a lot of enrichments automatically: see the [enrichment pipeline]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment), including MAC address to vendor by OUI, GeoIP, ASN, and a few others. In order to take advantage of these enrichments that are already in place, normalize new fields to use the same standardized field names Malcolm uses for things such as IP addresses, MAC addresses, etc. Additional enrichments may be added by creating new `.conf` files containing [Logstash filters](https://www.elastic.co/guide/en/logstash/7.10/filter-plugins.html) in the [enrichment pipeline]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment) directory and using either of the techniques in the [Local modifications](contributing-local-modifications.md#LocalMods) section to implement those changes in the `logstash` container.
 
+## <a name="LogstashBenchmark"></a>Measuring enrichment overhead
+
+The read-only [enrichment benchmark tool]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/benchmark_enrichment.py) captures two measurements from **running** Malcolm containers:
+
+- Allocated OpenSearch data-directory size, using `du -sk /usr/share/opensearch/data`.
+- Each Logstash pipeline's processed-event count and each filter's event counts and cumulative processing time, from `/_node/stats/pipelines`.
+
+Use a **disposable test deployment** and the same PCAP files for every experiment. Reset the indexes through the normal Malcolm maintenance workflow and restart Logstash between variants; do not wipe or reset a production deployment. Wait for ingestion to finish before recording each snapshot.
+
+For example, compare the existing NetBox dataset setting `LOGSTASH_NETBOX_ENRICHMENT_DATASETS=default` with `LOGSTASH_NETBOX_ENRICHMENT_DATASETS=all`, keeping `NETBOX_ENRICHMENT` and other settings identical:
+
+```bash
+# After ingesting the test dataset under the default configuration
+python3 scripts/benchmark_enrichment.py snapshot --label netbox-default --output /tmp/netbox-default.json
+
+# After resetting the disposable deployment, restarting Logstash, changing the setting and re-ingesting the SAME dataset
+python3 scripts/benchmark_enrichment.py snapshot --label netbox-all --output /tmp/netbox-all.json
+
+# Show allocated storage and normalized per-filter processing time
+python3 scripts/benchmark_enrichment.py compare /tmp/netbox-default.json /tmp/netbox-all.json --filter netbox
+```
+
+Repeat for other flags such as `LOGSTASH_OUI_LOOKUP`, `LOGSTASH_SEVERITY_SCORING`, `LOGSTASH_REVERSE_DNS`, or `FREQ_LOOKUP`. Run the capture commands from the Malcolm repository root, or specify `--project-dir` with the `snapshot` command.
+
+The snapshots preserve the raw per-filter count and duration metrics for review. Comparisons report **milliseconds per 1,000 filter input events** alongside pipeline event counts to help detect mismatched workloads. Logstash counters accumulate from process startup, and OpenSearch `du` measures allocated disk space rather than just logical index bytes. Both require equivalent ingestion workloads and reset conditions for meaningful comparisons.
+
 ## <a name="LogstashPlugins"></a>Logstash plugins
 
 The [logstash.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/logstash.Dockerfile) installs the Logstash plugins used by Malcolm (search for `logstash-plugin install` in that file). Additional Logstash plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `logstash` image.
