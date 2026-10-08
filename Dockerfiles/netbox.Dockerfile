@@ -32,8 +32,15 @@ ENV NETBOX_HEALTHCHECK_VERSION="0.3.0"
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL="https://codeload.github.com/mmguero-dev/Device-Type-Library-Import/tar.gz/main"
-ENV NETBOX_DEVICETYPE_LIBRARY_URL="https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
+# Pin both build-time archives to immutable commits and repository-checked
+# SHA-256 digests. Update commits AND hashes together when upgrading the library.
+# Never fetch checksum expectations from the same site as the artifact at build time.
+ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_COMMIT=47b4ddcf9e48a2c19b7ad9d331e36d681be56160
+ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_SHA256=c47ce23e4c9e7503362dcf38b0ced348061897b99bfcbfc8f4e848c97b7e55ac
+ARG NETBOX_DEVICETYPE_LIBRARY_COMMIT=a7cbb2790dbbf9a5929602af88cd2c747977ab4e
+ARG NETBOX_DEVICETYPE_LIBRARY_SHA256=e71a8ba1a8c08e1541221b15c1fedfb0f85262ebb0b1c4446cc7e64ae2b12961
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL="https://codeload.github.com/mmguero-dev/Device-Type-Library-Import/tar.gz/${NETBOX_DEVICETYPE_LIBRARY_IMPORT_COMMIT}"
+ENV NETBOX_DEVICETYPE_LIBRARY_URL="https://codeload.github.com/netbox-community/devicetype-library/tar.gz/${NETBOX_DEVICETYPE_LIBRARY_COMMIT}"
 
 ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"
 
@@ -97,12 +104,18 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     chown -R ${PUSER}:root /etc/netbox && \
     chown -R root:root "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" && \
-        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
+        curl -fLsS --retry 3 -o /tmp/netbox-dt-import.tar.gz "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" && \
+        printf '%s  %s\n' "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_SHA256}" /tmp/netbox-dt-import.tar.gz | sha256sum -c - && \
+        tar xzf /tmp/netbox-dt-import.tar.gz -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
+        rm /tmp/netbox-dt-import.tar.gz && \
     cd "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" && \
       VIRTUAL_ENV= "${NETBOX_PATH}/venv/bin/python" -m uv sync --no-dev && \
       sed -i "s/self.pull_repo()/pass/g" ./core/repo.py && \
       mkdir -p ./repo && \
-      curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
+      curl -fLsS --retry 3 -o /tmp/netbox-dt-library.tar.gz "${NETBOX_DEVICETYPE_LIBRARY_URL}" && \
+      printf '%s  %s\n' "${NETBOX_DEVICETYPE_LIBRARY_SHA256}" /tmp/netbox-dt-library.tar.gz | sha256sum -c - && \
+      tar xzf /tmp/netbox-dt-library.tar.gz -C ./repo --strip-components 1 && \
+      rm /tmp/netbox-dt-library.tar.gz && \
       chown -R ${PUSER}:root "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}/repo" && \
     mkdir -p "${NETBOX_PATH}/netbox/netbox" "${NETBOX_CUSTOM_PLUGINS_PATH}/requirements" "${NETBOX_CUSTOM_SCRIPTS_PATH}" "${NETBOX_RUNTIME_SCRIPTS_PATH}" "${NETBOX_CUSTOM_VENV_PACKAGES_PATH}" && \
       chown --silent -R ${PUSER}:${PGROUP} "${NETBOX_CUSTOM_PLUGINS_PATH}" "${NETBOX_CUSTOM_SCRIPTS_PATH}" "${NETBOX_RUNTIME_SCRIPTS_PATH}" "${NETBOX_CUSTOM_VENV_PACKAGES_PATH}" && \
