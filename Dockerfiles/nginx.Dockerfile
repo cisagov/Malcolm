@@ -140,8 +140,10 @@ ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.sv
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/netbox-community/netbox/main/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
+# Both icons use immutable source revisions, with BuildKit verifying content
+# against SHA-256 digests committed in this Dockerfile.
+ADD --checksum=sha256:1164d73b01454118b28a3200ed04c4f8e8dc7f67ef8faa9243cc142e92971812 https://raw.githubusercontent.com/gchq/CyberChef/609951ac13967da6d497e0600c922f56bfd0b7af/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
+ADD --checksum=sha256:a80e71eca8315be12d1f005ed68847f7c7aed8b9bf71dabf8479cd40b96abae6 https://raw.githubusercontent.com/netbox-community/netbox/74cb44fabed082aaacd841c984f2dbb435b0833d/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf /usr/share/nginx/html/css/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf /usr/share/nginx/html/css/
