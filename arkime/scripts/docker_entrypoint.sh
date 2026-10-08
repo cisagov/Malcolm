@@ -14,10 +14,20 @@ ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 32 | head -n 1)}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-"daily"}
-ARKIME_QUERY_ALL_INDICES=${ARKIME_QUERY_ALL_INDICES:-"false"}
+ARKIME_QUERY_ALL_INDICES=${ARKIME_QUERY_ALL_INDICES:-"auto"}
 ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}
 ARKIME_NETWORK_INDEX_PATTERN=${ARKIME_NETWORK_INDEX_PATTERN:-arkime_sessions3-*}
 MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-}
+MALCOLM_NETWORK_INDEX_SUFFIX=${MALCOLM_NETWORK_INDEX_SUFFIX:-%{%y%m%d}}
+
+# Preserve explicit true/false preferences; in auto mode work around an Arkime
+# index-selection problem when Malcolm uses custom weekly indices.
+source /usr/local/bin/arkime-index-query-mode.sh
+ARKIME_QUERY_ALL_INDICES_RESOLVED="$(arkime_index_query_mode   "$ARKIME_QUERY_ALL_INDICES" "$MALCOLM_NETWORK_INDEX_SUFFIX"   "$MALCOLM_NETWORK_INDEX_PATTERN" "$ARKIME_NETWORK_INDEX_PATTERN")" || exit 1
+if [[ "${ARKIME_QUERY_ALL_INDICES}" == "auto" ]] &&
+   [[ "$ARKIME_QUERY_ALL_INDICES_RESOLVED" == "true" ]]; then
+  echo "Arkime: enabling queryAllIndices for custom weekly Malcolm network indices" >&2
+fi
 
 ARKIME_DEBUG_LEVEL=${ARKIME_DEBUG_LEVEL:-0}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
@@ -78,7 +88,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(rotateIndex=\).*/\1"${ARKIME_ROTATE_INDEX}"/" "${ARKIME_CONFIG_FILE}"
-    sed -i "s/^\(queryAllIndices=\).*/\1"${ARKIME_QUERY_ALL_INDICES}"/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(queryAllIndices=\).*/\1"${ARKIME_QUERY_ALL_INDICES_RESOLVED}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(spiDataMaxIndices=\).*/\1"${ARKIME_SPI_DATA_MAX_INDICES}"/" "${ARKIME_CONFIG_FILE}"
     [[ -n "${MALCOLM_NETWORK_INDEX_PATTERN}" ]] && \
       [[ "${MALCOLM_NETWORK_INDEX_PATTERN}" != "${ARKIME_NETWORK_INDEX_PATTERN}" ]] && \
