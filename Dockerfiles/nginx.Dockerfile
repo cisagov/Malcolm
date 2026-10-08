@@ -128,12 +128,15 @@ ENV NGINX_LDAP_TLS_STUNNEL_CHECK_HOST=$NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
 ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP=$NGINX_LDAP_TLS_STUNNEL_CHECK_IP
 ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=$NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
-# build latest openresty with nginx-auth-ldap
-ENV NGINX_AUTH_LDAP_BRANCH=master
+# Build OpenResty with an immutable nginx-auth-ldap revision.
+# This module executes inside the authentication reverse proxy. BuildKit must
+# reject changed source archives rather than building an unverified branch HEAD.
+# Update the revision and SHA-256 together when upgrading the LDAP module.
+ARG NGINX_AUTH_LDAP_REVISION=394261b38c77ef692d98e9a05d28843b5a355921
 
 # NGINX source
 COPY --from=getresty /usr/local/src/openresty/openresty.tar.gz /openresty.tar.gz
-ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
+ADD --checksum=sha256:925d2b368db64d4bee6b17bb5b1958c44d20a1b945ac194f1db4fdd551614743 https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_REVISION /nginx-auth-ldap.tar.gz
 
 # component icons from original sources and stuff for offline landing page
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
