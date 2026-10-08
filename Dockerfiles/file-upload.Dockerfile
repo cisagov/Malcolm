@@ -51,6 +51,8 @@ ENV PHP_VERSION=$PHP_VERSION
 
 ARG FILEPOND_SERVER_BRANCH=75fea06f898ea5f474227be2daba924d06ba6aee
 ENV FILEPOND_SERVER_BRANCH=$FILEPOND_SERVER_BRANCH
+# Digest of the pinned source archive, stored independently of the download.
+ENV FILEPOND_SERVER_SHA256=2b3baf6eb0fb7304ec5b0be012719fa2e6b72d517ac95c12e74322a3ba74a001
 
 ARG STALE_UPLOAD_DELETE_MIN=360
 ENV STALE_UPLOAD_DELETE_MIN=$STALE_UPLOAD_DELETE_MIN
@@ -58,6 +60,8 @@ ENV STALE_UPLOAD_DELETE_MIN=$STALE_UPLOAD_DELETE_MIN
 ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
+ENV SUPERCRONIC_SHA256_AMD64=a53ae236602c7338aba3fbaff40bda6300eae3b9fedb8261eb06cfe3724430c1
+ENV SUPERCRONIC_SHA256_ARM64=02aa0cb229ba09050cba6638059dadb9eedc2276632ea43d6a57a2f8c1629dd5
 
 COPY --from=npmget /usr/local/lib/node_modules/filepond /var/www/upload/filepond
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-validate-size /var/www/upload/filepond-plugin-file-validate-size
@@ -88,12 +92,20 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       tini \
       vim-tiny && \
     rm -f /etc/ssh/ssh_host_* && \
+    case "$BINARCH" in \
+      amd64) SUPERCRONIC_SHA256="$SUPERCRONIC_SHA256_AMD64" ;; \
+      arm64) SUPERCRONIC_SHA256="$SUPERCRONIC_SHA256_ARM64" ;; \
+      *) echo "Unsupported Supercronic architecture: $BINARCH" >&2; exit 1 ;; \
+    esac && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      echo "${SUPERCRONIC_SHA256}  /usr/local/bin/supercronic" | sha256sum -c - && \
       chmod +x /usr/local/bin/supercronic && \
     mkdir -p /var/www/upload/server/php \
              /tmp/filepond-server && \
     cd /tmp && \
-      curl -sSL "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" | tar xzvf - -C ./filepond-server --strip-components 1 && \
+      curl -fsSL -o ./filepond-server.tar.gz "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" && \
+      echo "${FILEPOND_SERVER_SHA256}  ./filepond-server.tar.gz" | sha256sum -c - && \
+      tar xzvf ./filepond-server.tar.gz -C ./filepond-server --strip-components 1 && \
       rsync -a --include="*/" --include="*.php" --exclude="*" ./filepond-server/ /var/www/upload/server/php/ && \
       python3 -c 'import pathlib,sys; p=pathlib.Path("/var/www/upload/server/php/FilePond.class.php"); s=p.read_text(); old="[^a-zA-Z0-9\\_\\s]"; new="[^a-zA-Z0-9\\_\\s.]"; n=s.count(old); sys.exit("FilePond.class.php sanitize_filename_part pattern not found or ambiguous (count=%d); vendored library may have changed, update this patch" % n) if n != 1 else p.write_text(s.replace(old, new))' && \
       FILEPOND_INDEX_PHP="/var/www/upload/server/php/index.php"; \
