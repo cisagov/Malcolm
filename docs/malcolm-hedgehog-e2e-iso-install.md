@@ -629,6 +629,7 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
         * The [document store type](opensearch-instances.md#OpenSearchInstance) (either `opensearch-remote` or `elasticsearch-remote`) of the Malcolm aggregator
     * **Remote Malcolm Hostname or IP**
         * Specifying the IP address or hostname of the Malcolm aggregator here will automatically populate the following items (or, they can be set or overridden individually):
+        * When this hostname changes, unmodified connections are updated automatically. If you have explicitly edited an individual endpoint (for example, a non-standard Logstash port or an external Arkime WISE server), that setting is preserved in the Hedgehog profile. Update that endpoint directly if it should follow the new host. The same applies to an explicitly customised reachback ACL. Changing the profile back to Malcolm still restores the appropriate local defaults.
             * **Primary OpenSearch/Elasticsearch URL**
                 * The URL of the remote OpenSearch/Elasticsearch instance to be used as the data store (e.g., `https://malcolm.example.org:9200` or `https://service.whatever.org/elasticsearch/`)
             * **Logstash Host**

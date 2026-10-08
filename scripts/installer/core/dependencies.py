@@ -58,7 +58,9 @@ class ValueRule:
     depends_on: Union[str, List[str]]  # Key(s) this value depends on
     condition: Union[bool, Callable[..., bool]]  # When to apply the default value
     default_value: Any  # Value to set when condition is met
-    only_if_unmodified: bool = True  # Only set if user hasn't manually changed it
+    # A callable can decide whether to preserve a manual override based on
+    # the current dependency values (e.g. only while running Hedgehog).
+    only_if_unmodified: Union[bool, Callable[..., bool]] = True
 
 
 @dataclass
@@ -275,7 +277,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 if profile == PROFILE_MALCOLM
                 else (f"{malcolm_host}:{SERVICE_PORT_LOGSTASH}" if malcolm_host else DEFAULT_VALUE_UNCHANGED)
             ),
-            only_if_unmodified=False,
+            # Keep explicit service-specific forwarding overrides in Hedgehog
+            # mode, while still restoring safe local values for Malcolm.
+            only_if_unmodified=lambda profile, *_: profile == PROFILE_HEDGEHOG,
         ),
     ),
     KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL: DependencySpec(
@@ -295,7 +299,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 if ((profile == PROFILE_MALCOLM) or (not SYSTEM_INFO["malcolm_iso_install"]))
                 else ([malcolm_host] if isipaddress(malcolm_host) else DEFAULT_VALUE_UNCHANGED)
             ),
-            only_if_unmodified=False,
+            # A custom reachback ACL must not be replaced by changing the
+            # parent hostname; returning to Malcolm still clears it.
+            only_if_unmodified=lambda profile, *_: profile == PROFILE_HEDGEHOG,
         ),
     ),
     KEY_CONFIG_ITEM_AUX_FW_AIDE: DependencySpec(
@@ -518,7 +524,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                     else DEFAULT_VALUE_UNCHANGED
                 )
             ),
-            only_if_unmodified=False,
+            # Keep explicit service-specific forwarding overrides in Hedgehog
+            # mode, while still restoring safe local values for Malcolm.
+            only_if_unmodified=lambda profile, *_: profile == PROFILE_HEDGEHOG,
         ),
     ),
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL: DependencySpec(
@@ -851,7 +859,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 if ((profile == PROFILE_MALCOLM) and (not live_arkime))
                 else (f"https://{malcolm_host}/wise/" if malcolm_host else DEFAULT_VALUE_UNCHANGED)
             ),
-            only_if_unmodified=False,
+            # Keep explicit service-specific forwarding overrides in Hedgehog
+            # mode, while still restoring safe local values for Malcolm.
+            only_if_unmodified=lambda profile, *_: profile == PROFILE_HEDGEHOG,
         ),
     ),
     # -------------------------------------------------------------------------
