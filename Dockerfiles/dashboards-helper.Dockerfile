@@ -53,7 +53,11 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV ECS_RELEASES_URL="https://api.github.com/repos/elastic/ecs/releases/latest"
+# Keep the ECS schema revision and archive digest in sync when updating.
+ENV ECS_VERSION="9.5.0"
+ENV ECS_COMMIT="401807e0547301525acd28c4fb667203fec66d59"
+ENV ECS_SHA256="8cc199dba1510d14e5623b52dadf03b5da0f3e7bfca0ef5d7a34a7f6d766f3cd"
+ENV ECS_SOURCE_URL="https://codeload.github.com/elastic/ecs/tar.gz/${ECS_COMMIT}"
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD dashboards/dashboards /opt/dashboards
@@ -100,7 +104,9 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       usermod -a -G tty ${PUSER} && \
     mkdir -p /data/init /opt/ecs && \
       cd /opt && \
-      curl -sSL "$(curl -sSL "$ECS_RELEASES_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./ecs --strip-components 1 && \
+      curl -fsSL -o /tmp/ecs-source.tar.gz "$ECS_SOURCE_URL" && \
+      echo "${ECS_SHA256}  /tmp/ecs-source.tar.gz" | sha256sum -c - && \
+      tar xzf /tmp/ecs-source.tar.gz -C ./ecs --strip-components 1 && \
       mv /opt/ecs/generated/elasticsearch /opt/ecs-templates && \
       rsync -av /opt/ecs-templates/ /opt/ecs-templates-os/ && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \
