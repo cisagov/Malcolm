@@ -53,10 +53,6 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-# Verify versioned yq binaries against repository-controlled hashes.
-COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
-COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
-
 ENV ECS_RELEASES_URL="https://api.github.com/repos/elastic/ecs/releases/latest"
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
@@ -77,6 +73,10 @@ ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
+
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
