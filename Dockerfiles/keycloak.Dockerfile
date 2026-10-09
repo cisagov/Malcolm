@@ -3,6 +3,7 @@ FROM redhat/ubi9:latest AS ubi-micro-build
 RUN mkdir -p /mnt/rootfs && \
     dnf install --nodocs -y --releasever 9 --setopt install_weak_deps=false --installroot /mnt/rootfs \
       curl-minimal \
+      coreutils-single \
       jq \
       postgresql \
       procps-ng \
@@ -59,14 +60,16 @@ ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/t
 
 COPY --from=ubi-micro-build /mnt/rootfs /
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
+COPY --chmod=755 shared/bin/install-verified-tini.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/tini-v0.19.0.sha256 /tmp/tini-v0.19.0.sha256
 
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
   mkdir -p /var/local/ca-trust && \
     chown -R $PUSER:$PGROUP /var/local/ca-trust && \
-  curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-    chmod +x /usr/bin/tini
+  /usr/local/bin/install-verified-tini.sh "$BINARCH" /tmp/tini-v0.19.0.sha256 /usr/bin/tini && \
+    rm -f /tmp/tini-v0.19.0.sha256
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
