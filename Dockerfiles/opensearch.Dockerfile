@@ -43,9 +43,12 @@ ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
 
+ADD --chmod=755 shared/bin/install-verified-runtime-tini.sh /usr/local/bin/
+ADD --chmod=644 Dockerfiles/checksums/tini-runtime-v0.19.0.sha256 /tmp/tini-runtime.sha256
+
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
-  yum install -y gettext openssl util-linux procps jq rsync findutils && \
+  yum install -y gettext openssl util-linux procps jq rsync findutils coreutils && \
     yum remove -y vim-* && \
   curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
       chmod 755 /usr/local/bin/yq && \
@@ -62,8 +65,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config \
                           /var/local/ca-trust \
                           /opt/opensearch/backup && \
-  curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-    chmod +x /usr/bin/tini && \
+  /usr/local/bin/install-verified-runtime-tini.sh "$BINARCH" /tmp/tini-runtime.sha256 "${TINI_URL}-${BINARCH}" /usr/bin/tini && \
+    rm -f /tmp/tini-runtime.sha256 && \
   sed -i 's/^\([[:space:]]*\)echo "Disabling execution of install_demo_configuration.*/\1\/usr\/local\/bin\/setup-internal-users.sh || true/' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/keystore-bootstrap.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh

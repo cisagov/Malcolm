@@ -63,6 +63,8 @@ ADD --chmod=755 logstash/scripts/*.sh /usr/local/bin/
 ADD --chmod=755 logstash/scripts/*.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
+ADD --chmod=755 shared/bin/install-verified-runtime-tini.sh /usr/local/bin/
+ADD --chmod=644 Dockerfiles/checksums/tini-runtime-v0.19.0.sha256 /tmp/tini-runtime.sha256
 
 RUN set -x && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
@@ -72,6 +74,7 @@ RUN set -x && \
     microdnf -y install \
         bash \
         ca-certificates \
+        coreutils \
         gettext \
         git \
         jq \
@@ -79,8 +82,8 @@ RUN set -x && \
         rsync \
         supervisor \
         util-linux && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-        chmod +x /usr/bin/tini && \
+    /usr/local/bin/install-verified-runtime-tini.sh "$BINARCH" /tmp/tini-runtime.sha256 "${TINI_URL}-${BINARCH}" /usr/bin/tini && \
+        rm -f /tmp/tini-runtime.sha256 && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/local/bin/yq && \
     export JAVA_HOME=/usr/share/logstash/jdk && \

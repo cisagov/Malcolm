@@ -88,6 +88,8 @@ ENV EVTX_URL="https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VER
 USER root
 
 ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
+ADD --chmod=755 shared/bin/install-verified-runtime-tini.sh /usr/local/bin/
+ADD --chmod=644 Dockerfiles/checksums/tini-runtime-v0.19.0.sha256 /tmp/tini-runtime.sha256
 
 RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
@@ -98,6 +100,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     microdnf -y install \
         bzip2 \
         ca-certificates \
+        coreutils \
         cpio \
         file \
         gzip \
@@ -118,8 +121,8 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         unzip \
         util-linux \
         xz && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-        chmod +x /usr/bin/tini && \
+    /usr/local/bin/install-verified-runtime-tini.sh "$BINARCH" /tmp/tini-runtime.sha256 "${TINI_URL}-${BINARCH}" /usr/bin/tini && \
+        rm -f /tmp/tini-runtime.sha256 && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
