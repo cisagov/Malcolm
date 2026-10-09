@@ -17,7 +17,7 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
 
 ## Documentation
 
-See the [**Malcolm documentation**](docs/README.md).
+See the [**Malcolm documentation**](docs/README.md). For recorded tutorials, start with the [Malcolm Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and its [configuration errata](docs/learning-tree-errata.md#LearningTreeErrata).
 
 ## Share your feedback
 
