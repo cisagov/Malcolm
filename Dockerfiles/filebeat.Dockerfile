@@ -88,6 +88,8 @@ ENV EVTX_URL="https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VER
 USER root
 
 ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
+ADD --chmod=755 shared/bin/install-verified-evtx.sh /usr/local/bin/
+ADD --chmod=644 Dockerfiles/checksums/evtx-v0.12.3.sha256 /tmp/evtx-v0.12.3.sha256
 
 RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
@@ -98,6 +100,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     microdnf -y install \
         bzip2 \
         ca-certificates \
+        coreutils \
         cpio \
         file \
         gzip \
@@ -126,8 +129,8 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/local/bin/yq && \
-    curl -fsSL -o /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" && \
-        chmod 755 /usr/local/bin/evtx && \
+    /usr/local/bin/install-verified-evtx.sh "$EVTXARCH" /tmp/evtx-v0.12.3.sha256 "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" /usr/local/bin/evtx && \
+        rm -f /tmp/evtx-v0.12.3.sha256 && \
     microdnf clean all && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
