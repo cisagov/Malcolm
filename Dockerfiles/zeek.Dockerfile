@@ -54,6 +54,10 @@ ENV SUPERCRONIC_VERSION="0.2.49"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="${ZEEK_DIR}/etc/crontab"
 
+# Checksums are committed independently of the downloaded release binaries.
+COPY --chmod=755 shared/bin/install-verified-supercronic.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/supercronic-v0.2.49.sha256 /tmp/supercronic-v0.2.49.sha256
+
 # build and install system packages, zeek, spicy and plugins
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
@@ -124,8 +128,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       xxd \
       zlib1g-dev && \
     python3 -m pip install --break-system-packages --no-cache-dir -r /usr/local/src/requirements.txt && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
+    /usr/local/bin/install-verified-supercronic.sh "$BINARCH" /tmp/supercronic-v0.2.49.sha256 /usr/local/bin/supercronic && \
+      rm -f /tmp/supercronic-v0.2.49.sha256 && \
     cd "${ZEEK_DIR}"/share/zeek/site && \
       /usr/share/nodejs/corepack/shims/npm install redis && \
     cd /tmp && \
