@@ -109,6 +109,7 @@ Although the configuration script automates many of the following configuration 
         + `KC_BOOTSTRAP_ADMIN_USERNAME` and `KC_BOOTSTRAP_ADMIN_PASSWORD` - values for bootstrapping the temporary Keycloak admin service account (see [Keycloak configuration](authsetup.md#AuthKeycloakEmbedded))
 * **`logstash.env`** - settings specific to [Logstash](https://www.elastic.co/products/logstash)
     - `LOGSTASH_OUI_LOOKUP` - if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
+    - `LOGSTASH_GEOIP_SHARED_DB` - when `true`, Logstash reads the [same MaxMind City and ASN databases](#SharedGeoIPDatabases) published by Arkime to a shared Docker volume, rather than its separately bundled GeoIP databases (default `false`). The shared files must be present before Logstash starts.
     - `LOGSTASH_REVERSE_DNS` - if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
     - `LOGSTASH_SEVERITY_SCORING` - if set to `true`, Logstash will perform [severity scoring](severity.md#Severity) when analyzing Zeek logs (default `true`)
     - `LOGSTASH_NETBOX_ENRICHMENT_DATASETS` - defines which types of logs will be [enriched](asset-interaction-analysis.md#AssetInteractionAnalysis) via NetBox: a comma-separated list which may contain `provider.dataset` pairs (e.g., `zeek.dns`), the string `default` for the [built-in list]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment/21_netbox.conf) of log types, `ics` (or `ot`) to enrich OT/ICS traffic, or `all` to enrich all logs. Values may be combined (e.g., `default,ics`).
@@ -373,3 +374,37 @@ In instances where Malcolm is deployed with the intention of running indefinitel
     - `FILESCAN_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT` - specifies a maximum fill percentage for the file system containing the `./zeek-logs/extract_files/`; in other words, if the disk is more than this percentage utilized, the prune condition triggers
     - `FILESCAN_PRUNE_INTERVAL_SECONDS` - the interval between checking the prune conditions, in seconds (default `300`)
 * [Index management policies](index-management.md) can be handled via plugins provided as part of the OpenSearch and Elasticsearch platforms, respectively. In addition to those tools, the `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` variable in **`dashboards-helper.env`** defines a maximum cumulative that OpenSearch indices are allowed to consume before the oldest indices [are deleted]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/dashboards/scripts/opensearch_index_size_prune.py), specified as either as a human-readable data size (e.g., `250G`) or as a percentage of the total disk size (e.g., `70%`): e.g., a value of `500G` means "delete the oldest OpenSearch indices if the total space consumed by Malcolm's indices exceeds five hundred gigabytes."
+
+## <a name="SharedGeoIPDatabases"></a>Using the same GeoIP databases in Arkime and Logstash
+
+By default, Arkime downloads MaxMind GeoLite2 files (when credentials or an
+alternate source are configured), while Logstash uses the databases bundled
+with its GeoIP plugin. Their sources and update times can therefore differ.
+
+For consistent lookups, Malcolm provides an optional Docker named volume,
+`geoip-shared`. Arkime publishes its downloaded `GeoLite2-City.mmdb`,
+`GeoLite2-ASN.mmdb`, and `GeoLite2-Country.mmdb` into this volume during
+its existing startup GeoIP refresh. Logstash mounts the same volume read-only.
+
+1. Configure valid `MAXMIND_GEOIP_DB_ACCOUNT_ID` and
+   `MAXMIND_GEOIP_DB_LICENSE_KEY` in `config/arkime-secret.env` (or configure
+   the supported alternate download source). Start Malcolm with Arkime enabled.
+2. Confirm `GeoLite2-City.mmdb` and `GeoLite2-ASN.mmdb` exist and are
+   nonempty in `/var/local/geoip` inside the `arkime` container, for example
+   `docker compose exec arkime ls -lh /var/local/geoip/GeoLite2-*.mmdb`.
+3. Set `LOGSTASH_GEOIP_SHARED_DB=true` in `config/logstash.env`, then
+   restart the Logstash container. It validates the two shared files **before**
+   altering its runtime GeoIP filters. An absent database fails startup with a
+   descriptive error instead of silently starting with mismatched data.
+
+This setting is **disabled by default**: deployments without GeoIP credentials
+retain Logstash's bundled databases and Arkime's existing behavior. Existing
+`database =>` options in custom Logstash filters are not overwritten.
+
+After updating Arkime's databases (using
+`docker compose exec arkime /usr/local/bin/arkime_update_geo.sh`), restart
+Logstash to reload the new GeoIP files. Arkime processes using the previous
+database versions should also be restarted when coordinated refreshes are
+required. File publication uses temporary files and atomic renames so readers
+cannot observe incomplete database copies. The shared volume contains only
+the MMDB files; the MaxMind license key remains in Arkime's environment.
