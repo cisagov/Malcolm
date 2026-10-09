@@ -92,7 +92,7 @@ local path_role_envs = {
     }},
 
     -- OpenSearch proxy: read-only search operations (reader tier)
-    { pattern = "^/mapi/opensearch/(?:[^/_][^/]*/|_all/)?(?:_search|_msearch|_count|_field_caps|_validate/query)(?:$|[?])", roles = {
+    { pattern = "^/mapi/opensearch/(?:[^/_][^/]*/|_all/)?(?:_search|_msearch|_count|_field_caps|_validate/query)$", roles = {
         "ROLE_ADMIN",
         "ROLE_DASHBOARDS_READ_ACCESS",
         "ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS",

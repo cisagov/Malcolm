@@ -222,6 +222,8 @@ reader_ok("doubled slashes, search",       "//mapi//opensearch//_search")
 admin_only("encoded scroll clear",         "/mapi/opensearch/%5fsearch/scroll/%5fall")
 admin_only("uppercase cat nodes",          "/MAPI/OPENSEARCH/_CAT/NODES")
 admin_only("dot-dot out of reader endpoint", "/mapi/opensearch/idx/_search/../_cluster/settings")
+admin_only("pct-encoded ? in search path",  "/mapi/opensearch/_search%3f/x")
+admin_only("pct-encoded ? prefix match",    "/mapi/opensearch/_search%3f_cat/nodes")
 
 print()
 print("=== neighbouring routes are unaffected ===")
