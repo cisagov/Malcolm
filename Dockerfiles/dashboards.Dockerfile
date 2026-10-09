@@ -51,6 +51,9 @@ ENV NODE_OPTIONS=$NODE_OPTIONS
 ENV OPENSEARCH_DASHBOARDS_HOME=/usr/share/opensearch-dashboards
 ENV PATH="$PATH:$OPENSEARCH_DASHBOARDS_HOME/bin"
 
+COPY --chmod=755 shared/bin/install-verified-tini.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/tini-v0.19.0.sha256 /tmp/tini-v0.19.0.sha256
+
 USER root
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
@@ -76,8 +79,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     groupadd -g $DEFAULT_GID $PGROUP && \
         adduser -u $DEFAULT_UID -g $DEFAULT_GID -d $OPENSEARCH_DASHBOARDS_HOME $PUSER && \
     usermod -a -G tty ${PUSER} && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-      chmod +x /usr/bin/tini && \
+    /usr/local/bin/install-verified-tini.sh "$BINARCH" /tmp/tini-v0.19.0.sha256 /usr/bin/tini && \
+      rm -f /tmp/tini-v0.19.0.sha256 && \
     microdnf clean all && \
     rm -rf /var/cache/dnf /var/cache/yum
 
