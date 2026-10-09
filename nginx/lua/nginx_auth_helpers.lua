@@ -91,6 +91,21 @@ local path_role_envs = {
         "ROLE_EXTRACTED_FILES"
     }},
 
+    -- OpenSearch proxy: read-only search operations (reader tier)
+    { pattern = "^/mapi/opensearch/(?:[^/_][^/]*/|_all/)?(?:_search|_msearch|_count|_field_caps|_validate/query)(?:$|[?])", roles = {
+        "ROLE_ADMIN",
+        "ROLE_DASHBOARDS_READ_ACCESS",
+        "ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS",
+        "ROLE_DASHBOARDS_READ_WRITE_ACCESS",
+        "ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+    -- OpenSearch proxy: everything else (admin only)
+    { pattern = "^/mapi/opensearch", roles = {
+        "ROLE_ADMIN"
+    }},
+
     -- Dashboards & related paths
     { pattern = "^/((mapi/)?dashboards|idark2dash)", roles = {
         "ROLE_ADMIN",
@@ -200,6 +215,7 @@ local function normalize_uri_for_rbac(raw_uri)
     return path
 end
 _M._normalize_uri_for_rbac = normalize_uri_for_rbac  -- exported for unit testing only
+_M._path_role_envs = path_role_envs  -- exported for unit testing only
 
 local role_based_access_enabled = false
 local keycloak_ssl_verify = false
