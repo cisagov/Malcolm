@@ -40,6 +40,10 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 ENV SURICATA_VERSION_PATTERN="1:8.0.*"
 
 ENV SURICATA_CONFIG_DIR=/etc/suricata
@@ -111,8 +115,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
-    curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/bin/yq && \
+    /usr/local/bin/install-verified-yq.sh /usr/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+    rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistent ${PUSER} && \
       usermod -a -G tty ${PUSER} && \

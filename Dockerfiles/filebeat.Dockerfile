@@ -82,6 +82,10 @@ ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/t
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 ENV EVTX_VERSION="0.12.3"
 ENV EVTX_URL="https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VERSION}/evtx_dump-v${EVTX_VERSION}-XXX-unknown-linux-gnu"
 
@@ -124,8 +128,8 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/local/bin/yq && \
+    /usr/local/bin/install-verified-yq.sh /usr/local/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+    rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
     curl -fsSL -o /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" && \
         chmod 755 /usr/local/bin/evtx && \
     microdnf clean all && \

@@ -61,6 +61,10 @@ ADD --chmod=644 netbox/patch/* /tmp/netbox-patches/
 ADD --chmod=644 netbox/requirements.txt /usr/local/src/
 ADD --chmod=644 netbox/config/* /tmp/netbox-config/
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
@@ -89,8 +93,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/bin/yq && \
+    /usr/local/bin/install-verified-yq.sh /usr/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+    rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
     usermod -a -G tty ${PUSER} && \
     mkdir -p "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" "${NETBOX_PRELOAD_PATH}" && \
     cp /tmp/netbox-config/* "${NETBOX_CONFIG_PATH}" && \

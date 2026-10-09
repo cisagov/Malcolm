@@ -35,6 +35,10 @@ ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/t
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+# Verify versioned yq binaries against repository-controlled hashes.
+COPY --chmod=755 shared/bin/install-verified-yq.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/yq-v4.54.1.sha256 /tmp/yq-v4.54.1.sha256
+
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ARG DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
 ENV DISABLE_INSTALL_DEMO_CONFIG=$DISABLE_INSTALL_DEMO_CONFIG
@@ -47,8 +51,8 @@ USER root
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
   yum install -y gettext openssl util-linux procps jq rsync findutils && \
     yum remove -y vim-* && \
-  curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-      chmod 755 /usr/local/bin/yq && \
+  /usr/local/bin/install-verified-yq.sh /usr/local/bin/yq "${YQ_URL}" /tmp/yq-v4.54.1.sha256 || exit 1 ; \
+  rm -f /usr/local/bin/install-verified-yq.sh /tmp/yq-v4.54.1.sha256 && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
   /usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3 && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
