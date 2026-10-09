@@ -34,8 +34,6 @@ ENV PYTHONUNBUFFERED=1
 
 ENV ARKIME_DIR="/opt/arkime"
 ENV ARKIME_VERSION="6.7.0"
-ENV ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
-ENV ARKIME_JA4_SO_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH=no
 ENV ARKIME_INET=yes
 
@@ -98,6 +96,8 @@ ENV PCAP_NODE_NAME=$PCAP_NODE_NAME
 ENV PCAP_PROCESSED_DIRECTORY=$PCAP_PROCESSED_DIRECTORY
 
 ADD --chmod=644 arkime/requirements.txt /usr/local/src/
+COPY --chmod=755 shared/bin/download-verified-arkime.sh /usr/local/bin/
+COPY --chmod=644 Dockerfiles/checksums/arkime-v6.7.0.sha256 /usr/local/share/arkime-checksums.sha256
 
 RUN export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
@@ -142,11 +142,11 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       wget \
       zlib1g && \
     cd /tmp && \
-      curl -fsSL -o ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
-      dpkg -i /tmp/arkime.deb && \
+      /usr/local/bin/download-verified-arkime.sh "$ARKIME_VERSION" "$DEBARCH" /tmp /usr/local/share/arkime-checksums.sha256 && \
+      dpkg -i "/tmp/arkime_${ARKIME_VERSION}-1.debian13_${DEBARCH}.deb" && \
       rm -f ${ARKIME_DIR}/etc/*.systemd.service && \
     mkdir -p "${ARKIME_DIR}"/plugins "${ARKIME_DIR}"/rules && \
-      curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
+      mv "/tmp/ja4plus.${DEBARCH}.so" "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
       chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
@@ -155,6 +155,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     apt-get -q -y --purge remove libtool python3-setuptools python3-wheel gcc cpp && \
       apt-get -q -y autoremove && \
       apt-get clean && \
+      rm -f /usr/local/bin/download-verified-arkime.sh /usr/local/share/arkime-checksums.sha256 && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts

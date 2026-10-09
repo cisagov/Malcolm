@@ -1,0 +1,6 @@
+# Arkime v6.7.0 release assets for Debian 13 and the matching JA4 plugin.
+# Update both architectures and verify the downloaded bytes when changing versions.
+0938199f98ed6a430b438a0524d734dd847160bc2fca8d4cfefb2db23bcf0d9e  arkime_6.7.0-1.debian13_amd64.deb
+40447c6ab40c41627b56cfefde3fcc094cca48ac1555d76cc29987e17e93496d  arkime_6.7.0-1.debian13_arm64.deb
+31c53ec1d4554e1ab07858c6861298de9b812fdfeccffe4c39af3563431378af  ja4plus.amd64.so
+717d1df952a0fd9d46015b8df55f640a975e3ac996e8aa36a4246ac131268b47  ja4plus.arm64.so
