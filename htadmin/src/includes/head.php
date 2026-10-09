@@ -29,12 +29,14 @@ error_reporting(E_ALL);
 <script src="script/jquery-1.12.0.min.js"></script>
 <script src="bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <script src="script/script.js"></script>
-<link rel="stylesheet" href="styles/style.css">    <!-- These are local (overriding) css styles. -->
+<link rel="stylesheet" href="styles/style.css">    <!-- Existing htadmin overrides -->
+<link rel="stylesheet" href="malcolm.css"> <!-- Consistent Malcolm landing-page appearance -->
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 
 <!-- viewport: To ensure proper rendering and touch zooming. See 3.3.6 bootstrap docs -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title><?php echo $ini ['app_title']; ?></title>
+<title><?php echo htmlspecialchars($ini['app_title'] ?? 'Malcolm Account Management', ENT_QUOTES, 'UTF-8'); ?></title>
 </head>
 <body>
 
