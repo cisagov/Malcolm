@@ -10,6 +10,11 @@ from scripts.installer.configs.constants.config_env_var_keys import (
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_AUTO_FREQ,
     KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+    KEY_CONFIG_ITEM_LIVE_ARKIME,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
 )
 
 
@@ -56,6 +61,41 @@ class TestEnvFileImportExisting(unittest.TestCase):
         self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_AUTO_FREQ))
         # "false" for MANAGE_PCAP_FILES translates to False boolean
         self.assertFalse(cfg.get_value(KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP))
+
+
+    def test_saved_disabled_arkime_remains_disabled_after_reload(self):
+        """Loading a full Hedgehog config must not re-enable live Arkime."""
+        from scripts.malcolm_constants import PROFILE_HEDGEHOG
+
+        previous = MalcolmConfig()
+        previous.set_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE, PROFILE_HEDGEHOG)
+        previous.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True)
+        previous.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, False)
+        previous.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, False)
+        previous.set_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP, False)
+        self.assertFalse(previous.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME))
+
+        with tempfile.TemporaryDirectory() as config_dir:
+            previous.generate_env_files(config_dir)
+            restored = MalcolmConfig()
+            restored.load_from_env_files(config_dir)
+
+        self.assertTrue(restored.get_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC))
+        self.assertFalse(restored.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME))
+        self.assertFalse(restored.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF))
+        self.assertFalse(restored.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP))
+        self.assertFalse(restored._suspend_dependency_value_updates)
+
+    def test_value_dependencies_resume_after_import(self):
+        """User-driven edits still update derived live-capture settings."""
+        cfg = MalcolmConfig()
+        with tempfile.TemporaryDirectory() as config_dir:
+            self.reference_config.generate_env_files(config_dir)
+            cfg.load_from_env_files(config_dir)
+
+        cfg.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True)
+        self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC))
+        self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF))
 
 
 if __name__ == "__main__":

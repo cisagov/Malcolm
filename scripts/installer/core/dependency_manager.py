@@ -39,6 +39,7 @@ class DependencyManager:
         self.config = malcolm_config
         self._registered_observers = []  # Track for debugging/cleanup
         self._visibility_observers: Dict[str, Callable[[Any], None]] = {}
+        self._value_observers: Dict[str, Callable[[Any], None]] = {}
 
     def register_all_dependencies(self):
         """Register all dependency rules defined in the configuration."""
@@ -163,6 +164,8 @@ class DependencyManager:
         # Create observer function
         def value_observer(_):
             """Observer function that updates item value when conditions are met."""
+            if self.config._suspend_dependency_value_updates or item_key in self.config._protected_import_keys:
+                return
             try:
                 # Check if we should only apply to unmodified items
                 if value_rule.only_if_unmodified and item.is_modified:
@@ -223,8 +226,14 @@ class DependencyManager:
             self.config.observe(value_rule.depends_on, value_observer)
             self._registered_observers.append((value_rule.depends_on, value_observer))
 
+        self._value_observers[item_key] = value_observer
         # Trigger initial evaluation
         value_observer(None)
+
+    def refresh_value_dependencies(self):
+        """Recompute unimported derived values after a configuration load."""
+        for observer in self._value_observers.values():
+            observer(None)
 
     def cleanup(self):
         """Clean up all registered observers."""
@@ -232,6 +241,7 @@ class DependencyManager:
         for dep_key, observer in self._registered_observers:
             self.config.unobserve(dep_key, observer)
         self._registered_observers.clear()
+        self._value_observers.clear()
 
     def get_dependency_info(self, item_key: str) -> Dict[str, Any]:
         """Get information about dependencies for a configuration item.
