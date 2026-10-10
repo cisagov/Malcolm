@@ -49,6 +49,14 @@ fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}") | head -n 1)"
 FULL_PWD="$($REALPATH "$(pwd)" | head -n 1)"
 
+# Commit-pinned installer scripts with independently recorded SHA-256 hashes.
+# Update each commit and hash together when intentionally upgrading.
+FLUENTBIT_INSTALL_COMMIT=a92d414c1736c766a91115059b3a39671e81b877
+FLUENTBIT_INSTALL_SHA256=ccd7b1c956253d29ba8e8cea1ef0321c2bd1abd820d0b7006cd0aa717dc134c6
+HOMEBREW_INSTALL_COMMIT=8ab1549dfa1189fd4d818a2116592d8f0ee06d8c
+HOMEBREW_INSTALL_SHA256=5f333bbe53bc490e51e7ccb1df8779b3dd6ee73a1a7379efda216edb08ccb148
+source "$SCRIPT_PATH/verified_install_source.sh"
+
 ###################################################################################
 # _GetConfirmation - get a yes/no confirmation from the user (or accept the default)
 function _GetConfirmation {
@@ -164,7 +172,7 @@ function InstallFluentBit() {
     if [[ -n "$LINUX" ]]; then
       INSTALL_CONFIRM="$(_GetConfirmation "Install fluent-bit via GitHub/fluent install script [Y/n]?" "y")"
       if [[ $INSTALL_CONFIRM =~ ^[Yy] ]]; then
-        source <(curl -fsSL https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh)
+        verified_source_installer "https://raw.githubusercontent.com/fluent/fluent-bit/$FLUENTBIT_INSTALL_COMMIT/install.sh" "$FLUENTBIT_INSTALL_SHA256"
       else
         echo "Visit https://docs.fluentbit.io/manual/installation/linux" >&2
       fi
@@ -173,7 +181,7 @@ function InstallFluentBit() {
       if ! brew info >/dev/null 2>&1; then
         INSTALL_BREW_CONFIRM="$(_GetConfirmation "Install Homebrew for macOS [y/N]?" "n")"
         if [[ $INSTALL_BREW_CONFIRM =~ ^[Yy] ]]; then
-          source <(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)
+          verified_source_installer "https://raw.githubusercontent.com/Homebrew/install/$HOMEBREW_INSTALL_COMMIT/install.sh" "$HOMEBREW_INSTALL_SHA256"
         fi
       fi
       INSTALL_CONFIRM="$(_GetConfirmation "Install fluent-bit via Homebrew [Y/n]?" "y")"
