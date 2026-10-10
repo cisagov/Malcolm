@@ -90,6 +90,7 @@ from scripts.installer.utils.exceptions import (
     FileOperationError,
 )
 from scripts.installer.core.observable import ObservableStoreMixin
+from scripts.installer.core.dependencies import DEPENDENCY_CONFIG
 from scripts.installer.core.transform_registry import apply_inbound
 
 
@@ -112,6 +113,10 @@ class MalcolmConfig(ObservableStoreMixin):
         self._observers: Dict[str, List[Callable[[Any], None]]] = {}
         self._modified_keys: List[str] = []  # list instead of a set to preserve change order for display
         self._parent_map: Dict[str, List[str]] = {}
+        # Bulk imports must not apply value dependencies after each individual
+        # item, since later import entries can otherwise undo earlier values.
+        self._suspend_dependency_value_updates = False
+        self._protected_import_keys = set()
 
         # all items default to visible unless overridden
         for item in self._items.values():
@@ -457,7 +462,20 @@ class MalcolmConfig(ObservableStoreMixin):
 
         env_values = self._collect_env_values(config_dir)
         candidates = self._build_candidates_from_env(env_values)
-        self._apply_env_candidates(candidates)
+        was_suspended = self._suspend_dependency_value_updates
+        self._suspend_dependency_value_updates = True
+        try:
+            imported_keys = self._apply_env_candidates(candidates)
+        finally:
+            self._suspend_dependency_value_updates = was_suspended
+
+        # Derive values which were not explicitly supplied. Do not overwrite
+        # authoritative imported settings while their dependencies settle.
+        self._protected_import_keys = imported_keys
+        try:
+            self._dependency_manager.refresh_value_dependencies()
+        finally:
+            self._protected_import_keys = set()
         self.config_dir_loaded = config_dir
 
     def _collect_env_values(self, config_dir: str) -> Dict[str, str]:
@@ -542,6 +560,7 @@ class MalcolmConfig(ObservableStoreMixin):
         return winner_env_key, winner_value
 
     def _apply_env_candidates(self, candidates):
+        imported_keys = set()
         for item_key, options in candidates.items():
             if not options:
                 continue
@@ -555,9 +574,18 @@ class MalcolmConfig(ObservableStoreMixin):
                 continue
             try:
                 self.apply_default(item_key, winner_value, ignore_errors=True)
+                env_var = self._env_mapper.get_env_variable(winner_env_key)
+                if env_var:
+                    value_rule = getattr(DEPENDENCY_CONFIG.get(item_key), "value", None)
+                    # Forced rules must not erase an inferred value imported
+                    # from an env variable (e.g., a NetBox URL implies remote).
+                    preserve_inferred = value_rule is not None and not value_rule.only_if_unmodified
+                    if env_var.is_authoritative_for(item_key) or preserve_inferred:
+                        imported_keys.add(item_key)
             except (ConfigItemNotFoundError, ConfigValueValidationError) as e:
                 if "unittest" not in sys.modules:
                     InstallerLogger.warning(f"Could not set config for {item_key} from env: {e}")
+        return imported_keys
 
     def load_from_orchestration_file(
         self,
