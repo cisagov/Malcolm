@@ -66,6 +66,12 @@ find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null |
   cp -f "{}"/* "$PIPELINES_DEST_DIR"/
 '
 
+# Do not bind an unauthenticated NetFlow UDP listener unless enabled.
+if [[ "${LOGSTASH_NETFLOW_LISTEN:-false}" != "true" ]]; then
+  rm -f "$PIPELINES_DIR"/input/02_netflow_input.conf
+  rm -f "$PIPELINES_DIR"/input/03_netflow_normalize.conf
+fi
+
 # dynamically generate final pipelines.yml configuration file from all of the pipeline directories
 > "$PIPELINES_CFG"
 find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
