@@ -1,0 +1,21 @@
+# Optional read-only TLS keylog mounts; use as a second Compose file.
+# Set ZEEK_TLS_KEYLOG_FILE=/run/secrets/zeek-sslkeys.txt in config/zeek.env.
+# First create zeek/tls-secrets/sslkeylog.txt with mode 0600, owned by the
+# UID used for Zeek in the container. No directory auto-creation is allowed.
+services:
+  zeek:
+    volumes:
+      - type: bind
+        source: ./zeek/tls-secrets/sslkeylog.txt
+        target: /run/secrets/zeek-sslkeys.txt
+        read_only: true
+        bind:
+          create_host_path: false
+  zeek-live:
+    volumes:
+      - type: bind
+        source: ./zeek/tls-secrets/sslkeylog.txt
+        target: /run/secrets/zeek-sslkeys.txt
+        read_only: true
+        bind:
+          create_host_path: false

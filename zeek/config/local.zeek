@@ -100,6 +100,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load protocols/ssh/interesting-hostnames
 @load protocols/ssh/software
 @load protocols/ssl/known-certs
+@load ./tls-decryption
 @load protocols/ssl/log-hostcerts-only
 @if (!disable_ssl_validate_certs)
   @load protocols/ssl/validate-certs
