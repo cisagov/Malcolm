@@ -65,6 +65,21 @@ PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture-offline"
 ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
+PCAPNG_MAGIC = bytes.fromhex("0a0d0d0a")
+
+
+def arkime_pcap_reader_option(filename, use_libpcap):
+    """Pick Arkime's pcapng-aware scheme reader for pcapng captures.
+
+    Arkime's legacy libpcap reader does not handle every pcapng file. The
+    format's section-header magic is more reliable than filename extensions
+    and avoids changing the configured reader for ordinary pcap files.
+    """
+    if use_libpcap:
+        with open(filename, "rb") as capture:
+            if capture.read(4) == PCAPNG_MAGIC:
+                return "--scheme"
+    return "--libpcap" if use_libpcap else "--scheme"
 
 SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command-1.socket"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
@@ -227,7 +242,8 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             cmd.append(nodeHost)
                         if notLocked:
                             cmd.append('--nolockpcap')
-                        cmd.append('--libpcap' if useLibPcap else '--scheme')
+                        cmd.append(arkime_pcap_reader_option(
+                            fileInfo[FILE_INFO_DICT_NAME], useLibPcap))
                         cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
                         # execute capture for pcap file

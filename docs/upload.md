@@ -13,7 +13,8 @@ Additionally, there is a writable `files` directory on an SFTP server served on 
 The types of files supported are:
 
 * PCAP files (of mime type `application/vnd.tcpdump.pcap` or `application/x-pcapng`)
-    - PCAPNG files are *partially* supported: Zeek is able to process PCAPNG files, but not all of Arkime's packet examination features work correctly
+    - PCAPNG files are *partially* supported: Zeek can process PCAPNG, and Arkime 6.7's scheme reader supports many PCAPNG captures. Malcolm automatically chooses the scheme reader for PCAPNG uploads even if the legacy libpcap reader is configured. Not every PCAPNG link type or Arkime packet examination feature is supported; in particular, 802.11 captures remain outside Arkime's supported Ethernet/IP decoding path (see [#470](https://github.com/cisagov/Malcolm/issues/470)).
+    - PCAPNG support does not guarantee that malformed files, mixed-interface captures, or non-IP packets will be decoded. If your input is not recognized, use a capture conversion tool to create a classic Ethernet/IP PCAP after verifying the link type. Retain the original capture as evidence.
 * Zeek logs (with a `.log` file extension) in archive files (`application/gzip`, `application/x-gzip`, `application/x-7z-compressed`, `application/x-bzip2`, `application/x-cpio`, `application/x-lzip`, `application/x-lzma`, `application/x-rar-compressed`, `application/x-tar`, `application/x-xz`, or `application/zip`)
     - because log fields may differ depending on Zeek's configuration, users are recommended to use [Zeek JSON format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-json-format-logs) when generating Zeek logs outside of Malcolm to later be uploaded to Malcolm for processing
     - where the Zeek logs are found in the internal directory structure in the archive file does not matter
