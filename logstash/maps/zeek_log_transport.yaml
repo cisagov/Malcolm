@@ -119,6 +119,11 @@ bacnet: udp
 bacnet_device_control: udp
 bacnet_discovery: udp
 bacnet_property: udp
+bsap_ip_header: udp
+bsap_ip_rdb: udp
+bsap_serial_header: udp
+bsap_serial_rdb: udp
+bsap_serial_rdb_ext: udp
 cip_io: udp
 profinet: udp
 profinet_dce_rpc: udp
@@ -128,11 +133,7 @@ profinet_dce_rpc: udp
 # Either transport (no way to tell from the log alone):
 #   ssl (DTLS is logged to ssl.log too), kerberos, ldap, ldap_search,
 #   cip, cip_identity, enip, dnp3, dnp3_control, dnp3_objects,
-#   omron_fins_*, roc_plus_* (sub-logs; roc_plus itself has proto)
-#
-# Not sure enough to list (check the analyzers before adding):
-#   bsap_ip_header, bsap_ip_rdb, bsap_serial_header, bsap_serial_rdb,
-#   bsap_serial_rdb_ext, ipsec
+#   omron_fins_*, roc_plus_* (sub-logs; roc_plus itself has proto), ipsec
 #
 # No meaningful port tuple, or not a single flow:
 #   ospf (IP protocol 89), files, intel, notice, signatures, software,
