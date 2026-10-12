@@ -4,6 +4,8 @@
 # runs over a single transport are listed. Logs that can be either TCP or
 # UDP are omitted on purpose (see the end of this file), since a wrong
 # transport produces a valid-looking but wrong Community ID.
+# Many parsers also set proto themselves, and that value always
+# takes precedence; entries here only apply when it's absent.
 
 # TCP ##########################################################################
 
@@ -121,9 +123,6 @@ bacnet_discovery: udp
 bacnet_property: udp
 bsap_ip_header: udp
 bsap_ip_rdb: udp
-bsap_serial_header: udp
-bsap_serial_rdb: udp
-bsap_serial_rdb_ext: udp
 cip_io: udp
 profinet: udp
 profinet_dce_rpc: udp
@@ -138,6 +137,9 @@ profinet_dce_rpc: udp
 # No meaningful port tuple, or not a single flow:
 #   ospf (IP protocol 89), files, intel, notice, signatures, software,
 #   tunnel, weird, known_*
+#
+# Serial:
+#   bsap_serial_header, bsap_serial_rdb, bsap_serial_rdb_ext
 #
 # Already have a proto column (no mapping needed):
 #   bestguess, c1222*, conn, conn_long, diagnostic analyzer, dns, ge_srtp,
