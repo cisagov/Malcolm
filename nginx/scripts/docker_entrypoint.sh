@@ -304,6 +304,17 @@ elif [[ "$NGINX_AUTH_MODE" == "no_authentication" ]] || [[ "$NGINX_AUTH_MODE" ==
 elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
   # Keycloak (remote) authentication
 
+  # warn if the remote Keycloak's TLS certificate won't be verified (this matches the
+  #   exact "true" comparison nginx_auth_helpers.lua uses for KEYCLOAK_SSL_VERIFY)
+  if [[ "${KEYCLOAK_SSL_VERIFY:-false}" != "true" ]]; then
+    echo "WARNING: NGINX_AUTH_MODE is keycloak_remote but KEYCLOAK_SSL_VERIFY is not true." >&2
+    echo "WARNING: The remote Keycloak's TLS certificate will NOT be verified, so a host able to" >&2
+    echo "WARNING: intercept traffic between Malcolm and Keycloak could impersonate it. To enable" >&2
+    echo "WARNING: verification, set KEYCLOAK_SSL_VERIFY=true in keycloak.env and, if Keycloak's" >&2
+    echo "WARNING: certificate is not issued by a publicly-trusted CA, place the issuing CA" >&2
+    echo "WARNING: certificate in Malcolm's nginx/ca-trust/ directory." >&2
+  fi
+
   # point nginx_auth_rt.conf to nginx_auth_keycloak.conf
   ln -sf "$NGINX_KEYCLOAK_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
 

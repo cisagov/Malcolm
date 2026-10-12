@@ -917,10 +917,10 @@ def main():
         if os.path.isfile(str(imported_config_file)):
             imported_config_data, imported_config_format = LoadYamlOrJson(imported_config_file)
             if isinstance(imported_config_data, dict) and ("raw" in imported_config_data):
-                if raw_envs := imported_config_data.get("raw", {}):
-                    base64_decode_files_to_dir(raw_envs, dirs.output_dir)
+                if (raw_envs := imported_config_data.get("raw", {})) and isinstance(raw_envs, dict):
+                    restored_count = base64_decode_files_to_dir(raw_envs, dirs.output_dir, "*.env")
                     InstallerLogger.info(
-                        f"Raw configuration from {imported_config_file} ({len(raw_envs)} files) restored to {dirs.output_dir}"
+                        f"Raw configuration from {imported_config_file} ({restored_count} of {len(raw_envs)} files) restored to {dirs.output_dir}"
                     )
 
         malcolm_config.generate_env_files(dirs.output_dir)

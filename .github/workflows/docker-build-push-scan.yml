@@ -97,11 +97,12 @@ jobs:
             MALCOLM_VERSION=${{ steps.extract_malcolm_version.outputs.mversion }}
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
+            ${{ inputs.extra_build_args || '' }}
+          secrets: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
             ${{ secrets.maxmind_account_id && format('MAXMIND_GEOIP_DB_ACCOUNT_ID={0}', secrets.maxmind_account_id) || '' }}
             ${{ secrets.maxmind_license_key && format('MAXMIND_GEOIP_DB_LICENSE_KEY={0}', secrets.maxmind_license_key) || '' }}
             ${{ secrets.maxmind_alternate_url && format('MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL={0}', secrets.maxmind_alternate_url) || '' }}
-            ${{ inputs.extra_build_args || '' }}
           push: true
           provenance: false
           platforms: ${{ matrix.platform }}

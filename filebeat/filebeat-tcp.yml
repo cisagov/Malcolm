@@ -20,6 +20,7 @@ filebeat.inputs:
   ssl.key: "/certs/client.key"
   ssl.supported_protocols: "TLSv1.2"
   ssl.verification_mode: "none"
+  ssl.client_authentication: "required"
 
 #================================ Processors ===================================
 processors:

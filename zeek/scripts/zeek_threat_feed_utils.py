@@ -6,7 +6,8 @@
 # - BSD 3-Clause license: https://github.com/tenzir/threatbus/blob/master/COPYING
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
-from antlr4 import ParseTreeListener
+from antlr4 import ParseTreeListener, ParserRuleContext
+from antlr4.tree.Tree import TerminalNode
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from collections.abc import Iterable
@@ -32,10 +33,11 @@ from taxii2client.common import _HTTPConnection as TaxiiHTTPConn
 from threading import Lock
 from time import sleep
 from types import GeneratorType, FunctionType, LambdaType
-from typing import Tuple, Union, Iterator
+from typing import Iterator, NamedTuple, Tuple, Union
 from urllib.parse import urljoin, urlparse
 from logging import DEBUG as LOGGING_DEBUG
 import copy
+import ipaddress
 import json
 import mandiant_threatintel
 import vt
@@ -45,7 +47,7 @@ import requests
 import sys
 import urllib3
 
-from malcolm_utils import base64_decode_if_prefixed, get_iterable, LoadStrIfJson, LoadFileIfJson, isprivateip
+from malcolm_utils import base64_decode_if_prefixed, get_iterable, LoadStrIfJson, LoadFileIfJson, isprivateip, str2bool
 
 # keys for dict returned by map_*_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
@@ -93,6 +95,7 @@ MANDIANT_INCLUDE_REPORTS_DEFAULT = False
 MANDIANT_INCLUDE_THREAT_RATING_DEFAULT = False
 MANDIANT_INCLUDE_MISP_DEFAULT = True
 MANDIANT_INCLUDE_CATEGORY_DEFAULT = True
+MISP_REQUIRE_TO_IDS_DEFAULT = True
 
 # See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -118,6 +121,10 @@ STIX_ZEEK_INTEL_TYPE_MAP = {
     "user:user_id": "USER_NAME",
     "user:account_login": "USER_NAME",
     "x509-certificate:hashes.'SHA-1'": "CERT_HASH",  # Zeek only supports SHA-1
+    # network-traffic endpoints (e.g., MISP's STIX export of ip-src/ip-dst); Zeek ADDR intel
+    # matches either side of a connection, so direction is not preserved
+    "network-traffic:src_ref.value": "ADDR",
+    "network-traffic:dst_ref.value": "ADDR",
 }
 
 # See the documentation for the Zeek INTEL framework [1] and MISP attribute types [2]
@@ -148,6 +155,14 @@ MISP_ZEEK_INTEL_TYPE_MAP = {
     "url": "URL",
     "x509-fingerprint-sha1": "CERT_HASH",
 }
+
+# Zeek intel types whose value identifies the thing it describes. When one of these sits
+# alongside other properties of the same thing (a STIX AND clause within one observation,
+# a MISP filename|hash attribute, the attributes of one MISP object), a match on the hash
+# means we've found that file, certificate, or key, and the other properties (file name,
+# size, etc.) describe it rather than narrow it. Emitting those other properties as their
+# own intel items would match far more than the source intended, so they're dropped.
+ZEEK_INTEL_IDENTIFYING_TYPES = frozenset(("FILE_HASH", "CERT_HASH", "PUBKEY_HASH"))
 
 # See the documentation for the Zeek INTEL framework [1] and Mandiant threat intel API [2]
 # [1] https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -456,109 +471,320 @@ def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[STIX_
         return None
 
 
-class _STIXConjunctionListener(ParseTreeListener):
-    """Detect Boolean conjunctions without matching text inside string literals."""
+def _normalize_stix_object_path(object_path: str) -> str:
+    """
+    Normalize a STIX-2 object path for lookups by removing the optional quoting
+    around path components, so file:hashes.'SHA-256' and file:hashes.SHA-256
+    (and file:hashes.MD5 and file:hashes.'MD5') resolve to the same key.
+    """
+    return object_path.replace("'", "")
+
+
+_STIX_ZEEK_INTEL_TYPE_MAP_NORMALIZED = {_normalize_stix_object_path(k): v for k, v in STIX_ZEEK_INTEL_TYPE_MAP.items()}
+
+# Upper bound on clauses produced when normalizing a pattern into disjunctive normal form.
+# AND-ing several OR groups multiplies clause counts, so cap it rather than let a
+# pathological pattern eat memory.
+STIX_DNF_MAX_CLAUSES = 256
+
+STIX_REDUCED_PATTERN_NOTE = 'Reduced from compound STIX pattern'
+MISP_REDUCED_COMPOSITE_NOTE = 'Reduced from MISP'
+MISP_REDUCED_OBJECT_NOTE = 'Reduced from MISP object'
+
+
+class _STIXDNFTooLarge(Exception):
+    pass
+
+
+class _STIXAtom(NamedTuple):
+    # one property test from a pattern: object path (normalized), its value
+    # (None if Zeek can't represent the test as a point match), and why not
+    path: str
+    value: Union[str, None]
+    reason: Union[str, None] = None
+
+
+class StixPointIoc(NamedTuple):
+    object_path: str
+    value: str
+    reduced: bool  # True when other conjuncts in its clause were dropped
+
+
+class _STIXParseTreeCapture(ParseTreeListener):
+    """Grab the root of a stix2patterns parse tree through its public walk() method."""
 
     def __init__(self):
-        self.has_conjunction = False
+        self.root = None
 
-    def visitTerminal(self, node):
-        if node.getText() == 'AND':
-            self.has_conjunction = True
+    def enterEveryRule(self, ctx):
+        if self.root is None:
+            self.root = ctx
 
 
-def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -> bool:
+def _stix_ctx_name(ctx) -> str:
+    return type(ctx).__name__
+
+
+def _stix_rule_children(ctx) -> list:
+    return [c for c in (ctx.getChildren() or []) if isinstance(c, ParserRuleContext)]
+
+
+def _stix_terminal_texts(ctx) -> list:
+    return [c.getText() for c in (ctx.getChildren() or []) if isinstance(c, TerminalNode)]
+
+
+def _stix_unquote_literal(text: str) -> Union[str, None]:
+    # STIX string literals are single-quoted, with \' and \\ as the only escapes
+    if len(text) >= 2 and text.startswith("'") and text.endswith("'"):
+        return re.sub(r"\\(['\\])", r"\1", text[1:-1])
+    # binary, hex, and timestamp literals (b'..', h'..', t'..') never name a point value Zeek can match
+    if len(text) >= 3 and text[0] in 'bht' and text[1] == "'" and text.endswith("'"):
+        return None
+    # numbers and booleans
+    return text
+
+
+def _stix_object_path_of(ctx) -> str:
+    for child in _stix_rule_children(ctx):
+        if _stix_ctx_name(child) == 'ObjectPathContext':
+            return _normalize_stix_object_path(child.getText())
+    return '?'
+
+
+def _stix_dnf_or(left: list, right: list) -> list:
+    if len(left) + len(right) > STIX_DNF_MAX_CLAUSES:
+        raise _STIXDNFTooLarge()
+    return left + right
+
+
+def _stix_dnf_and(left: list, right: list) -> list:
+    if len(left) * len(right) > STIX_DNF_MAX_CLAUSES:
+        raise _STIXDNFTooLarge()
+    return [lc + rc for lc in left for rc in right]
+
+
+def _stix_comparison_dnf(ctx) -> list:
     """
-    Check whether a STIX-2 pattern contains only positive point equalities,
-    optionally joined by OR. Conjunctions and non-equality comparisons cannot
-    be represented by independent Zeek intelligence entries. For example,
-    "[file:hashes.'SHA-1' = '080989879772b0da6a78be8d38dba1f50279fd22' OR file:hashes.MD5 = 'a04aae944126fc3256cf4cf6de4646fb]"
+    Normalize the comparison expression inside one observation's brackets into
+    disjunctive normal form: a list of clauses (OR'ed), each a list of _STIXAtom (AND'ed).
+    STIX only allows NOT directly on a property test, so no negation pushing is needed.
+    Rule names are the same in the 2.0 and 2.1 grammars, so this works on either tree.
+    """
+    name = _stix_ctx_name(ctx)
+    kids = _stix_rule_children(ctx)
+    terms = _stix_terminal_texts(ctx)
+
+    if name in ('ComparisonExpressionContext', 'ComparisonExpressionAndContext'):
+        if len(kids) == 1:
+            return _stix_comparison_dnf(kids[0])
+        elif len(kids) == 2 and 'OR' in terms:
+            return _stix_dnf_or(_stix_comparison_dnf(kids[0]), _stix_comparison_dnf(kids[1]))
+        elif len(kids) == 2 and 'AND' in terms:
+            return _stix_dnf_and(_stix_comparison_dnf(kids[0]), _stix_comparison_dnf(kids[1]))
+
+    elif name == 'PropTestParenContext' and len(kids) == 1:
+        return _stix_comparison_dnf(kids[0])
+
+    elif name == 'PropTestEqualContext':
+        path = _stix_object_path_of(ctx)
+        if ('NOT' in terms) or ('!=' in terms):
+            return [[_STIXAtom(path, None, 'negated equality')]]
+        literal = next((c for c in kids if _stix_ctx_name(c) != 'ObjectPathContext'), None)
+        value = _stix_unquote_literal(literal.getText()) if literal is not None else None
+        return [[_STIXAtom(path, value, None if value is not None else 'non-string literal')]]
+
+    elif name == 'PropTestSetContext':
+        # IN ('a', 'b') is an OR of equalities
+        path = _stix_object_path_of(ctx)
+        if 'NOT' in terms:
+            return [[_STIXAtom(path, None, 'negated set membership')]]
+        set_literal = next((c for c in kids if _stix_ctx_name(c) == 'SetLiteralContext'), None)
+        values = [_stix_unquote_literal(c.getText()) for c in _stix_rule_children(set_literal)] if set_literal else []
+        if len(values) > STIX_DNF_MAX_CLAUSES:
+            raise _STIXDNFTooLarge()
+        return [[_STIXAtom(path, v, None if v is not None else 'non-string literal')] for v in values] or [
+            [_STIXAtom(path, None, 'empty set')]
+        ]
+
+    elif name.startswith('PropTest'):
+        # ordering (<, >=, ...), LIKE, MATCHES, ISSUBSET, ISSUPERSET, EXISTS
+        return [[_STIXAtom(_stix_object_path_of(ctx), None, name[len('PropTest') : -len('Context')] or name)]]
+
+    return [[_STIXAtom('?', None, f'unexpected parse node {name}')]]
+
+
+def _stix_observation_dnf(ctx) -> list:
+    """
+    Normalize the observation level of a pattern. OR between observations is safe to split.
+    AND between observations, FOLLOWEDBY, and qualifiers (WITHIN, REPEATS, START/STOP)
+    relate separate objects or time windows, which independent Zeek intel items can't
+    express, so those become a single unrepresentable clause.
+    """
+    name = _stix_ctx_name(ctx)
+    kids = _stix_rule_children(ctx)
+    terms = _stix_terminal_texts(ctx)
+
+    if name == 'PatternContext' and kids:
+        return _stix_observation_dnf(kids[0])
+
+    elif name in ('ObservationExpressionsContext', 'ObservationExpressionOrContext', 'ObservationExpressionAndContext'):
+        if len(kids) == 1:
+            return _stix_observation_dnf(kids[0])
+        elif len(kids) == 2 and 'OR' in terms:
+            return _stix_dnf_or(_stix_observation_dnf(kids[0]), _stix_observation_dnf(kids[1]))
+        elif len(kids) == 2 and 'AND' in terms:
+            return [[_STIXAtom('?', None, 'AND between observations')]]
+        elif len(kids) == 2 and 'FOLLOWEDBY' in terms:
+            return [[_STIXAtom('?', None, 'FOLLOWEDBY')]]
+
+    elif name == 'ObservationExpressionSimpleContext' and len(kids) == 1:
+        return _stix_comparison_dnf(kids[0])
+
+    elif name == 'ObservationExpressionCompoundContext' and len(kids) == 1:
+        return _stix_observation_dnf(kids[0])
+
+    elif name.startswith('ObservationExpression'):
+        return [[_STIXAtom('?', None, 'observation qualifier')]]
+
+    return [[_STIXAtom('?', None, f'unexpected parse node {name}')]]
+
+
+_STIX_ADDRESS_TYPES = {'ipv4-addr': 4, 'ipv6-addr': 6}
+
+
+def _stix_drop_ref_type_atoms(atoms: list) -> Tuple[list, Union[str, None]]:
+    """
+    Drop "<object>:<x>_ref.type = 'ipv4-addr'" (or 'ipv6-addr') conjuncts that sit alongside a
+    "<object>:<x>_ref.value = ..." conjunct on the same reference. The type test only says what
+    kind of object the reference points to, which the value already implies, so it doesn't narrow
+    the match. If the type disagrees with the value (an IPv6 value declared as ipv4-addr), nothing
+    could ever match it, so the clause is dropped.
+    """
+    values = {a.path[: -len('.value')]: a.value for a in atoms if a.path.endswith('_ref.value') and a.value}
+    kept = []
+    for atom in atoms:
+        ref = atom.path[: -len('.type')] if atom.path.endswith('_ref.type') else None
+        if (ref is not None) and (ref in values) and (atom.value in _STIX_ADDRESS_TYPES):
+            try:
+                version = ipaddress.ip_network(values[ref], strict=False).version
+            except ValueError:
+                return [], f'{ref}.value is not an IP address'
+            if version != _STIX_ADDRESS_TYPES[atom.value]:
+                return [], f'{ref}.type does not match its value'
+            continue
+        kept.append(atom)
+    return kept, None
+
+
+def _stix_reduce_clause(clause: list) -> Tuple[list, Union[str, None]]:
+    """
+    Turn one AND clause into the point IoCs Zeek can match independently.
+    Returns (iocs, None) on success or ([], reason) when the clause has to be dropped.
+    """
+    atoms, reason = _stix_drop_ref_type_atoms(list(dict.fromkeys(clause)))  # dedupe, keep order
+    if reason:
+        return [], reason
+
+    if len(atoms) == 1:
+        atom = atoms[0]
+        if atom.value is None:
+            return [], (f'{atom.reason} on {atom.path}' if atom.path != '?' else atom.reason)
+        return [StixPointIoc(atom.path, atom.value, False)], None
+
+    identifying = [
+        a
+        for a in atoms
+        if a.value is not None
+        and _STIX_ZEEK_INTEL_TYPE_MAP_NORMALIZED.get(a.path) in ZEEK_INTEL_IDENTIFYING_TYPES
+    ]
+    if identifying:
+        object_types = {a.path.split(':', 1)[0] for a in atoms}
+        if len(object_types) == 1:
+            reduced = len(identifying) < len(atoms)
+            return [StixPointIoc(a.path, a.value, reduced) for a in identifying], None
+        return [], 'AND across object types'
+
+    return [], 'AND without an identifying hash'
+
+
+def stix_pattern_point_iocs(
+    indicator_type: type, pattern_str: str, logger=None
+) -> Union[Tuple[Tuple[StixPointIoc], Tuple[str]], None]:
+    """
+    Convert a STIX-2 pattern into the point IoCs Zeek can match independently.
+
+    The pattern is normalized to an OR of AND clauses. Every clause becomes Zeek intel
+    items on its own, since the Zeek intel file is itself an OR of point equalities:
+      - a clause with a single positive equality (or IN member) emits that value
+      - an AND clause on one object that includes a file or certificate hash emits the
+        hash(es) and drops the other conjuncts (these are flagged as reduced)
+      - any other clause is dropped, which loses that branch of the OR without ever
+        matching traffic the pattern wouldn't match
     @param indicator_type the type of the indicator object
-    @param pattern_str The STIX-2 pattern string to inspect
-    @return True (the pattern is a point-IoC) or False (the pattern is NOT a point-IoC)
+    @param pattern_str the STIX-2 pattern string
+    @return (point IoCs, reasons for dropped clauses), or None if the pattern can't be parsed
     """
     try:
-        if pattern := stix_pattern_from_str(indicator_type, pattern_str):
-            # InspectionListener https://github.com/oasis-open/cti-pattern-validator/blob/e926d0a14adf88de08acb908a51db1f453c13647/stix2patterns/v21/inspector.py#L5
-            # E.g.,   pattern = "[domain-name:value = 'evil.com']"
-            # =>           il = pattern_data(comparisons={'domain-name': [(['value'], '=', "'evil.com'")]}, observation_ops=set(), qualifiers=set())
-            # =>  cybox_types = ['domain-name']
-            il = pattern.inspect()
-            cybox_types = list(il.comparisons.keys())
-            conjunctions = _STIXConjunctionListener()
-            pattern.walk(conjunctions)
+        if not (pattern := stix_pattern_from_str(indicator_type, pattern_str)):
+            return None
+        capture = _STIXParseTreeCapture()
+        pattern.walk(capture)
+        if capture.root is None:
+            return None
+        clauses = _stix_observation_dnf(capture.root)
 
-            return (
-                len(il.observation_ops) == 0  # no observation operators
-                and len(il.qualifiers) == 0  # no qualifiers
-                and len(il.comparisons) == 1  # only one observable type (comparison) is in use
-                and len(cybox_types) == 1  # must be point-indicator (one field only)
-                and all(y == 3 for y in [len(x) for x in il.comparisons[cybox_types[0]]])  # ('value', '=', 'evil.com')
-                and not conjunctions.has_conjunction
-                and all(x[1] in ("=", "==") for x in il.comparisons[cybox_types[0]])  # positive equalities only
-            )
-
-        else:
-            return False
+    except _STIXDNFTooLarge:
+        return (), (f'more than {STIX_DNF_MAX_CLAUSES} clauses after normalization',)
 
     except Exception as e:
         if logger is not None:
             logger.warning(f'Parsing "{pattern_str}": {e}')
-        return False
+        return None
+
+    iocs = {}
+    dropped = []
+    for clause in clauses:
+        clause_iocs, reason = _stix_reduce_clause(clause)
+        if reason:
+            dropped.append(reason)
+        for ioc in clause_iocs:
+            key = (ioc.object_path, ioc.value)
+            # the same value can come out of several clauses; it's only reduced if every occurrence was
+            iocs[key] = ioc if (key not in iocs) else iocs[key]._replace(reduced=iocs[key].reduced and ioc.reduced)
+
+    return tuple(iocs.values()), tuple(dropped)
+
+
+def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -> bool:
+    """
+    Check whether a STIX-2 pattern converts to Zeek point IoCs without losing anything:
+    every clause emits, and no conjuncts were dropped by hash reduction. For example,
+    "[file:hashes.'SHA-1' = '080989879772b0da6a78be8d38dba1f50279fd22' OR file:hashes.MD5 = 'a04aae944126fc3256cf4cf6de4646fb']"
+    @param indicator_type the type of the indicator object
+    @param pattern_str The STIX-2 pattern string to inspect
+    @return True if the pattern is exactly representable as point IoCs
+    """
+    if result := stix_pattern_point_iocs(indicator_type, pattern_str, logger):
+        iocs, dropped = result
+        return bool(iocs) and not dropped and not any(ioc.reduced for ioc in iocs)
+    return False
 
 
 def split_stix_object_path_and_value(
     indicator_type: type, pattern_str: str, logger=None
 ) -> Union[Tuple[Tuple[str, str]], None]:
     """
-    Splits a STIX-2 pattern from a point IoC into the object_path and the
-    ioc_value of that pattern (e.g., [domain-name:value = 'evil.com'] is split
-    to `domain-name:value` and `evil.com`. Returns None if the pattern is not
-    a point-ioc pattern.
+    Splits a STIX-2 pattern into the (object_path, ioc_value) pairs Zeek can match
+    (e.g., [domain-name:value = 'evil.com'] is split to `domain-name:value` and `evil.com`).
+    Object paths are normalized (component quoting removed). Returns None if nothing in
+    the pattern can be represented. See stix_pattern_point_iocs for the conversion rules.
     @param indicator_type the type of the indicator object
     @param pattern_str the STIX-2 pattern to split
-    @return the object_path and ioc_value of the pattern or None
+    @return the object_path and ioc_value pairs, or None
     """
-    if is_stix_point_equality_ioc(indicator_type, pattern_str, logger) and (
-        pattern := stix_pattern_from_str(indicator_type, pattern_str)
-    ):
-        il = pattern.inspect()
-        results = []
-
-        # some of these checks are redundant (there is only one key, len(element) == 3, etc.) in is_stix_point_equality_ioc
-        for comparison in list(il.comparisons.keys()):
-            for element in il.comparisons[comparison]:
-                if isinstance(element, Iterable) and (len(element) == 3) and (element[1] in ('=', '==')):
-                    # construct object path name, e.g.:
-                    #     file:hashes.'SHA-1'
-                    #     software:name
-                    if isinstance(element[0], Iterable):
-                        object_path = ':'.join(
-                            (
-                                comparison.strip(),
-                                '.'.join(
-                                    [element[0][0].strip()] + ["'" + item.strip() + "'" for item in element[0][1:]]
-                                ),
-                            )
-                        )
-                    else:
-                        object_path = ':'.join((comparison.strip(), element[0].strip()))
-
-                    # strip quotes from IoC value
-                    if element[2].startswith("'") and element[2].endswith("'"):
-                        ioc_value = element[2].strip("'")
-                    elif element[2].startswith('"') and element[2].endswith('"'):
-                        ioc_value = element[2].strip('"')
-                    else:
-                        ioc_value = element[2]
-
-                    results.append((object_path, ioc_value))
-
-        return results
-
-    else:
-        # invalid pattern
-        return None
+    if (result := stix_pattern_point_iocs(indicator_type, pattern_str, logger)) and result[0]:
+        return tuple((ioc.object_path, ioc.value) for ioc in result[0])
+    return None
 
 
 def map_stix_indicator_to_zeek(
@@ -577,20 +803,28 @@ def map_stix_indicator_to_zeek(
             logger.warning(f"Discarding message, expected STIX-2 Indicator: {indicator}")
         return None
 
-    if not is_stix_point_equality_ioc(type(indicator), indicator.pattern, logger):
+    if not (converted := stix_pattern_point_iocs(type(indicator), indicator.pattern, logger)):
+        # parse failure, already logged
+        return None
+    point_iocs, dropped = converted
+    if not point_iocs:
         if logger is not None:
             logger.warning(
-                f"Zeek only supports point-IoCs. Cannot map compound pattern to a Zeek Intel item: {indicator.pattern}"
+                f"Zeek only supports point-IoCs. Cannot map {indicator.id} to a Zeek Intel item ({'; '.join(dropped)}): {indicator.pattern}"
             )
         return None
+    if dropped and (logger is not None):
+        logger.debug(
+            f"Dropped {len(dropped)} clause(s) of {indicator.id} that Zeek can't match ({'; '.join(dropped)}): {indicator.pattern}"
+        )
 
     if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(indicator)
 
     results = []
-    for object_path, ioc_value in split_stix_object_path_and_value(type(indicator), indicator.pattern, logger):
+    for object_path, ioc_value, reduced in point_iocs:
         # get matching Zeek intel type
-        if not (zeek_type := STIX_ZEEK_INTEL_TYPE_MAP.get(object_path)):
+        if not (zeek_type := _STIX_ZEEK_INTEL_TYPE_MAP_NORMALIZED.get(object_path)):
             if logger is not None:
                 logger.warning(f"No matching Zeek type found for STIX-2 indicator type '{object_path}'")
             continue
@@ -619,10 +853,12 @@ def map_stix_indicator_to_zeek(
         )
         zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
-        if ('name' in indicator) or ('description' in indicator):
-            zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
-                [x for x in [indicator.get('name'), indicator.get('description')] if x is not None]
-            )
+        descParts = [x for x in [indicator.get('name'), indicator.get('description')] if x]
+        if reduced:
+            # let an analyst looking at a hit find the original, stricter pattern
+            descParts.append(f"{STIX_REDUCED_PATTERN_NOTE} ({indicator.id})")
+        if descParts:
+            zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(descParts)
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             # some of these are from CFM, what the heck...
             # if 'description' in indicator:
@@ -643,27 +879,89 @@ def map_stix_indicator_to_zeek(
     return results
 
 
+def _misp_type_is_identifying(attribute_type) -> bool:
+    zeek_types = MISP_ZEEK_INTEL_TYPE_MAP.get(attribute_type)
+    if isinstance(zeek_types, list):
+        return any(t in ZEEK_INTEL_IDENTIFYING_TYPES for t in zeek_types)
+    return zeek_types in ZEEK_INTEL_IDENTIFYING_TYPES
+
+
+def _misp_is_for_detection(attribute) -> bool:
+    # an attribute with no to_ids flag at all is treated as meant for detection
+    return bool(getattr(attribute, 'to_ids', True))
+
+
+def misp_event_attributes_with_notes(
+    attr: MISPAttribute,
+    event: MISPEvent,
+    require_to_ids: bool = False,
+) -> Iterator[Tuple[MISPAttribute, Union[str, None]]]:
+    """
+    Yield (attribute, reduction note) pairs from:
+      1. a single attr,
+      2. event.attributes,
+      3. attributes from event.objects
+
+    With require_to_ids, attributes whose to_ids flag is false are skipped. MISP authors use
+    that flag to mark values that are context rather than something to alert on (a payload
+    host's reassignable IP, a generic file name like update.exe, a URL path with no host).
+
+    The attributes of one MISP object describe one thing. If an object carries an
+    identifying hash (see ZEEK_INTEL_IDENTIFYING_TYPES), only its identifying attributes
+    are yielded, each with a note saying the object was reduced; its file names, etc.
+    are left out so they don't become intel items that match on their own. The to_ids
+    filter runs first, so a hash marked as context doesn't suppress the object's other
+    attributes.
+
+    Yields in priority order: attr → event.attributes → object attributes.
+    """
+
+    def wanted(a):
+        return (not require_to_ids) or _misp_is_for_detection(a)
+
+    if attr and wanted(attr):
+        yield attr, None
+
+    if event:
+        if event.attributes:
+            for attribute in event.attributes:
+                if wanted(attribute):
+                    yield attribute, None
+
+        for obj in event.objects:
+            # partition in one pass by type; MISP attributes are Mappings, so `in` on a list of them
+            # would compare by value, serializing both sides through to_dict() on every check
+            identifying, dropped = [], False
+            for a in obj.attributes:
+                if getattr(a, 'deleted', False) or not wanted(a):
+                    continue
+                if _misp_type_is_identifying(a.type):
+                    identifying.append(a)
+                elif a.type in MISP_ZEEK_INTEL_TYPE_MAP:
+                    dropped = True
+            if identifying:
+                note = (
+                    f"{MISP_REDUCED_OBJECT_NOTE} {getattr(obj, 'name', 'object')} ({getattr(obj, 'uuid', '?')})"
+                    if dropped
+                    else None
+                )
+                for attribute in identifying:
+                    yield attribute, note
+            else:
+                for attribute in obj.attributes:
+                    if wanted(attribute):
+                        yield attribute, None
+
+
 def all_misp_event_attributes(
     attr: MISPAttribute,
     event: MISPEvent,
 ) -> Iterator[MISPAttribute]:
     """
-    Yield attributes from:
-      1. a single attr,
-      2. event.attributes,
-      3. all attributes from event.objects
-
-    Yields in priority order: attr → event.attributes → object attributes.
+    Yield the attributes from misp_event_attributes_with_notes without the notes.
     """
-    if attr:
-        yield attr
-
-    if event:
-        if event.attributes:
-            yield from event.attributes
-
-        for obj in event.objects:
-            yield from obj.attributes
+    for attribute, _ in misp_event_attributes_with_notes(attr, event):
+        yield attribute
 
 
 def map_misp_attribute_to_zeek(
@@ -673,12 +971,14 @@ def map_misp_attribute_to_zeek(
     description: Union[str, None] = None,
     tags: Union[Tuple[str], None] = None,
     confidence: Union[float, None] = None,
+    note: Union[str, None] = None,
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
     """
     Maps a MISP attribute to Zeek intel items
     @see https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
     @param attribute The MISPAttribute to convert
+    @param note extra text appended to the description (e.g., that the attribute's object was reduced)
     @return a list containing the Zeek intel dict(s) from the MISPAttribute object
     """
     if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
@@ -692,12 +992,26 @@ def map_misp_attribute_to_zeek(
             logger.warning(f"No matching Zeek type found for MISP attribute type '{attribute.type}'")
         return None
 
+    descParts = [x for x in [description, note] if x]
+
     # some MISP indicators are actually two values together (e.g., filename|sha256)
-    valTypePairs = (
-        list(zip(zeek_types, attribute.value.split('|')))
-        if isinstance(zeek_types, list)
-        else [(zeek_types, attribute.value)]
-    )
+    if isinstance(zeek_types, list):
+        # split from the right, since a file name can contain '|' and a hash can't
+        valTypePairs = list(zip(zeek_types, attribute.value.rsplit('|', len(zeek_types) - 1)))
+        if any(t in ZEEK_INTEL_IDENTIFYING_TYPES for t, _ in valTypePairs):
+            # keep the hash; the other parts describe the file and would match on their own,
+            # so carry them in the description instead
+            labels = attribute.type.split('|')
+            context = [
+                f"{label}: {value}"
+                for label, (t, value) in zip(labels, valTypePairs)
+                if t not in ZEEK_INTEL_IDENTIFYING_TYPES
+            ]
+            valTypePairs = [(t, value) for t, value in valTypePairs if t in ZEEK_INTEL_IDENTIFYING_TYPES]
+            descParts.append(f"{MISP_REDUCED_COMPOSITE_NOTE} {attribute.type} ({', '.join(context)})")
+    else:
+        valTypePairs = [(zeek_types, attribute.value)]
+    combinedDescription = '. '.join(descParts) if descParts else None
 
     # process type/value pairs
     for zeek_type, attribute_value in valTypePairs:
@@ -720,8 +1034,8 @@ def map_misp_attribute_to_zeek(
 
         if source is not None and len(source) > 0:
             zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
-        if description is not None:
-            zeekItem[ZEEK_INTEL_META_DESC] = description
+        if combinedDescription is not None:
+            zeekItem[ZEEK_INTEL_META_DESC] = combinedDescription
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
         if url is not None:
             zeekItem[ZEEK_INTEL_META_URL] = url
@@ -754,11 +1068,21 @@ class FeedParserZeekPrinter(object):
     outFile = None
     since = None
 
-    def __init__(self, extended: bool, notice: bool, cif: bool, since=None, file=None, logger=None):
+    def __init__(
+        self,
+        extended: bool,
+        notice: bool,
+        cif: bool,
+        since=None,
+        file=None,
+        logger=None,
+        misp_require_to_ids: bool = MISP_REQUIRE_TO_IDS_DEFAULT,
+    ):
         self.lock = Lock()
         self.logger = logger
         self.outFile = file
         self.since = since
+        self.mispRequireToIds = misp_require_to_ids
         self.fields = [
             ZEEK_INTEL_INDICATOR,
             ZEEK_INTEL_INDICATOR_TYPE,
@@ -861,22 +1185,46 @@ class FeedParserZeekPrinter(object):
     ):
         result = False
         try:
-            # parse the STIX and process all "Indicator" objects
-            for obj in STIXParse(toParse, allow_custom=True, version=version).objects:
-                if type(obj).__name__ == "Indicator":
-                    if not result:
-                        result = True
-                    # map indicator object to Zeek value(s)
-                    if ((self.since is None) or (obj.created >= self.since) or (obj.modified >= self.since)) and (
-                        vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger)
-                    ):
-                        for val in vals:
-                            self.PrintHeader()
-                            with self.lock:
-                                # print the intelligence item fields according to the columns in 'fields'
-                                print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+            if isinstance(toParse, (str, bytes)):
+                toParse = json.loads(toParse)
 
-        except STIXError as ve:
+            # Gather the raw objects. A bundle (from a file or a TAXII 2.0 server) has "type": "bundle";
+            # a TAXII 2.1 envelope ({"more": ..., "objects": [...]}) has no "type" at all, and an empty
+            # one is what a 2.1 server sends when nothing matched.
+            if isinstance(toParse, dict) and toParse.get('type') in ('bundle', None):
+                objects = toParse.get('objects') or []
+                # STIX 2.0 puts spec_version on the bundle rather than on each object
+                version = version or toParse.get('spec_version')
+            elif isinstance(toParse, dict):
+                objects = [toParse]
+            else:
+                objects = []
+
+            # Parse the indicators one at a time. Validating the whole bundle at once means one malformed
+            # object anywhere (a report with a bad object_refs, say) throws away every indicator with it.
+            for raw in objects:
+                if not (isinstance(raw, dict) and raw.get('type') == 'indicator'):
+                    continue
+                try:
+                    obj = STIXParse(raw, allow_custom=True, version=version)
+                except Exception as e:
+                    if self.logger is not None:
+                        self.logger.warning(f"{type(e).__name__} for {raw.get('id', 'indicator')}: {e}")
+                    continue
+
+                if not result:
+                    result = True
+                # map indicator object to Zeek value(s)
+                if ((self.since is None) or (obj.created >= self.since) or (obj.modified >= self.since)) and (
+                    vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger)
+                ):
+                    for val in vals:
+                        self.PrintHeader()
+                        with self.lock:
+                            # print the intelligence item fields according to the columns in 'fields'
+                            print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+
+        except (STIXError, ValueError) as ve:
             if self.logger is not None:
                 self.logger.warning(f"{type(ve).__name__}: {ve}")
         return result
@@ -886,6 +1234,7 @@ class FeedParserZeekPrinter(object):
         toParse,
         source: Union[Tuple[str], None] = None,
         url: Union[str, None] = None,
+        require_to_ids: Union[bool, None] = None,
     ):
         result = False
         if isinstance(toParse, dict):
@@ -944,7 +1293,8 @@ class FeedParserZeekPrinter(object):
                                 certainty = None
 
                     # loop through and process the attribute(s)
-                    for attribute in all_misp_event_attributes(attr, event):
+                    requireToIds = self.mispRequireToIds if require_to_ids is None else require_to_ids
+                    for attribute, note in misp_event_attributes_with_notes(attr, event, require_to_ids=requireToIds):
                         # map attribute to Zeek value(s)
                         if (
                             ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
@@ -961,6 +1311,7 @@ class FeedParserZeekPrinter(object):
                                     description=f"{description}{'. '+attribute.comment if (hasattr(attribute, 'comment') and attribute.comment) else ''}",
                                     tags=tags,
                                     confidence=certainty,
+                                    note=note,
                                     logger=self.logger,
                                 )
                             )
@@ -996,6 +1347,11 @@ def UpdateFromMISP(
     # allow an individual feed source to override the global "since" value passed in
     since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
 
+    # allow an individual feed source to override whether attributes need to_ids set to be used
+    requireToIds = connInfo.get('require_to_ids')
+    if isinstance(requireToIds, str):
+        requireToIds = str2bool(requireToIds)
+
     with requests.Session() as mispSession:
         mispSession.headers.update({'Accept': 'application/json;q=1.0,text/plain;q=0.9,text/html;q=0.9'})
         if mispAuthKey := connInfo.get('auth_key'):
@@ -1027,6 +1383,7 @@ def UpdateFromMISP(
                 if zeekPrinter.ProcessMISP(
                     mispJson,
                     url=mispUrl,
+                    require_to_ids=requireToIds,
                 ):
                     successCount.increment()
 
@@ -1078,6 +1435,7 @@ def UpdateFromMISP(
                                         if zeekPrinter.ProcessMISP(
                                             item,
                                             url=mispUrl,
+                                            require_to_ids=requireToIds,
                                         ):
                                             successCount.increment()
                                     except Exception as e:
@@ -1095,6 +1453,7 @@ def UpdateFromMISP(
                                             if zeekPrinter.ProcessMISP(
                                                 item[resultKey],
                                                 url=mispUrl,
+                                                require_to_ids=requireToIds,
                                             ):
                                                 successCount.increment()
                                         except Exception as e:
@@ -1136,6 +1495,7 @@ def UpdateFromMISP(
                             if zeekPrinter.ProcessMISP(
                                 mispObjectResponse.json(),
                                 url=newUrl,
+                                require_to_ids=requireToIds,
                             ):
                                 successCount.increment()
                     except Exception as e:
@@ -1183,6 +1543,7 @@ def UpdateFromMISP(
                                     if zeekPrinter.ProcessMISP(
                                         mispObjectResponse.json(),
                                         url=newUrl,
+                                        require_to_ids=requireToIds,
                                     ):
                                         successCount.increment()
                             except Exception as e:
@@ -1208,6 +1569,7 @@ def UpdateFromMISP(
                         if zeekPrinter.ProcessMISP(
                             mispObjectResponse.json(),
                             url=url,
+                            require_to_ids=requireToIds,
                         ):
                             successCount.increment()
                     except Exception as e:
@@ -1251,11 +1613,26 @@ def UpdateFromTAXII(
     collectionUrls = {}
     for api_root in server.api_roots:
         for collection in api_root.collections:
+            # skip collections the server says we can't read (e.g., paid tiers when matching '*')
+            if not getattr(collection, 'can_read', True):
+                if (logger is not None) and (collection.title.lower() == taxiiCollection.lower()):
+                    logger.warning(f"[{workerId}]: TAXII collection '{collection.title}' is not readable with these credentials")
+                continue
             if (taxiiCollection == '*') or (collection.title.lower() == taxiiCollection.lower()):
                 collectionUrls[collection.title] = {
                     'id': collection.id,
                     'url': collection.url,
                 }
+
+    # let the server do the date filtering when we can; ProcessSTIX still checks created/modified
+    # against since, so this only cuts down on what gets downloaded
+    taxiiFilter = dict(TAXII_INDICATOR_FILTER)
+    if since is not None:
+        sinceUtc = since.astimezone(timezone.utc)
+        taxiiFilter['added_after'] = sinceUtc.strftime('%Y-%m-%dT%H:%M:%S.') + f"{sinceUtc.microsecond // 1000:03d}Z"
+
+    if (not collectionUrls) and (logger is not None):
+        logger.warning(f"[{workerId}]: No readable TAXII collection matching '{taxiiCollection}' at {taxiiUrl}")
 
     # connect to and retrieve indicator STIX objects from the collection URL(s)
     for title, info in collectionUrls.items():
@@ -1270,7 +1647,7 @@ def UpdateFromTAXII(
             for envelope in TaxiiAsPagesClass(
                 collection.get_objects,
                 per_request=TAXII_PAGE_SIZE,
-                **TAXII_INDICATOR_FILTER,
+                **taxiiFilter,
             ):
                 if zeekPrinter.ProcessSTIX(
                     envelope,

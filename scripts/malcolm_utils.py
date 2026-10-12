@@ -144,30 +144,49 @@ def base64_encode_files_in_dir(directory, pattern):
     return result
 
 
-def base64_decode_files_to_dir(encoded_dict, dest_dir):
+def base64_decode_files_to_dir(encoded_dict, dest_dir, pattern=None):
     """
     Given a dict mapping relative paths to Base64-encoded contents,
     recreate the files under dest_dir.
 
     - Creates dest_dir and subdirectories if they don’t exist
     - Skips entries that fail Base64 decoding
+    - Skips entries whose path is absolute, escapes dest_dir (e.g., via ".." components
+      or symlinks), or whose filename doesn't match pattern (if specified)
+
+    Returns the number of files written.
     """
     os.makedirs(dest_dir, exist_ok=True)
+    dest_real = os.path.realpath(dest_dir)
+    written = 0
 
     for rel_path, b64data in encoded_dict.items():
+        if (not isinstance(rel_path, str)) or (not rel_path) or os.path.isabs(rel_path):
+            logging.warning(f"Skipping restored file with invalid path: {rel_path!r}")
+            continue
+        if pattern and not fnmatch.fnmatch(os.path.basename(rel_path), pattern):
+            logging.warning(f"Skipping restored file not matching {pattern}: {rel_path!r}")
+            continue
+
+        full_path = os.path.realpath(os.path.join(dest_real, rel_path))
+        if (full_path == dest_real) or (os.path.commonpath([dest_real, full_path]) != dest_real):
+            logging.warning(f"Skipping restored file outside of {dest_dir}: {rel_path!r}")
+            continue
+
         try:
             decoded = b64decode(b64data, validate=True)
-        except (binascii.Error, ValueError):
+        except (binascii.Error, ValueError, TypeError):
             continue
-
-        full_path = os.path.join(dest_dir, rel_path)
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
         try:
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "wb") as f:
                 f.write(decoded)
+            written += 1
         except Exception:
             continue
+
+    return written
 
 
 ###################################################################################################
@@ -270,9 +289,9 @@ def get_function_name(depth=0):
 
 ###################################################################################################
 # test if a remote port is open
-def check_socket(host, port):
+def check_socket(host, port, timeout=10):
     with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-        sock.settimeout(10)
+        sock.settimeout(timeout)
         if sock.connect_ex((host, port)) == 0:
             return True
         else:

@@ -20,6 +20,11 @@ copied_environment_variables:
       ARKIME_EXPOSE_WISE_GUI:
         ARKIME_EXPOSE_WISE_GUI:
           "false": "true"
+  arkime_secret:
+    arkime_secret:
+      ARKIME_WISE_CONFIG_PIN_CODE:
+        ARKIME_WISE_CONFIG_PIN_CODE:
+          "WISE2019": ""
   auth_common:
     auth_common:
       NGINX_AUTH_MODE:

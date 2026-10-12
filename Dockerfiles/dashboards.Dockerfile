@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:3.8.0 AS permissions
+FROM opensearchproject/opensearch-dashboards:3.9.0 AS permissions
 
 ENV PUSER="opensearch-dashboards"
 ENV PGROUP="opensearch-dashboards"
@@ -88,7 +88,9 @@ ADD --chmod=755 container-health-scripts/dashboards.sh /usr/local/bin/container_
 ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --from=permissions $OPENSEARCH_DASHBOARDS_HOME $OPENSEARCH_DASHBOARDS_HOME
 ADD --chmod=644 dashboards/opensearch_dashboards.yml $OPENSEARCH_DASHBOARDS_HOME/config/opensearch_dashboards.orig.yml
-ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
+ADD --chmod=644 dashboards/scripts/keepalive-finish-fix.js /usr/local/lib/keepalive-finish-fix.js
+ADD --chmod=644 dashboards/scripts/socket-timeout-guard.js /usr/local/lib/socket-timeout-guard.js
+ENV NODE_OPTIONS="$NODE_OPTIONS --require /usr/local/lib/keepalive-finish-fix.js --require /usr/local/lib/socket-timeout-guard.js"
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 

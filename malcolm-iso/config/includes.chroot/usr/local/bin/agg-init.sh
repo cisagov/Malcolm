@@ -72,7 +72,7 @@ EOF
     fi
 
     # make sure read permission is set correctly for the nginx worker processes
-    chmod 644 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
+    chmod 640 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
   fi
 
   # set the default wallpaper based on ISO variant

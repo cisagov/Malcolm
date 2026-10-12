@@ -16,7 +16,7 @@ RUN microdnf -y install \
     python3 -m pip install --no-cache-dir -r requirements.txt && \
     python3 manuf-oui-parse.py -o vendor_macs.yaml
 
-FROM docker.elastic.co/logstash/logstash-oss:9.5.4
+FROM docker.elastic.co/logstash/logstash-oss:9.5.5
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

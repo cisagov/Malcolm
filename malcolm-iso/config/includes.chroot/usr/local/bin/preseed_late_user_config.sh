@@ -12,8 +12,15 @@
 # this is a debconf-compatible script
 . /usr/share/debconf/confmodule
 
+# Keep the template private and avoid predictable paths in the shared /tmp.
+PRESEED_TMPDIR="$(mktemp -d /tmp/malcolm-preseed.XXXXXXXXXX)" || exit 1
+trap 'rm -rf -- "$PRESEED_TMPDIR"' EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 # template for user prompt
-cat > /tmp/malcolm.template <<'!EOF!'
+cat > "$PRESEED_TMPDIR/malcolm.template" <<'!EOF!'
 Template: malcolm/autologin
 Type: boolean
 Default: true
@@ -76,7 +83,7 @@ Description: Format Non-OS Drive(s)?
 !EOF!
 
 # load template
-db_x_loadtemplatefile /tmp/malcolm.template malcolm
+db_x_loadtemplatefile "$PRESEED_TMPDIR/malcolm.template" malcolm
 
 # set title
 db_settitle malcolm/format_large_storage_title
@@ -92,8 +99,6 @@ if [ "$RET" = false ]; then
   # capture_storage_format file was already created in preseed, remove it
   rm -f /etc/capture_storage_format*
 fi
-
-echo "malcolm/format_large_storage=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/disable_ipv6_title
@@ -114,8 +119,6 @@ fi
 
 echo "-net.ipv6.conf.all.disable_ipv6 = $DISABLE_IPV6_VAL" >> /etc/sysctl.d/99-ipv6.conf 2>/dev/null || true
 sed -i "s/\(ipv6\.disable=\)[[:digit:]]\+/\1$DISABLE_IPV6_VAL/g" /etc/default/grub 2>/dev/null || true
-
-echo "malcolm/disable_ipv6=$RET" > /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/autologin_title
@@ -138,8 +141,6 @@ if [ -n $RET ] && [ -f /etc/lightdm/lightdm.conf ]; then
   	sed -i 's/^\(autologin-user-timeout=\)/#\1/' /etc/lightdm/lightdm.conf
   fi
 fi
-
-echo "malcolm/autologin=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/xscreensaver_title
@@ -190,8 +191,6 @@ if [ -n $RET ]; then
 
 fi
 
-echo "malcolm/xscreensaver_lock=$RET" >> /tmp/malcolm.answer
-
 # set title
 db_settitle malcolm/dod_banner_title
 
@@ -224,8 +223,6 @@ else
   rm -f /usr/local/bin/dod-login-banner.sh
 fi
 
-echo "malcolm/dod_banner=$RET" >> /tmp/malcolm.answer
-
 # set title
 db_settitle malcolm/ssh_password_auth_title
 
@@ -243,5 +240,3 @@ else
 fi
 
 sed -i "s/^[[:space:]]*#*[[:space:]]*PasswordAuthentication[[:space:]][[:space:]]*[[:alpha:]][[:alpha:]]*[[:space:]]*$/PasswordAuthentication $SSH_PASSWORD_AUTH/g" /etc/ssh/sshd_config 2>/dev/null || true
-
-echo "malcolm/ssh_password_auth=$RET" >> /tmp/malcolm.answer

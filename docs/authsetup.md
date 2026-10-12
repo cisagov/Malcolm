@@ -151,6 +151,8 @@ The next steps happen in the context of `auth_setup`.
 
 ![Specify the Keycloak URL](./images/screenshots/keycloak_auth_setup_remote_url.png)
 
+The user is also asked whether Malcolm should verify the remote Keycloak's TLS certificate, which sets `KEYCLOAK_SSL_VERIFY` in `keycloak.env`. Verification is disabled by default to accommodate self-signed certificates, but enabling it is **strongly recommended**: without it, a host able to intercept traffic between Malcolm and the Keycloak instance could impersonate Keycloak and influence authentication decisions. If Keycloak's certificate is issued by a publicly-trusted certificate authority, no further steps are needed. Otherwise, place the issuing CA certificate (in PEM format) in Malcolm's `nginx/ca-trust/` directory before starting Malcolm. When verification is disabled, Malcolm's nginx container logs a warning at startup.
+
 7. Enter the client ID and client secret that should be used by Malcolm to authenticate.
 
 ![Client ID in auth_setup](./images/screenshots/keycloak_auth_setup_client_name.png)
@@ -496,7 +498,9 @@ Authentication Setup:
   --auth-admin-password-htpasswd <string>
                         Administrator password hash from "htpasswd -n -B username | cut -d: -f2" (for --auth-noninteractive)
   --auth-arkime-password <string>
-                        Password hash secret for Arkime viewer cluster (for --auth-noninteractive)
+                        Password hash secret for Arkime viewer (for --auth-noninteractive)
+  --auth-arkime-wise-pin <string>
+                        WISE web config code for Arkime (for --auth-noninteractive)
   --auth-generate-webcerts [AUTHGENWEBCERTS]
                         (Re)generate self-signed certificates for HTTPS access (for --auth-noninteractive)
   --auth-generate-fwcerts [AUTHGENFWCERTS]
@@ -519,6 +523,8 @@ Authentication Setup:
                         Keycloak redirect URI
   --auth-keycloak-url <string>
                         Keycloak URL
+  --auth-keycloak-ssl-verify [AUTHKEYCLOAKSSLVERIFY]
+                        Verify Keycloak SSL certificate (when --auth-method is keycloak_remote)
   --auth-keycloak-client-id <string>
                         Keycloak client ID
   --auth-keycloak-client-secret <string>

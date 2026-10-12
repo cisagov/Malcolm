@@ -21,6 +21,7 @@ import pathlib
 import re
 import shutil
 import signal
+import stat
 import sys
 import tempfile
 import time
@@ -90,6 +91,48 @@ def is_pcap_upload(file_mime, file_type):
 
 
 ###################################################################################################
+# Uploads are processed by this script as root, but the upload directory is writable by the
+#   upload service (e.g., via SFTP), which can create symlinks. Anything that touches an upload's
+#   contents or ownership goes through a file descriptor opened with O_NOFOLLOW, so a symlink (or a
+#   regular file swapped for one between checks) is never followed.
+UPLOAD_OPEN_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
+
+
+def open_upload_nofollow(pathname):
+    """Open an upload without following symlinks and verify it's a regular file.
+
+    Returns (fd, stat_result). Raises OSError (ELOOP for a symlink) or ValueError for any other
+    non-regular file. The caller is responsible for closing the descriptor.
+    """
+    fd = os.open(pathname, UPLOAD_OPEN_FLAGS)
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            raise ValueError('not a regular file')
+        return fd, st
+    except Exception:
+        os.close(fd)
+        raise
+
+
+def same_directory_entry(pathname, st):
+    """True if pathname still refers (without following symlinks) to the file described by st."""
+    try:
+        cur = os.lstat(pathname)
+    except FileNotFoundError:
+        return False
+    return stat.S_ISREG(cur.st_mode) and (cur.st_dev, cur.st_ino) == (st.st_dev, st.st_ino)
+
+
+def remove_non_regular_upload(pathname, reason, logger):
+    logger.error(f"{scriptName}:\t🗑\t{pathname} {reason}, removing")
+    try:
+        os.unlink(pathname)
+    except FileNotFoundError:
+        pass
+
+
+###################################################################################################
 def move_uploaded_file(pathname, destination, file_mime, file_type, logger):
     logger.info(f"{scriptName}:\t🖅\t{pathname} [{file_mime}][{file_type}] to {destination}")
     shutil.move(pathname, os.path.join(destination, os.path.basename(pathname)))
@@ -118,12 +161,13 @@ def try_decompress_pcap_stream(pathname, file_mime, pcap_dir, min_bytes, max_byt
         return False
 
     open_fn = RAW_COMPRESSED_PCAP_MIME_OPENERS[file_mime]
-    source_mode = os.stat(pathname).st_mode & 0o7777
     temp_path = None
     identified_pcap = False
 
     try:
-        with open_fn(pathname, 'rb') as src:
+        source_fd, source_st = open_upload_nofollow(pathname)
+        source_mode = source_st.st_mode & 0o7777
+        with os.fdopen(source_fd, 'rb') as source_file, open_fn(source_file, 'rb') as src:
             header = src.read(65536)
             if not header:
                 return False
@@ -141,6 +185,9 @@ def try_decompress_pcap_stream(pathname, file_mime, pcap_dir, min_bytes, max_byt
                 delete=False,
             ) as dst:
                 temp_path = dst.name
+                # set ownership and mode through the open descriptor rather than by path
+                os.fchown(dst.fileno(), uid, gid)
+                os.fchmod(dst.fileno(), source_mode)
                 total_bytes = len(header)
                 if total_bytes > max_bytes:
                     raise ValueError(f'decompressed PCAP exceeds {sizeof_fmt(max_bytes)}')
@@ -169,9 +216,6 @@ def try_decompress_pcap_stream(pathname, file_mime, pcap_dir, min_bytes, max_byt
         if os.path.commonpath((pcap_dir_real, output_path)) != pcap_dir_real:
             raise ValueError(f'decompressed PCAP output escapes destination: {output_name!r}')
 
-        os.chown(temp_path, uid, gid)
-        os.chmod(temp_path, source_mode)
-
         logger.info(
             f"{scriptName}:\t🖅\t{pathname} [{file_mime}] decompressed to {output_path} "
             f"[{payload_mime}][{payload_type}]"
@@ -194,7 +238,7 @@ def try_decompress_pcap_stream(pathname, file_mime, pcap_dir, min_bytes, max_byt
         return False
 
     finally:
-        if temp_path and os.path.isfile(temp_path):
+        if temp_path and os.path.lexists(temp_path):
             os.unlink(temp_path)
 
 
@@ -210,17 +254,43 @@ def file_processor(pathname, **kwargs):
 
     logger.info(f"{scriptName}:\t👓\t{pathname}")
 
-    if not os.path.isfile(pathname):
+    # inspect the directory entry itself (don't follow symlinks)
+    try:
+        entryStat = os.lstat(pathname)
+    except FileNotFoundError:
+        return
+    if stat.S_ISDIR(entryStat.st_mode):
+        return
+    if not stat.S_ISREG(entryStat.st_mode):
+        remove_non_regular_upload(pathname, "is not a regular file (e.g., a symlink)", logger)
         return
 
     time.sleep(0.1)
     try:
-        os.chown(pathname, uid, gid)
+        try:
+            fd, fileStat = open_upload_nofollow(pathname)
+        except (OSError, ValueError) as openError:
+            if isinstance(openError, FileNotFoundError):
+                return
+            # replaced with a symlink or other non-regular file since the check above
+            remove_non_regular_upload(pathname, f"could not be opened safely ({openError})", logger)
+            return
 
-        # get the file magic mime type
-        fileMime = magic.from_file(pathname, mime=True)
-        fileType = magic.from_file(pathname)
-        fileSize = os.path.getsize(pathname)
+        try:
+            os.fchown(fd, uid, gid)
+
+            # get the file magic mime type
+            os.lseek(fd, 0, os.SEEK_SET)
+            fileMime = magic.from_descriptor(fd, mime=True)
+            os.lseek(fd, 0, os.SEEK_SET)
+            fileType = magic.from_descriptor(fd)
+            fileSize = fileStat.st_size
+        finally:
+            os.close(fd)
+
+        if not same_directory_entry(pathname, fileStat):
+            remove_non_regular_upload(pathname, "changed while being processed", logger)
+            return
 
         if not (minBytes <= fileSize <= maxBytes):
             delete_uploaded_file(pathname, fileSize, fileMime, fileType, "unacceptable file size", logger)

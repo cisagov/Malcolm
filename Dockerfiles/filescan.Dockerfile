@@ -129,7 +129,7 @@ RUN set -e ; \
       /usr/local/bin/web-ui-asset-download.sh -o "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css" && \
     cd /install-filescan ; \
         python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt ; \
-        make ; \
+        make -B ; \
         python3 -m pip install --break-system-packages --no-cache-dir . ; \
     cd /filescan ; \
     find /filescan "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" -type d -exec chmod 755 "{}" \; ; \

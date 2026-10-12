@@ -188,3 +188,272 @@ After reviewing the contents of this page, Romeo pushes the green **Publish rele
 ## 12. Close project milestone
 
 Finally, Romeo navigates back to the [GitHub project](https://github.com/orgs/idaholab/projects/1) and changes the status of each issue under the now-released milestone from **Done** to **Released**. He then navigates to the [milestones]({{ site.github.repository_url }}/milestones) page on GitHub and clicks **Close** for that milestone.
+
+# <a name="IronBankRelease"></a>Updating Malcolm Iron Bank Images
+
+Malcolm publishes hardened container images to the DoD's Iron Bank (IB), the centralized repository of vetted, continuously rescanned images maintained under Platform One ([official documentation](https://p1docs.dso.mil/iron-bank/faq)). The images themselves are available at [repo1.dso.mil/dsop/afdco/malcolm](https://repo1.dso.mil/dsop/afdco/malcolm). These builds exist because government and defense teams often cannot pull from public container registries at all, and even when they can, an Authority to Operate (ATO) usually requires proof that a container has passed vulnerability scanning, STIG checks, and supply-chain validation. Iron Bank handles much of that work up front, so anyone deploying Malcolm inside a DoD network, on an Impact Level 2 system, or as part of an accreditation package already has the scan history and documentation available alongside the image. Users outside that environment, running Malcolm in a non-U.S. government setting, will generally find the official upstream `ghcr.io/idaholab` images simpler and faster to update. But for systems integrators, ISSOs pursuing an ATO, or anyone who needs to answer "where did this container come from" during an audit, the Iron Bank builds may be worth using.
+
+This section describes how Malcolm developers update the Iron Bank images after a [Malcolm release](#ReleasePrep).
+
+## 1. Clone the git repositories for the Malcolm Iron Bank images
+
+If working copies for the Malcolm IB image repositories don't yet exist locally, clone them:
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+mkdir -p "$IRON_BANK_PARENT_PATH"
+
+for REPO in \
+    api \
+    arkime \
+    dashboards \
+    dashboards-helper \
+    dirinit \
+    filebeat \
+    filescan \
+    file-upload \
+    freq \
+    htadmin \
+    keycloak \
+    logstash-oss \
+    netbox \
+    nginx \
+    opensearch \
+    pcap-capture \
+    pcap-monitor \
+    postgresql \
+    redis \
+    strelka-backend \
+    strelka-frontend \
+    strelka-manager \
+    suricata \
+    zeek \
+; do
+    git clone https://repo1.dso.mil/dsop/afdco/malcolm/"$REPO".git
+    pushd "$REPO" >/dev/null 2>&1
+    for BRANCH in master development inl-26.x; do
+        git checkout "$BRANCH"
+    done
+    popd >/dev/null 2>&1
+done
+```
+
+As illustrated above, users will likely want the `master` and `development` branches, as well as whatever "working" or "update" branch is going to be used to stage the changes.
+
+## 2. Perform automated version bumps in the hardening manifests
+
+Run [`./scripts/iron-bank/bump-iron-bank-hardening-manifest.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/iron-bank/bump-iron-bank-hardening-manifest.sh) for each image's `hardening_manifest.yaml`:
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+MALCOLM_TAG={{ site.malcolm.version }}
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    GITHUB_TOKEN=ghp_xxxxxxxxxxxx bump-iron-bank-hardening-manifest.sh "$MALCOLM_TAG"
+    popd >/dev/null 2>&1
+done
+```
+
+This script bumps the version tag in a `hardening_manifest.yaml`, resolves the new upstream container digest via `docker buildx imagetools`, re-downloads the Malcolm source tarball (if necessary) to compute its new sha512 sum, and pulls the commit sha and commit date for the corresponding git tag into `VCS_REVISION` and `BUILD_DATE`. A GitHub personal access token can be picked up from `$GITHUB_TOKEN` to authenticate the GitHub API call and avoid the unauthenticated rate limit (60 req/hr per IP).
+
+For each image working copy, this script will output something like:
+
+```
+Using GitHub token for API authentication
+Old version: 26.08.0
+New version: 26.09.0
+Updated tags: entry
+Updated org.opencontainers.image.version label
+Inspecting ghcr.io/idaholab/malcolm/api:26.09.0 ...
+New digest: sha256:d2d1d6f2df02bbb895e3b2e9c69e47915185e4b3bc79b74797952eee6a312944
+Downloading https://github.com/idaholab/Malcolm/archive/refs/tags/v26.09.0.tar.gz ...
+New sha512: 4b856ba57893c76ed28fd936c25dd4bd9caef4b3c774402afd0d9842f64d15ea08dba235d2f9381b08fa471a32b46453f3a79dc597f563014d5e634e1d1ec832
+Resolving commit for tag v26.09.0 on https://github.com/idaholab/Malcolm ...
+New VCS_REVISION: b09a0ad
+Fetching commit date for b09a0adaee18421bcc24f3c5608d2135a6ee84bb ...
+New BUILD_DATE: 2026-09-29T20:47:52Z
+Done. Updated ./hardening_manifest.yaml from 26.08.0 to 26.09.0.
+```
+
+## 3. Perform manual updates to the hardening manifests and Dockerfiles
+
+Review the [`./Dockerfiles`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) of the [latest Malcolm release]({{ site.github.repository_url }}/releases/latest) and make note of all other changes not covered by the automatic version bumps in the previous step. These may include:
+
+* Changes to base Docker images (`BASE_IMAGE` and `BASE_TAG`)
+* Version updates of included tools like [`supercronic`](github.com/aptible/supercronic) or [`yq`](https://github.com/mikefarah/yq)
+* Changed build logic or references to moved or new files or directories
+
+Upstream changes will need to be reflected in `Dockerfile` and `hardening_manifest.yaml` in each Iron Bank Malcolm image repository. One-off changes will likely need to be made by hand, while other things may be able to be done in bulk.
+
+For example, if the `yq` utility had been updated from v4.53.6 to v4.54.1, that update could be done across all hardening manifests at once:
+
+```bash
+$ grep -A 3 yq_linux_amd64 */hardening_manifest.yaml
+dashboards-helper/hardening_manifest.yaml:  - filename: yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.53.6/yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml-    validation:
+dashboards-helper/hardening_manifest.yaml-      type: sha512
+dashboards-helper/hardening_manifest.yaml-      value: 508f4ee34c6d093d136ff3c1b36db4105e686c3d68d435c064448ba16e2616d528efafb2cb0a1890b7724890373a226a38b7da27e6796396ee759bed39a8c671
+--
+filebeat/hardening_manifest.yaml:  - filename: yq_linux_amd64
+filebeat/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.53.6/yq_linux_amd64
+filebeat/hardening_manifest.yaml-    validation:
+filebeat/hardening_manifest.yaml-      type: sha512
+filebeat/hardening_manifest.yaml-      value: 508f4ee34c6d093d136ff3c1b36db4105e686c3d68d435c064448ba16e2616d528efafb2cb0a1890b7724890373a226a38b7da27e6796396ee759bed39a8c671
+--
+...
+```
+
+Both the version number and sha sum for the updated version would need to be changed. For the version number:
+
+```bash
+OLD_VERSION=4.53.6
+
+NEW_VERSION=4.54.1
+
+sed -i "s@\(yq/releases/download/\)v$OLD_VERSION@\1v$NEW_VERSION@" */hardening_manifest.yaml
+```
+
+For the sha sum, the new binary will need to be downloaded and the new checksum calculated:
+
+```bash
+OLD_SUM=508f4ee34c6d093d136ff3c1b36db4105e686c3d68d435c064448ba16e2616d528efafb2cb0a1890b7724890373a226a38b7da27e6796396ee759bed39a8c671
+
+curl -fsSLOJ 'https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64'
+
+NEW_SUM=$(sha512sum yq_linux_amd64 | awk '{print $1}')
+
+sed -i "s@$OLD_SUM@$NEW_SUM@" */hardening_manifest.yaml
+
+rm -f yq_linux_amd64
+```
+
+Verify the updated version and sha sum was written:
+
+```bash
+$ grep -A 3 yq_linux_amd64 */hardening_manifest.yaml
+dashboards-helper/hardening_manifest.yaml:  - filename: yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml-    validation:
+dashboards-helper/hardening_manifest.yaml-      type: sha512
+dashboards-helper/hardening_manifest.yaml-      value: 57a5e74afd5aafb63c373be84c37fb778957051af3f2d1f563ae77df27b16f0e221cd64a6b7d7729f087fccbfe7d5b4aa1b42e9004d6c2df478f160b17392ead
+--
+filebeat/hardening_manifest.yaml:  - filename: yq_linux_amd64
+filebeat/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64
+filebeat/hardening_manifest.yaml-    validation:
+filebeat/hardening_manifest.yaml-      type: sha512
+filebeat/hardening_manifest.yaml-      value: 57a5e74afd5aafb63c373be84c37fb778957051af3f2d1f563ae77df27b16f0e221cd64a6b7d7729f087fccbfe7d5b4aa1b42e9004d6c2df478f160b17392ead
+--
+...
+```
+
+## 4. Commit and push the updates to the repositories
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+MALCOLM_TAG={{ site.malcolm.version }}
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    git add ./Dockerfile ./hardening_manifest.yaml && \
+        git commit -m "Updates to the $REPO_NAME image for Malcolm v$MALCOLM_TAG" && \
+        git push
+    popd >/dev/null 2>&1
+done
+```
+
+## 5. Monitor the image builds for failures
+
+Open the Iron Bank pipeline page for each repository (this example requires xdg-open from xdg-utils) and monitor each pipeline build for failures.
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    xdg-open "https://repo1.dso.mil/dsop/afdco/malcolm/$REPO_NAME/-/pipelines"
+    popd >/dev/null 2>&1
+done
+```
+
+Investigate and fix any failed builds.
+
+## 6. Test Malcolm Iron Bank images
+
+Pull and tag the Iron Bank images:
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+BRANCH=inl-26.x
+TAG=26.08.0-ib
+CONTAINER_ENGINE=docker
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    gitlab-artifacts-download.py \
+        -p "$REPO_NAME" \
+        -b "$BRANCH" \
+        -j create-tar \
+        -t ghcr.io/idaholab/malcolm/"$REPO_NAME":"$TAG"
+    popd >/dev/null 2>&1
+done
+
+for PAIR in filebeat:filebeat-oss \
+            nginx:nginx-proxy \
+            redis:valkey; do \
+    "$CONTAINER_ENGINE" tag ghcr.io/idaholab/malcolm/${PAIR%:*}:$TAG ghcr.io/idaholab/malcolm/${PAIR#*:}:$TAG
+done
+```
+
+You'll need to modify your local Malcolm installation's `docker-compose.yml` file:
+
+* `yq -i '.services[] |= . + {"user": "0:0"}' docker-compose.yml`
+* Add `-ib` (or whatever else you used as  tag suffix in the commands above, if any, to the `image:` line of each service)
+
+Start Malcolm and verify that all containers are running as expected.
+
+## 7. Submit pull requests to Iron Bank
+
+The script [`./scripts/iron-bank/malcolm-iron-bank-merge-requests.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/iron-bank/malcolm-iron-bank-merge-requests.sh) can help get these started in bulk. Verify the variables at the top of that script before running it. The pull requests should be from your working branch (e.g., `inl-26.x`) to `development`. Follow the instructions in Iron Bank for applying labels, etc., to make sure these PRs are flagged to be reviewed by Iron Bank staff.
+
+# <a name="ReleaseHelmChart"></a>Updating the Malcolm Helm Chart
+
+This section outlines updating the [Malcolm-Helm chart](https://github.com/idaholab/Malcolm-Helm) corresponding with a Malcolm release.
+
+These changes should be done in a fork or branch of the Malcolm-Helm git repository then submitted as a pull request.
+
+## 1. Update `Chart.yaml`
+
+Update `version` and `appVersion` in `chart/Chart.yaml`. Note that `version` does not use leading zeroes (`26.8.0`) while `appVersion` does (`26.08.0`).
+
+## 2. Update `values.yaml` and templates
+
+Examine the [latest Malcolm release]({{ site.github.repository_url }}/releases/latest) for changes that may need to be reflected in the helm chart. Likely areas where you will find these changes include, but are not limited to, the following:
+
+* [`docker-compose.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/docker-compose.yml)
+    * Most changes to `docker-compose.yml` will have an analogue in the helm chart service templates. These might include changes to services' `env_file` sections, volume bind mounts, capabilities, etc.
+[`config/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config)
+    * Changes in the `*.env.example` files will need to be reflected in their corresponding `ConfigMap`/`configMapRef` sections.
+* [`kubernetes/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes)
+    * Malcolm's non-helm [Kubernetes manifests](kubernetes.md) can be found here and will likely have some matching parts in Malcolm-Helm.
+
+## 3. Test updates
+
+Test all changes from the previous version, minimally with the [Vagrant example](https://github.com/idaholab/Malcolm-Helm#VagrantDemo) but also preferrably on a real cluster.
+
+## 4. Submit pull request to idaholab/Malcolm-Helm
+
+Submit a pull request to [idaholab/Malcolm-Helm](https://github.com/idaholab/Malcolm-Helm/pulls) with the changes. This should be reviewed, approved, and merged by a maintainer of that project.
+
+## 4. Update Malcolm-Helm repository with new release
+
+Follow [these instructions](https://github.com/idaholab/Malcolm-Helm/blob/helm-repo/README.md) to package and publish the Malcolm-Helm release.

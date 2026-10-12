@@ -98,6 +98,7 @@ class MalcolmSource extends WISESource {
       "event.severity",
       "event.severity_tags",
       "event.start",
+      "event.submitter",
       "file.accessed",
       "file.created",
       "file.ctime",
@@ -3647,6 +3648,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
       "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
       "    +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
+      "    +arrayList(session.event, 'submitter', 'Submitter', 'event.submitter')\n" +
       "    +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
       "    +arrayList(session.rule, 'category', 'Event Category', 'rule.category')\n" +
       "    +arrayList(session.rule, 'ruleset', 'Event Ruleset', 'rule.ruleset')\n" +

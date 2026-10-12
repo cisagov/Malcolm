@@ -13,12 +13,13 @@ import urllib3
 import warnings
 
 from collections import defaultdict, OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
 from malcolm_constants import DatabaseMode
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import BadRequest, HTTPException
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -211,6 +212,12 @@ redisPort = app.config["VALKEY_PORT"]
 redisPassword = app.config["VALKEY_PASSWORD"]
 strelkaHost = app.config["STRELKA_HOST"]
 strelkaPort = app.config["STRELKA_PORT"]
+
+# (connect, read) timeouts for outbound HTTP requests to other Malcolm services, so a stalled
+#   dependency can't hold an API worker indefinitely
+httpTimeout = (app.config["MALCOLM_API_HTTP_CONNECT_TIMEOUT_SEC"], app.config["MALCOLM_API_HTTP_READ_TIMEOUT_SEC"])
+# timeout applied to each individual check performed by the readiness endpoint
+readyTimeout = app.config["MALCOLM_API_READY_TIMEOUT_SEC"]
 
 opensearchLocal = (databaseMode == DatabaseMode.OpenSearchLocal) or (opensearchUrl == 'https://opensearch:9200')
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
@@ -687,16 +694,95 @@ def filtervalues(search, args):
     return (filters, s)
 
 
-def aggfields(fieldnames, current_request, urls=None):
+def nonnegative_integer_argument(args, name, default=None):
+    """Parse an integer without silently truncating floats or accepting booleans."""
+    value = args.get(name, default)
+    if type(value) is int and value >= 0:
+        return value
+    if isinstance(value, str) and re.fullmatch(r'[0-9]+', value.strip()):
+        try:
+            return int(value.strip())
+        except ValueError:
+            pass
+    raise BadRequest(f"'{name}' must be a nonnegative integer")
+
+
+def document_sort(args):
+    """Normalize a comma-separated string or JSON array of field sort expressions."""
+    if 'sort' not in args:
+        return []
+    expressions = args['sort']
+    if isinstance(expressions, str):
+        expressions = expressions.split(',')
+    if not isinstance(expressions, list) or not expressions:
+        raise BadRequest("'sort' must be a nonempty string or array of strings")
+
+    sorts = []
+    for expression in expressions:
+        if not isinstance(expression, str) or not (expression := expression.strip()):
+            raise BadRequest("Each sort expression must be a nonempty string")
+        direction = 'asc'
+        field = expression
+        if ':' in expression:
+            field, direction = expression.rsplit(':', 1)
+            field, direction = field.strip(), direction.strip().lower()
+        elif expression.startswith('-'):
+            field, direction = expression[1:], 'desc'
+        if (
+            not field
+            or field.startswith(('-', '+'))
+            or any(char.isspace() or char in ',:' for char in field)
+            or direction not in ('asc', 'desc')
+        ):
+            raise BadRequest("Sort expressions must use 'field', '-field', or 'field:asc|desc'")
+        sorts.append({field: {'order': direction}})
+    return sorts
+
+
+def document_track_total_hits(args):
+    """Accept a boolean or nonnegative counting threshold, preserving backend defaults."""
+    if 'track_total_hits' not in args:
+        return None
+    value = args['track_total_hits']
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str) and value.strip().lower() in ('true', 'false'):
+        return value.strip().lower() == 'true'
+    return nonnegative_integer_argument(args, 'track_total_hits')
+
+
+def search_response_metadata(response):
+    """Preserve search status; absent metadata remains unknown (JSON null)."""
+    return {'shards': response.get('_shards'), 'timed_out': response.get('timed_out')}
+
+
+def debug_search_response(endpoint, response, **details):
+    """Log a compact search summary and any shard failures when API debugging is enabled."""
+    if debugApi:
+        shards = response.get('_shards') or {}
+        details.update(
+            timed_out=response.get('timed_out'),
+            shards_total=shards.get('total'),
+            shards_successful=shards.get('successful'),
+            shards_skipped=shards.get('skipped'),
+            shards_failed=shards.get('failed'),
+            took_ms=response.get('took'),
+        )
+        print(f"{endpoint}: {json.dumps(details, default=str)}")
+        if failures := shards.get('failures'):
+            print(f"{endpoint} shard failures: {json.dumps(failures, default=str)}")
+
+
+def aggfields(fieldnames, args, urls=None):
     """Returns a bucket aggregation for a particular field over a given time range
 
     Parameters
     ----------
     fieldname : string or Array of string
         The name of the field(s) on which to perform the aggregation
-    current_request : Request
-        The flask Request object being processed (see gettimes/filtertime and getfilters/filtervalues)
-        Uses 'from', 'to', 'limit', 'filter', and 'doctype' from current_request arguments
+    args : dict
+        Parsed request arguments (see gettimes/filtertime and getfilters/filtervalues).
+        Uses 'from', 'to', 'limit', 'filter', and 'doctype'.
 
     Returns
     -------
@@ -709,7 +795,10 @@ def aggfields(fieldnames, current_request, urls=None):
     fields
         the name of the field(s) on which the aggregation was performed
     """
-    args = get_request_arguments(current_request)
+    top_bucket_name = next(iter(malcolm_utils.get_iterable(fieldnames)))
+    if top_bucket_name in ('range', 'filter', 'fields', 'urls', 'shards', 'timed_out'):
+        raise BadRequest(f"Aggregation field '{top_bucket_name}' conflicts with a reserved response key")
+
     idx = index_from_args(args)
     s = SearchClass(
         using=databaseClient,
@@ -717,7 +806,9 @@ def aggfields(fieldnames, current_request, urls=None):
     ).extra(size=0)
     start_time_ms, end_time_ms, s = filtertime(s, args)
     filters, s = filtervalues(s, args)
-    bucket_limit = int(malcolm_utils.deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"]))
+    bucket_limit = nonnegative_integer_argument(args, 'limit', app.config['RESULT_SET_LIMIT'])
+    if bucket_limit == 0:
+        raise BadRequest("Aggregation 'limit' must be greater than zero")
     last_bucket = s.aggs
 
     for fname in malcolm_utils.get_iterable(fieldnames):
@@ -751,17 +842,26 @@ def aggfields(fieldnames, current_request, urls=None):
             missing=missing_val,
         )
 
-    response = s.execute()
+    response = s.execute().to_dict()
 
-    top_bucket_name = next(iter(malcolm_utils.get_iterable(fieldnames)))
     result_dict = {
-        top_bucket_name: response.aggregations.to_dict().get(top_bucket_name, {}),
+        top_bucket_name: response.get('aggregations', {}).get(top_bucket_name, {}),
         'range': (start_time_ms // 1000, end_time_ms // 1000),
         'filter': filters,
         'fields': malcolm_utils.get_iterable(fieldnames),
+        **search_response_metadata(response),
     }
     if (urls is not None) and (len(urls) > 0):
         result_dict['urls'] = urls
+
+    if debugApi:
+        buckets = result_dict[top_bucket_name].get('buckets')
+        debug_search_response(
+            'agg',
+            response,
+            fields=result_dict['fields'],
+            buckets=len(buckets) if buckets is not None else None,
+        )
 
     return jsonify(result_dict)
 
@@ -795,11 +895,12 @@ def aggregate(fieldname):
     if not check_roles(request):
         raise PermissionError("Not authorized to perform this action")
 
-    start_time, end_time = gettimes(get_request_arguments(request))
+    args = get_request_arguments(request)
+    start_time, end_time = gettimes(args)
     fields = fieldname.split(",")
     return aggfields(
         fields,
-        request,
+        args,
         urls=urls_for_field(fields, start_time=start_time, end_time=end_time),
     )
 
@@ -814,7 +915,8 @@ def document():
     Parameters
     ----------
     request : Request
-        Uses 'from', 'to', 'limit', 'filter', and 'doctype' from request arguments
+        Uses 'from', 'to', 'limit', 'filter', 'doctype', 'sort', 'offset', and
+        'track_total_hits' from request arguments
 
     Returns
     -------
@@ -822,21 +924,47 @@ def document():
         dict containing the filters, e.g., {"_id":"210301-Cgnjsc2Tkdl38g25D6-cotp-5485"}
     results
         array of the documents retrieved (up to 'limit')
+    total
+        backend hit count and relation, or None if counting is disabled
+    shards, timed_out
+        backend search status, or None when unavailable
     """
     if not check_roles(request):
         raise PermissionError("Not authorized to perform this action")
 
     args = get_request_arguments(request)
+    limit = nonnegative_integer_argument(args, 'limit', app.config['RESULT_SET_LIMIT'])
+    offset = nonnegative_integer_argument(args, 'offset', 0)
+    sorts = document_sort(args)
+    track_total_hits = document_track_total_hits(args)
     s = SearchClass(
         using=databaseClient,
         index=index_from_args(args),
-    ).extra(size=int(malcolm_utils.deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
+    ).extra(**{'size': limit, 'from': offset})
+    if sorts:
+        s = s.sort(*sorts)
+    if track_total_hits is not None:
+        s = s.extra(track_total_hits=track_total_hits)
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
     filters, s = filtervalues(s, args)
+    response = s.execute().to_dict()
+    if debugApi:
+        hits = response.get('hits', {})
+        total = hits.get('total')
+        debug_search_response(
+            'document',
+            response,
+            returned=len(hits.get('hits', [])),
+            offset=offset,
+            total=total.get('value') if isinstance(total, dict) else total,
+            relation=total.get('relation') if isinstance(total, dict) else None,
+        )
     return jsonify(
-        results=s.execute().to_dict().get('hits', {}).get('hits', []),
+        results=response.get('hits', {}).get('hits', []),
+        total=response.get('hits', {}).get('total'),
         range=(start_time_ms // 1000, end_time_ms // 1000),
         filter=filters,
+        **search_response_metadata(response),
     )
 
 
@@ -870,6 +998,7 @@ def indices():
         f'{opensearchUrl}/_cat/indices?format=json',
         auth=opensearchReqHttpAuth,
         verify=opensearchSslVerify,
+        timeout=httpTimeout,
     ).json()
     result["malcolm_network_index_pattern"] = app.config["MALCOLM_NETWORK_INDEX_PATTERN"]
     result["malcolm_other_index_pattern"] = app.config["MALCOLM_OTHER_INDEX_PATTERN"]
@@ -959,6 +1088,7 @@ def get_opensearch_template_fields(template_name):
             f"{opensearchUrl}/_index_template/{template_name}",
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
+            timeout=httpTimeout,
         ).json()
 
         for template in malcolm_utils.deep_get(response, ["index_templates"], []):
@@ -977,6 +1107,7 @@ def get_opensearch_template_fields(template_name):
                     f"{opensearchUrl}/_component_template/{comp_name}",
                     auth=opensearchReqHttpAuth,
                     verify=opensearchSslVerify,
+                    timeout=httpTimeout,
                 ).json()
                 for component in malcolm_utils.get_iterable(malcolm_utils.deep_get(comp_resp, ["component_templates"])):
                     result.update(
@@ -1004,6 +1135,7 @@ def get_dashboards_fields(args):
             },
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
+            timeout=httpTimeout,
         ).json()
 
         for field in resp.get('fields', []):
@@ -1031,9 +1163,13 @@ def extract_field_info(properties, source=None):
     """Convert a mapping properties dict into the internal field format."""
     fields = {}
     for name, info in properties.items():
-        # Skip top-level objects that just contain subfields
-        if 'properties' in info and 'type' not in info:
-            continue
+        # Include object descendants using their fully qualified field names.
+        if 'properties' in info:
+            fields.update(
+                (f'{name}.{child}', entry) for child, entry in extract_field_info(info['properties'], source).items()
+            )
+            if 'type' not in info:
+                continue
         entry = {}
         if debugApi:
             info['source'] = source
@@ -1085,6 +1221,7 @@ def version():
         opensearchUrl,
         auth=opensearchReqHttpAuth,
         verify=opensearchSslVerify,
+        timeout=httpTimeout,
     ).json()
     if isinstance(opensearchStats, dict):
         opensearchStats['health'] = dict(databaseClient.cluster.health())
@@ -1152,6 +1289,7 @@ def ready():
                 port=port,
                 password=password,
                 socket_connect_timeout=timeout,
+                socket_timeout=timeout,
             )
             return r.ping()
         except Exception:
@@ -1201,40 +1339,76 @@ def ready():
                 print(f"{type(e).__name__}: {e} getting {name} status")
             return default
 
-    # Each component’s check becomes a small lambda
+    # Each component's check becomes a small lambda. Every check is bounded by readyTimeout so a
+    #   stalled dependency can't hold the request open.
     checks = {
-        "arkime": (lambda: requests.get(arkimeStatusUrl, verify=False).raise_for_status() or True, False),
+        "arkime": (
+            lambda: requests.get(arkimeStatusUrl, verify=False, timeout=readyTimeout).raise_for_status() or True,
+            False,
+        ),
         "dashboards": (
             lambda: requests.get(
                 f"{dashboardsUrl}/api/status",
                 auth=opensearchReqHttpAuth,
                 verify=opensearchSslVerify,
+                timeout=readyTimeout,
             ).json(),
             {},
         ),
-        "dashboards_maps": (lambda: malcolm_utils.check_socket(dashboardsHelperHost, dashboardsMapsPort), False),
-        "extracted_files": (lambda: malcolm_utils.check_socket(filescanHost, filescanHttpServerPort), False),
-        "filebeat_tcp": (lambda: malcolm_utils.check_socket(filebeatHost, filebeatTcpJsonPort), False),
-        "filescan": (lambda: filescan_healthy(filescanHost, filescanHealthPort), False),
-        "freq": (lambda: requests.get(freqUrl).raise_for_status() or True, False),
-        "logstash_health": (lambda: requests.get(f"{logstashUrl}/_health_report").json(), {}),
-        "logstash_lumberjack": (lambda: malcolm_utils.check_socket(logstashHost, logstashLJPort), False),
+        "dashboards_maps": (
+            lambda: malcolm_utils.check_socket(dashboardsHelperHost, dashboardsMapsPort, timeout=readyTimeout),
+            False,
+        ),
+        "extracted_files": (
+            lambda: malcolm_utils.check_socket(filescanHost, filescanHttpServerPort, timeout=readyTimeout),
+            False,
+        ),
+        "filebeat_tcp": (
+            lambda: malcolm_utils.check_socket(filebeatHost, filebeatTcpJsonPort, timeout=readyTimeout),
+            False,
+        ),
+        "filescan": (lambda: filescan_healthy(filescanHost, filescanHealthPort, timeout=readyTimeout), False),
+        "freq": (lambda: requests.get(freqUrl, timeout=readyTimeout).raise_for_status() or True, False),
+        "logstash_health": (
+            lambda: requests.get(f"{logstashUrl}/_health_report", timeout=readyTimeout).json(),
+            {},
+        ),
+        "logstash_lumberjack": (
+            lambda: malcolm_utils.check_socket(logstashHost, logstashLJPort, timeout=readyTimeout),
+            False,
+        ),
         "netbox": (
             lambda: requests.get(
                 f"{netboxUrl}/api/?format=json",
                 headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
                 verify=False,
+                timeout=readyTimeout,
             ).json(),
             {},
         ),
         "opensearch": (lambda: dict(databaseClient.cluster.health()), {}),
-        "pcap_monitor": (lambda: malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort), False),
-        "redis": (lambda: redis_accessible(redisHost, redisPort, redisPassword), False),
-        "redis_cache": (lambda: redis_accessible(redisCacheHost, redisCachePort, redisPassword), False),
-        "strelka": (lambda: malcolm_utils.check_socket(strelkaHost, strelkaPort), False),
+        "pcap_monitor": (
+            lambda: malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort, timeout=readyTimeout),
+            False,
+        ),
+        "redis": (lambda: redis_accessible(redisHost, redisPort, redisPassword, timeout=readyTimeout), False),
+        "redis_cache": (
+            lambda: redis_accessible(redisCacheHost, redisCachePort, redisPassword, timeout=readyTimeout),
+            False,
+        ),
+        "strelka": (
+            lambda: malcolm_utils.check_socket(strelkaHost, strelkaPort, timeout=readyTimeout),
+            False,
+        ),
     }
 
-    results = {name: safe_check(name, func, default) for name, (func, default) in checks.items()}
+    # run the checks concurrently so the total time is bounded by the slowest single check
+    #   rather than the sum of all of them
+    with ThreadPoolExecutor(max_workers=len(checks)) as executor:
+        futures = {
+            name: executor.submit(safe_check, name, func, default) for name, (func, default) in checks.items()
+        }
+        results = {name: future.result() for name, future in futures.items()}
 
     return jsonify(
         arkime=results["arkime"],
@@ -1310,6 +1484,7 @@ def dashboard_export(dashid):
                 },
                 auth=opensearchReqHttpAuth,
                 verify=opensearchSslVerify,
+                timeout=httpTimeout,
             )
             response.raise_for_status()
 
@@ -1495,7 +1670,7 @@ def netbox_sites():
         url = f'{netboxUrl}/api/dcim/sites/?format=json'
         while url:
             try:
-                response = requests.get(url, headers=headers, verify=False)
+                response = requests.get(url, headers=headers, verify=False, timeout=httpTimeout)
                 response.raise_for_status()
             except Exception as e:
                 if debugApi:
@@ -1571,6 +1746,7 @@ def redis_keyspace_info():
                 port=port,
                 password=password,
                 socket_connect_timeout=timeout,
+                socket_timeout=timeout,
                 decode_responses=True,
             )
             return r.info("keyspace")
@@ -1687,7 +1863,8 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
-    if (not is_internal_request(request)) and (not check_roles(request)):
+    internal_request = is_internal_request(request)
+    if (not internal_request) and (not check_roles(request)):
         raise PermissionError("Not authorized to perform this action")
 
     alert = {}
@@ -1797,10 +1974,22 @@ def event():
                 if hitCount := malcolm_utils.deep_get(alertResults[0], ['hits', 'total', 'value'], 0):
                     alert['event']['hits'] = hitCount
 
-        docDateStr = dateparser.parse(alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]]).strftime('%y%m%d')
+        # Record who submitted this document. It's set after the merge so the submitted body can't supply it.
+        alert['event']['submitter'] = (
+            'internal' if internal_request else (request.headers.get('X-Forwarded-User') or 'unknown')
+        )
+
+        docDateStr = (
+            _parse_query_time(alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]])
+            .astimezone(timezone.utc)
+            .strftime('%y%m%d')
+        )
+        # The "alert." namespace keeps caller-supplied IDs from colliding with (and overwriting) pipeline
+        # records in the same index: Arkime IDs are URL-safe base64 and Zeek UIDs are alphanumeric, so
+        # neither ever contains a '.'.
         idxResponse = databaseClient.index(
             index=f"{app.config['MALCOLM_NETWORK_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
-            id=f"{docDateStr}-{alert['event']['id']}",
+            id=f"{docDateStr}-alert.{alert['event']['id']}",
             body=alert,
         )
 

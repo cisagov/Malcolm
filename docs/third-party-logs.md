@@ -43,7 +43,7 @@ These variables' values will depend on the forwarder and the format of the data 
 
 ### <a name="MalcolmTLS"></a>Secure communication
 
-In order to maintain the integrity and confidentiality of data, Malcolm's default (set via the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars)) is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which the forwarder is running and used when defining its settings for connecting to Malcolm.
+In order to maintain the integrity and confidentiality of data, Malcolm's default (set via the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars)) is to require connections from external forwarders to be encrypted using TLS and authenticated with a client certificate. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which the forwarder is running and used when defining its settings for connecting to Malcolm.
 
 ## <a name="FluentBit"></a>Fluent Bit
 

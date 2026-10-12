@@ -108,6 +108,7 @@ done
 echo "SSH available." >&2
 
 cleanup_shared_and_docs
+trap cleanup_shared_and_docs EXIT
 mkdir "$SCRIPT_PATH"/shared
 
 if [[ -r "$DOCKER_IMAGES_TGZ" ]]; then
@@ -120,9 +121,11 @@ fi
 YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 [[ -n $YML_IMAGE_VERSION ]] && echo "$YML_IMAGE_VERSION" > "$SCRIPT_PATH"/shared/version.txt
 [[ -n $DOCKER_IMAGES_LOCAL ]] && echo "$(basename "$DOCKER_IMAGES_LOCAL")" > "$SCRIPT_PATH"/shared/docker_images.txt
-[[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "export GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
-echo "export VCS_REVISION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
-trap cleanup_shared_and_docs EXIT
+(
+  umask 077
+  [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "export GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
+  echo "export VCS_REVISION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
+)
 
 # send source code to VM
 vagrant rsync

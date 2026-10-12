@@ -63,7 +63,12 @@ taxii|2.1|https://example.com/taxii/api2/|URL Blocklist
 
 Malcolm will attempt to query the TAXII feed(s) for `indicator` STIX objects and convert them to the Zeek intelligence format as described above. There are publicly available TAXII 2.x-compatible services provided by a number of organizations including [Anomali Labs](https://www.anomali.com/resources/limo) and [MITRE](https://github.com/mitre-attack/attack-stix-data/); or users may choose from several open-source offerings to roll their own TAXII 2 server (e.g., [oasis-open/cti-taxii-server](https://github.com/oasis-open/cti-taxii-server), [freetaxii/server](https://github.com/freetaxii/server), [StephenOTT/TAXII-Server](https://github.com/StephenOTT/TAXII-Server), etc.).
 
-Note that only **indicators** of [**cyber-observable objects**](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the **equals (`=`)** [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a **single value** can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
+Each Zeek intelligence item matches a single value on its own, so Malcolm converts a STIX indicator's [pattern](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html) into the items that can match independently without ever matching traffic the pattern itself wouldn't:
+
+* Indicators of [**cyber-observable objects**](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) compared with the **equals (`=`)** [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a single value are converted directly. Values joined by `OR`, or listed with `IN (...)`, become one item each.
+* In an `AND` within a single observation that includes a file or certificate hash (e.g., `[file:hashes.MD5 = '…' AND file:name = 'update.exe']`), the hash identifies the file, so only the hash(es) are kept and the other conditions are dropped. These items note in their description that they were reduced from a compound pattern.
+* A `network-traffic` address with an address-type test (e.g., `[network-traffic:dst_ref.type = 'ipv4-addr' AND network-traffic:dst_ref.value = '…']`) is converted to the address.
+* Branches of an `OR` that can't be expressed (other `AND` combinations such as an address with a port, negations, `LIKE`, `MATCHES`, ordering comparisons) are dropped while the other branches are kept. Indicators with nothing that can be expressed, including those relating separate observations (`AND` or `FOLLOWEDBY` between observations, `WITHIN`, `REPEATS`, and `START`/`STOP` qualifiers), are skipped with a warning.
 
 Malcolm uses the [stix2](https://pypi.org/project/stix2/) and [taxii2-client](https://pypi.org/project/taxii2-client/) Python libraries to access STIX™/TAXII™ threat intelligence feeds.
 
@@ -82,7 +87,10 @@ These other parameters can also optionally be provided:
 
 ```yaml
   auth_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  require_to_ids: False
 ```
+
+`require_to_ids` controls whether attributes from that feed with their [`to_ids`](https://www.misp-standard.org/rfc/misp-standard-core.html#name-to_ids) flag set to `false` are skipped (see below).
 
 Alternatively, if a special file named `.misp_input.txt` is found in `./zeek/intel/MISP`, that file will be read and processed as described above. The feeds are specified one per line, according to the following format (the authentication key is optional):
 ```
@@ -110,6 +118,10 @@ Upon Malcolm connects to the URLs for the MISP feeds in `.misp_input.txt`, it wi
 * a list of [Attributes](https://www.misp-project.org/openapi/#tag/Attributes) returned for a request via the [MISP Automation API](https://www.misp-project.org/openapi/) made to a MISP platform's [`/attributes` endpoint](https://www.misp-project.org/openapi/#tag/Attributes/operation/restSearchAttributes)
 
 Note that only a subset of MISP [attribute types](https://www.misp-project.org/datamodels/#attribute-categories-vs-types) can be expressed with the Zeek intelligence [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type). MISP attributes with other types will be silently ignored.
+
+MISP authors set an attribute's `to_ids` flag to `false` to mark it as context rather than something to detect on: for example, the reassignable IP address of a host that served a malicious URL, a generic file name like `update.exe`, or a URL path without a host. By default Malcolm skips these attributes. Setting `require_to_ids: False` for a feed in `misp.yaml` includes them for that feed. For MISP JSON files and feeds listed in `.misp_input.txt`, the default can be changed with the `--misp-require-to-ids` option of `zeek_intel_from_threat_feed.py`.
+
+The attributes of a MISP [object](https://www.misp-standard.org/rfc/misp-standard-core.html) describe one thing. When an object includes a file, certificate, or key hash, only its hashes are converted; its other attributes (file names, sizes, etc.) would match far more broadly on their own. Likewise, for composite attributes such as `filename|sha256`, only the hash is converted, and the file name is included in the item's description. Items converted this way note in their description that they were reduced from the MISP object or attribute.
 
 Malcolm uses the [MISP/PyMISP](https://github.com/MISP/PyMISP) Python library to access MISP threat intelligence feeds.
 

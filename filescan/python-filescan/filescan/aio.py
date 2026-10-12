@@ -42,11 +42,14 @@ def run_as_main[T](main: AnyAwaitable[T]) -> T:
 
 @contextlib.asynccontextmanager
 async def main_task_group(run_forever: bool = False) -> AsyncGenerator[TaskGroup]:
-    async with anyio.create_task_group() as group, _atexit:
-        group.start_soon(_signal_handler, group.cancel_scope)
-        if run_forever:
-            group.start_soon(anyio.sleep_forever)
-        yield group
+    # The signal listener must not keep otherwise finished work alive.
+    async with anyio.create_task_group() as signal_group:
+        async with anyio.create_task_group() as group, _atexit:
+            signal_group.start_soon(_signal_handler, group.cancel_scope)
+            if run_forever:
+                group.start_soon(anyio.sleep_forever)
+            yield group
+        signal_group.cancel_scope.cancel()
 
 
 async def _signal_handler(scope: CancelScope) -> None:

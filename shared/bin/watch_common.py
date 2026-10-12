@@ -158,6 +158,19 @@ class FileOperationEventHandler(FileSystemEventHandler):
                             d[fName] = self.modDeck.pop(fName)
                             d[fName].append(newOpLog)
 
+                        else:
+                            # not promoted yet: keep staging it in modDeck, recording this event so a later
+                            # size change can be recognized as a real modification. Without this, the
+                            # event fell through to the move_to_end below against the main deck, which
+                            # doesn't contain this file (KeyError), and was never recorded, so a file whose
+                            # first event was "opened" could never be promoted by a "modified" event.
+                            deckInserted = self.modDeck
+                            staged = self.modDeck[fName]
+                            if staged and (staged[-1].operation == event.event_type):
+                                staged[-1] = newOpLog
+                            else:
+                                staged.append(newOpLog)
+
                     else:
                         # this is a file we were not previously tracking at all, in either deck
 

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 FROM debian:13-slim
@@ -33,7 +34,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 ENV ARKIME_DIR="/opt/arkime"
-ENV ARKIME_VERSION="6.7.0"
+ENV ARKIME_VERSION="6.8.0"
 ENV ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH=no
@@ -65,9 +66,6 @@ ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG PCAP_NODE_NAME=malcolm
 ARG PCAP_PROCESSED_DIRECTORY=/data/pcap/processed
-ARG MAXMIND_GEOIP_DB_ACCOUNT_ID=""
-ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
-ARG MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL=""
 
 # Declare envs vars for each arg
 ENV MALCOLM_USERNAME=$MALCOLM_USERNAME
@@ -177,11 +175,15 @@ ADD --chmod=644 arkime/rules/*.yml $ARKIME_DIR/rules/
 ADD --chmod=644 arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 
 # MaxMind now requires a (free) license key to download the free versions of
-# their GeoIP databases. This should be provided as a build argument.
+# their GeoIP databases. These credentials are provided as build secrets (not
+# build arguments) so they are not recorded in the image history.
 #   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
 #   see https://github.com/arkime/arkime/issues/1350
 #   see https://github.com/arkime/arkime/issues/1352
-RUN ( /usr/local/bin/maxmind-mmdb-download.sh -o $ARKIME_DIR/etc || true ) && \
+RUN --mount=type=secret,id=MAXMIND_GEOIP_DB_ACCOUNT_ID,env=MAXMIND_GEOIP_DB_ACCOUNT_ID \
+    --mount=type=secret,id=MAXMIND_GEOIP_DB_LICENSE_KEY,env=MAXMIND_GEOIP_DB_LICENSE_KEY \
+    --mount=type=secret,id=MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL,env=MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL \
+    ( /usr/local/bin/maxmind-mmdb-download.sh -o $ARKIME_DIR/etc || true ) && \
     curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
     curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
 

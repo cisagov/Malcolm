@@ -69,11 +69,13 @@ echo "SSH available." >&2
 
 # pass a few things across to the vagrant environment in a "shared" directory (and clean it up when done)
 cleanup_shared
-mkdir -p "$SCRIPT_PATH"/shared
-[[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
-echo "VCS_REVISION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
-
 trap cleanup_shared EXIT
+mkdir -p "$SCRIPT_PATH"/shared
+(
+  umask 077
+  [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
+  echo "VCS_REVISION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
+)
 
 if [[ -r "$DOCKER_IMAGES_TGZ" ]]; then
   DOCKER_IMAGES_LOCAL="$SCRIPT_PATH/../$(basename "$DOCKER_IMAGES_TGZ")"

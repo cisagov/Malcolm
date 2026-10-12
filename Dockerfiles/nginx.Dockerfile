@@ -1,10 +1,10 @@
+# syntax=docker/dockerfile:1
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ####################################################################################
 # first build documentation with jekyll
 FROM ghcr.io/mmguero-dev/jekyll:latest AS docbuild
 
-ARG GITHUB_TOKEN
 ARG VCS_REVISION
 ENV VCS_REVISION=$VCS_REVISION
 
@@ -18,8 +18,9 @@ ADD --chmod=644 https://use.fontawesome.com/releases/v4.7.0/css/font-awesome-css
 WORKDIR /site
 
 # build documentation, remove unnecessary files, then massage a bit to work nicely with NGINX (which will be serving it)
-RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$VCS_REVISION/g" "{}" \; && \
-    ( [ -n "${GITHUB_TOKEN}" ] && export JEKYLL_GITHUB_TOKEN="${GITHUB_TOKEN}" || true ) && \
+#   GITHUB_TOKEN is provided as a build secret (not a build argument) so it is not recorded in the image history
+RUN --mount=type=secret,id=GITHUB_TOKEN,env=JEKYLL_GITHUB_TOKEN \
+    find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$VCS_REVISION/g" "{}" \; && \
     sed -i "s/^\(show_downloads:\).*/\1 false/" /site/_config.yml && \
     sed -i "s/^\(offline_mode:\).*/\1 true/" /site/_config.yml && \
     sed -i -e "/^mastodon:/,+2d" /site/_config.yml && \

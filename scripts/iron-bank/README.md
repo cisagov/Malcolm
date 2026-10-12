@@ -83,7 +83,7 @@ done
 IRON_BANK_PARENT_PATH=/path/to/iron-bank
 BRANCH=inl-26.x
 TAG=26.08.0-ib
-CONTAINER_ENGINE=docker
+export CONTAINER_ENGINE=docker
 
 for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
 ; do
@@ -100,7 +100,7 @@ done
 for PAIR in filebeat:filebeat-oss \
             nginx:nginx-proxy \
             redis:valkey; do \
-    "$CONTAINER_ENGINE" tag ghcr.io/idaholab/malcolm/${PAIR%:*}:$v ghcr.io/idaholab/malcolm/${PAIR#*:}:$v
+    "$CONTAINER_ENGINE" tag ghcr.io/idaholab/malcolm/${PAIR%:*}:$TAG ghcr.io/idaholab/malcolm/${PAIR#*:}:$TAG
 done
 ```
 
