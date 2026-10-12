@@ -11,7 +11,6 @@ from unittest.mock import Mock
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'scripts'))
 SCRIPT = ROOT / 'filebeat' / 'scripts' / 'clean-processed-folder.py'
 SPEC = importlib.util.spec_from_file_location('cleanup_lock_subject', SCRIPT)
 cleaner = importlib.util.module_from_spec(SPEC)

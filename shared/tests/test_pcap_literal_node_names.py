@@ -2,18 +2,14 @@
 
 import json
 import logging
-from pathlib import Path
 import re
 import struct
-import sys
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import opensearchpy
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(ROOT / 'scripts'), str(ROOT / 'shared/bin')]
 import pcap_watcher as watcher_module
 
 

@@ -4,17 +4,11 @@ from datetime import datetime, timedelta, timezone
 import io
 import json
 import os
-from pathlib import Path
-import sys
 import time
 from unittest.mock import Mock, patch
 
 import pytest
 import requests
-
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'scripts'))
-sys.path.insert(0, str(ROOT / 'zeek' / 'scripts'))
 
 import zeek_threat_feed_utils as feeds
 from malcolm_utils import AtomicInt

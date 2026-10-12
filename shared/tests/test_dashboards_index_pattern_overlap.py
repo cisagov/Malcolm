@@ -2,16 +2,12 @@
 
 from copy import deepcopy
 import json
-from pathlib import Path
-import sys
 from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
 
 import pytest
 import requests
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(ROOT / 'scripts'), str(ROOT / 'dashboards/scripts')]
 import opensearch_index_size_prune as prune
 
 CAT = [

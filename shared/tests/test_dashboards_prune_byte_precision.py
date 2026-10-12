@@ -2,18 +2,13 @@
 
 from copy import deepcopy
 import json
-from pathlib import Path
-import sys
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 import requests
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'scripts'))
-sys.path.insert(0, str(ROOT / 'dashboards' / 'scripts'))
-import opensearch_index_size_prune as pruning  # noqa: E402 - standalone sources require their checkout paths
+import opensearch_index_size_prune as pruning
 
 
 def options(primary=False, names=False, dryrun=False):

@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Parsing dates involving a day of month without a year:DeprecationWarning",
+]

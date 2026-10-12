@@ -4,8 +4,6 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import io
 import os
-from pathlib import Path
-import sys
 import time
 
 import mandiant_threatintel
@@ -14,9 +12,6 @@ import pytest
 from stix2.v20 import Bundle as Bundle20, Indicator as Indicator20
 from stix2.v21 import Bundle as Bundle21, Indicator as Indicator21
 
-_REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(_REPO / 'scripts'))
-sys.path.insert(0, str(_REPO / 'zeek' / 'scripts'))
 import zeek_threat_feed_utils as feed
 
 

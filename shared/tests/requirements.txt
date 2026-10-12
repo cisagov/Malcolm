@@ -1,0 +1,41 @@
+# test dependencies for shared/tests
+# pip install -r shared/tests/requirements.txt
+
+pytest
+trio
+
+# api (api/requirements.txt)
+psutil==7.1.3
+redis==7.1.0
+regex==2025.11.3
+
+# filescan (filescan/python-filescan/requirements.txt)
+anyio==4.14.2
+Flask==3.1.3
+human-id==0.2.0
+inflection==0.5.1
+pydantic==2.11.7; python_version < "3.14"
+pydantic>=2.12; python_version >= "3.14"
+supervisor==4.3.0
+# filescan Strelka bindings (make -C filescan/python-filescan)
+grpcio-tools
+
+# threat feeds (zeek/requirements.txt)
+git+https://github.com/mmguero-dev/mandiant-ti-client
+dateparser==1.2.2
+pymisp==2.5.17.2
+stix2==3.0.1
+taxii2-client==2.3.0
+vt-py==0.22.0
+
+# dashboards retention (dashboards/requirements.txt)
+git+https://github.com/mmguero-dev/python-humanfriendly.git
+
+# pcap watcher (pcap-monitor/requirements.txt)
+elasticsearch==8.19.2
+elasticsearch-dsl==8.18.0
+opensearch-py==3.2.0
+python-magic==0.4.27
+pyzmq==27.1.0
+requests==2.33.1
+watchdog==6.0.0

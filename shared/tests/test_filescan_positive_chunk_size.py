@@ -2,15 +2,21 @@
 
 import asyncio
 from pathlib import Path
-import sys
 from unittest.mock import patch
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-from filescan.aio import chunk_async_data_stream  # noqa: E402 - standalone sources require their checkout paths
-from filescan.strelka import StrelkaFrontend  # noqa: E402 - standalone sources require their checkout paths
+from filescan.aio import chunk_async_data_stream
+
+try:
+    from filescan.strelka import StrelkaFrontend
+except ImportError:
+    StrelkaFrontend = None
+
+needs_strelka = pytest.mark.skipif(
+    StrelkaFrontend is None,
+    reason='Strelka protobuf bindings not generated (run make in filescan/python-filescan)',
+)
 
 
 @pytest.mark.parametrize('size', [0, -1, -128])
@@ -44,6 +50,7 @@ def test_invalid_size_does_not_consume_input(size):
     asyncio.run(run())
 
 
+@needs_strelka
 @pytest.mark.parametrize('size', [0, -1, -128])
 def test_frontend_rejects_invalid_configuration_before_reading_credentials(size):
     with patch.object(Path, 'read_bytes', side_effect=AssertionError('certificate must not be read')):
@@ -66,6 +73,7 @@ def test_valid_chunking_keeps_byte_order_and_final_remainder(size, kind):
     asyncio.run(run())
 
 
+@needs_strelka
 @pytest.mark.parametrize('size', [1, 3, 64])
 def test_real_file_requests_keep_protobuf_metadata_and_contents(tmp_path, size):
     path = tmp_path / 'fixture.bin'
@@ -83,6 +91,7 @@ def test_real_file_requests_keep_protobuf_metadata_and_contents(tmp_path, size):
     assert len({request.request.id for request in result}) == 1
 
 
+@needs_strelka
 def test_default_chunk_size_and_empty_input_are_unchanged():
     frontend = StrelkaFrontend()
     assert frontend.chunksize == 32768

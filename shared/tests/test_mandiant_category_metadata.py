@@ -1,19 +1,13 @@
 """Mandiant indicator category enrichment for Zeek intel output."""
 
-import importlib
-import sys
 from datetime import datetime, timezone
 from io import StringIO
-from pathlib import Path
 from unittest.mock import Mock
 
 import mandiant_threatintel
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts"))
-sys.path.insert(0, str(ROOT / "zeek" / "scripts"))
-intel = importlib.import_module("zeek_threat_feed_utils")
+import zeek_threat_feed_utils as intel
 
 
 def indicator(category, sources=None):
@@ -30,9 +24,7 @@ def indicator(category, sources=None):
     }
     if category is not None:
         fields["category"] = category
-    return mandiant_threatintel.FQDNIndicator.from_json_response(
-        fields, client=None
-    )
+    return mandiant_threatintel.FQDNIndicator.from_json_response(fields, client=None)
 
 
 @pytest.mark.parametrize(
@@ -46,9 +38,7 @@ def indicator(category, sources=None):
     ],
 )
 def test_direct_mandiant_category_reaches_zeek_metadata(category, expected):
-    (result,) = intel.map_mandiant_indicator_to_zeek(
-        indicator(category), skip_attr_map={"category": False}
-    )
+    (result,) = intel.map_mandiant_indicator_to_zeek(indicator(category), skip_attr_map={"category": False})
     assert result[intel.ZEEK_INTEL_META_CATEGORY] == expected
     assert result[intel.ZEEK_INTEL_INDICATOR] == "example.test"
 
@@ -72,63 +62,43 @@ def test_direct_category_combines_without_duplicates_with_source_categories():
 
 
 def test_disabled_category_does_not_emit_unrequested_direct_enrichment():
-    (result,) = intel.map_mandiant_indicator_to_zeek(
-        indicator(["ransomware"]), skip_attr_map={"category": True}
-    )
+    (result,) = intel.map_mandiant_indicator_to_zeek(indicator(["ransomware"]), skip_attr_map={"category": True})
     assert result[intel.ZEEK_INTEL_META_CATEGORY] == "-"
+
+
+def _run_update(monkeypatch, conn_info):
+    client = Mock()
+    client.Indicators.get_list.return_value = []
+    monkeypatch.setattr(intel.mandiant_threatintel, "ThreatIntelClient", Mock(return_value=client))
+    intel.UpdateFromMandiant(
+        connInfo=conn_info,
+        since=datetime(2026, 10, 1, tzinfo=timezone.utc),
+        nowTime=datetime(2026, 10, 7, tzinfo=timezone.utc),
+        sslVerify=True,
+        zeekPrinter=Mock(),
+        logger=None,
+        successCount=Mock(),
+        workerId=1,
+    )
+    return client.Indicators.get_list.call_args.kwargs
 
 
 @pytest.mark.parametrize("requested", [False, True])
 def test_mandiant_client_gets_requested_category_flag(monkeypatch, requested):
-    client = Mock()
-    client.Indicators.get_list.return_value = []
-    factory = Mock(return_value=client)
-    monkeypatch.setattr(intel.mandiant_threatintel, "ThreatIntelClient", factory)
-
-    intel.UpdateFromMandiant(
-        connInfo={"api_key": "example", "include_category": requested},
-        since=datetime(2026, 10, 1, tzinfo=timezone.utc),
-        nowTime=datetime(2026, 10, 7, tzinfo=timezone.utc),
-        sslVerify=True,
-        zeekPrinter=Mock(),
-        logger=None,
-        successCount=Mock(),
-        workerId=1,
-    )
-
-    assert client.Indicators.get_list.call_args.kwargs["include_category"] is requested
+    kwargs = _run_update(monkeypatch, {"api_key": "example", "include_category": requested})
+    assert kwargs["include_category"] is requested
 
 
 def test_default_category_enrichment_remains_enabled(monkeypatch):
-    client = Mock()
-    client.Indicators.get_list.return_value = []
-    monkeypatch.setattr(
-        intel.mandiant_threatintel,
-        "ThreatIntelClient",
-        Mock(return_value=client),
-    )
-    intel.UpdateFromMandiant(
-        connInfo={"api_key": "example"},
-        since=datetime(2026, 10, 1, tzinfo=timezone.utc),
-        nowTime=datetime(2026, 10, 7, tzinfo=timezone.utc),
-        sslVerify=True,
-        zeekPrinter=Mock(),
-        logger=None,
-        successCount=Mock(),
-        workerId=1,
-    )
-    assert client.Indicators.get_list.call_args.kwargs["include_category"] is True
+    kwargs = _run_update(monkeypatch, {"api_key": "example"})
+    assert kwargs["include_category"] is True
 
 
 def test_extended_zeek_output_includes_category_without_extra_columns():
     output = StringIO()
-    printer = intel.FeedParserZeekPrinter(
-        extended=True, notice=False, cif=False, file=output
-    )
+    printer = intel.FeedParserZeekPrinter(extended=True, notice=False, cif=False, file=output)
 
-    assert printer.ProcessMandiant(
-        indicator(["phishing", "ransomware"]), skip_attr_map={"category": False}
-    )
+    assert printer.ProcessMandiant(indicator(["phishing", "ransomware"]), skip_attr_map={"category": False})
 
     lines = output.getvalue().splitlines()
     assert len(lines) == 2
@@ -154,16 +124,8 @@ def test_md5_hash_fanout_preserves_category():
             {"value": "b" * 40, "id": "associated-hash-2"},
         ],
     }
-    indicator_obj = mandiant_threatintel.MD5Indicator.from_json_response(
-        response, client=None
-    )
-    rows = intel.map_mandiant_indicator_to_zeek(
-        indicator_obj, skip_attr_map={"category": False}
-    )
+    indicator_obj = mandiant_threatintel.MD5Indicator.from_json_response(response, client=None)
+    rows = intel.map_mandiant_indicator_to_zeek(indicator_obj, skip_attr_map={"category": False})
     assert len(rows) == 2
-    assert {row[intel.ZEEK_INTEL_INDICATOR] for row in rows} == {
-        "a" * 64, "b" * 40
-    }
-    assert all(
-        row[intel.ZEEK_INTEL_META_CATEGORY] == "malware" for row in rows
-    )
+    assert {row[intel.ZEEK_INTEL_INDICATOR] for row in rows} == {"a" * 64, "b" * 40}
+    assert all(row[intel.ZEEK_INTEL_META_CATEGORY] == "malware" for row in rows)

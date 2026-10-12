@@ -4,13 +4,11 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import sys
 from unittest.mock import Mock
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'scripts'))
 spec = importlib.util.spec_from_file_location('cleanup_registry', ROOT / 'filebeat/scripts/clean-processed-folder.py')
 cleanup = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cleanup)

@@ -1,19 +1,13 @@
 """PCAP duplicate checks are independent of optional startup health waiting."""
 
 import json
-from pathlib import Path
 import struct
-import sys
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'scripts'))
-sys.path.insert(0, str(ROOT / 'shared' / 'bin'))
-
-import pcap_watcher  # noqa: E402 - standalone scripts require their source paths
+import pcap_watcher
 
 
 @pytest.fixture

@@ -3,15 +3,11 @@
 from collections import defaultdict
 from datetime import datetime, timezone
 import os
-from pathlib import Path
-import sys
 import time
 from unittest.mock import Mock, patch
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(ROOT / 'scripts'), str(ROOT / 'api')]
 import malcolm_utils
 
 # Client construction is local; credential files and network transport are not used.
@@ -21,6 +17,13 @@ with patch.dict(
     'socket.create_connection', side_effect=AssertionError('Network access in offline tests')
 ):
     import project as api
+
+
+@pytest.fixture(autouse=True)
+def role_based_access_disabled(monkeypatch):
+    """These tests cover time handling; keep a ROLE_BASED_ACCESS in the caller's environment out of them."""
+    monkeypatch.setitem(api.app.config, 'ROLE_BASED_ACCESS', 'false')
+
 
 START = datetime(2026, 1, 2, 12, tzinfo=timezone.utc)
 END = datetime(2026, 1, 2, 13, tzinfo=timezone.utc)
@@ -101,3 +104,23 @@ def test_public_aggregation_uses_the_correct_range(host_timezone, method):
     bounds = search.call_args.kwargs['body']['query']['bool']['filter'][0]['range'][api.timefield_from_args({})]
     assert bounds['gte'] == int(START.timestamp() * 1000)
     assert bounds['lte'] == int(END.timestamp() * 1000)
+
+
+@pytest.mark.parametrize(
+    'start, suffix',
+    [
+        ('2026-01-02T23:30:00Z', '260102'),
+        ('2026-01-02 23:30:00', '260102'),
+        ('2026-01-02T23:30:00-05:00', '260103'),
+        ('2026-01-03T00:30:00+05:30', '260102'),
+    ],
+)
+def test_alert_index_suffix_uses_the_utc_date(host_timezone, start, suffix):
+    index = Mock(return_value={'result': 'created'})
+    with patch.object(api.databaseClient, 'index', new=index):
+        with api.app.test_client() as client:
+            url = '/' + api.app.config['MALCOLM_API_PREFIX'].strip('/') + '/alert'
+            response = client.post(url, json={'alert': {'alert': 'offline-alert', 'period': {'start': start}}})
+    assert response.status_code == 200, response.data
+    assert index.call_args.kwargs['index'] == api.app.config['MALCOLM_NETWORK_INDEX_PATTERN'].rstrip('*') + suffix
+    assert index.call_args.kwargs['id'].startswith(suffix + '-')
