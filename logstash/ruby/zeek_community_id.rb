@@ -6,16 +6,16 @@ require 'digest'
 require 'ipaddr'
 
 # Computes Community ID v1 for flow-oriented Zeek events with a complete
-# TCP, UDP or SCTP tuple. Other protocols are left unchanged.
-def register(params)
-  @enabled = %w[true yes on 1].include?(params.fetch('enabled', 'false').to_s.downcase)
-end
-
+# TCP, UDP or SCTP tuple. Other protocols are left unchanged. The transport
+# comes from [network][transport], or from [@metadata][inferred_transport]
+# when the log has no proto column.
 def filter(event)
-  return [event] unless @enabled
   return [event] unless event.get('[network][community_id]').nil?
 
+  # Prefer the transport Zeek logged; otherwise fall back to the one looked up
+  # by log type in 1250_zeek_community_id.conf (see zeek_log_transport.yaml).
   transport = event.get('[network][transport]')
+  transport = event.get('[@metadata][inferred_transport]') if transport.nil? || transport == []
   transport = transport.first if transport.is_a?(Array) && transport.size == 1
   protocol = case transport.to_s.downcase
              when 'tcp' then 6
