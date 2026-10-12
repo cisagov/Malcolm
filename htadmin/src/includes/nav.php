@@ -6,13 +6,13 @@
   <div class="container malcolm-navigation-content">
     <div class="navbar-header">
       <a class="navbar-brand malcolm-brand" href="/" aria-label="Malcolm home">
-        <img src="malcolm-cisa.svg" alt="CISA" class="malcolm-brand-logo">
-        <span>Malcolm <small>Account Management</small></span>
+        <img src="malcolm-icon.svg" alt="Malcolm" class="malcolm-brand-logo">
+        <span>Malcolm <small>Local Account Management</small></span>
       </a>
     </div>
     <ul class="nav navbar-nav navbar-right malcolm-navigation-links">
-      <li><a href="/" class="malcolm-home-link">Home</a></li>
       <?php if (check_admin_login()): ?>
+        <li><a href="htadmin.php">Accounts</a></li>
         <li><a href="admin_logout.php">Logout</a></li>
       <?php else: ?>
         <li><a href="admin_login.php">Administrator Login</a></li>
