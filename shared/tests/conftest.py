@@ -8,6 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # highest precedence first
 SOURCE_DIRS = (
     REPO_ROOT / 'zeek' / 'scripts',
+    REPO_ROOT / 'netbox' / 'control-scripts',
     REPO_ROOT / 'shared' / 'bin',
     REPO_ROOT / 'scripts',
     REPO_ROOT / 'filescan' / 'python-filescan',
