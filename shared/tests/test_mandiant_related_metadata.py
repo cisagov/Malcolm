@@ -50,8 +50,11 @@ class TestMandiantRelatedMetadata(unittest.TestCase):
         record = intel.map_mandiant_indicator_to_zeek(
             indicator, skip_attr_map={"campaigns": False, "reports": False}
         )[0]
-        self.assertEqual(record["meta.campaigns"], r"UNC\x2c42\x7cUNC7\x7cUNC\x7cOps")
-        self.assertEqual(record["meta.reports"], r"23-123\x7c24\x7c002")
+        # A literal "|" inside a value can't be escaped (Logstash splits on "|"
+        # after Zeek decodes \x7c), so it is replaced with a space. Space sorts
+        # before "," and digits, so "UNC Ops" comes first.
+        self.assertEqual(record["meta.campaigns"], r"UNC Ops\x7cUNC\x2c42\x7cUNC7")
+        self.assertEqual(record["meta.reports"], r"23-123\x7c24 002")
 
     def test_no_fallback_from_missing_fields_or_scalar_entries(self):
         indicator = self._indicator(
