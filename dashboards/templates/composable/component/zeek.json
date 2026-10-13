@@ -1163,6 +1163,62 @@
                 }
               }
             },
+            "ntp_control": {
+              "properties": {
+                "op_code": {
+                  "type": "long"
+                },
+                "sequence": {
+                  "type": "long"
+                },
+                "status": {
+                  "type": "long"
+                },
+                "association_id": {
+                  "type": "long"
+                },
+                "resp_bit": {
+                  "type": "keyword"
+                },
+                "err_bit": {
+                  "type": "keyword"
+                },
+                "more_bit": {
+                  "type": "keyword"
+                },
+                "data": {
+                  "type": "keyword"
+                },
+                "key_id": {
+                  "type": "long"
+                },
+                "crypto_checksum": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "ntp_private": {
+              "properties": {
+                "req_code": {
+                  "type": "long"
+                },
+                "sequence": {
+                  "type": "long"
+                },
+                "implementation": {
+                  "type": "long"
+                },
+                "auth_bit": {
+                  "type": "keyword"
+                },
+                "err": {
+                  "type": "long"
+                },
+                "data": {
+                  "type": "keyword"
+                }
+              }
+            },
             "ocsp": {
               "properties": {
                 "certStatus": {
