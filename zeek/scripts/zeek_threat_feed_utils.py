@@ -269,6 +269,31 @@ def mandiant_indicator_as_json_str(indicator, skip_attr_map=None):
         return 'unknown indicator'
 
 
+def _mandiant_related_refs(entries, field):
+    """Render one kind of Mandiant reference as escaped Zeek set items.
+
+    Read only fields already returned with the indicator, never lazy SDK
+    properties that can trigger extra network requests.
+    """
+    if not isinstance(entries, (list, tuple)):
+        entries = [entries] if entries else []
+
+    values = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        value = entry.get(field)
+        if not isinstance(value, (str, int)) or isinstance(value, bool):
+            continue
+        value = str(value).strip()
+        if value:
+            values.add(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '))
+
+    return '\\x7c'.join(
+        value.replace(',', '\\x2c').replace('|', '\\x7c') for value in sorted(values)
+    )
+
+
 def map_mandiant_indicator_to_zeek(
     indicator: mandiant_threatintel.APIResponse,
     skip_attr_map=None,
@@ -291,6 +316,8 @@ def map_mandiant_indicator_to_zeek(
         zeekItem = defaultdict(lambda: '-')
         tags = []
         sources = []
+        raw_response = getattr(indicator, '_api_response', None)
+        raw_response = raw_response if isinstance(raw_response, dict) else {}
 
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
 
@@ -322,8 +349,7 @@ def map_mandiant_indicator_to_zeek(
         # Read the category enrichment already returned with this page instead
         # of triggering a separate request for every indicator.
         if not (skip_attr_map or {}).get('category', False):
-            response = indicator._api_response if isinstance(indicator._api_response, dict) else {}
-            direct_categories = response.get('category')
+            direct_categories = raw_response.get('category')
             if isinstance(direct_categories, str):
                 direct_categories = [direct_categories]
             if isinstance(direct_categories, (list, tuple, set)):
@@ -337,6 +363,17 @@ def map_mandiant_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join(
                 category.replace(',', '\\x2c') for category in sorted(categories)
             )
+
+        # Campaigns and reports are opt-in indicator fields. Use stable keys
+        # within each column and do not load lazy SDK properties.
+        if not (skip_attr_map or {}).get('campaigns', False) and (
+            campaigns := _mandiant_related_refs(raw_response.get('campaigns'), 'name')
+        ):
+            zeekItem[ZEEK_INTEL_META_CAMPAIGNS] = campaigns
+        if not (skip_attr_map or {}).get('reports', False) and (
+            reports := _mandiant_related_refs(raw_response.get('reports'), 'report_id')
+        ):
+            zeekItem[ZEEK_INTEL_META_REPORTS] = reports
 
         if hasattr(indicator, 'misp'):
             if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
@@ -355,8 +392,7 @@ def map_mandiant_indicator_to_zeek(
         #   network communication to attempt.
         if (
             isinstance(indicator, mandiant_threatintel.MD5Indicator)
-            and indicator._api_response
-            and (hashes := indicator._api_response.get('associated_hashes', []))
+            and (hashes := raw_response.get('associated_hashes', []))
         ):
             for hashish in hashes:
                 if hashVal := hashish.get('value'):
