@@ -955,6 +955,13 @@
                 }
               }
             },
+            "multicast_participants": {
+              "properties": {
+                "participants": {
+                  "type": "ip"
+                }
+              }
+            },
             "mysql": {
               "properties": {
                 "arg": {
