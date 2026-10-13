@@ -21,7 +21,7 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots and/or Logs **
+**Screenshots and/or Logs**
 If applicable, attach screenshots or container logs (e.g., the relevant bits of `./scripts/logs`) to help explain your problem.
 
 **Malcolm Version:**
@@ -34,6 +34,12 @@ If applicable, attach screenshots or container logs (e.g., the relevant bits of 
 - [ ] via Docker on [macOS](https://cisagov.github.io/Malcolm/docs/host-config-macos.html#HostSystemConfigMac)
 - [ ] via [Kubernetes](https://cisagov.github.io/Malcolm/docs/kubernetes.html#Kubernetes) (please provide platform details: e.g., on-prem K3s, Amazon AWS EKS, Microsoft Azure AKS, etc.)
 - [ ] other (please describe)
+
+**Was AI used in discovering, diagnosing, or writing up this bug?**
+- [ ] No
+- [ ] Yes (please describe below)
+
+If yes, describe how: which tool(s), what they did (e.g., found the issue, analyzed logs, drafted this report), and whether you confirmed the behavior yourself on a running Malcolm instance.
 
 **Additional context**
 Add any other context about the problem here.
