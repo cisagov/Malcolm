@@ -6,6 +6,7 @@ from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
+import shlex
 from pathlib import Path
 import shutil
 import subprocess
@@ -15,10 +16,12 @@ import unittest
 from urllib.parse import parse_qs, unquote, urlsplit
 
 
-_SCRIPT = Path(__file__).resolve().parents[4] / 'shared/bin/opensearch_status.sh'
+_SCRIPT = Path(__file__).resolve().parents[2] / 'shared/bin/opensearch_status.sh'
 _BASH = shutil.which('bash')
 _JQ = shutil.which('jq')
 _TOOLS = {name: shutil.which(name) for name in ('curl', 'sed', 'awk', 'wc')}
+_ORIGINAL_PATH = os.environ.get('PATH', '')
+_ORIGINAL_HOME = os.environ.get('HOME', '')
 
 
 @unittest.skipUnless(_BASH and all(_TOOLS.values()), 'Requires Bash, curl, sed, awk and wc')
@@ -79,10 +82,18 @@ class OpenSearchLogReadinessTest(unittest.TestCase):
             root = Path(directory)
             bindir = root / 'bin'
             bindir.mkdir()
-            for name, executable in _TOOLS.items():
-                (bindir / name).symlink_to(executable)
-            if use_jq:
-                (bindir / 'jq').symlink_to(_JQ)
+            # Wrap each tool rather than symlinking it: version-manager shims
+            # (asdf, mise, etc.) are scripts that need the caller's real PATH and
+            # HOME (to find ~/.tool-versions). curl still ignores the real HOME
+            # because CURL_HOME points at the temporary directory below.
+            tools = dict(_TOOLS, jq=_JQ) if use_jq else _TOOLS
+            for name, executable in tools.items():
+                wrapper = bindir / name
+                wrapper.write_text(
+                    f'#!/bin/sh\nHOME={shlex.quote(_ORIGINAL_HOME)} PATH={shlex.quote(_ORIGINAL_PATH)} '
+                    f'exec {shlex.quote(executable)} "$@"\n'
+                )
+                wrapper.chmod(0o755)
             # Eliminate the script's retry delays; all network I/O is localhost.
             sleep = bindir / 'sleep'
             sleep.write_text('#!/bin/sh\nexit 0\n')
@@ -160,6 +171,3 @@ class OpenSearchLogReadinessTest(unittest.TestCase):
         )
         self.assertEqual([pattern for pattern, _ in requests], ['logs-*', 'arkime-*'])
 
-
-if __name__ == '__main__':
-    unittest.main()
