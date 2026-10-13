@@ -44,11 +44,12 @@ ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 USER root
 
 # Remove the performance-analyzer plugin - Reduce resources in docker image
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
   yum install -y gettext openssl util-linux procps jq rsync findutils && \
     yum remove -y vim-* && \
-  curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-      chmod 755 /usr/local/bin/yq && \
+  sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
   /usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3 && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \

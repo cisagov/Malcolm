@@ -89,7 +89,9 @@ USER root
 
 ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
 
-RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     microdnf -y install curl-minimal && \
         curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
@@ -124,8 +126,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/local/bin/yq && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
     curl -fsSL -o /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" && \
         chmod 755 /usr/local/bin/evtx && \
     microdnf clean all && \

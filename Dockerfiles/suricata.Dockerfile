@@ -58,7 +58,9 @@ ENV SURICATA_UPDATE_CACHE_DIR="$SURICATA_UPDATE_DIR/cache"
 
 ADD --chmod=644 suricata/requirements.txt /usr/local/src/requirements.txt
 
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     echo "deb http://deb.debian.org/debian trixie-backports main contrib non-free" | tee /etc/apt/sources.list.d/trixie-backports.list && \
     apt-get -q update && \
@@ -111,8 +113,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
-    curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/bin/yq && \
+    sh /usr/local/share/install-verified-binary.sh /usr/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistent ${PUSER} && \
       usermod -a -G tty ${PUSER} && \

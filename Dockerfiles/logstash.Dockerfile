@@ -64,7 +64,9 @@ ADD --chmod=755 logstash/scripts/*.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
-RUN set -x && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    set -x && \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     microdnf -y install curl-minimal && \
         curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
@@ -81,8 +83,7 @@ RUN set -x && \
         util-linux && \
     curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
         chmod +x /usr/bin/tini && \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/local/bin/yq && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     logstash-plugin install --preserve logstash-output-opensearch && \
         /usr/share/logstash/bin/ruby -e 'path = Dir["/usr/share/logstash/vendor/bundle/jruby/3.4.0/gems/psych-*/lib/psych/class_loader.rb"].first or abort "psych class_loader not found"; text = File.read(path); changed = text.gsub!(/constants\.each do \|const\|\n\s+konst = const_get const\n\s+class_eval <<~RUBY, __FILE__, __LINE__ \+ 1\n\s+def #\{const\.to_s\.downcase\}\n\s+load #\{konst\.inspect\}\n\s+end\n\s+RUBY\n\s+end/, "constants.each do |const|\n      konst = const_get const\n      define_method(const.to_s.downcase) { load konst }\n    end"); abort "psych patch did not apply" unless changed; File.write(path, text)' && \

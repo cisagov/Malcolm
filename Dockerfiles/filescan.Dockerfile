@@ -86,7 +86,9 @@ ADD --chmod=644 docs/images/logo/Malcolm_background.png "${FILESCAN_HTTP_SERVER_
 ADD --chmod=644 docs/images/icon/favicon.ico "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 ADD --chmod=755 filescan/scripts/web-ui-asset-download.sh /usr/local/bin/
 
-RUN set -e ; \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
         useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistent ${PUSER} ; \
         usermod -a -G tty ${PUSER} ; \
@@ -122,8 +124,7 @@ RUN set -e ; \
       webfs ; \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
         chmod +x /usr/local/bin/supercronic ; \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" ; \
-        chmod 755 /usr/local/bin/yq ; \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" ; \
     mkdir -p /filescan /filescan/data/files /filescan/data/logs "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" ; \
     cd /tmp && \
       /usr/local/bin/web-ui-asset-download.sh -o "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css" && \
