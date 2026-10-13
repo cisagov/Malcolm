@@ -72,10 +72,7 @@ Each Zeek intelligence item matches a single value on its own, so Malcolm conver
 
 Malcolm uses the [stix2](https://pypi.org/project/stix2/) and [taxii2-client](https://pypi.org/project/taxii2-client/) Python libraries to access STIX™/TAXII™ threat intelligence feeds.
 
-STIX 2.1 indicators with a numeric `confidence` (0-100) preserve it in the
-extended Zeek intel `meta.confidence` field and convert it to the 0-10 CIF
-confidence scale. Indicators without confidence do not get an invented value.
-Confidence is not a threat severity score.
+STIX 2.1 indicators with a numeric `confidence` (0-100) preserve it in the extended Zeek intel `meta.confidence` field and convert it to the 0-10 CIF confidence scale. Indicators without confidence do not get an invented value. Confidence is not a threat severity score.
 
 ## <a name="ZeekIntelMISP"></a>MISP
 
@@ -1030,10 +1027,7 @@ These other parameters can also optionally be provided:
 
 Malcolm uses the [google/mandiant-ti-client](https://github.com/google/mandiant-ti-client) Python library to access Mandiant threat intelligence feeds.
 
-Mandiant `mscore` (0-100) represents confidence that an indicator is malicious,
-not its separate threat rating. Valid scores populate `meta.confidence` and the
-0-10 CIF confidence field. Non-numeric and out-of-range scores are omitted.
-The `meta.threat_score` field is reserved for Mandiant threat rating enrichment.
+Mandiant `mscore` (0-100) represents confidence that an indicator is malicious, not its separate threat rating. Valid scores populate `meta.confidence` and the 0-10 CIF confidence field. Non-numeric and out-of-range scores are omitted. The `meta.threat_score` field is reserved for Mandiant threat rating enrichment.
 
 ## <a name="IntelFeedDisclaimer"></a>Disclaimer
 
