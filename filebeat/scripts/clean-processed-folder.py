@@ -299,15 +299,15 @@ def main() -> None:
         logfmt='%(message)s',
     )
 
-    with open(lock_filename, 'w') as lock_file:
+    # Keep the lock path after the file descriptor closes. Unlinking a locked
+    # file lets another process create a new inode and acquire a second lock,
+    # so concurrent cleanups could run even while the first process is active.
+    with open(lock_filename, 'a') as lock_file:
         try:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except IOError:
             return
-        else:
-            prune_files()
-        finally:
-            os.remove(lock_filename)
+        prune_files()
 
 
 if __name__ == '__main__':
