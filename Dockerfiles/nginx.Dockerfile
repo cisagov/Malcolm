@@ -140,26 +140,28 @@ COPY --from=getresty /usr/local/src/openresty/openresty.tar.gz /openresty.tar.gz
 ADD --checksum=sha256:925d2b368db64d4bee6b17bb5b1958c44d20a1b945ac194f1db4fdd551614743 https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_REVISION /nginx-auth-ldap.tar.gz
 
 # component icons from original sources and stuff for offline landing page
-ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
-ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
-ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
-ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/netbox-community/netbox/main/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
-ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/
-ADD https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf /usr/share/nginx/html/css/
-ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf /usr/share/nginx/html/css/
-ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf /usr/share/nginx/html/css/
-ADD https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf /usr/share/nginx/html/css/
-ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf /usr/share/nginx/html/css/
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff2' /usr/share/nginx/html/css/bootstrap-icons.woff2
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff' /usr/share/nginx/html/css/bootstrap-icons.woff
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css' /usr/share/nginx/html/css/bootstrap-icons.css
-ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.eot' /usr/share/nginx/html/css/
-ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff2' /usr/share/nginx/html/css/
-ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff' /usr/share/nginx/html/css/
-ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.ttf' /usr/share/nginx/html/css/
-ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#fontawesomeregular' /usr/share/nginx/html/css/fontawesome-webfont.svg
+ADD --checksum=sha256:44e0882ef03a40fefc148bab511a9b6bbc394c1865500206f6532f66bf4f4482 https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
+ADD --checksum=sha256:f08d2b1bcc9fa3aa5fa450d8d06087ae64f611ea3dfe084e5db8b29a2f9f8090 https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
+ADD --checksum=sha256:d89d0555a75fa2c745bfdd782589cc17ce596d3fd41e5008bef8ff3fec695bc8 https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
+ADD --checksum=sha256:72c3cc4bdb44fe9bc567d1345aa8a00d3ee059ce23f38248c067dc580448821d https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
+# Both icons use immutable source revisions, with BuildKit verifying content
+# against SHA-256 digests committed in this Dockerfile.
+ADD --checksum=sha256:1164d73b01454118b28a3200ed04c4f8e8dc7f67ef8faa9243cc142e92971812 https://raw.githubusercontent.com/gchq/CyberChef/609951ac13967da6d497e0600c922f56bfd0b7af/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
+ADD --checksum=sha256:a80e71eca8315be12d1f005ed68847f7c7aed8b9bf71dabf8479cd40b96abae6 https://raw.githubusercontent.com/netbox-community/netbox/74cb44fabed082aaacd841c984f2dbb435b0833d/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
+ADD --checksum=sha256:287f2b0a046343d811ae43312783880cba0e09850886d6dcdd57a73f65147f01 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/
+ADD --checksum=sha256:218f6f647f83ceec4b0995a5186404d9fc4a5fb5c535d0cdd016bf52afbb5e7e https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf /usr/share/nginx/html/css/
+ADD --checksum=sha256:726beec7cd96f06f5b05b5af54d47321b6270f94e21f4a3bdc80cefc3b79ba69 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf /usr/share/nginx/html/css/
+ADD --checksum=sha256:b229d664a58a75e0a438fad204b292b5777e79fafd4b840cce21bac7ad2a7a28 https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf /usr/share/nginx/html/css/
+ADD --checksum=sha256:b6e055ad6056d64c89133fd73e9ee935c068d8bd3ac09366d5d99f9eee99e3f4 https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf /usr/share/nginx/html/css/
+ADD --checksum=sha256:7e15d8482756e9d79c5b14dde8cd92256fd2afe0307703d825d4e8178d416c41 https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf /usr/share/nginx/html/css/
+ADD --checksum=sha256:6c75710364a1ca5604267716f6d28997b26319fdb078cf11e0b42ab66ff2ea61 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff2' /usr/share/nginx/html/css/bootstrap-icons.woff2
+ADD --checksum=sha256:f55513b7b591cb84a3b87ff0e34ea24d4831d6fedc22e54b911ca64b5b544a15 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff' /usr/share/nginx/html/css/bootstrap-icons.woff
+ADD --checksum=sha256:004322721c8557331759bc6ddaacbb689b0f0715d688aec82bd056d2d5b5cc3b 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css' /usr/share/nginx/html/css/bootstrap-icons.css
+ADD --checksum=sha256:7bfcab6db99d5cfbf1705ca0536ddc78585432cc5fa41bbd7ad0f009033b2979 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.eot' /usr/share/nginx/html/css/
+ADD --checksum=sha256:2adefcbc041e7d18fcf2d417879dc5a09997aa64d675b7a3c4b6ce33da13f3fe 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff2' /usr/share/nginx/html/css/
+ADD --checksum=sha256:ba0c59deb5450f5cb41b3f93609ee2d0d995415877ddfa223e8a8a7533474f07 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff' /usr/share/nginx/html/css/
+ADD --checksum=sha256:aa58f33f239a0fb02f5c7a6c45c043d7a9ac9a093335806694ecd6d4edc0d6a8 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.ttf' /usr/share/nginx/html/css/
+ADD --checksum=sha256:ad6157926c1622ba4e1d03d478f1541368524bfc46f51e42fe0d945f7ef323e4 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#fontawesomeregular' /usr/share/nginx/html/css/fontawesome-webfont.svg
 
 ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
 
