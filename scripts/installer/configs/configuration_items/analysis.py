@@ -19,10 +19,11 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_AUTO_OUI,
     KEY_CONFIG_ITEM_AUTO_SURICATA,
     KEY_CONFIG_ITEM_AUTO_ZEEK,
+    KEY_CONFIG_ITEM_AUTO_ZEEK_COMMUNITY_ID,
     KEY_CONFIG_ITEM_MALCOLM_ICS,
     KEY_CONFIG_ITEM_REVERSE_DNS,
-    KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE,
     KEY_CONFIG_ITEM_SURICATA_DISABLE_SIDS,
+    KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE,
     KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS,
 )
 
@@ -123,6 +124,15 @@ CONFIG_ITEM_FREQ_LOOKUP = ConfigItem(
     default_value=True,
     validator=lambda x: isinstance(x, bool),
     question="Perform string randomness scoring on some fields?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_LOGSTASH_ZEEK_COMPUTE_COMMUNITY_ID = ConfigItem(
+    key=KEY_CONFIG_ITEM_AUTO_ZEEK_COMMUNITY_ID,
+    label="Enrich with Community ID",
+    default_value=True,
+    validator=lambda x: isinstance(x, bool),
+    question="Calculate Community ID flow hashes for Zeek logs that don't already have one?",
     widget_type=WidgetType.CHECKBOX,
 )
 

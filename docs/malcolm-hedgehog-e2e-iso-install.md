@@ -277,23 +277,24 @@ Select an item number to configure, or an action:
 ├── 65. Enrich with Reverse DNS Lookups (current: Yes)
 ├── 66. Enrich with Manufacturer (OUI) Lookups (current: Yes)
 ├── 67. Enrich with Frequency Scoring (current: Yes)
-├── 68. NetBox Mode (current: Local)
-│   ├── 69. Auto-Create Subnet Prefixes (current: Yes)
-│   ├── 70. Auto-Populate NetBox Inventory (current: Yes)
-│   ├── 71. NetBox Enrichment (current: Yes)
-│   ├── 72. NetBox IP Autopopulation Filter (current: empty)
-│   └── 73. NetBox Site Name (current: Malcolm)
-├── 74. Expose Malcolm Service Ports (current: No)
-├── 75. Network Traffic Node Name (current: host)
-└── 76. Capture Live Network Traffic (current: Yes)
-    ├── 77. Analyze Live Traffic with Suricata (current: Yes)
-    ├── 78. Analyze Live Traffic with Zeek (current: Yes)
-    ├── 79. Capture Filter (current: empty)
-    ├── 80. Capture Interface(s) (current: eth0)
-    ├── 81. Capture Live Traffic with netsniff-ng (current: Yes)
-    ├── 82. Capture Live Traffic with tcpdump (current: No)
-    ├── 83. Gather Traffic Capture Statistics (current: Yes)
-    └── 84. Optimize Interface Settings for Capture (current: Yes)
+├── 68. Enrich with Community ID (current: Yes)
+├── 69. NetBox Mode (current: Local)
+│   ├── 70. Auto-Create Subnet Prefixes (current: Yes)
+│   ├── 71. Auto-Populate NetBox Inventory (current: Yes)
+│   ├── 72. NetBox Enrichment (current: Yes)
+│   ├── 73. NetBox IP Autopopulation Filter (current: empty)
+│   └── 74. NetBox Site Name (current: Malcolm)
+├── 75. Expose Malcolm Service Ports (current: No)
+├── 76. Network Traffic Node Name (current: host)
+└── 77. Capture Live Network Traffic (current: Yes)
+    ├── 78. Analyze Live Traffic with Suricata (current: Yes)
+    ├── 79. Analyze Live Traffic with Zeek (current: Yes)
+    ├── 80. Capture Filter (current: empty)
+    ├── 81. Capture Interface(s) (current: eth0)
+    ├── 82. Capture Live Traffic with netsniff-ng (current: Yes)
+    ├── 83. Capture Live Traffic with tcpdump (current: No)
+    ├── 84. Gather Traffic Capture Statistics (current: Yes)
+    └── 85. Optimize Interface Settings for Capture (current: Yes)
 
 --- Actions ---
   s. Save and Continue
@@ -504,6 +505,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - Malcolm will [map MAC addresses](https://standards.ieee.org/products-programs/regauth/) to hardware manufacturer when possible. Users probably want to select **Y** for this setting.
 * **Enrich with Frequency Scoring**
     - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). Users probably want to select **Y** for this setting.
+* **Enrich with Community ID**
+    - If enabled, Malcolm will calculate a [Community ID](https://github.com/corelight/community-id-spec) flow hash for Zeek logs that don't already include one, making it easier to correlate Zeek logs with each other and with Suricata alerts and Arkime sessions by a single common value. Users probably want to select **Y** for this setting.
 * **NetBox Mode**
     - Specifies whether Malcolm will use [NetBox](https://netbox.dev/), a tool for modeling networks and documenting network assets; options are `local` (use an embedded instance NetBox maintained by Malcolm), `remote` (use a remote instance of NetBox), or `disabled` (do not use NetBox).
     - **Auto-Create Subnet Prefixes**

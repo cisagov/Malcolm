@@ -42,7 +42,7 @@ Malcolm is a tool suite that incorporates many open source components (some of w
 
 ### <a name="BaseImagesForContainersAndInstalledEnvironments"></a> Base Images for Containers and Installed Environments
 
-The main sources of Malcolm’s core tools and libraries are the 'base images' on which Malcolm is built. These base images are defined in:
+The main sources of Malcolm's core tools and libraries are the 'base images' on which Malcolm is built. These base images are defined in:
 
 * [Dockerfiles]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) used to build container images
 * scripts that use the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build the x86_64 ISO and ARM64 [Raspberry Pi installer](hedgehog-raspi.md#HedgehogRaspiBuild) images
@@ -121,7 +121,7 @@ Another critical aspect is project popularity and adoption. The more widely used
 
 #### Technical Security
 
-Beyond community activity and popularity, other technical factors should be considered. Reviewing a candidate project's dependency tree can reveal if it relies on well-maintained and trusted libraries or if it introduces risky, obscure dependencies. Checking for reproducible builds and signed releases ensures that the distributed code matches the source and hasn’t been tampered with. Additionally, verifying that the project follows security best practices — such as enforcing code reviews, providing cryptographic signatures for releases, and maintaining a clear disclosure process for vulnerabilities — can provide confidence in its reliability.
+Beyond community activity and popularity, other technical factors should be considered. Reviewing a candidate project's dependency tree can reveal if it relies on well-maintained and trusted libraries or if it introduces risky, obscure dependencies. Checking for reproducible builds and signed releases ensures that the distributed code matches the source and hasn't been tampered with. Additionally, verifying that the project follows security best practices — such as enforcing code reviews, providing cryptographic signatures for releases, and maintaining a clear disclosure process for vulnerabilities — can provide confidence in its reliability.
 
 #### Relationships of Trust
 

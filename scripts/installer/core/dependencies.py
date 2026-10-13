@@ -185,6 +185,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
+    KEY_CONFIG_ITEM_AUTO_ZEEK_COMMUNITY_ID: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile == PROFILE_MALCOLM,
+            is_top_level=True,
+        )
+    ),
     KEY_CONFIG_ITEM_OPEN_PORTS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,

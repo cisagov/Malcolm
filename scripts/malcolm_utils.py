@@ -149,7 +149,7 @@ def base64_decode_files_to_dir(encoded_dict, dest_dir, pattern=None):
     Given a dict mapping relative paths to Base64-encoded contents,
     recreate the files under dest_dir.
 
-    - Creates dest_dir and subdirectories if they don’t exist
+    - Creates dest_dir and subdirectories if they don't exist
     - Skips entries that fail Base64 decoding
     - Skips entries whose path is absolute, escapes dest_dir (e.g., via ".." components
       or symlinks), or whose filename doesn't match pattern (if specified)
