@@ -323,9 +323,11 @@ def map_mandiant_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_META_DESC] = indicator.id
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
-        if hasattr(indicator, 'mscore'):
-            zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(indicator.mscore)
-            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
+        # M-Score is confidence, not the separate Mandiant threat rating.
+        mscore = getattr(indicator, 'mscore', None)
+        if isinstance(mscore, (int, float)) and not isinstance(mscore, bool) and 0 <= mscore <= 100:
+            zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(mscore)
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(mscore / 10))
         if hasattr(indicator, 'first_seen'):
             zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(indicator.first_seen.timestamp())
             zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
@@ -883,6 +885,11 @@ def map_stix_indicator_to_zeek(
         )
         zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+        # STIX 2.1 confidence is 0-100, not the indicator's threat severity.
+        confidence = indicator.get('confidence')
+        if isinstance(confidence, int) and not isinstance(confidence, bool) and 0 <= confidence <= 100:
+            zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(confidence)
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
         descParts = [x for x in [indicator.get('name'), indicator.get('description')] if x]
         if reduced:
             # let an analyst looking at a hit find the original, stricter pattern
