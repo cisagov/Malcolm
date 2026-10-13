@@ -79,7 +79,7 @@ if [ -d "$WORKDIR" ]; then
   PATTERN='(\./)?([0-9]+)-([0-9]+)-([0-9]+)/(.+)\.([0-9]+):([0-9]+):([0-9]+)-([0-9]+):([0-9]+):([0-9]+)\.log\.gz$'
 
   # find and unzip the compressed zeek logs below this directory into temporary subdirectories that make sense
-  for GZ_LOG_FILE in $(find . -type f -name "*.log.gz"); do
+  while IFS= read -r -d '' GZ_LOG_FILE; do
     GZ_LOG_FILE_SUBDIR="$(dirname "$GZ_LOG_FILE")"
     GZ_LOG_FILE_DESTDIR="$WORKDIR"/"$GZ_LOG_FILE_SUBDIR"
     mkdir -p "$GZ_LOG_FILE_DESTDIR"
@@ -105,11 +105,11 @@ if [ -d "$WORKDIR" ]; then
         echo "$DEST_FILE: $FILE_TYPE ($FILE_SIZE)"
       fi
     fi
-  done
+  done < <(find . -type f -name "*.log.gz" -print0)
 
   # package up all of the log files in their respective directories under our temporary one
   REPACKAGED_LOGS_TARBALL="$FULL_PWD"/zeek-logs-compressed-$(date +'%Y%m%d_%H%M%S').tar.gz
-  tar -c -z $VERBOSE_FLAG -C "$WORKDIR" -f $REPACKAGED_LOGS_TARBALL .
+  tar -c -z $VERBOSE_FLAG -C "$WORKDIR" -f "$REPACKAGED_LOGS_TARBALL" .
   if [[ -n $VERBOSE_FLAG ]]; then
     FILE_TYPE="$(file -b "$REPACKAGED_LOGS_TARBALL")"
     FILE_SIZE="$(fsize $(stat --printf="%s" "$REPACKAGED_LOGS_TARBALL"))"
