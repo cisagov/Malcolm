@@ -61,7 +61,9 @@ ADD --chmod=644 netbox/patch/* /tmp/netbox-patches/
 ADD --chmod=644 netbox/requirements.txt /usr/local/src/
 ADD --chmod=644 netbox/config/* /tmp/netbox-config/
 
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       gcc \
@@ -89,8 +91,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/bin/yq && \
+    sh /usr/local/share/install-verified-binary.sh /usr/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
     usermod -a -G tty ${PUSER} && \
     mkdir -p "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" "${NETBOX_PRELOAD_PATH}" && \
     cp /tmp/netbox-config/* "${NETBOX_CONFIG_PATH}" && \
