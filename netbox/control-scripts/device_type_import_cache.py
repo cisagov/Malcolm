@@ -19,13 +19,7 @@ MARKER_PREFIX = "malcolm-device-library-"
 def selected_vendors(value):
     """Parse an optional comma-separated list accepted by nb-dt-import."""
     return tuple(
-        sorted(
-            {
-                slug
-                for part in (value or "").split(",")
-                if (slug := re.sub(r"\W+", "-", part.strip().casefold()))
-            }
-        )
+        sorted({slug for part in (value or "").split(",") if (slug := re.sub(r"\W+", "-", part.strip().casefold()))})
     )
 
 
@@ -37,9 +31,7 @@ def library_fingerprint(library_dir, vendors=()):
     files = sorted(
         path
         for path in source.rglob("*")
-        if path.is_file()
-        and not path.is_symlink()
-        and path.suffix.casefold() in (".yaml", ".yml")
+        if path.is_file() and not path.is_symlink() and path.suffix.casefold() in (".yaml", ".yml")
     )
     if not files:
         return None
@@ -78,26 +70,23 @@ def completed(nb, marker):
 
 def record_completion(nb, marker):
     """Only persist completion after a successful, non-partial import."""
-    nb.extras.tags.create(
-        {
-            "name": marker,
-            "slug": marker,
-            "color": "808080",
-            "description": "Malcolm device-type library initialization completed",
-        }
-    )
+    if not completed(nb, marker):
+        nb.extras.tags.create(
+            {
+                "name": marker,
+                "slug": marker,
+                "color": "808080",
+                "description": "Malcolm device-type library initialization completed",
+            }
+        )
 
     # A new source or vendor selection supersedes the previous library marker.
     # Search by prefix to avoid iterating unrelated NetBox tags, but still
     # verify the slug before deleting any record.
     try:
-        for tag in nb.extras.tags.filter(q=MARKER_PREFIX):
+        for tag in list(nb.extras.tags.filter(q=MARKER_PREFIX)):
             slug = getattr(tag, "slug", "")
-            if (
-                isinstance(slug, str)
-                and slug.startswith(MARKER_PREFIX)
-                and slug != marker
-            ):
+            if isinstance(slug, str) and slug.startswith(MARKER_PREFIX) and slug != marker:
                 try:
                     if tag.delete() is False:
                         logger.warning(
@@ -111,9 +100,7 @@ def record_completion(nb, marker):
                         exc,
                     )
     except Exception as exc:  # noqa: BLE001 - stale-marker cleanup is best-effort
-        logger.warning(
-            "Could not enumerate superseded NetBox device library markers: %s", exc
-        )
+        logger.warning("Could not enumerate superseded NetBox device library markers: %s", exc)
 
 
 def import_device_type_library(args, netbox_venv_py, nb, run_process, pushd):
@@ -127,15 +114,11 @@ def import_device_type_library(args, netbox_venv_py, nb, run_process, pushd):
         if marker and nb and not args.force_library_import:
             try:
                 if completed(nb, marker):
-                    logger.info(
-                        "Device type library already imported; skipping unchanged library and vendor selection"
-                    )
+                    logger.info("Device type library already imported; skipping unchanged library and vendor selection")
                     return True
             except Exception as e:  # noqa: BLE001 - fail open, preserving import
                 # A failed marker lookup must never silently skip an import.
-                logger.warning(
-                    f"Cannot check NetBox device library import marker; importing: {e}"
-                )
+                logger.warning(f"Cannot check NetBox device library import marker; importing: {e}")
 
         try:
             with pushd(args.library_dir):
@@ -169,13 +152,9 @@ def import_device_type_library(args, netbox_venv_py, nb, run_process, pushd):
                         except Exception as e:  # noqa: BLE001 - fail open, preserving import
                             # Successful imports remain valid even if the marker cannot be saved;
                             # they will simply be retried on the next container restart.
-                            logger.warning(
-                                f"Device type library imported but completion marker was not saved: {e}"
-                            )
+                            logger.warning(f"Device type library imported but completion marker was not saved: {e}")
                 else:
-                    logger.error(
-                        f"{err} running nb-dt-import.py (possibly partial import): {results}"
-                    )
+                    logger.error(f"{err} running nb-dt-import.py (possibly partial import): {results}")
 
         except Exception as e:  # noqa: BLE001 - fail open, preserving import
             logger.error(f"{type(e).__name__} processing library: {e}")

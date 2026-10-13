@@ -38,6 +38,9 @@ class Tags:
         return SimpleNamespace(slug=slug) if slug in self.markers else None
 
     def create(self, data):
+        # NetBox rejects a tag whose slug already exists
+        if data["slug"] in self.markers:
+            raise RuntimeError(f"tag with slug {data['slug']} already exists")
         self.created.append(data)
         self.markers.add(data["slug"])
 
@@ -160,6 +163,28 @@ class DeviceLibraryCacheTests(unittest.TestCase):
         self.args.force_library_import = True
         self.assertTrue(run(self.args, "/venv/python", self.nb))
         self.assertEqual(process.call_count, 2)
+
+    def test_force_import_with_existing_marker_keeps_it_and_cleans_up(self):
+        # Forcing a reimport of an unchanged library means the marker already
+        # exists; recording completion must not try to create it again (which
+        # NetBox rejects), and stale markers must still be cleaned up.
+        marker = cache.library_fingerprint(self.path)
+        old = cache.MARKER_PREFIX + "old-library"
+        self.tags.markers.update({marker, old})
+        self.args.force_library_import = True
+        process = Mock(return_value=(0, ["3 device types created"]))
+        with self.assertNoLogs(cache.logger, level="WARNING"):
+            self.assertTrue(import_function(process)(self.args, "/venv/python", self.nb))
+        process.assert_called_once()
+        self.assertEqual(self.tags.created, [])
+        self.assertEqual(self.tags.markers, {marker})
+
+    def test_record_completion_is_idempotent(self):
+        marker = cache.library_fingerprint(self.path)
+        cache.record_completion(self.nb, marker)
+        cache.record_completion(self.nb, marker)
+        self.assertEqual(len(self.tags.created), 1)
+        self.assertEqual(self.tags.markers, {marker})
 
     def test_partial_and_failed_imports_are_never_marked_complete(self):
         cases = [
