@@ -287,11 +287,9 @@ def _mandiant_related_refs(entries, field):
             continue
         value = str(value).strip()
         if value:
-            values.add(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '))
+            values.add(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' ').replace('|', ' '))
 
-    return '\\x7c'.join(
-        value.replace(',', '\\x2c').replace('|', '\\x7c') for value in sorted(values)
-    )
+    return '\\x7c'.join(value.replace(',', '\\x2c') for value in sorted(values))
 
 
 def map_mandiant_indicator_to_zeek(
@@ -354,9 +352,7 @@ def map_mandiant_indicator_to_zeek(
                 direct_categories = [direct_categories]
             if isinstance(direct_categories, (list, tuple, set)):
                 categories.update(
-                    category.strip()
-                    for category in direct_categories
-                    if isinstance(category, str) and category.strip()
+                    category.strip() for category in direct_categories if isinstance(category, str) and category.strip()
                 )
 
         if categories:
@@ -390,9 +386,8 @@ def map_mandiant_indicator_to_zeek(
         #   Performance-wise, if we didn't get it with the indicator object in
         #   the first place it's not something we need to make an entire extra
         #   network communication to attempt.
-        if (
-            isinstance(indicator, mandiant_threatintel.MD5Indicator)
-            and (hashes := raw_response.get('associated_hashes', []))
+        if isinstance(indicator, mandiant_threatintel.MD5Indicator) and (
+            hashes := raw_response.get('associated_hashes', [])
         ):
             for hashish in hashes:
                 if hashVal := hashish.get('value'):
@@ -730,8 +725,7 @@ def _stix_reduce_clause(clause: list) -> Tuple[list, Union[str, None]]:
     identifying = [
         a
         for a in atoms
-        if a.value is not None
-        and _STIX_ZEEK_INTEL_TYPE_MAP_NORMALIZED.get(a.path) in ZEEK_INTEL_IDENTIFYING_TYPES
+        if a.value is not None and _STIX_ZEEK_INTEL_TYPE_MAP_NORMALIZED.get(a.path) in ZEEK_INTEL_IDENTIFYING_TYPES
     ]
     if identifying:
         object_types = {a.path.split(':', 1)[0] for a in atoms}
@@ -1652,7 +1646,9 @@ def UpdateFromTAXII(
             # skip collections the server says we can't read (e.g., paid tiers when matching '*')
             if not getattr(collection, 'can_read', True):
                 if (logger is not None) and (collection.title.lower() == taxiiCollection.lower()):
-                    logger.warning(f"[{workerId}]: TAXII collection '{collection.title}' is not readable with these credentials")
+                    logger.warning(
+                        f"[{workerId}]: TAXII collection '{collection.title}' is not readable with these credentials"
+                    )
                 continue
             if (taxiiCollection == '*') or (collection.title.lower() == taxiiCollection.lower()):
                 collectionUrls[collection.title] = {

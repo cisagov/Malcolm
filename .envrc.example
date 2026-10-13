@@ -80,6 +80,7 @@ export ZEEK_INTEL_ITEM_EXPIRATION="-1min"
 export REVERSE_DNS=false
 export AUTO_OUI=true
 export AUTO_FREQ=true
+export AUTO_COMMUNITY_ID=true
 export PIPELINE_ENABLED=true
 export PIPELINE_WORKERS=1
 export STRELKA_SCANNERS=default

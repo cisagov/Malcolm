@@ -65,6 +65,9 @@ KEY_ENV_LOGSTASH_PIPELINE_WORKERS = "pipeline.workers"  # logstash workers (per 
 KEY_ENV_LOGSTASH_HOST = "LOGSTASH_HOST"  # Logstash host and port
 KEY_ENV_LOGSTASH_REVERSE_DNS = "LOGSTASH_REVERSE_DNS"  # automatic local reverse dns lookup
 KEY_ENV_LOGSTASH_OUI_LOOKUP = "LOGSTASH_OUI_LOOKUP"  # automatic MAC OUI lookup
+KEY_ENV_LOGSTASH_ZEEK_COMPUTE_COMMUNITY_ID = (
+    "LOGSTASH_ZEEK_COMPUTE_COMMUNITY_ID"  # calculate community ID for Zeek logs without it
+)
 KEY_ENV_LOGSTASH_JAVA_OPTS = "LS_JAVA_OPTS"  # logstash memory allowance
 KEY_ENV_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES = (
     "LOGSTASH_NETBOX_ENRICHMENT_DATASETS"  # netbox-enriched log types via logstash

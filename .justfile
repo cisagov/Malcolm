@@ -64,6 +64,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.autoArkime = ${AUTO_ARKIME:-true}
     | .configuration.autoFreq = ${AUTO_FREQ:-true}
     | .configuration.autoOui = ${AUTO_OUI:-true}
+    | .configuration.autoZeekCommunityID = ${AUTO_COMMUNITY_ID:-true}
     | .configuration.autoSuricata = ${AUTO_SURICATA:-true}
     | .configuration.autoZeek = ${AUTO_ZEEK:-true}
     | .configuration.captureLiveNetworkTraffic = ${CAPTURE_LIVE}
