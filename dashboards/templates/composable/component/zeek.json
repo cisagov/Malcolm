@@ -288,9 +288,6 @@
                     }
                   }
                 },
-                "ftime": {
-                  "type": "date"
-                },
                 "local_orig": {
                   "type": "keyword"
                 },
