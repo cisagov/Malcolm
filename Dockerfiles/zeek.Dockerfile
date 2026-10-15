@@ -42,6 +42,7 @@ ENV CCACHE_DIR="/var/spool/ccache"
 ENV CCACHE_COMPRESS=1
 
 ADD --chmod=755 zeek/scripts/zeek_install_plugins.sh /usr/local/bin/
+ADD --chmod=644 zeek/zeek-packages.lock /usr/local/share/zeek-packages.lock
 ADD --chmod=755 zeek/scripts/zeek_iana_lookup_generator.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
@@ -127,13 +128,13 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     python3 -m pip install --break-system-packages --no-cache-dir -r /usr/local/src/requirements.txt && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     cd "${ZEEK_DIR}"/share/zeek/site && \
-      /usr/share/nodejs/corepack/shims/npm install redis@6.3.0 && \
+      COREPACK_DEFAULT_TO_LATEST=0 /usr/share/nodejs/corepack/shims/npm install redis@6.3.0 && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
       ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
-      ( find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \; ) && \
+      ( find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \; ) && \
       rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch && \
       rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
       ( find "${ZEEK_DIR}/"var/lib/zkg/clones/package/ja4 -mindepth 1 -maxdepth 1 -type d ! \( -name zeek -o -name '.git*' \) -exec rm -rf "{}" \; || true ) && \
