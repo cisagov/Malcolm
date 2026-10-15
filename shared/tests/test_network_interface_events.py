@@ -7,7 +7,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 PIPELINE = ROOT / "logstash/pipelines/beats/11_beats_logs.conf"
 MAPPING = ROOT / "dashboards/templates/composable/component/miscbeat.json"
 DASHBOARD = ROOT / "dashboards/dashboards/beats/Metricbeat-host-overview.json"
