@@ -1027,7 +1027,7 @@ These other parameters can also optionally be provided:
 
 Malcolm uses the [google/mandiant-ti-client](https://github.com/google/mandiant-ti-client) Python library to access Mandiant threat intelligence feeds.
 
-Mandiant `mscore` (0-100) represents confidence that an indicator is malicious, not its separate threat rating. Valid scores populate `meta.confidence` and the 0-10 CIF confidence field. Non-numeric and out-of-range scores are omitted. The `meta.threat_score` field is reserved for Mandiant threat rating enrichment.
+Mandiant `mscore` (0-100) represents confidence that an indicator is malicious, not its separate threat rating. Valid scores populate `meta.confidence` and the 0-10 CIF confidence field. Non-numeric and out-of-range scores are omitted. When `include_threat_rating: true`, a numeric Mandiant `threat_rating.threat_score` (0-100) populates the separate `meta.threat_score` field. Missing, malformed, and out-of-range values are omitted; mapping uses the current response without additional per-indicator API requests. The default `include_threat_rating: false` remains unchanged.
 
 ## <a name="IntelFeedDisclaimer"></a>Disclaimer
 
