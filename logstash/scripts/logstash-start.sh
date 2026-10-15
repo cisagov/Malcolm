@@ -66,15 +66,6 @@ find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null |
   cp -f "{}"/* "$PIPELINES_DEST_DIR"/
 '
 
-# When explicitly requested, use the same MaxMind MMDBs published by Arkime.
-# Configuring only at startup avoids initializing custom-database GeoIP plugins
-# before the shared volume has been populated. Default Logstash DBs stay intact.
-case "${LOGSTASH_GEOIP_SHARED_DB:-false}" in
-  true|TRUE|1|yes|YES|on|ON)
-    python3 /usr/local/bin/configure_geoip_databases.py "$PIPELINES_DIR"
-    ;;
-esac
-
 # dynamically generate final pipelines.yml configuration file from all of the pipeline directories
 > "$PIPELINES_CFG"
 find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
@@ -99,6 +90,15 @@ fi
 
 # insert quotes around the OpenSearch output pipeline list
 MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
+
+# When explicitly requested, use the same MaxMind MMDBs published by Arkime.
+# Configuring only at startup avoids initializing custom-database GeoIP plugins
+# before the shared volume has been populated. Default Logstash DBs stay intact.
+case "${LOGSTASH_GEOIP_SHARED_DB:-false}" in
+  true|TRUE|1|yes|YES|on|ON)
+    python3 /usr/local/bin/configure_geoip_databases.py "$PIPELINES_DIR"
+    ;;
+esac
 
 # get the username/password for opensearch from the curlrf file(s) for both primary and secondary outputs
 # (I already wrote python code to do this, so sue me)
