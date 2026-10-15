@@ -5,14 +5,12 @@
 
 import argparse
 import ast
-import json
 import logging
 import os
 import sys
 import malcolm_utils
 from tempfile import TemporaryDirectory
 
-from datetime import datetime
 from packaging.version import Version
 from distutils import dir_util
 
@@ -275,6 +273,182 @@ def perform_migrations(netboxVenvPy, manageScript, pluginNames):
     return success
 
 
+def _plugin_search_locations(packages_installed):
+    """Return sorted, existing package locations, including pip --target installs."""
+    locations = {
+        package['location']
+        for package in packages_installed.values()
+        if isinstance(package.get('location'), str) and os.path.isdir(package['location'])
+    }
+    custom_location = os.getenv('NETBOX_CUSTOM_VENV_PACKAGES_PATH', '')
+    if os.path.isdir(custom_location):
+        locations.add(custom_location)
+    return sorted(locations)
+
+
+def _is_plugin_config_class(node):
+    """Recognize direct classes derived from NetBox's PluginConfig."""
+    return isinstance(node, ast.ClassDef) and any(
+        (isinstance(base, ast.Name) and base.id == 'PluginConfig')
+        or (isinstance(base, ast.Attribute) and base.attr == 'PluginConfig')
+        for base in node.bases
+    )
+
+
+def _static_plugin_name(item):
+    """Extract a nonempty literal `name = ...` assignment, if present."""
+    if not isinstance(item, ast.Assign):
+        return None
+    if not any(isinstance(target, ast.Name) and target.id == 'name' for target in item.targets):
+        return None
+    if isinstance(item.value, ast.Constant) and isinstance(item.value.value, str):
+        return item.value.value or None
+    return None
+
+
+def _plugin_names_from_init(path):
+    """Parse declared plugin names without importing or executing plugin code."""
+    with open(path, 'r', encoding='utf-8') as handle:
+        tree = ast.parse(handle.read(), filename=path)
+    names = []
+    for node in tree.body:
+        if _is_plugin_config_class(node):
+            logging.debug("found PluginConfig subclass '%s' in %s", node.name, path)
+            name_found = False
+            for item in node.body:
+                name = _static_plugin_name(item)
+                if name:
+                    logging.info("discovered plugin name '%s' from class '%s' in %s", name, node.name, path)
+                    names.append(name)
+                    name_found = True
+            if not name_found:
+                logging.debug(
+                    "class '%s' in %s has no valid literal 'name' assignment; skipping",
+                    node.name,
+                    path,
+                )
+    return names
+
+
+def discover_plugin_names(search_locations):
+    """Return ordered, unique plugin names from valid package directories."""
+    if not search_locations:
+        logging.debug('No package directories available for PluginConfig discovery')
+        return []
+    cmd = [
+        '/usr/bin/rg',
+        '--files-with-matches',
+        '--iglob',
+        '__init__.py',
+        r'\bPluginConfig\b',
+        *search_locations,
+    ]
+    logging.debug('PluginConfig search command: %s', cmd)
+    error, paths = malcolm_utils.run_process(cmd, stderr=False, logger=logging)
+    if error not in (0, 1):
+        logging.warning('PluginConfig lookup returned error %s', error)
+    logging.debug('rg found %d candidate __init__.py file(s): %s', len(paths or []), paths)
+    names = set()
+    for path in sorted(set(paths or [])):
+        logging.debug('inspecting %s for PluginConfig subclasses', path)
+        try:
+            if os.path.isfile(path):
+                names.update(_plugin_names_from_init(path))
+            else:
+                logging.debug('%s does not exist (or is not a file), skipping', path)
+        except (OSError, SyntaxError, UnicodeError, ValueError) as error:
+            logging.warning('Skipping invalid plugin configuration in %s: %s', path, error)
+        except Exception as error:
+            logging.error(
+                '%s identifying NetBox plugin names in %s: %s',
+                type(error).__name__,
+                path,
+                error,
+            )
+    return sorted(names)
+
+
+def _last_top_level_plugins_assignment(tree):
+    """Find the effective top-level PLUGINS assignment, not one in a function."""
+    for node in reversed(tree.body):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == 'PLUGINS' for target in node.targets
+        ):
+            return node
+    return None
+
+
+def _append_missing_plugin_names(assignment, names):
+    """Append only unknown names to an existing literal list."""
+    installed = {
+        value.value
+        for value in assignment.value.elts
+        if isinstance(value, ast.Constant) and isinstance(value.value, str)
+    }
+    logging.debug('existing plugins already listed: %s', sorted(installed))
+    missing = []
+    for name in names:
+        if name in installed:
+            logging.debug("'%s' already present in PLUGINS list, not re-adding", name)
+        else:
+            logging.info("adding '%s' to PLUGINS list in plugins.py", name)
+            missing.append(name)
+            installed.add(name)
+    assignment.value.elts.extend(ast.Constant(value=name) for name in missing)
+    return bool(missing)
+
+
+def register_plugin_names(config_path, plugin_names):
+    """Add missing plugin names to a top-level PLUGINS list, if statically defined."""
+    names = sorted(set(plugin_names))
+    if not names:
+        return False
+    logging.debug('parsing %s', config_path)
+    with open(config_path, 'r', encoding='utf-8') as handle:
+        tree = ast.parse(handle.read(), filename=config_path)
+
+    existing = _last_top_level_plugins_assignment(tree)
+    if existing:
+        logging.debug('found existing top-level PLUGINS assignment in plugins.py')
+        if not isinstance(existing.value, ast.List):
+            logging.warning('PLUGINS exists but is dynamically defined; leaving config unchanged')
+            return False
+        if not _append_missing_plugin_names(existing, names):
+            logging.debug('plugins.py already contains all discovered plugin names, no rewrite needed')
+            return False
+    else:
+        logging.debug('no top-level PLUGINS assignment found in plugins.py, appending a new one')
+        for name in names:
+            logging.info("adding '%s' to PLUGINS list in plugins.py", name)
+        tree.body.append(
+            ast.Assign(
+                targets=[ast.Name(id='PLUGINS', ctx=ast.Store())],
+                value=ast.List(elts=[ast.Constant(value=name) for name in names], ctx=ast.Load()),
+            )
+        )
+    logging.info('writing updated plugins.py to %s', config_path)
+    with open(config_path, 'w', encoding='utf-8') as handle:
+        handle.write(ast.unparse(ast.fix_missing_locations(tree)))
+    return True
+
+
+def _install_custom_plugin_dirs(args, netbox_venv_py, installed_packages):
+    """Install custom plugin packages, returning those actually changed."""
+    candidates = sorted(
+        malcolm_utils.remove_suffix(item.path, '/')
+        for item in os.scandir(args.customPluginsDir)
+        if item.is_dir() and item.name != 'requirements'
+    )
+    updated = []
+    logging.debug('Candidate plugin directories: %s', candidates)
+    for directory in candidates:
+        installed = install_package_dir_if_needed(directory, netbox_venv_py, installed_packages)
+        if installed:
+            updated.append(directory)
+        logging.info("%s: %sinstalled", os.path.basename(directory), '' if installed else 'not ')
+    return updated
+
+
 def install_plugins(args):
     if not os.path.isdir(args.customPluginsDir) or not os.path.isfile(os.path.join(args.netboxConfigDir, 'plugins.py')):
         logging.debug(
@@ -294,175 +468,26 @@ def install_plugins(args):
     # if there is a "requirements" subdirectory, handle that first as it contains dependencies
     install_requirements(args, netboxVenvPy, packagesInstalled)
 
-    # now install the plugins directories
-    installedOrUpdatedPlugins = []
-    global pluginsListModified
-    global pluginsListFound
-    pluginsListModified = False
-    pluginsListFound = False
-    customPluginSubdirs = [
-        malcolm_utils.remove_suffix(f.path, '/')
-        for f in os.scandir(args.customPluginsDir)
-        if f.is_dir() and (os.path.basename(f) != 'requirements')
-    ]
-    logging.debug(f"found {len(customPluginSubdirs)} candidate plugin directory(ies): {customPluginSubdirs}")
-    for pluginDir in customPluginSubdirs:
-        if pluginInstalled := install_package_dir_if_needed(pluginDir, netboxVenvPy, packagesInstalled):
-            installedOrUpdatedPlugins.append(pluginDir)
-        logging.info(f"{os.path.basename(pluginDir)}: {'' if pluginInstalled else 'not ' }installed")
-
+    # Install custom plugins separately from their static configuration discovery.
+    installedOrUpdatedPlugins = _install_custom_plugin_dirs(args, netboxVenvPy, packagesInstalled)
     # for any packages that were newly installed (or updated, we'll be thorough) we need to make
-    #   sure the package name is in the plugins.py
-    logging.info(f"Plugins installed or updated: {installedOrUpdatedPlugins}")
+    # sure the package name is in plugins.py.
+    logging.info('Plugins installed or updated: %s', installedOrUpdatedPlugins)
     if installedOrUpdatedPlugins:
         # get updated list of installed packages
         logging.debug("refreshing installed package list after install/update")
         packagesInstalled = get_installed_packages(netboxVenvPy)
 
-    # now get the names of the NetBox plugins installed
-    pluginNames = []
-
-    # first get a list of __init__.py files for potential plugins installed in the package location(s)
-    searchLocations = list({package['location'] for package in packagesInstalled.values() if 'location' in package})
-
-    # packages installed with `pip install --target <dir>` (e.g. our custom plugins) don't show up
-    #   in `pip list --local`, so pip never reports a location for them; make sure the custom
-    #   target directory is searched too, even though packagesInstalled doesn't know about it
-    customVenvPackagesDir = os.getenv('NETBOX_CUSTOM_VENV_PACKAGES_PATH', '')
-    if os.path.isdir(customVenvPackagesDir) and customVenvPackagesDir not in searchLocations:
-        logging.debug(f"adding custom venv packages directory to search locations: {customVenvPackagesDir}")
-        searchLocations.append(customVenvPackagesDir)
-
-    logging.debug(
-        f"searching {len(searchLocations)} package location(s) for PluginConfig __init__.py files: {searchLocations}"
-    )
-    cmd = [
-        '/usr/bin/rg',
-        '--files-with-matches',
-        '--iglob',
-        '__init__.py',
-        r'\bPluginConfig\b',
-        searchLocations,
-    ]
-    logging.debug(f"rg command: {cmd}")
-    err, results = malcolm_utils.run_process(cmd, stderr=False, logger=logging)
-    if results:
-        logging.debug(f"rg found {len(results)} candidate __init__.py file(s): {results}")
-        # process each of those potential plugin __init__.py files
-        for pluginInitFileName in results:
-            logging.debug(f"inspecting {pluginInitFileName} for PluginConfig subclasses")
-            try:
-                if os.path.isfile(pluginInitFileName):
-                    # parse the Python of the __init__.py into an abstract syntax tree
-                    with open(pluginInitFileName, 'r') as f:
-                        node = ast.parse(f.read())
-                        # look at each Class defined in this code
-                        for c in [n for n in node.body if isinstance(n, ast.ClassDef)]:
-                            # plugins are classes with "PluginConfig" for a parent
-                            if any(
-                                (isinstance(baseClass, ast.Name) and baseClass.id == 'PluginConfig')
-                                or (isinstance(baseClass, ast.Attribute) and baseClass.attr == 'PluginConfig')
-                                for baseClass in c.bases
-                            ):
-                                logging.debug(f"found PluginConfig subclass '{c.name}' in {pluginInitFileName}")
-                                # this ia a plugin class, so iterate over its members (functions,
-                                #   variables, etc.) to find its name
-                                nameFoundForClass = False
-                                for item in c.body:
-                                    # the name is defined as an assignment (ast.Assign)
-                                    if isinstance(item, ast.Assign):
-                                        # does this assignment have a target called 'name'?
-                                        for target in item.targets:
-                                            if isinstance(target, ast.Name) and target.id == 'name':
-                                                # check if the value assigned to 'name' is a constant
-                                                if isinstance(item.value, ast.Constant):
-                                                    logging.info(
-                                                        f"discovered plugin name '{item.value.value}' "
-                                                        f"from class '{c.name}' in {pluginInitFileName}"
-                                                    )
-                                                    pluginNames.append(item.value.value)
-                                                    nameFoundForClass = True
-                                if not nameFoundForClass:
-                                    logging.debug(
-                                        f"class '{c.name}' in {pluginInitFileName} has no 'name' assignment; skipping"
-                                    )
-                else:
-                    logging.debug(f"{pluginInitFileName} does not exist (or is not a file), skipping")
-            except Exception as e:
-                logging.error(f"{type(e).__name__} identifying NetBox plugin names in {pluginInitFileName}: {e}")
-    else:
-        logging.debug("rg found no candidate __init__.py files containing PluginConfig")
-
+    # Keep discovery independent of pip list so --target installs are included.
+    search_locations = _plugin_search_locations(packagesInstalled)
+    logging.debug('Searching package directories for plugins: %s', search_locations)
+    pluginNames = discover_plugin_names(search_locations)
+    pluginsListModified = False
     if pluginNames:
-        pluginNames = list(set(pluginNames))
-        logging.info(f"plugin name(s) to ensure are registered in plugins.py: {pluginNames}")
-        # at this point we have a list of plugin names for all of the plugin classes!
-        #   we need to make sure they exist in plugins.py
-
-        # Load and parse the plugins.py file
-        pluginsListFound = False
-        pluginsPyPath = os.path.join(args.netboxConfigDir, 'plugins.py')
-        logging.debug(f"parsing {pluginsPyPath}")
-        with open(pluginsPyPath, 'r') as pluginFile:
-            code = pluginFile.read()
-            tree = ast.parse(code)
-
-        # Walk the AST to find the PLUGINS assignment
-        class PluginListModifier(ast.NodeTransformer):
-            def visit_Assign(self, node):
-                global pluginsListFound
-                global pluginsListModified
-                if isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'PLUGINS':
-                    pluginsListFound = True
-                    logging.debug("found existing PLUGINS assignment in plugins.py")
-                    # Check if the node's value is a list
-                    if isinstance(node.value, ast.List):
-                        # Get the existing plugin names in the list
-                        existingPlugins = {
-                            elt.value
-                            for elt in node.value.elts
-                            if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
-                        }
-                        logging.debug(f"existing plugins already listed: {existingPlugins}")
-                        # Add new plugins if they aren't already in the list
-                        for plugin in pluginNames:
-                            if plugin not in existingPlugins:
-                                logging.info(f"adding '{plugin}' to PLUGINS list in plugins.py")
-                                node.value.elts.append(ast.Constant(value=plugin))
-                                pluginsListModified = True
-                            else:
-                                logging.debug(f"'{plugin}' already present in PLUGINS list, not re-adding")
-                    else:
-                        logging.warning("PLUGINS assignment found but its value is not a list; leaving it untouched")
-                return node
-
-        # Modify the AST
-        modifier = PluginListModifier()
-        modifiedTree = modifier.visit(tree)
-
-        # # If PLUGINS was not found, add it at the end of the module
-        if not pluginsListFound:
-            logging.debug('no PLUGINS assignment found in plugins.py, appending a new one')
-            modifiedTree.body.append(
-                ast.Assign(
-                    targets=[ast.Name(id='PLUGINS', ctx=ast.Store())],
-                    value=ast.List(elts=[ast.Constant(value=plugin) for plugin in pluginNames], ctx=ast.Load()),
-                )
-            )
-            pluginsListModified = True
-
-        if pluginsListModified:
-            # Unparse the modified AST back into code
-            modifiedCode = ast.unparse(ast.fix_missing_locations(modifiedTree))
-
-            # Write the modified code back to the file
-            logging.info(f"writing updated plugins.py to {pluginsPyPath}")
-            with open(pluginsPyPath, 'w') as pluginFile:
-                pluginFile.write(modifiedCode)
-        else:
-            logging.debug("plugins.py already contains all discovered plugin names, no rewrite needed")
+        logging.info('plugin names to ensure are registered in plugins.py: %s', pluginNames)
+        pluginsListModified = register_plugin_names(os.path.join(args.netboxConfigDir, 'plugins.py'), pluginNames)
     else:
-        logging.debug("no plugin names discovered, plugins.py left untouched")
+        logging.debug('No plugins found; plugins.py left untouched')
 
     if installedOrUpdatedPlugins or pluginsListModified:
         logging.debug("changes detected, running migrations")
