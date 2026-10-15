@@ -143,7 +143,7 @@ function _EnvSetup {
   if command -v asdf >/dev/null 2>&1 && [[ -d "${ASDF_DATA_DIR}" ]]; then
     export PATH="${ASDF_DATA_DIR}/shims:$PATH"
     [[ -n $BASH_VERSION ]] && . <(asdf completion bash)
-    for i in ${ENV_LIST[@]}; do
+    for i in "${ENV_LIST[@]}"; do
       asdf reshim "$i" >/dev/null 2>&1 || true
     done
   fi
@@ -153,7 +153,7 @@ function _EnvSetup {
 # InstallEnvs - install asdf environments
 function InstallEnvs {
   declare -A ENVS_INSTALLED
-  for i in ${ENV_LIST[@]}; do
+  for i in "${ENV_LIST[@]}"; do
     ENVS_INSTALLED[$i]=false
   done
 
@@ -184,7 +184,7 @@ function InstallEnvs {
   if command -v asdf >/dev/null 2>&1 || [[ -x "${LOCAL_BIN_PATH}"/asdf ]] ; then
     _EnvSetup
     if [[ -n $ASDF_DATA_DIR ]]; then
-      for i in ${ENV_LIST[@]}; do
+      for i in "${ENV_LIST[@]}"; do
         if ! ( asdf plugin list | grep -q "$i" ) >/dev/null 2>&1 ; then
           CONFIRMATION=$(_GetConfirmation "\"$i\" is not installed, attempt to install it [Y/n]?" Y)
           if [[ $CONFIRMATION =~ ^[Yy] ]]; then
@@ -202,7 +202,7 @@ function InstallEnvs {
   fi # .asdf check
 
   # install versions of the tools and plugins
-  for i in ${ENV_LIST[@]}; do
+  for i in "${ENV_LIST[@]}"; do
     if [[ ${ENVS_INSTALLED[$i]} = 'true' ]]; then
       asdf plugin update $i
       asdf install $i latest
@@ -303,7 +303,7 @@ function InstallCommonPackages {
       xz
     )
     # install the packages from yum
-    for i in ${PACKAGE_LIST[@]}; do
+    for i in "${PACKAGE_LIST[@]}"; do
       $SUDO_CMD yum install -y "$i"
     done
 
@@ -311,86 +311,83 @@ function InstallCommonPackages {
 }
 
 ################################################################################
-# _InstallTool - generalized GitHub binary installer
-# Usage:
-#   _InstallTool <repo> <binary_name> <asset_pattern_amd64> <asset_pattern_arm64> [--strip N]
-#
-# Examples:
-#   _InstallTool schollz/croc croc \
-#     "croc_{ver}_Linux-64bit.tar.gz" "croc_{ver}_Linux-ARM64.tar.gz" --strip 0
-#
-#   _InstallTool mikefarah/yq yq \
-#     "yq_linux_amd64" "yq_linux_arm64"
-################################################################################
-function _InstallTool {
-  local repo="$1"
-  local bin_name="$2"
-  local amd64_pattern="$3"
-  local arm64_pattern="$4"
-  local strip_components=1
+# _InstallTool - install only repository-pinned and SHA-256-verified releases.
+# These setup scripts are intentionally standalone, so the pinned checksums
+# live here rather than in a manifest that may not be copied onto the AMI.
+function _PinnedToolReleaseAndSha256 {
+  case "$1:$2" in
+    schollz/croc:amd64) printf '%s %s\n' 'v11.5.4' '577f2c4170fac3f8ab244e325cdeea5644788e1cd7620f592a5d365ee349d556' ;;
+    schollz/croc:arm64) printf '%s %s\n' 'v11.5.4' '532646fdc82e51b524aa99fa52024e8d9ddf8b67622f574b5ae7943dc9ffce55' ;;
+    mikefarah/yq:amd64) printf '%s %s\n' 'v4.54.1' '8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f' ;;
+    mikefarah/yq:arm64) printf '%s %s\n' 'v4.54.1' '189088da0c6429ec5178dfaab1a114805f6cab0b61b165ab236efedf1d57a71b' ;;
+    boringproxy/boringproxy:amd64) printf '%s %s\n' 'v0.10.0' 'f5b42d933cea4d53aa975039de0cb1053287fac5ce4377d2afb663e26a5d22dd' ;;
+    boringproxy/boringproxy:arm64) printf '%s %s\n' 'v0.10.0' '7a778797dd640eb51defe912e8b6872df92241927193106590a2ccb92a5dc926' ;;
+    sharkdp/bat:amd64) printf '%s %s\n' 'v0.26.1' '0dcd8ac79732c0d5b136f11f4ee00e581440e16a44eab5b3105b611bbf2cf191' ;;
+    sharkdp/bat:arm64) printf '%s %s\n' 'v0.26.1' '6369242c584065f195fb20cb36fbd7cb63ae690605bbe89868a7596b596c2c23' ;;
+    eza-community/eza:amd64) printf '%s %s\n' 'v0.23.5' 'e06eebab74b73d6b7d51a796a353824b001bea82df077706382e100815d28904' ;;
+    eza-community/eza:arm64) printf '%s %s\n' 'v0.23.5' '1c01b578b5bd3f23b7de5a4b41936cde20fb16ff16a03e63266317ac1eb821e0' ;;
+    *) echo "No pinned tool release/checksum for $1 ($2)" >&2; return 1 ;;
+  esac
+}
 
+# Usage: _InstallTool <repo> <binary_name> <amd64_asset> <arm64_asset> [--strip N]
+function _InstallTool {
+  local repo="$1" bin_name="$2" amd64_pattern="$3" arm64_pattern="$4"
+  local strip_components=1
   shift 4
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --strip) strip_components="$2"; shift ;;
+      --strip)
+        [[ $# -ge 2 ]] || { echo "Missing --strip argument" >&2; return 1; }
+        strip_components="$2"; shift 2 ;;
+      *) echo "Unknown _InstallTool option: $1" >&2; return 1 ;;
     esac
-    shift
   done
 
-  local release="$(_GitLatestRelease "$repo")"
-  local dest_dir=/usr/local/bin
-  $SUDO_CMD mkdir -p "$dest_dir"
-  local tmp_dir="$(mktemp -d)"
-
-  local linux_cpu="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
-  local arch_pattern=""
-  case "$linux_cpu" in
-    amd64) arch_pattern="$amd64_pattern" ;;
-    arm64) arch_pattern="$arm64_pattern" ;;
-    *) echo "Unsupported architecture: $linux_cpu" >&2; return 1 ;;
+  local cpu release expected_sha asset_pattern asset_url dest_dir pinned
+  cpu="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+  case "$cpu" in
+    amd64) asset_pattern="$amd64_pattern" ;;
+    arm64) asset_pattern="$arm64_pattern" ;;
+    *) echo "Unsupported architecture: $cpu" >&2; return 1 ;;
   esac
-
-  arch_pattern="${arch_pattern//\{ver\}/$release}"
-  local url="https://github.com/${repo}/releases/download/${release}/${arch_pattern}"
-
-  # Default binary name = repo basename if omitted or '-'
   if [[ -z "$bin_name" || "$bin_name" == "-" ]]; then
     bin_name="$(basename "$repo")"
   fi
+  [[ "$bin_name" =~ ^[a-zA-Z0-9_-]+$ ]] || return 1
+  pinned="$(_PinnedToolReleaseAndSha256 "$repo" "$cpu")" || return 1
+  read -r release expected_sha <<< "$pinned"
+  [[ "$release" == v* && "$expected_sha" =~ ^[a-f0-9]{64}$ ]] || return 1
+  asset_pattern="$(printf %s "$asset_pattern" | sed "s/{ver}/$release/g")"
+  asset_url="https://github.com/$repo/releases/download/$release/$asset_pattern"
+  dest_dir="${LOCAL_BIN_PATH:-/usr/local/bin}"
+  echo "Installing verified $bin_name ($release) from $asset_url" >&2
 
-  echo "Installing $bin_name from $url" >&2
+  (
+    set -e
+    local temp_dir artifact selected_bin
+    temp_dir="$(mktemp -d)"
+    trap 'rm -rf "$temp_dir"' EXIT
+    artifact="$temp_dir/$asset_pattern"
+    curl -fsSL --retry 3 -o "$artifact" "$asset_url"
+    printf '%s  %s\n' "$expected_sha" "$artifact" | sha256sum -c - >&2
 
-  local is_tarball=false
-  [[ "$arch_pattern" =~ \.tar\.gz$|\.tgz$ ]] && is_tarball=true
-
-  if $is_tarball; then
-    if [[ "$strip_components" -eq 0 ]]; then
-      curl -sSL "$url" | tar xzf - -C "$tmp_dir"
+    if [[ "$asset_pattern" == *.tar.gz || "$asset_pattern" == *.tgz ]]; then
+      mkdir -p "$temp_dir/unpacked"
+      tar -xzf "$artifact" -C "$temp_dir/unpacked" --strip-components="$strip_components"
+      selected_bin="$temp_dir/unpacked/$bin_name"
     else
-      curl -sSL "$url" | tar xzf - --strip-components "$strip_components" -C "$tmp_dir"
+      selected_bin="$artifact"
     fi
-
-    # Try to locate binary
-    local found_bin
-    found_bin="$(find "$tmp_dir" -type f -executable \( -name "$bin_name" -o -printf "%f\n" \) 2>/dev/null | head -n1)"
-    if [[ -z "$found_bin" ]]; then
-      # fallback: just grab first executable file
-      found_bin="$(find "$tmp_dir" -type f -perm -111 | head -n1)"
+    if [[ ! -f "$selected_bin" ]]; then
+      echo "Pinned archive does not contain expected executable: $bin_name" >&2
+      exit 1
     fi
-    if [[ -z "$found_bin" ]]; then
-      echo "Error: could not detect binary in tarball" >&2
-      rm -rf "$tmp_dir"
-      return 1
-    fi
-
-    $SUDO_CMD cp -f "$found_bin" "$dest_dir/$bin_name"
-  else
-    $SUDO_CMD curl -sSL -o "$dest_dir/$bin_name" "$url"
-  fi
-
-  $SUDO_CMD chmod 755 "$dest_dir/$bin_name"
-  $SUDO_CMD chown root:root "$dest_dir/$bin_name"
-  rm -rf "$tmp_dir"
+    # Verification and exact file selection both precede privileged writes.
+    $SUDO_CMD mkdir -p "$dest_dir"
+    $SUDO_CMD install -m 755 "$selected_bin" "$dest_dir/$bin_name"
+    $SUDO_CMD chown root:root "$dest_dir/$bin_name"
+  )
 }
 
 function _InstallCroc {
@@ -411,7 +408,7 @@ function _InstallBoringProxy {
 function _InstallBat {
   _InstallTool sharkdp/bat - \
     "bat-{ver}-x86_64-unknown-linux-musl.tar.gz" \
-    "bat-{ver}-aarch64-unknown-linux-musl.tar.gz" --strip 1
+    "bat-{ver}-aarch64-unknown-linux-musl.tar.gz" --strip 1 || return 1
   $SUDO_CMD ln -s -r /usr/local/bin/bat /usr/local/bin/batcat
 }
 
@@ -426,11 +423,11 @@ function _InstallEza {
 function InstallUserLocalBinaries {
   CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-    [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
-    [[ ! -f "${LOCAL_BIN_PATH}"/yq ]] && _InstallYQ
-    [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
-    [[ ! -f "${LOCAL_BIN_PATH}"/bat ]] && _InstallBat
-    [[ ! -f "${LOCAL_BIN_PATH}"/eza ]] && _InstallEza
+    [[ -f "${LOCAL_BIN_PATH}"/croc ]] || _InstallCroc || return 1
+    [[ -f "${LOCAL_BIN_PATH}"/yq ]] || _InstallYQ || return 1
+    [[ -f "${LOCAL_BIN_PATH}"/boringproxy ]] || _InstallBoringProxy || return 1
+    [[ -f "${LOCAL_BIN_PATH}"/bat ]] || _InstallBat || return 1
+    [[ -f "${LOCAL_BIN_PATH}"/eza ]] || _InstallEza || return 1
   fi
 }
 
@@ -559,7 +556,7 @@ function SGroverDotfiles {
     LINKED_SCRIPTS=(
       self_signed_key_gen.sh
     )
-    for i in ${LINKED_SCRIPTS[@]}; do
+    for i in "${LINKED_SCRIPTS[@]}"; do
       rm -vf "$LOCAL_BIN_PATH"/"$i" && ln -vrs "$SGROVER_GITHUB_PATH"/scripts/"$i" "$LOCAL_BIN_PATH"/
     done
 
@@ -621,8 +618,8 @@ function InstallMalcolm {
 
     CONFIRMATION=$(_GetConfirmation "Set up crontab for starting/resetting Malcolm? [y/N]?" N)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-      ((echo 'SHELL=/bin/bash') ; \
-       (( crontab -l | grep . | grep -v ^SHELL= ; \
+      ( ( echo 'SHELL=/bin/bash' ) ; \
+       ( ( crontab -l | grep . | grep -v ^SHELL= ; \
           echo "@reboot sleep 60 && /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -r -o -n -m $MALCOLM_PATH/docker-compose.yml" ; \
           echo "15 8 * * * /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -w -o -n -m $MALCOLM_PATH/docker-compose.yml -d yesterday $ARTIFACTS_PATH/*.pcap" ) \
           | sort | uniq )) | crontab -
@@ -648,8 +645,8 @@ function SetupConnectivity {
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       COMMAND=$(_GetString "Command:" "")
       if [[ -n "$COMMAND" ]]; then
-        ((echo 'SHELL=/bin/bash') ; \
-         (( crontab -l | grep . | grep -v ^SHELL= ; \
+        ( ( echo 'SHELL=/bin/bash' ) ; \
+         ( ( crontab -l | grep . | grep -v ^SHELL= ; \
             echo "@reboot ${COMMAND}" ) \
             | sort | uniq )) | crontab -
       fi
@@ -660,15 +657,15 @@ function SetupConnectivity {
   if ! ( crontab -l | grep -q boringproxy ); then
     CONFIRMATION=$(_GetConfirmation "Configure boringproxy [y/N]?" N)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-      [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
+      [[ -f "${LOCAL_BIN_PATH}"/boringproxy ]] || _InstallBoringProxy || return 1
       SERVER=$(_GetString "boringproxy server:" "")
       CLIENT=$(_GetString "boringproxy client name:" "")
       USER=$(_GetString "boringproxy user:" "")
       TOKEN=$(_GetString "boringproxy token (will be stored in plaintext in crontab):" "")
       if [[ -n "$SERVER" ]] && [[ -n "$CLIENT" ]] && [[ -n "$USER" ]] && [[ -n "$TOKEN" ]]; then
         mkdir -p "${LOCAL_CONFIG_PATH}"/boringproxy/certs
-        ((echo 'SHELL=/bin/bash') ; \
-         (( crontab -l | grep . | grep -v ^SHELL= ; \
+        ( ( echo 'SHELL=/bin/bash' ) ; \
+         ( ( crontab -l | grep . | grep -v ^SHELL= ; \
             echo "@reboot sleep 120 && ( nohup ${LOCAL_BIN_PATH}/boringproxy client -client-name ${CLIENT} -acme-email example@example.com -cert-dir ${LOCAL_CONFIG_PATH}/boringproxy/certs -user ${USER} -token ${TOKEN} -server ${SERVER} >/dev/null 2>&1 </dev/null & )" ) \
             | sort | uniq )) | crontab -
       fi
@@ -709,7 +706,7 @@ if (( $USER_FUNCTION_IDX == 0 )); then
   InstallCommonPackages
   InstallDocker
   SystemConfig
-  InstallUserLocalBinaries
+  InstallUserLocalBinaries || exit 1
   InstallEnvPackages
   CreateCommonLinuxConfig
   SGroverDotfiles
