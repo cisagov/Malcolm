@@ -42,6 +42,7 @@ ENV CCACHE_DIR="/var/spool/ccache"
 ENV CCACHE_COMPRESS=1
 
 ADD --chmod=755 zeek/scripts/zeek_install_plugins.sh /usr/local/bin/
+ADD --chmod=644 zeek/zeek-packages.lock /usr/local/share/zeek-packages.lock
 ADD --chmod=755 zeek/scripts/zeek_iana_lookup_generator.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/

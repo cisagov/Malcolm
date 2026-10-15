@@ -9,71 +9,40 @@ fi
 
 ZEEK_DIR=${ZEEK_DIR:-/usr/local/zeek}
 
+# Packages are installed at the commits pinned in zeek-packages.lock (generated from
+#   zeek/zeek-packages.list by scripts/zeek_packages_lock_refresh.sh). git verifies each checkout
+#   against its commit hash, so the build gets exactly the reviewed code.
+ZEEK_PACKAGES_LOCK=${ZEEK_PACKAGES_LOCK:-/usr/local/share/zeek-packages.lock}
+
 #
-# get_latest_github_tagged_release
+# zkg_install_pinned URL COMMIT ENV_LIST
 #
-# get the latest GitHub release tag name given a github repo URL
-#
-function get_latest_github_tagged_release() {
-  REPO_URL="$1"
-  REPO_NAME="$(echo "$REPO_URL" | sed 's|.*github\.com/||')"
-  LATEST_URL="https://github.com/$REPO_NAME/releases/latest"
-  REDIRECT_URL="$(curl -fsSLI -o /dev/null -w %{url_effective} "$LATEST_URL" 2>/dev/null)"
-  if [[ "$LATEST_URL" = "$REDIRECT_URL"/latest ]]; then
-    echo ""
-  else
-    echo "$REDIRECT_URL" | sed 's|.*tag/||'
+# zkg install a package at a specific commit, with optional semicolon-separated environment
+#   variables (e.g., CMAKE_BUILD_TYPE=Debug;HILTI_CXX_FLAGS=-fno-var-tracking-assignments)
+function zkg_install_pinned() {
+  local REPO_URL="$1" COMMIT="$2" ENV_LIST="$3"
+  local ENVS=()
+  [[ -n "$ENV_LIST" ]] && IFS=';' read -ra ENVS <<< "${ENV_LIST}"
+  local EXTRA_ZKG_PARAMS=()
+  if [[ "$REPO_URL" =~ "zeek-kafka" ]]; then
+    EXTRA_ZKG_PARAMS+=( --user-var )
+    EXTRA_ZKG_PARAMS+=( LIBRDKAFKA_ROOT=/usr/include/librdkafka )
   fi
+  env "${ENVS[@]}" zkg install --nodeps --force --skiptests "${EXTRA_ZKG_PARAMS[@]}" --version "$COMMIT" "$REPO_URL"
 }
 
 #
-# zkg_install_github_repo
+# git_clone_pinned URL COMMIT DESTINATION
 #
-# zkg install the latest GitHub release tag if available (else, master/HEAD)
-# some optional overrides can be specified using | as a delimiter in the URL parameter:
-#   URL|branch|environment variables
-#   URL - the full GitHub URL to install
-#   branch - the branch to checkout and install (otherwise, the latest release tag will be used, or the default branch if no releases exist)
-#   environment variables - semicolon-separated list of environment variables to set before calling zkg (e.g., CMAKE_BUILD_TYPE=Debug;HILTI_CXX_FLAGS=-fno-var-tracking-assignments)
-function zkg_install_github_repo() {
-  URL_PARAM="$1"
-  URL_DELIM='|'
-  URL_DELIM_COUNT="$(awk -F"${URL_DELIM}" '{print NF-1}' <<< "${URL_PARAM}")"
-  REPO_URL=""
-  BRANCH_OVERRIDE=""
-  ENV_LIST=""
-  if (( $URL_DELIM_COUNT >= 0 )); then
-    REPO_URL="$(echo "$URL_PARAM" | cut -d'|' -f1)"
-  fi
-  if (( $URL_DELIM_COUNT >= 1 )); then
-    BRANCH_OVERRIDE="$(echo "$URL_PARAM" | cut -d'|' -f2)"
-  fi
-  if (( $URL_DELIM_COUNT >= 2 )); then
-    ENV_LIST="$(echo "$URL_PARAM" | cut -d'|' -f3)"
-  fi
-  if [[ -n $REPO_URL ]]; then
-    if [[ -n $BRANCH_OVERRIDE ]]; then
-      REPO_LATEST_RELEASE="$BRANCH_OVERRIDE"
-    else
-      REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
-    fi
-    if [[ -n $ENV_LIST ]]; then
-      IFS=';' read -ra ENVS <<< "${ENV_LIST}"
-      for ENV in "${ENVS[@]}"; do
-        export "$ENV"
-      done
-    fi
-    EXTRA_ZKG_PARAMS=()
-    if [[ "$REPO_URL" =~ "zeek-kafka" ]]; then
-      EXTRA_ZKG_PARAMS+=( --user-var )
-      EXTRA_ZKG_PARAMS+=( LIBRDKAFKA_ROOT=/usr/include/librdkafka )
-    fi
-    if [[ -n $REPO_LATEST_RELEASE ]]; then
-      zkg install --nodeps --force --skiptests "${EXTRA_ZKG_PARAMS[@]}" --version "$REPO_LATEST_RELEASE" "$REPO_URL"
-    else
-      zkg install --nodeps --force --skiptests "${EXTRA_ZKG_PARAMS[@]}" "$REPO_URL"
-    fi
-  fi
+# check out a repository (and its submodules) at a specific commit, for packages zkg doesn't handle
+function git_clone_pinned() {
+  local REPO_URL="$1" COMMIT="$2" DEST="$3"
+  mkdir -p "$DEST"
+  git -C "$DEST" init -q
+  git -C "$DEST" remote add origin "$REPO_URL"
+  git -C "$DEST" fetch -q --depth 1 origin "$COMMIT"
+  git -C "$DEST" checkout -q FETCH_HEAD
+  git -C "$DEST" submodule update -q --init --recursive --depth 1
 }
 
 # don't consume as many resources when building spicy analyzers, even if it's slower.
@@ -88,89 +57,36 @@ export HILTI_JIT_PARALLELISM=${BUILD_JOBS:-$TOTAL_CPUS}
 # * Detect gateway IP: https://github.com/stratosphereips/zeek-package-log-gateway-IP
 # * Different IRC detections: https://packages.zeek.org/packages/view/5943b1ed-c3b1-11ed-9c2f-0a598146b5c6
 
-# install Zeek packages that install nicely using zkg
-ZKG_GITHUB_URLS=(
-  "https://github.com/0xl3x1/zeek-EternalSafety"
-  "https://github.com/0xxon/cve-2020-0601"
-  "https://github.com/0xxon/cve-2020-13777"
-  "https://github.com/amzn/zeek-plugin-profinet|master"
-  "https://github.com/amzn/zeek-plugin-tds|master"
-  "https://github.com/cert-lv/spicy-iec104|main"
-  "https://github.com/mmguero-dev/icsnpp-bacnet"
-  "https://github.com/mmguero-dev/icsnpp-bsap"
-  "https://github.com/mmguero-dev/icsnpp-c1222"
-  "https://github.com/mmguero-dev/icsnpp-dnp3"
-  "https://github.com/mmguero-dev/icsnpp-enip"
-  "https://github.com/mmguero-dev/icsnpp-ethercat"
-  "https://github.com/mmguero-dev/icsnpp-ge-srtp"
-  "https://github.com/mmguero-dev/icsnpp-genisys"
-  "https://github.com/mmguero-dev/icsnpp-hart-ip"
-  "https://github.com/mmguero-dev/icsnpp-modbus"
-  "https://github.com/mmguero-dev/icsnpp-omron-fins"
-  "https://github.com/mmguero-dev/icsnpp-opcua-binary"
-  "https://github.com/mmguero-dev/icsnpp-profinet-io-cm"
-  "https://github.com/mmguero-dev/icsnpp-roc-plus"
-  "https://github.com/mmguero-dev/icsnpp-s7comm"
-  "https://github.com/mmguero-dev/icsnpp-synchrophasor"
-  "https://github.com/corelight/callstranger-detector"
-  "https://github.com/corelight/CVE-2020-16898"
-  "https://github.com/corelight/CVE-2021-1675"
-  "https://github.com/corelight/CVE-2021-31166"
-  "https://github.com/corelight/CVE-2021-38647"
-  "https://github.com/corelight/CVE-2021-41773"
-  "https://github.com/corelight/CVE-2021-42292"
-  "https://github.com/corelight/cve-2021-44228"
-  "https://github.com/corelight/cve-2022-21907"
-  "https://github.com/corelight/cve-2022-22954"
-  "https://github.com/corelight/CVE-2022-23270-PPTP"
-  "https://github.com/corelight/CVE-2022-24491"
-  "https://github.com/corelight/CVE-2022-24497"
-  "https://github.com/corelight/cve-2022-26809"
-  "https://github.com/corelight/CVE-2022-26937"
-  "https://github.com/corelight/CVE-2022-30216"
-  "https://github.com/corelight/CVE-2022-3602"
-  "https://github.com/corelight/ExtendIntel"
-  "https://github.com/corelight/hassh"
-  "https://github.com/corelight/http-more-files-names"
-  "https://github.com/corelight/pingback"
-  "https://github.com/corelight/ripple20"
-  "https://github.com/corelight/SIGRed"
-  "https://github.com/corelight/zeek-agenttesla-detector"
-  "https://github.com/corelight/zeek-asyncrat-detector"
-  "https://github.com/corelight/zeek-long-connections|master"
-  "https://github.com/corelight/zeek-netsupport-detector"
-  "https://github.com/corelight/zeek-quasarrat-detector"
-  "https://github.com/corelight/zeek-spicy-ipsec"
-  "https://github.com/corelight/zeek-spicy-openvpn"
-  "https://github.com/corelight/zeek-spicy-ospf|master"
-  "https://github.com/corelight/zeek-spicy-stun"
-  "https://github.com/corelight/zeek-spicy-wireguard"
-  "https://github.com/corelight/zeek-strrat-detector"
-  "https://github.com/corelight/zeek-xor-exe-plugin|master"
-  "https://github.com/corelight/zerologon"
-  "https://github.com/cybera/zeek-sniffpass"
-  "https://github.com/FoxIO-LLC/ja4|v1.0.1"
-  "https://github.com/J-Gras/zeek-fuzzy-hashing|topic/jgras/hash-all-files"
-  "https://github.com/mmguero-dev/bzar"
-  "https://github.com/corelight/json-streaming-logs|master"
-  "https://github.com/ncsa/bro-is-darknet"
-  "https://github.com/ncsa/bro-simple-scan"
-  "https://github.com/precurse/zeek-httpattacks"
-  "https://github.com/salesforce/GQUIC_Protocol_Analyzer"
-  "https://github.com/SeisoLLC/zeek-kafka|main"
-  "https://github.com/zeek/spicy-tftp|main"
-)
+if [[ ! -r "$ZEEK_PACKAGES_LOCK" ]]; then
+  echo "Zeek package lock file not found: $ZEEK_PACKAGES_LOCK" >&2
+  exit 1
+fi
 
-for i in ${ZKG_GITHUB_URLS[@]}; do
-  zkg_install_github_repo "$i"
+# read the whole lock file first so nothing run during an install can consume its lines from stdin
+mapfile -t LOCK_ENTRIES < <(grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "$ZEEK_PACKAGES_LOCK")
+
+for ENTRY in "${LOCK_ENTRIES[@]}"; do
+  IFS='|' read -r REPO_URL COMMIT RESOLVED_REF ENV_LIST METHOD <<< "$ENTRY"
+  if [[ -z "$REPO_URL" ]] || [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Invalid entry in $ZEEK_PACKAGES_LOCK: $ENTRY" >&2
+    exit 1
+  fi
+  echo "Installing $REPO_URL at $COMMIT ($RESOLVED_REF)"
+  case "$METHOD" in
+    ""|zkg)
+      zkg_install_pinned "$REPO_URL" "$COMMIT" "$ENV_LIST"
+      ;;
+    clone:*)
+      git_clone_pinned "$REPO_URL" "$COMMIT" "${ZEEK_DIR}/${METHOD#clone:}"
+      ;;
+    *)
+      echo "Unknown install method '$METHOD' for $REPO_URL" >&2
+      exit 1
+      ;;
+  esac
 done
 
 find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \;
-
-# plugins/packages/scripts that don't play nicely or need to be coddled
-git clone \
-  --single-branch --depth 1 --recurse-submodules --shallow-submodules \
-  "https://github.com/cisagov/ACID" "${ZEEK_DIR}"/share/zeek/site/ACID
 
 # one-off packages from local build
 if [[ -d "$ZEEK_DIR"/custom-pkg ]]; then
