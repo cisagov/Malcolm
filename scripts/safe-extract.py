@@ -154,8 +154,8 @@ def _extract_libarchive(archive, dest):
 
 def safe_extract(archive, dest):
     os.makedirs(dest, exist_ok=False)
-    file_mime_type = magic.from_file(archive, mime=True)
     try:
+        file_mime_type = magic.from_file(archive, mime=True)
         if TAR_COMPRESSED_EXTS.search(archive):
             _extract_libarchive(archive, dest)
         elif file_mime_type in ARCHIVE_RAW_STREAM_MIMES:
@@ -164,7 +164,9 @@ def safe_extract(archive, dest):
             _extract_lzip(archive, dest)
         else:
             _extract_libarchive(archive, dest)
-    except ArchiveBombError:
+    except Exception:
+        # This call created dest, so remove incomplete output on any extraction
+        # failure before a caller can mistake partial logs for a valid archive.
         shutil.rmtree(dest, ignore_errors=True)
         raise
 
