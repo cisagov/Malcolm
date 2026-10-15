@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'logstash/scripts/logstash-stage-pipelines.sh'
 
 
