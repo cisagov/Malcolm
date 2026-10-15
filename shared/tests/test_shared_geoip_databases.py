@@ -1,6 +1,5 @@
 """Offline tests for shared MaxMind GeoIP data in Arkime and Logstash."""
 
-import importlib.util
 import re
 import stat
 import subprocess
@@ -8,13 +7,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-CONFIG = ROOT / "logstash/scripts/configure_geoip_databases.py"
+ROOT = Path(__file__).resolve().parents[2]
 PUBLISH = ROOT / "arkime/scripts/publish-shared-geoip.sh"
 
-spec = importlib.util.spec_from_file_location("geoip_configuration", CONFIG)
-geoip = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(geoip)
+from logstash.scripts import configure_geoip_databases as geoip
 
 PIPELINES = (
     "logstash/pipelines/beats/12_lookups.conf",
