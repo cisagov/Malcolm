@@ -6,7 +6,7 @@ import json
 import logging
 import time
 
-from malcolm_utils import AtomicInt, ContextLockedOrderedDict, same_file_or_dir
+from malcolm_utils import AtomicInt, ContextLockedOrderedDict
 
 from watchdog.events import (
     FileSystemEventHandler,
@@ -106,10 +106,10 @@ class FileOperationEventHandler(FileSystemEventHandler):
                 try:
                     deckInserted = d
 
-                    if fNameOld and same_file_or_dir(os.path.dirname(fNameOld), os.path.dirname(fName)):
-                        # a file was simply renamed in the watched directory (not moved
-                        # from some other directory) so remove the old filename from our list
-                        # and a new one will get added
+                    if fNameOld:
+                        # Moves can cross subdirectories of the watched tree. Retire any
+                        # tracked source path, not just same-directory renames; the file
+                        # will be queued at its destination below.
                         d.pop(fNameOld, None)
                         self.modDeck.pop(fNameOld, None)
 
