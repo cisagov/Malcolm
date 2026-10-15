@@ -1830,122 +1830,92 @@ ISO8601_TIME_REGEX = re.compile(
 )
 
 
-def ProcessLogLine(line, debug=False):
-    global ISO8601_TIME_REGEX
-    global LOG_IGNORE_REGEX
-    global SERVICE_REGEX
-    global URL_USER_PASS_REGEX
+def _log_timestamp_from_json(output_json, message_time_match):
+    """Remove the preferred JSON timestamp, falling back to the log prefix."""
+    for key in ('time', 'timestamp', '@timestamp'):
+        if key in output_json:
+            return f"{output_json.pop(key)} "
+    return f"{message_time_match[0]} " if message_time_match is not None else ''
 
-    outputStr = CONTAINER_REPL_REGEX.sub(r"\1\2", URL_USER_PASS_REGEX.sub(r"\1xxxxxxxx\2", line.decode().strip()))
-    outputStrEscaped = EscapeAnsi(outputStr)
-    if LOG_IGNORE_REGEX.match(outputStrEscaped):
+
+def _format_supercronic_log(output_prefix, output_json, debug):
+    """Condense job events and suppress routine start/success chatter."""
+    for noisy_key in ('level', 'channel', 'iteration', 'job.position', 'job.schedule'):
+        output_json.pop(noisy_key, None)
+
+    if len(output_json) == 2 and 'job.command' in output_json and 'msg' in output_json:
+        job_status = output_json['msg']
+        if debug or job_status not in ('starting', 'job succeeded'):
+            return f"{output_prefix} {output_json['job.command']}: {job_status}"
         return None
-    else:
-        serviceMatch = SERVICE_REGEX.search(outputStrEscaped)
-        serviceMatchFmt = SERVICE_REGEX.search(outputStr) if coloramaImported else serviceMatch
-        serviceStr = serviceMatchFmt.group('service').replace('-container', '') if (serviceMatchFmt is not None) else ''
+    return f"{output_prefix}{json.dumps(output_json)}"
 
-        messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
-        messageStrSplit = messageStr.split(' ')
-        messageTimeMatch = ISO8601_TIME_REGEX.match(messageStrSplit[0])
-        if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
-            messageStrToTestJson = messageStr
-        else:
-            messageStrToTestJson = messageStrSplit[1:].join(' ')
 
-        outputJson = LoadStrIfJson(messageStrToTestJson)
-        if isinstance(outputJson, dict):
-            # if there's a timestamp, move it outside of the JSON to the beginning of the log string
-            timeKey = None
-            if 'time' in outputJson:
-                timeKey = 'time'
-            elif 'timestamp' in outputJson:
-                timeKey = 'timestamp'
-            elif '@timestamp' in outputJson:
-                timeKey = '@timestamp'
-            timeStr = ''
-            if timeKey is not None:
-                timeStr = f"{outputJson[timeKey]} "
-                outputJson.pop(timeKey, None)
-            elif messageTimeMatch is not None:
-                timeStr = f"{messageTimeMatch[0]} "
+def _format_filebeat_log(output_prefix, output_json):
+    """Remove verbose Filebeat fields and summarize ordinary events."""
+    for noisy_key in (
+        'ecs.version',
+        'harvester_id',
+        'input_id',
+        'log.level',
+        'log.logger',
+        'log.origin',
+        'os_id',
+        'service.name',
+        'state_id',
+    ):
+        output_json.pop(noisy_key, None)
 
-            if ('job.schedule' in outputJson) and ('job.position' in outputJson) and ('job.command' in outputJson):
-                # this is a status line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
+    if len(output_json) == 3 and all(k in output_json for k in ('message', 'source_file', 'finished')):
+        return f"{output_prefix}{output_json['message'].rstrip('.')}: {output_json['source_file']}"
+    if len(output_json) == 1:
+        key = next(iter(output_json))
+        key_prefix = f'{key}: ' if key != 'message' else ''
+        return f"{output_prefix}{key_prefix}{output_json[key]}"
+    return f"{output_prefix}{json.dumps(output_json)}"
 
-                # remove some clutter for the display
-                for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
-                    outputJson.pop(noisyKey, None)
 
-                # if it's just command and message, format those NOT as JSON
-                jobCmd = outputJson['job.command']
-                jobStatus = outputJson['msg']
-                if (len(outputJson.keys()) == 2) and ('job.command' in outputJson) and ('msg' in outputJson):
-                    # if it's the most common status (starting or job succeeded) then don't print unless debug mode
-                    if debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
-                        return (
-                            f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr} {jobCmd}: {jobStatus}"
-                        )
-                    else:
-                        return None
+def _format_service_json(service, output_json, message_time_match, debug):
+    """Render a parsed log event according to its service-specific format."""
+    time_str = _log_timestamp_from_json(output_json, message_time_match)
+    output_prefix = f"{service}{Style.RESET_ALL if coloramaImported else ''} {time_str}"
 
-                else:
-                    # standardize and print the JSON line
-                    return (
-                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                    )
+    if all(k in output_json for k in ('job.schedule', 'job.position', 'job.command')):
+        return _format_supercronic_log(output_prefix, output_json, debug)
+    if 'dashboards' in service:
+        for noisy_key in ('type', 'tags', 'pid', 'method', 'prevState', 'prevMsg'):
+            output_json.pop(noisy_key, None)
+        return f'{output_prefix}{json.dumps(output_json)}'
+    if 'filebeat' in service:
+        return _format_filebeat_log(output_prefix, output_json)
+    return f'{output_prefix}{json.dumps(output_json)}'
 
-            elif 'dashboards' in serviceStr:
-                # this is a line from dashboards, let's clean it up a bit: remove some clutter for the display
-                for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
-                    outputJson.pop(noisyKey, None)
 
-                # standardize and print the JSON line
-                return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+def ProcessLogLine(line, debug=False):
+    """Normalize and format a container log line, including timestamped JSON."""
+    output_str = CONTAINER_REPL_REGEX.sub(
+        r"\1\2", URL_USER_PASS_REGEX.sub(r"\1xxxxxxxx\2", line.decode().strip())
+    )
+    output_escaped = EscapeAnsi(output_str)
+    if LOG_IGNORE_REGEX.match(output_escaped):
+        return None
 
-            elif 'filebeat' in serviceStr:
-                # this is a line from filebeat, let's clean it up a bit: remove some clutter for the display
-                for noisyKey in [
-                    'ecs.version',
-                    'harvester_id',
-                    'input_id',
-                    'log.level',
-                    'log.logger',
-                    'log.origin',
-                    'os_id',
-                    'service.name',
-                    'state_id',
-                ]:
-                    outputJson.pop(noisyKey, None)
+    service_match = SERVICE_REGEX.search(output_escaped)
+    service_match_fmt = SERVICE_REGEX.search(output_str) if coloramaImported else service_match
+    service = service_match_fmt.group('service').replace('-container', '') if service_match_fmt else ''
+    message = service_match.group('message') if service_match else ''
 
-                # we'll fancify a couple of common things from filebeat
-                if (
-                    (len(outputJson.keys()) == 3)
-                    and ('message' in outputJson)
-                    and ('source_file' in outputJson)
-                    and ('finished' in outputJson)
-                ):
-                    return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
+    # Strip a leading ISO-8601 timestamp only when followed by a message.
+    # partition preserves spacing in the rest of a JSON line, unlike split/join.
+    first_token, separator, remaining = message.partition(' ')
+    message_time_match = ISO8601_TIME_REGEX.match(first_token)
+    json_text = remaining if message_time_match is not None and separator else message
+    output_json = LoadStrIfJson(json_text)
+    if isinstance(output_json, dict):
+        return _format_service_json(service, output_json, message_time_match, debug)
 
-                elif len(outputJson.keys()) == 1:
-                    outputKey = next(iter(outputJson))
-                    return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
+    return output_str if coloramaImported else output_escaped
 
-                else:
-                    # standardize and print the JSON line
-                    return (
-                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                    )
-
-            else:
-                # standardize and print the JSON line
-                return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-
-        else:
-            # just a regular non-JSON string, print as-is
-            return outputStr if coloramaImported else outputStrEscaped
-
-    return None
 
 
 ##################################################################################################
