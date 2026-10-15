@@ -164,17 +164,26 @@ class DependencyManager:
         def value_observer(_):
             """Observer function that updates item value when conditions are met."""
             try:
-                # Check if we should only apply to unmodified items
-                if value_rule.only_if_unmodified and item.is_modified:
-                    # InstallerLogger.debug(f"{item_key} is modified, leaving alone")
-                    return
-
                 if isinstance(value_rule.depends_on, list):
                     # Multi-dependency: get values for all dependencies
                     dep_values = [self.config.get_value(dep_key) for dep_key in value_rule.depends_on]
                 else:
                     # Single dependency
                     dep_values = self.config.get_value(value_rule.depends_on)
+
+                # For most dependencies this is a fixed boolean. A few
+                # profile-specific rules must preserve user-edited remote
+                # endpoints but still reset them when returning to Malcolm.
+                if item.is_modified:
+                    skip_modified = value_rule.only_if_unmodified
+                    if callable(skip_modified):
+                        skip_modified = (
+                            skip_modified(*dep_values)
+                            if isinstance(dep_values, list)
+                            else skip_modified(dep_values)
+                        )
+                    if skip_modified:
+                        return
 
                 if callable(value_rule.condition):
                     if isinstance(dep_values, list):
