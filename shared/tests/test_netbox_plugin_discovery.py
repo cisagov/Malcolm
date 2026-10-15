@@ -1,11 +1,11 @@
 """Offline regression coverage for discovering and registering NetBox plugins."""
 
 import ast
+import logging
 import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
-
 
 SOURCE = Path(__file__).resolve().parents[2] / "netbox/control-scripts/netbox_install_plugins.py"
 SPEC = importlib.util.spec_from_file_location("malcolm_netbox_plugin_installer", SOURCE)
@@ -138,3 +138,68 @@ def test_full_install_does_not_modify_function_local_plugins_assignment(tmp_path
     assert ast.literal_eval(toplevel[0].value) == ["new_plugin"]
     local_assignment = next(node for node in tree.body if isinstance(node, ast.FunctionDef)).body[0]
     assert ast.literal_eval(local_assignment.value) == ["nested"]
+
+
+def test_discovery_logs_plugin_names_and_missing_name(tmp_path, monkeypatch, caplog):
+    named = write_init(tmp_path, 'alpha', class_name='WorkingPlugin')
+    unnamed = tmp_path / 'unnamed' / '__init__.py'
+    unnamed.parent.mkdir()
+    unnamed.write_text('class MissingName(PluginConfig):\n    verbose_name = "No Name"\n')
+    monkeypatch.setattr(
+        mod.malcolm_utils,
+        'run_process',
+        lambda *args, **kwargs: (0, [str(unnamed), str(named)]),
+    )
+    with caplog.at_level(logging.DEBUG):
+        assert mod.discover_plugin_names([str(tmp_path)]) == ['alpha']
+    messages = [entry.message for entry in caplog.records]
+    assert any('candidate __init__.py' in msg for msg in messages)
+    assert any(f'inspecting {named}' in msg for msg in messages)
+    assert any(f"found PluginConfig subclass 'WorkingPlugin' in {named}" in msg for msg in messages)
+    assert any(f"discovered plugin name 'alpha' from class 'WorkingPlugin' in {named}" in msg for msg in messages)
+    assert any("class 'MissingName'" in msg and 'no valid literal' in msg for msg in messages)
+
+
+def test_discovery_continues_after_unexpected_exception(tmp_path, monkeypatch, caplog):
+    bad = write_init(tmp_path, 'bad')
+    good = write_init(tmp_path, 'good')
+    real_parser = mod._plugin_names_from_init
+
+    def unstable_parser(path):
+        if path == str(bad):
+            raise RuntimeError('unexpected parser issue')
+        return real_parser(path)
+
+    monkeypatch.setattr(mod, '_plugin_names_from_init', unstable_parser)
+    monkeypatch.setattr(
+        mod.malcolm_utils,
+        'run_process',
+        lambda *args, **kwargs: (0, [str(good), str(bad)]),
+    )
+    with caplog.at_level(logging.ERROR):
+        assert mod.discover_plugin_names([str(tmp_path)]) == ['good']
+    assert any(
+        'RuntimeError identifying NetBox plugin names' in entry.message and str(bad) in entry.message
+        for entry in caplog.records
+    )
+
+
+def test_registration_logs_added_and_existing_plugins(tmp_path, caplog):
+    config = tmp_path / 'plugins.py'
+    config.write_text('PLUGINS = ["already"]\n')
+    with caplog.at_level(logging.DEBUG):
+        assert mod.register_plugin_names(str(config), ['already', 'new']) is True
+    messages = [entry.message for entry in caplog.records]
+    assert any("'already' already present in PLUGINS list" in msg for msg in messages)
+    assert any("adding 'new' to PLUGINS list" in msg for msg in messages)
+    assert any('writing updated plugins.py' in msg for msg in messages)
+
+
+def test_new_plugins_assignment_logs_each_addition(tmp_path, caplog):
+    config = tmp_path / 'plugins.py'
+    config.write_text('def unrelated():\n    return None\n')
+    with caplog.at_level(logging.INFO):
+        assert mod.register_plugin_names(str(config), ['beta', 'alpha']) is True
+    messages = [entry.message for entry in caplog.records]
+    assert any("adding 'alpha' to PLUGINS list" in msg for msg in messages)
+    assert any("adding 'beta' to PLUGINS list" in msg for msg in messages)
