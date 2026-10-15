@@ -3,7 +3,7 @@
 
 ####################################################################################
 # first build documentation with jekyll
-FROM ghcr.io/mmguero-dev/jekyll:latest AS docbuild
+FROM ghcr.io/mmguero-dev/jekyll:latest@sha256:8649ddf866df7b79d1d297b3b6eaff91cde1fbde01f1f4406625e254584c9eca AS docbuild
 
 ARG VCS_REVISION
 ENV VCS_REVISION=$VCS_REVISION

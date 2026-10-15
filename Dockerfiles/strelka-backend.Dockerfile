@@ -1,4 +1,4 @@
-FROM ghcr.io/idaholab/strelka/backend:malcolm
+FROM ghcr.io/idaholab/strelka/backend:malcolm@sha256:f560261b494b09bf90ad2155f5865450e3ac89a9e8f62b0af585d9da18d5ee1a
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -100,7 +100,7 @@ RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
 
 USER root
 
-COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=644 strelka/backend/supervisord.conf /etc/supervisord.conf
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/

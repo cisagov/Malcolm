@@ -139,7 +139,7 @@ else
   TOKEN_ARGS=()
 fi
 # run jekyll docker container to generate HTML version of the documentation
-$DOCKER_BIN run --rm -v "$(pwd)":/site "${TOKEN_ARGS[@]}" --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll:latest bundle exec jekyll build
+$DOCKER_BIN run --rm -v "$(pwd)":/site "${TOKEN_ARGS[@]}" --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll:latest@sha256:8649ddf866df7b79d1d297b3b6eaff91cde1fbde01f1f4406625e254584c9eca bundle exec jekyll build
 
 # clean up some files no longer needed
 $FIND ./_site/ -type f -name "*.md" -delete
