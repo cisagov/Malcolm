@@ -4,7 +4,7 @@ import re
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 ERRATA = ROOT / "docs/learning-tree-errata.md"
 DOCS_INDEX = ROOT / "docs/README.md"
 CONFIG_DOCS = ROOT / "docs/malcolm-config.md"
