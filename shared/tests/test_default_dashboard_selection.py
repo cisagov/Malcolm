@@ -30,7 +30,7 @@ class TestDefaultDashboardSelection(unittest.TestCase):
             {choice[0] for choice in item.choices},
             {self.OVERVIEW, self.SECURITY, self.ICS, self.SEVERITY},
         )
-        dashboards_dir = Path(__file__).resolve().parents[4] / "dashboards/dashboards"
+        dashboards_dir = Path(__file__).resolve().parents[2] / "dashboards/dashboards"
         for dashboard_id in (self.OVERVIEW, self.SECURITY, self.ICS, self.SEVERITY):
             with self.subTest(dashboard_id=dashboard_id):
                 self.assertTrue((dashboards_dir / f"{dashboard_id}.json").is_file())
