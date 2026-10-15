@@ -59,7 +59,7 @@ ENV ECS_COMMIT="401807e0547301525acd28c4fb667203fec66d59"
 ENV ECS_SHA256="8cc199dba1510d14e5623b52dadf03b5da0f3e7bfca0ef5d7a34a7f6d766f3cd"
 ENV ECS_SOURCE_URL="https://codeload.github.com/elastic/ecs/tar.gz/${ECS_COMMIT}"
 
-COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD dashboards/dashboards /opt/dashboards
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 # TODO: restore after we resolve cisagov/Malcolm#746
