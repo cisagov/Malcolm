@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 INSTALLER = ROOT / "scripts/install-verified-docs-yq.sh"
 DOCS_BUILD = ROOT / "scripts/documentation_build.sh"
 CHECKSUMS = ROOT / "scripts/checksums/yq-v4.54.1.sha256"
