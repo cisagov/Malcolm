@@ -20,8 +20,8 @@ import shutil
 import signal
 import sys
 import time
+import uuid
 
-import malcolm_utils
 from malcolm_utils import str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
 import watch_common
 
@@ -90,8 +90,21 @@ def file_processor(pathname, **kwargs):
                 # looks like this is a compressed file (or evtx file), we're assuming it's:
                 #  * a zeek log archive to be processed by filebeat
                 #  * a windows event log archive to be processed into JSON and then also sent through filebeat
-                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {destination}")
-                shutil.move(pathname, os.path.join(destination, os.path.basename(pathname)))
+                target = os.path.join(destination, os.path.basename(pathname))
+                if os.path.lexists(target):
+                    # Preserve the complete archive extension (.tar.gz, .log.gz,
+                    # etc.) so downstream extraction still detects its format.
+                    basename = pathlib.Path(pathname).name
+                    suffix = ''.join(pathlib.Path(basename).suffixes)
+                    prefix = basename[: -len(suffix)] if suffix else basename
+                    while True:
+                        unique_name = f"{prefix}-{uuid.uuid4().hex}{suffix}"
+                        target = os.path.join(destination, unique_name)
+                        if not os.path.lexists(target):
+                            break
+                    logger.warning(f"{scriptName}:\tarchive name already exists; moving upload as {unique_name}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {target}")
+                shutil.move(pathname, target)
 
             else:
                 # unhandled file type uploaded, delete it
