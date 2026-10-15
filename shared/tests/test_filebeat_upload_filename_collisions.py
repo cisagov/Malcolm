@@ -7,7 +7,6 @@ import pathlib
 from pathlib import Path
 import re
 import shutil
-import uuid
 from unittest import mock
 
 import pytest
@@ -25,7 +24,6 @@ def _load_file_processor():
         "shutil": shutil,
         "time": mock.Mock(sleep=lambda _: None),
         "pathlib": pathlib,
-        "uuid": uuid,
         "magic": mock.Mock(
             from_file=lambda path, mime=False: (
                 ("application/zip" if str(path).lower().endswith(".zip") else "application/gzip")
@@ -86,7 +84,10 @@ def test_existing_archive_is_not_overwritten(uploader, name):
     extra = [p for p in uploads.iterdir() if p != original]
     assert len(extra) == 1
     assert extra[0].read_bytes() == b"second-upload"
-    assert extra[0].name.endswith("".join(Path(name).suffixes))
+    suffix = "".join(Path(name).suffixes)
+    prefix = name[: -len(suffix)]
+    # an all-digit segment is dropped by the tag splitting in filebeat-process-zeek-folder.sh
+    assert re.fullmatch(re.escape(prefix) + r"\.[0-9]+" + re.escape(suffix), extra[0].name)
     logger.critical.assert_not_called()
 
 

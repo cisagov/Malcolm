@@ -20,7 +20,6 @@ import shutil
 import signal
 import sys
 import time
-import uuid
 
 from malcolm_utils import str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
 import watch_common
@@ -92,16 +91,19 @@ def file_processor(pathname, **kwargs):
                 #  * a windows event log archive to be processed into JSON and then also sent through filebeat
                 target = os.path.join(destination, os.path.basename(pathname))
                 if os.path.lexists(target):
-                    # Preserve the complete archive extension (.tar.gz, .log.gz,
-                    # etc.) so downstream extraction still detects its format.
-                    basename = pathlib.Path(pathname).name
+                    # Insert a numeric segment ahead of the complete extension chain (.tar.gz,
+                    # .log.gz, etc.). The extension chain still tells the extractor the format,
+                    # the name before the first dot is unchanged, and the tag splitting in
+                    # filebeat-process-zeek-folder.sh drops all-digit segments.
+                    basename = os.path.basename(pathname)
                     suffix = ''.join(pathlib.Path(basename).suffixes)
                     prefix = basename[: -len(suffix)] if suffix else basename
-                    while True:
-                        unique_name = f"{prefix}-{uuid.uuid4().hex}{suffix}"
-                        target = os.path.join(destination, unique_name)
-                        if not os.path.lexists(target):
-                            break
+                    counter = 1
+                    unique_name = f"{prefix}.{counter}{suffix}"
+                    while os.path.lexists(os.path.join(destination, unique_name)):
+                        counter += 1
+                        unique_name = f"{prefix}.{counter}{suffix}"
+                    target = os.path.join(destination, unique_name)
                     logger.warning(f"{scriptName}:\tarchive name already exists; moving upload as {unique_name}")
                 logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {target}")
                 shutil.move(pathname, target)
