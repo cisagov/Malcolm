@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 EXPORT = ROOT / "dashboards/dashboards/beats/4ca94c70-d7da-11ee-9ed3-e7afff29e59a.json"
 
 NIC_PANELS = {
