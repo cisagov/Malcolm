@@ -123,7 +123,6 @@ YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-co
 [[ -n $DOCKER_IMAGES_LOCAL ]] && echo "$(basename "$DOCKER_IMAGES_LOCAL")" > "$SCRIPT_PATH"/shared/docker_images.txt
 (
   umask 077
-  [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "export GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
   echo "export VCS_REVISION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
 )
 

@@ -32,8 +32,18 @@ ENV NETBOX_HEALTHCHECK_VERSION="0.3.0"
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL="https://codeload.github.com/mmguero-dev/Device-Type-Library-Import/tar.gz/main"
-ENV NETBOX_DEVICETYPE_LIBRARY_URL="https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
+# Keep the device type importer and library fixed and verify each archive before extracting it;
+#   update each commit and SHA-256 together
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_COMMIT="01d06bb14a03bd3af57c3b91cd2cdfc58b7cce0e"
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_SHA256="61a9794271c146de3e669477c867a25aedf4c05b3cb39f1b150b9857e0edef97"
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL="https://codeload.github.com/mmguero-dev/Device-Type-Library-Import/tar.gz/${NETBOX_DEVICETYPE_LIBRARY_IMPORT_COMMIT}"
+ENV NETBOX_DEVICETYPE_LIBRARY_COMMIT="12b55e51aa259d75c5658b9cb7ce9a1bd1effc65"
+ENV NETBOX_DEVICETYPE_LIBRARY_SHA256="78ffb15620154df8362ff70482aa9b502018584844ddf666e1cad15570e312a8"
+ENV NETBOX_DEVICETYPE_LIBRARY_URL="https://codeload.github.com/netbox-community/devicetype-library/tar.gz/${NETBOX_DEVICETYPE_LIBRARY_COMMIT}"
+
+# pip for NetBox's venv, installed from its PyPI wheel (verified against binaries.sha256)
+ENV NETBOX_PIP_VERSION="25.2"
+ENV NETBOX_PIP_URL="https://files.pythonhosted.org/packages/py3/p/pip/pip-${NETBOX_PIP_VERSION}-py3-none-any.whl"
 
 ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"
 
@@ -63,9 +73,9 @@ ADD --chmod=644 netbox/config/* /tmp/netbox-config/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
-    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
+      curl \
       gcc \
       file \
       git \
@@ -86,8 +96,8 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       ripgrep \
       rsync \
       tini && \
-    curl -fsSL -o /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
-      "${NETBOX_PATH}/venv/bin/python" /tmp/get-pip.py && \
+    sh /usr/local/share/install-verified-binary.sh "/tmp/pip-${NETBOX_PIP_VERSION}-py3-none-any.whl" "${NETBOX_PIP_URL}" "pip-${NETBOX_PIP_VERSION}-py3-none-any.whl" && \
+      "${NETBOX_PATH}/venv/bin/python" "/tmp/pip-${NETBOX_PIP_VERSION}-py3-none-any.whl/pip" install --no-index --no-cache-dir "/tmp/pip-${NETBOX_PIP_VERSION}-py3-none-any.whl" && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
@@ -98,12 +108,16 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     chown -R ${PUSER}:root /etc/netbox && \
     chown -R root:root "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" && \
-        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
+        curl -fsSL -o /tmp/devicetype-library-import.tar.gz "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" && \
+        echo "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_SHA256}  /tmp/devicetype-library-import.tar.gz" | sha256sum -c - && \
+        tar xzf /tmp/devicetype-library-import.tar.gz -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
     cd "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" && \
       VIRTUAL_ENV= "${NETBOX_PATH}/venv/bin/python" -m uv sync --no-dev && \
       sed -i "s/self.pull_repo()/pass/g" ./core/repo.py && \
       mkdir -p ./repo && \
-      curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
+      curl -fsSL -o /tmp/devicetype-library.tar.gz "${NETBOX_DEVICETYPE_LIBRARY_URL}" && \
+      echo "${NETBOX_DEVICETYPE_LIBRARY_SHA256}  /tmp/devicetype-library.tar.gz" | sha256sum -c - && \
+      tar xzf /tmp/devicetype-library.tar.gz -C ./repo --strip-components 1 && \
       chown -R ${PUSER}:root "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}/repo" && \
     mkdir -p "${NETBOX_PATH}/netbox/netbox" "${NETBOX_CUSTOM_PLUGINS_PATH}/requirements" "${NETBOX_CUSTOM_SCRIPTS_PATH}" "${NETBOX_RUNTIME_SCRIPTS_PATH}" "${NETBOX_CUSTOM_VENV_PACKAGES_PATH}" && \
       chown --silent -R ${PUSER}:${PGROUP} "${NETBOX_CUSTOM_PLUGINS_PATH}" "${NETBOX_CUSTOM_SCRIPTS_PATH}" "${NETBOX_RUNTIME_SCRIPTS_PATH}" "${NETBOX_CUSTOM_VENV_PACKAGES_PATH}" && \
@@ -120,7 +134,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/netbox.sh /usr/local/bin/container_health.sh

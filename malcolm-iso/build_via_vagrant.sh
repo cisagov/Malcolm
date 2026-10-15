@@ -73,7 +73,6 @@ trap cleanup_shared EXIT
 mkdir -p "$SCRIPT_PATH"/shared
 (
   umask 077
-  [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
   echo "VCS_REVISION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
 )
 

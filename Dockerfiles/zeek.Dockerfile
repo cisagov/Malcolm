@@ -55,7 +55,8 @@ ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$
 ENV SUPERCRONIC_CRONTAB="${ZEEK_DIR}/etc/crontab"
 
 # build and install system packages, zeek, spicy and plugins
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       bc \
@@ -124,10 +125,9 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       xxd \
       zlib1g-dev && \
     python3 -m pip install --break-system-packages --no-cache-dir -r /usr/local/src/requirements.txt && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     cd "${ZEEK_DIR}"/share/zeek/site && \
-      /usr/share/nodejs/corepack/shims/npm install redis && \
+      /usr/share/nodejs/corepack/shims/npm install redis@6.3.0 && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
@@ -155,7 +155,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/*/*
 
 # add configuration and scripts
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/zeek.sh /usr/local/bin/container_health.sh

@@ -3,7 +3,9 @@
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 HTPDATE_URL="https://github.com/twekkel/htpdate"
-HTPDATE_VER="$(curl -sqI "$HTPDATE_URL/releases/latest" | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}' | sed 's/^v//')"
+# pinned version and SHA-256, shared with the Hedgehog Raspberry Pi build
+. "$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/htpdate.env"
+HTPDATE_VER="$HTPDATE_VERSION"
 OUTPUT_DIR="/tmp"
 unset VERBOSE
 
@@ -22,7 +24,9 @@ fi
 
 cd /tmp
 mkdir ./htpdate
-curl -sSL "$HTPDATE_URL/tarball/v$HTPDATE_VER" | tar xzf - -C ./htpdate --strip-components 1
+curl -fsSL -o ./htpdate.tar.gz "https://codeload.github.com/twekkel/htpdate/tar.gz/refs/tags/v${HTPDATE_VER}"
+echo "${HTPDATE_SHA256}  ./htpdate.tar.gz" | sha256sum -c -
+tar xzf ./htpdate.tar.gz -C ./htpdate --strip-components 1
 cd ./htpdate
 sed -i '/.*man8.*/d' Makefile
 rm -f scripts/*

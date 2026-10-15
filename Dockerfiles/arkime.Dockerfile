@@ -97,7 +97,9 @@ ENV PCAP_PROCESSED_DIRECTORY=$PCAP_PROCESSED_DIRECTORY
 
 ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 
-RUN export DEBARCH=$(dpkg --print-architecture) && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
@@ -140,12 +142,11 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       wget \
       zlib1g && \
     cd /tmp && \
-      curl -fsSL -o ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
+      sh /usr/local/share/install-verified-binary.sh ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/{arch}/g")" "arkime_${ARKIME_VERSION}-1.debian13_{arch}.deb" && \
       dpkg -i /tmp/arkime.deb && \
       rm -f ${ARKIME_DIR}/etc/*.systemd.service && \
     mkdir -p "${ARKIME_DIR}"/plugins "${ARKIME_DIR}"/rules && \
-      curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
-      chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
+      sh /usr/local/share/install-verified-binary.sh "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/{arch}/g")" "ja4plus_${ARKIME_VERSION}_linux_{arch}.so" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
@@ -156,7 +157,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/

@@ -54,6 +54,8 @@ ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
+ENV LOGSTASH_OPENSEARCH_OUTPUT_PLUGIN_VERSION="2.1.1"
+
 ADD --chmod=644 logstash/config/log4j2.properties /usr/share/logstash.build/config/
 ADD --chmod=644 logstash/config/logstash.yml /usr/share/logstash.build/config/logstash.orig.yml
 ADD logstash/pipelines/ /usr/share/logstash.build/malcolm-pipelines/
@@ -66,11 +68,12 @@ ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/keys/RPM-GPG-KEY-EPEL-9,target=/usr/local/share/RPM-GPG-KEY-EPEL-9,ro \
     set -x && \
-    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     microdnf -y install curl-minimal && \
-        curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
-        rpm -i /tmp/epel-release.rpm && \
+        curl -fsSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+        rpm --import /usr/local/share/RPM-GPG-KEY-EPEL-9 && \
+        rpm -i --define '_pkgverify_level all' /tmp/epel-release.rpm && \
     microdnf -y install \
         bash \
         ca-certificates \
@@ -81,11 +84,10 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         rsync \
         supervisor \
         util-linux && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-        chmod +x /usr/bin/tini && \
+    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
-    logstash-plugin install --preserve logstash-output-opensearch && \
+    logstash-plugin install --preserve --version "${LOGSTASH_OPENSEARCH_OUTPUT_PLUGIN_VERSION}" logstash-output-opensearch && \
         /usr/share/logstash/bin/ruby -e 'path = Dir["/usr/share/logstash/vendor/bundle/jruby/3.4.0/gems/psych-*/lib/psych/class_loader.rb"].first or abort "psych class_loader not found"; text = File.read(path); changed = text.gsub!(/constants\.each do \|const\|\n\s+konst = const_get const\n\s+class_eval <<~RUBY, __FILE__, __LINE__ \+ 1\n\s+def #\{const\.to_s\.downcase\}\n\s+load #\{konst\.inspect\}\n\s+end\n\s+RUBY\n\s+end/, "constants.each do |const|\n      konst = const_get const\n      define_method(const.to_s.downcase) { load konst }\n    end"); abort "psych patch did not apply" unless changed; File.write(path, text)' && \
         grep -n 'define_method' /usr/share/logstash/vendor/bundle/jruby/3.4.0/gems/psych-*/lib/psych/class_loader.rb && \
         echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
@@ -117,7 +119,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
 
 
 COPY --from=manuf-builder --chmod=644 /work/vendor_macs.yaml /etc/vendor_macs.yaml
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/logstash.sh /usr/local/bin/container_health.sh
