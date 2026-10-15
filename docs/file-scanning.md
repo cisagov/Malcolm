@@ -30,9 +30,9 @@ Other Strelka-related configuration files can be found under [`strelka/config/`]
 
 For the [**YARA**](https://github.com/VirusTotal/yara) scanner, Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh) and/or [user-defined custom YARA rules](custom-rules.md#YARA) are used for scanning.
 
-The `RULES_UPDATE_ENABLED` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env) controls whether or not to regularly pull signature/rule definitions from the internet for file scanning engines, including [**ClamAV**](https://www.clamav.net/) signatures and Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh).
+The `RULES_UPDATE_ENABLED` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`pipeline.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/pipeline.env.example) controls whether or not to regularly pull signature/rule definitions from the internet for file scanning engines, including [**ClamAV**](https://www.clamav.net/) signatures and Malcolm's [default YARA rule set]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/strelka/backend/yara_rules_setup.sh).
 
-The `FILESCAN_PRESERVATION` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`filescan.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/filescan.env) determines the behavior for preservation of scanned files:
+The `FILESCAN_PRESERVATION` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in [`filescan.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/filescan.env.example) determines the behavior for preservation of scanned files:
 
 * `quarantined`: preserve only files in `./zeek-logs/extract_files` that are flagged by the YARA, ClamAV, or [**Capa**](https://github.com/fireeye/capa) scanners
 * `all`: preserve all extracted files  files in `./zeek-logs/extract_files`
