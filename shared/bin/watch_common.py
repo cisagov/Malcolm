@@ -23,7 +23,7 @@ from threading import get_native_id
 from watchdog.utils import WatchdogShutdownError
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
-from collections import namedtuple, defaultdict, OrderedDict
+from collections import namedtuple, OrderedDict
 
 ASSUME_CLOSED_SEC_DEFAULT = 10
 
@@ -65,155 +65,128 @@ class FileOperationEventHandler(FileSystemEventHandler):
     def updateTime(self):
         self.nowTime = int(time.time())
 
-    def on_any_event(self, event):
-        fName = None
-        if not event.is_directory:
-            self.updateTime()
+    def _append_or_refresh(self, entries, operation):
+        """Coalesce consecutive operations of the same kind on a file."""
+        last = entries[-1] if entries else None
+        if last and last.operation == operation.operation:
+            if operation.timestamp > last.timestamp or operation.size != last.size:
+                entries[-1] = operation
+        else:
+            entries.append(operation)
 
-            # if this is a move event, we need to track the old and new filenames
-            if isinstance(event, FileMovedEvent):
-                fName = event.dest_path
-                fNameOld = event.src_path
-                self.logger.debug(f"↦\t{event.event_type: >10}\t{event.src_path} {event.dest_path}\t{self.workerPid}")
-            else:
-                fName = event.src_path
-                fNameOld = None
-                self.logger.debug(f"🗲\t{event.event_type: <10}\t{event.src_path}\t{self.workerPid}")
+    def _track_existing(self, deck, filename, event, operation):
+        """Update the primary queue, ignoring metadata-only modifications."""
+        entries = deck[filename]
+        if (
+            isinstance(event, FileModifiedEvent)
+            and operation.size > 0
+            and entries
+            and operation.size == entries[-1].size
+        ):
+            return True
+        self._append_or_refresh(entries, operation)
+        return False
 
-            # This is a pain, but due to this watchdog issue (see
-            # https://github.com/gorakhargosh/watchdog/issues/260 and
-            # https://github.com/gorakhargosh/watchdog/pull/800)
-            # we get FileModifiedEvent triggered for metadata-only changes
-            # even if content has not changed (e.g., file access time).
-            # So for now, if we detect a file has been modified but the size
-            # hasn't changed, we will ignore that event.
-            try:
-                fSize = os.path.getsize(fName)
-            except Exception:
-                fSize = 0
-
-            # FileClosedEvent is only going to come from inotify events, not polling
-            # so we know we're good to go (a FileClosedEvent signals we can process the
-            # file immediately). We can signal this by setting the timestamp to 0.
-            newOpLog = OperationEvent(
-                self.nowTime if (not isinstance(event, FileClosedEvent)) else 0,
-                event.event_type,
-                fSize,
+    def _track_staged(self, deck, filename, event, operation):
+        """Promote a provisional open/modify sequence once content changes."""
+        staged = self.modDeck[filename]
+        previous_modify_sizes = [op.size for op in staged if op.operation == 'modified']
+        promote = (
+            not isinstance(event, (FileOpenedEvent, FileModifiedEvent))
+            or (
+                isinstance(event, FileModifiedEvent)
+                and bool(previous_modify_sizes)
+                and operation.size > 0
+                and operation.size != previous_modify_sizes[-1]
             )
-            noop = False
+        )
+        if promote:
+            self.logger.debug(f"𝦸\t{event.event_type: <10}\t{filename}\t{self.workerPid}")
+            deck[filename] = self.modDeck.pop(filename)
+            deck[filename].append(operation)
+            return deck
 
-            with self.deck as d:
-                try:
-                    deckInserted = d
+        # Keep staging updates in modDeck, not the primary queue: otherwise
+        # an open followed by a same-sized modify used to raise KeyError.
+        self._append_or_refresh(staged, operation)
+        return self.modDeck
 
-                    if fNameOld:
-                        # Moves can cross subdirectories of the watched tree. Retire any
-                        # tracked source path, not just same-directory renames; the file
-                        # will be queued at its destination below.
-                        d.pop(fNameOld, None)
-                        self.modDeck.pop(fNameOld, None)
+    def _insert_first(self, deck, filename, event, operation):
+        """Stage unconfirmed opens/modifies; queue other events immediately."""
+        target = self.modDeck if isinstance(event, (FileOpenedEvent, FileModifiedEvent)) else deck
+        target[filename] = [operation]
+        return target
 
-                    # insert or update file event(s)
+    def _prioritize_or_remove(self, deck, target, filename, event):
+        """Order processable events and discard deleted paths from both queues."""
+        if isinstance(event, (FileModifiedEvent, FileClosedEvent, FileCreatedEvent, FileMovedEvent)):
+            # Close events use timestamp zero, moving them to the front.
+            target.move_to_end(filename, last=target[filename][-1].timestamp > 0)
+            return filename, False
+        if isinstance(event, FileDeletedEvent):
+            deck.pop(filename, None)
+            self.modDeck.pop(filename, None)
+            return None, False
+        return filename, True
 
-                    if fName in d:
-                        # this is a file we're already currently tracking in main deck
+    def _record_event(self, filename, old_filename, event, operation):
+        with self.deck as deck:
+            try:
+                if old_filename:
+                    # Moves can cross watched subdirectories: discard stale
+                    # source entries in both queues before queuing destination.
+                    deck.pop(old_filename, None)
+                    self.modDeck.pop(old_filename, None)
 
-                        # see comment about fSize above (FileModifiedEvent only counts if the file size is changed)
-                        if (
-                            isinstance(event, FileModifiedEvent)
-                            and (newOpLog.size > 0)
-                            and (len(d[fName]) > 0)
-                            and (newOpLog.size == d[fName][-1].size)
-                        ):
-                            # don't do *anything*, leave the entry untouched in the list
-                            noop = True
+                if filename in deck:
+                    target = deck
+                    noop = self._track_existing(deck, filename, event, operation)
+                elif filename in self.modDeck:
+                    target = self._track_staged(deck, filename, event, operation)
+                    noop = False
+                else:
+                    target = self._insert_first(deck, filename, event, operation)
+                    noop = False
 
-                        elif (len(d[fName]) > 0) and (d[fName][-1].operation == event.event_type):
-                            # if the previous operation (the last one in the history) was the same as this one,
-                            # replace the operation rather than appending a new one (effectively just updating the timestamp)
-                            if (newOpLog.timestamp > d[fName][-1].timestamp) or (newOpLog.size != d[fName][-1].size):
-                                d[fName][-1] = newOpLog
+                if not noop:
+                    filename, noop = self._prioritize_or_remove(deck, target, filename, event)
+                if noop:
+                    self.logger.debug(f"🗑\t{event.event_type: <10}\t{filename}\t{self.workerPid}")
+                elif filename:
+                    if filename in deck:
+                        self.logger.debug(f"➊\t{filename}\t{json.dumps(deck[filename])}\t{self.workerPid}")
+                    if filename in self.modDeck:
+                        self.logger.debug(f"➋\t{filename}\t{json.dumps(self.modDeck[filename])}\t{self.workerPid}")
+            except Exception as error:
+                self.logger.error(f"⨳\t{filename}\t{error}\t{self.workerPid}")
 
-                        else:
-                            # otherwise append a new history item
-                            d[fName].append(newOpLog)
+    def on_any_event(self, event):
+        """Convert a watchdog notification into a bounded file history entry."""
+        if event.is_directory:
+            return
+        self.updateTime()
+        if isinstance(event, FileMovedEvent):
+            filename, old_filename = event.dest_path, event.src_path
+            self.logger.debug(
+                f"↦\t{event.event_type: >10}\t{event.src_path} {event.dest_path}\t{self.workerPid}"
+            )
+        else:
+            filename, old_filename = event.src_path, None
+            self.logger.debug(f"🗲\t{event.event_type: <10}\t{filename}\t{self.workerPid}")
 
-                    elif fName in self.modDeck:
-                        # we've seen this entry before, but it's in the staging modDeck
-
-                        modifyOpSizes = [
-                            optLog.size for optLog in self.modDeck[fName] if optLog.operation == "modified"
-                        ]
-                        # promote to main deck if either:
-                        # - this is something more than just an open/modify attribute event OR
-                        # - this is a modified event, but the size is different now so it is an actual modification
-                        if (not isinstance(event, FileOpenedEvent) and not isinstance(event, FileModifiedEvent)) or (
-                            isinstance(event, FileModifiedEvent)
-                            and (len(modifyOpSizes) > 0)
-                            and (newOpLog.size > 0)
-                            and (newOpLog.size != modifyOpSizes[-1])
-                        ):
-                            # promote what's already in modDec to the real deck, then append this new history item
-                            self.logger.debug(f"𝦸\t{event.event_type: <10}\t{fName}\t{self.workerPid}")
-                            d[fName] = self.modDeck.pop(fName)
-                            d[fName].append(newOpLog)
-
-                        else:
-                            # not promoted yet: keep staging it in modDeck, recording this event so a later
-                            # size change can be recognized as a real modification. Without this, the
-                            # event fell through to the move_to_end below against the main deck, which
-                            # doesn't contain this file (KeyError), and was never recorded, so a file whose
-                            # first event was "opened" could never be promoted by a "modified" event.
-                            deckInserted = self.modDeck
-                            staged = self.modDeck[fName]
-                            if staged and (staged[-1].operation == event.event_type):
-                                staged[-1] = newOpLog
-                            else:
-                                staged.append(newOpLog)
-
-                    else:
-                        # this is a file we were not previously tracking at all, in either deck
-
-                        if isinstance(event, FileOpenedEvent) or isinstance(event, FileModifiedEvent):
-                            # this is the very first time we've seen this file, if this
-                            # is "open" or "modified" with no other context yet then
-                            # put it in modDec until it shows up like a real modification
-                            deckInserted = self.modDeck
-
-                        deckInserted[fName] = [newOpLog]
-
-                    # move the file to the appropriate end of its deck, if needed
-                    if not noop:
-                        if (
-                            isinstance(event, FileModifiedEvent)
-                            or isinstance(event, FileClosedEvent)
-                            or isinstance(event, FileCreatedEvent)
-                            or isinstance(event, FileMovedEvent)
-                        ):
-                            # put FileClosedEvent events (which now have a timestamp of 0) at the front of
-                            # the deck (to be processed first), and others to the back
-                            deckInserted.move_to_end(fName, last=deckInserted[fName][-1].timestamp > 0)
-
-                        elif isinstance(event, FileDeletedEvent):
-                            # if a file is deleted I guess we don't need to track it any more
-                            d.pop(fName, None)
-                            self.modDeck.pop(fName, None)
-                            fName = None
-
-                        else:
-                            noop = True
-
-                    if noop:
-                        self.logger.debug(f"🗑\t{event.event_type: <10}\t{fName}\t{self.workerPid}")
-
-                    elif fName:
-                        if fName in d:
-                            self.logger.debug(f"➊\t{fName}\t{json.dumps(d[fName])}\t{self.workerPid}")
-                        if fName in self.modDeck:
-                            self.logger.debug(f"➋\t{fName}\t{json.dumps(self.modDeck[fName])}\t{self.workerPid}")
-
-                except Exception as e:
-                    self.logger.error(f"⨳\t{fName}\t{e}\t{self.workerPid}")
+        # Watchdog can emit metadata-only modify events. The queue uses file
+        # size to ignore no-content-change modifications when possible.
+        if not filename:
+            return
+        try:
+            file_size = os.path.getsize(filename)
+        except Exception:
+            # Preserve the existing tolerance for disappearing/inaccessible
+            # entries and platform-specific watchdog path irregularities.
+            file_size = 0
+        # Closed file notifications from inotify may be processed immediately.
+        operation = OperationEvent(0 if isinstance(event, FileClosedEvent) else self.nowTime, event.event_type, file_size)
+        self._record_event(filename, old_filename, event, operation)
 
 
 ###################################################################################################
