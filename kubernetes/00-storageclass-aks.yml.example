@@ -1,0 +1,31 @@
+# AKS StorageClass templates for a Malcolm deployment.
+# Apply to the cluster before starting Malcolm; these are cluster-scoped.
+# NFS requires network-enabled Azure Files Premium and AKS node connectivity.
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: malcolm-azurefile-nfs
+provisioner: file.csi.azure.com
+parameters:
+  protocol: nfs
+  skuName: Premium_LRS
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+mountOptions:
+  - nconnect=4
+  - noresvport
+  - actimeo=30
+---
+# OpenSearch index storage should use a block volume, not an NFS share.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: malcolm-azuredisk
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: Premium_LRS
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
