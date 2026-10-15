@@ -2325,6 +2325,7 @@ _distro_info = get_distro_info()
 SYSTEM_INFO: dict[str, object] = {
     "image_architecture": get_system_image_architecture(),
     "total_mem_gb": total_memory_gb(),
+    "total_mem_bytes": _total_memory_bytes(),
     "cpu_cores": cpu_cores(),
     "uid": os.getuid(),
     "gid": os.getgid(),
