@@ -30,6 +30,24 @@ Malcolm can be configured to automatically restart when the Docker system daemon
 
 Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch database (**including** [index snapshots and management policies](index-management.md#IndexManagement) and [alerting configuration](alerting.md#Alerting)).
 
+## <a name="ReingestPCAP"></a>Re-ingesting processed PCAPs
+
+To **replay** PCAPs that are already in the host's `pcap/processed/` directory, first preview the selected captures (this is read-only):
+
+```bash
+./scripts/control.py --reingest-pcaps
+```
+
+The preview selects at most 10 original PCAP/PCAPNG files, ordered by name. To publish copies of those files into `pcap/upload/` for processing, explicitly request the operation:
+
+```bash
+./scripts/control.py --reingest-pcaps --reingest-apply --reingest-limit 10
+```
+
+The limit must be between 1 and 100. Only regular, header-verified PCAP/PCAPNG files directly under `pcap/processed/` are eligible; subdirectories, symlinks and previously replayed copies are skipped. Malcolm must use Docker Compose with `pcap-monitor`'s `/pcap` bind mount and the standard `processed` and `upload` subdirectories. The upload watcher processes these new files when running (or after Malcolm next starts).
+
+Re-ingestion **does not wipe or reset OpenSearch indices, delete previously processed captures, or overwrite upload files**. It safely stages a complete copy before publishing it with a unique `reingest_` filename, which bypasses filename-based duplicate detection. As a result, re-ingestion can produce **duplicate indexed sessions** and adds a replay marker to filename-derived tags. The operation is intended for deliberate troubleshooting/reprocessing, not automatic periodic use; ensure sufficient free disk space and review the preview before applying. Kubernetes re-ingestion is not supported by this command.
+
 ## <a name="ReadOnlyUI"></a>Temporary read-only interface
 
 To temporarily set the Malcolm user interfaces into read-only configuration, run the following commands from the Malcolm installation directory.
