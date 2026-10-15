@@ -1,0 +1,7 @@
+# Optional Compose override for Logstash NetFlow v9 ingestion.
+# Enable LOGSTASH_NETFLOW_LISTEN in config/logstash.env first.
+# Bind only to a trusted interface; allow only exporter IPs at the firewall.
+services:
+  logstash:
+    ports:
+      - "127.0.0.1:2055:2055/udp"
