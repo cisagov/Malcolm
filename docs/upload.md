@@ -14,6 +14,9 @@ The types of files supported are:
 
 * PCAP files (of mime type `application/vnd.tcpdump.pcap` or `application/x-pcapng`)
     - PCAPNG files are supported by Zeek, Suricata, and Arkime's now-default (`scheme`) packet reader. Some link types, including IEEE 802.11, are not fully decoded by Arkime (see [#470](https://github.com/cisagov/Malcolm/issues/470)). If Arkime's legacy `libpcap` reader has been selected instead, PCAPNG files with multiple sections or mixed interface link types may not be processed.
+
+For optional Zeek analysis of **authorized TLS 1.2 captures** with a matching session keylog, see [Zeek TLS keylog decryption](zeek-tls-decryption.md). The keylog is supplied privately and is never uploaded through the Malcolm web form.
+
 * Zeek logs (with a `.log` file extension) in archive files (`application/gzip`, `application/x-gzip`, `application/x-7z-compressed`, `application/x-bzip2`, `application/x-cpio`, `application/x-lzip`, `application/x-lzma`, `application/x-rar-compressed`, `application/x-tar`, `application/x-xz`, or `application/zip`)
     - because log fields may differ depending on Zeek's configuration, users are recommended to use [Zeek JSON format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-json-format-logs) when generating Zeek logs outside of Malcolm to later be uploaded to Malcolm for processing
     - where the Zeek logs are found in the internal directory structure in the archive file does not matter
