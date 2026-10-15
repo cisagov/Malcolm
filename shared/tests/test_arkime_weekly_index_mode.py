@@ -5,7 +5,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 HELPER = ROOT / "arkime/scripts/arkime-index-query-mode.sh"
 ENTRYPOINT = ROOT / "arkime/scripts/docker_entrypoint.sh"
 ARKIME_ENV = ROOT / "config/arkime.env.example"
