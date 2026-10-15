@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[2]
 INSTALLERS = [
     ROOT / "scripts/third-party-environments/aws/ami/scripts/Malcolm_AMI_Setup.sh",
     ROOT / "scripts/third-party-environments/aws/amazonlinux-2023/amazon_linux_2023_malcolm_demo_setup.sh",
