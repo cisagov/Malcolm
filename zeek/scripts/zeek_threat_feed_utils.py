@@ -77,7 +77,6 @@ ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 #   - ZEEK_INTEL_META_ASSOCIATED
 #   - ZEEK_INTEL_META_CAMPAIGNS
 #   - ZEEK_INTEL_META_REPORTS
-#   - ZEEK_INTEL_META_THREAT_SCORE
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
 
@@ -328,6 +327,18 @@ def map_mandiant_indicator_to_zeek(
         if isinstance(mscore, (int, float)) and not isinstance(mscore, bool) and 0 <= mscore <= 100:
             zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(mscore)
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(mscore / 10))
+        # Mandiant's threat rating is separate from M-Score. Only use the
+        # already-returned, opt-in API response to avoid lazy SDK requests.
+        if not (skip_attr_map or {}).get('threat_rating', False):
+            threat_rating = raw_response.get('threat_rating')
+            if isinstance(threat_rating, dict):
+                threat_score = threat_rating.get('threat_score')
+                if (
+                    isinstance(threat_score, (int, float))
+                    and not isinstance(threat_score, bool)
+                    and 0 <= threat_score <= 100
+                ):
+                    zeekItem[ZEEK_INTEL_META_THREAT_SCORE] = str(threat_score)
         if hasattr(indicator, 'first_seen'):
             zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(indicator.first_seen.timestamp())
             zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
