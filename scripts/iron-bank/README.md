@@ -7,6 +7,9 @@ mkdir -p "$IRON_BANK_PARENT_PATH"
 for REPO in \
     api \
     arkime \
+    base-alpine \
+    base-debian \
+    base-debian-python \
     dashboards \
     dashboards-helper \
     dirinit \

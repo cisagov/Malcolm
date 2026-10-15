@@ -12,7 +12,6 @@ global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == true_reg
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == true_regex) ? T : F;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == true_regex) ? T : F;
 global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == true_regex) ? T : F;
-global disable_detect_routers = (getenv("ZEEK_DISABLE_DETECT_ROUTERS") == true_regex) ? T : F;
 global c1222_authentication_value = (getenv("ZEEK_C1222_AUTHENTICATION_VALUE") == true_regex) ? T : F;
 global c1222_identification_service =(getenv("ZEEK_C1222_IDENTIFICATION_SERVICE") == true_regex) ? T : F;
 global c1222_read_write_service = (getenv("ZEEK_C1222_READ_WRITE_SERVICE") == true_regex) ? T : F;
@@ -117,7 +116,11 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @endif
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
+@load policy/protocols/conn/multicast-participants
 @load policy/protocols/modbus/known-masters-slaves
+@if (!disable_spicy_zip)
+  @load policy/files/zip/register
+@endif
 @load policy/frameworks/notice/community-id
 @load ./iana_registry.zeek
 @load ./login.zeek
@@ -125,10 +128,6 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 
 @if ((!disable_ics_all) && (!disable_best_guess_ics))
  @load ./guess.zeek
-@endif
-
-@if (!disable_detect_routers)
-  @load ./known-routers.zeek
 @endif
 
 @load packages
@@ -279,9 +278,6 @@ event zeek_init() &priority=-5 {
   }
   if (disable_spicy_wireguard) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
-  }
-  if (disable_spicy_zip) {
-    Spicy::disable_file_analyzer(Files::ANALYZER_SPICY_ZIP);
   }
 
   # register additional ports for Analyzers
