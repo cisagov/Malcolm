@@ -2,7 +2,6 @@
 
 import contextlib
 import gzip
-import importlib.util
 import io
 import json
 import tempfile
@@ -10,10 +9,7 @@ import unittest
 from unittest import mock
 from pathlib import Path
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "aws_vpc_flow_to_json.py"
-spec = importlib.util.spec_from_file_location("aws_vpc_flow_to_json", MODULE_PATH)
-converter = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(converter)
+import aws_vpc_flow_to_json as converter
 
 EXAMPLE = (
     "2 000012345678 eni-abc 192.0.2.10 2001:db8::4 443 50231 "
