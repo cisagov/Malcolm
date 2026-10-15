@@ -13,6 +13,7 @@ from contextlib import nullcontext
 from collections import defaultdict
 from itertools import chain
 from io import StringIO
+import time
 from pathlib import Path
 
 from malcolm_constants import (
@@ -539,6 +540,92 @@ def GetPodNamesForService(service, namespace):
     return podsNames
 
 
+def _wait_for_pod_exec_ready(client, pod_name, namespace, deadline):
+    """Wait for Pending to clear without exceeding the exec timeout."""
+    while time.monotonic() < deadline:
+        pod = client.read_namespaced_pod(name=pod_name, namespace=namespace)
+        if pod.status.phase != 'Pending':
+            return True
+        remaining = deadline - time.monotonic()
+        if remaining > 0:
+            time.sleep(min(0.25, remaining))
+    return False
+
+
+def _open_pod_exec(kube_imported, client, pod_name, namespace, command, stdout, stderr, stdin, container):
+    """Open a websocket stream for a Kubernetes container command."""
+    kwargs = {
+        'command': get_iterable(command),
+        'stdout': stdout,
+        'stderr': stderr,
+        'stdin': stdin is not None,
+        'tty': False,
+        '_preload_content': False,
+    }
+    if container:
+        kwargs['container'] = container
+    return kube_imported.stream.stream(
+        client.connect_get_namespaced_pod_exec, pod_name, namespace, **kwargs
+    )
+
+
+def _pod_exec_exit_code(response, kube_imported):
+    """Interpret Kubernetes websocket exit status, including nonzero codes."""
+    error = None
+    if yaml_imported := YAMLDynamic():
+        error = yaml_imported.YAML(typ='safe', pure=True).load(
+            response.read_channel(kube_imported.stream.ws_client.ERROR_CHANNEL)
+        )
+    if not error or deep_get(error, ['status'], None) == 'Success':
+        return 0
+    if deep_get(error, ['reason'], None) == 'NonZeroExitCode':
+        causes = deep_get(error, ['details', 'causes'], []) or []
+        codes = [
+            int(deep_get(cause, ['message'], 1))
+            for cause in causes
+            if deep_get(cause, ['reason'], None) == 'ExitCode'
+        ]
+        return codes[0] if codes else 1
+    return 1
+
+
+def _collect_pod_exec_output(response, stdout, stderr, raw_output, raw_error):
+    """Drain data already available on a websocket's output channels."""
+    if stdout and response.peek_stdout():
+        raw_output.write(response.read_stdout())
+    if stderr and response.peek_stderr():
+        raw_error.write(response.read_stderr())
+
+
+def _pod_exec_stdin_lines(stdin):
+    """Split user-supplied input into protocol lines without mutation."""
+    if stdin is None:
+        return []
+    return list(chain.from_iterable(line.split('\n') for line in get_iterable(stdin)))
+
+
+def _run_pod_exec_stream(response, kube_imported, stdout, stderr, stdin, deadline):
+    """Send stdin, collect output and always close the websocket."""
+    raw_output = StringIO('')
+    raw_error = StringIO('')
+    stdin_remaining = _pod_exec_stdin_lines(stdin)
+    try:
+        while response.is_open() and time.monotonic() < deadline:
+            remaining = max(0, deadline - time.monotonic())
+            response.update(timeout=0 if stdin_remaining else min(1, remaining))
+            _collect_pod_exec_output(response, stdout, stderr, raw_output, raw_error)
+            if stdin_remaining:
+                response.write_stdin(stdin_remaining.pop(0) + '\n')
+        _collect_pod_exec_output(response, stdout, stderr, raw_output, raw_error)
+        output = raw_output.getvalue().split('\n') + raw_error.getvalue().split('\n')
+        if response.is_open():
+            output.append('Pod exec timed out before the command completed')
+            return 124, output
+        return _pod_exec_exit_code(response, kube_imported), output
+    finally:
+        response.close()
+
+
 def PodExec(
     service,
     namespace,
@@ -550,103 +637,34 @@ def PodExec(
     maxPodsToExec=1,
     container=None,
 ):
+    """Execute a command in matching pods with a bounded per-pod timeout."""
     results = {}
-    if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
-        podsNames = GetPodNamesForService(service, namespace)
+    if not namespace:
+        return results
+    kube_imported = KubernetesDynamic()
+    if not kube_imported or not (client := kube_imported.client.CoreV1Api()):
+        return results
 
-        for podName in podsNames[:maxPodsToExec]:
-            retcode = -1
-            output = []
-            try:
-                while True:
-                    resp = client.read_namespaced_pod(
-                        name=podName,
-                        namespace=namespace,
-                    )
-                    if resp.status.phase != 'Pending':
-                        break
-                if container:
-                    resp = kubeImported.stream.stream(
-                        client.connect_get_namespaced_pod_exec,
-                        podName,
-                        namespace,
-                        container=container,
-                        command=get_iterable(command),
-                        stdout=stdout,
-                        stderr=stderr,
-                        stdin=stdin is not None,
-                        tty=False,
-                        _preload_content=False,
-                    )
-                else:
-                    resp = kubeImported.stream.stream(
-                        client.connect_get_namespaced_pod_exec,
-                        podName,
-                        namespace,
-                        command=get_iterable(command),
-                        stdout=stdout,
-                        stderr=stderr,
-                        stdin=stdin is not None,
-                        tty=False,
-                        _preload_content=False,
-                    )
-                rawOutput = StringIO('')
-                rawErrput = StringIO('')
-                stdinRemaining = (
-                    list(chain(*[i.split('\n') for i in list(get_iterable(stdin))])) if (stdin is not None) else []
+    for pod_name in GetPodNamesForService(service, namespace)[:maxPodsToExec]:
+        deadline = time.monotonic() + max(0, timeout)
+        retcode, output = -1, []
+        try:
+            if not _wait_for_pod_exec_ready(client, pod_name, namespace, deadline):
+                retcode = 124
+                output.append(f'Pod {pod_name} timed out waiting to leave Pending')
+            else:
+                response = _open_pod_exec(
+                    kube_imported, client, pod_name, namespace, command,
+                    stdout, stderr, stdin, container,
                 )
-                counter = 0
-                while resp.is_open() and (counter <= timeout):
-                    resp.update(timeout=0 if stdinRemaining else 1)
-                    counter += 0 if stdinRemaining else 1
-                    if stdout and resp.peek_stdout():
-                        rawOutput.write(resp.read_stdout())
-                    if stderr and resp.peek_stderr():
-                        rawErrput.write(resp.read_stderr())
-                    if stdinRemaining:
-                        resp.write_stdin(stdinRemaining.pop(0) + "\n")
-                if stdout and resp.peek_stdout():
-                    rawOutput.write(resp.read_stdout())
-                if stderr and resp.peek_stderr():
-                    rawErrput.write(resp.read_stderr())
-                output.extend(rawOutput.getvalue().split('\n'))
-                output.extend(rawErrput.getvalue().split('\n'))
-
-                err = None
-                if yamlImported := YAMLDynamic():
-                    err = yamlImported.YAML(typ='safe', pure=True).load(
-                        resp.read_channel(kubeImported.stream.ws_client.ERROR_CHANNEL)
-                    )
-
-                if not err:
-                    err = {}
-                    err['status'] = 'Success'
-
-                if deep_get(err, ['status'], None) == 'Success':
-                    retcode = 0
-                elif deep_get(err, ['reason'], None) == 'NonZeroExitCode':
-                    retcodes = [
-                        int(deep_get(x, ['message'], 1))
-                        for x in deep_get(err, ['details', 'causes'], [{'reason': 'ExitCode', 'message': '1'}])
-                        if (deep_get(x, ['reason'], None) == 'ExitCode')
-                    ]
-                    retcode = retcodes[0] if len(retcodes) > 0 else 1
-                else:
-                    # can't parse, but it's a failure
-                    retcode = 1
-
-                resp.close()
-
-            except kubeImported.client.rest.ApiException as x:
-                if x.status != 404:
-                    if retcode == 0:
-                        retcode = 1
-                    output.extend(str(x))
-
-            results[podName] = {}
-            results[podName]['err'] = retcode
-            results[podName]['output'] = output
-
+                retcode, output = _run_pod_exec_stream(
+                    response, kube_imported, stdout, stderr, stdin, deadline,
+                )
+        except kube_imported.client.rest.ApiException as error:
+            if error.status != 404:
+                retcode = 1
+                output.append(str(error))
+        results[pod_name] = {'err': retcode, 'output': output}
     return results
 
 
