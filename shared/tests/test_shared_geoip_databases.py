@@ -7,10 +7,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from logstash.scripts import configure_geoip_databases as geoip
+
 ROOT = Path(__file__).resolve().parents[2]
 PUBLISH = ROOT / "arkime/scripts/publish-shared-geoip.sh"
 
-from logstash.scripts import configure_geoip_databases as geoip
 
 PIPELINES = (
     "logstash/pipelines/beats/12_lookups.conf",
