@@ -92,7 +92,11 @@ from scripts.installer.ui.tui.tui_installer_ui import TUIInstallerUI
 from scripts.installer.utils.artifact_utils import decide_and_handle_artifacts
 from scripts.installer.utils.env_file_utils import apply_extra_env_settings
 from scripts.installer.utils.logger_utils import InstallerLogger
-from scripts.installer.utils.host_memory_preflight import linux_swap_total_kib, low_memory_warning
+from scripts.installer.utils.host_memory_preflight import (
+    host_memory_check_applies,
+    linux_swap_total_kib,
+    low_memory_warning,
+)
 from scripts.installer.utils.settings_file_handler import SettingsFileHandler
 
 
@@ -470,17 +474,18 @@ def determine_presentation_mode(parsed_args: argparse.Namespace) -> Presentation
 
 
 def show_host_memory_warning(malcolm_config, ui_impl, presentation_mode: PresentationMode) -> bool:
-    """Warn before config export/write when the full local stack is undersized.
+    """Warn before config export/write when this host is clearly too small for the full local stack.
 
-    This preflight never changes user-selected settings and does not apply to
-    capture-only Hedgehog or a remotely scheduled Kubernetes workload.
+    Read-only: never changes settings. Skipped for Hedgehog, Kubernetes, and a remote primary OpenSearch.
     """
-    if malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) != PROFILE_MALCOLM:
-        return False
-    if malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE) == OrchestrationFramework.KUBERNETES:
+    if not host_memory_check_applies(
+        malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE),
+        malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE),
+        malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE),
+    ):
         return False
 
-    warning = low_memory_warning(SYSTEM_INFO.get('total_mem_gb'), linux_swap_total_kib())
+    warning = low_memory_warning(SYSTEM_INFO.get('total_mem_bytes'), linux_swap_total_kib())
     if warning is None:
         return False
 
