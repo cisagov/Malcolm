@@ -91,11 +91,12 @@ ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/keys/RPM-GPG-KEY-EPEL-9,target=/usr/local/share/RPM-GPG-KEY-EPEL-9,ro \
     export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
-    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     microdnf -y install curl-minimal && \
-        curl -sSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
-        rpm -i /tmp/epel-release.rpm && \
+        curl -fsSL -o /tmp/epel-release.rpm https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+        rpm --import /usr/local/share/RPM-GPG-KEY-EPEL-9 && \
+        rpm -i --define '_pkgverify_level all' /tmp/epel-release.rpm && \
     microdnf -y update && \
     microdnf -y install \
         bzip2 \
@@ -120,19 +121,16 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         unzip \
         util-linux \
         xz && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-        chmod +x /usr/bin/tini && \
+    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
-    curl -fsSL -o /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" && \
-        chmod 755 /usr/local/bin/evtx && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" "evtx_dump_${EVTX_VERSION}_linux_{arch}" && \
     microdnf clean all && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/filebeat.sh /usr/local/bin/container_health.sh

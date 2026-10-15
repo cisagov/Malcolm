@@ -54,13 +54,17 @@ FROM alpine:3.24 AS getresty
 # OPENRESTY_VERSION can be like "1.29.2.4" or "318a52b814ef903066002ffa3166b7714b3b9c6f"
 ARG OPENRESTY_VERSION=1.31.1.1
 ENV OPENRESTY_VERSION=$OPENRESTY_VERSION
+# SHA-256 of openresty-${OPENRESTY_VERSION}.tar.gz; only used for release versions (a commit checkout is verified by git)
+ARG OPENRESTY_SHA256=65b78baadd3f0984055de89bf13f4a1932e5bfe9c31932037a134ea2b1a0ce42
 
-RUN apk update --no-cache; \
+RUN set -e; \
+    apk update --no-cache; \
     mkdir -p /usr/local/src/openresty; \
     cd /usr/local/src/openresty; \
     if echo "${OPENRESTY_VERSION}" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*$'; then \
         echo "Downloading OpenResty: ${OPENRESTY_VERSION}"; \
-        wget -O "./openresty.tar.gz" "https://openresty.org/download/openresty-${OPENRESTY_VERSION}.tar.gz"; \
+        for i in 1 2 3; do wget -O "./openresty.tar.gz" "https://openresty.org/download/openresty-${OPENRESTY_VERSION}.tar.gz" && break; sleep 5; done; \
+        echo "${OPENRESTY_SHA256}  ./openresty.tar.gz" | sha256sum -c -; \
     elif echo "${OPENRESTY_VERSION}" | grep -qE '^[0-9a-f]{40}$'; then \
         apk add --no-cache bash dos2unix git make mercurial patch perl; \
         echo "Checking out OpenResty: ${OPENRESTY_VERSION}"; \

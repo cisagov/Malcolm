@@ -106,103 +106,104 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 EOF
 ###
 
-# we'll use cURL to get release information and assets from GitHub using the GitHub API
-GITHUB_API_CURL_ARGS=()
-GITHUB_API_CURL_ARGS+=( -fsSL )
-GITHUB_API_CURL_ARGS+=( -H )
-GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
-[[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
+# Third-party tools are pinned release assets verified against binaries.sha256
+#   (copied into the build environment as /usr/local/share/binaries.sha256).
+#   When bumping a version here, update the matching manifest entries too.
+YQ_VERSION="4.54.1"
+CROC_VERSION="11.5.4"
+JUST_VERSION="1.59.0"
+EZA_VERSION="0.23.5"
+NERD_FONTS_VERSION="3.5.1"
+STERN_VERSION="1.34.0"
+KUBECTL_VERSION="1.37.1"
+
+# install-verified-binary.sh <destination> <url> <artifact-key>, aborting this hook on any failure
+function verified_download {
+  sh /usr/local/bin/install-verified-binary.sh "$@" || { echo "Verified download of $3 failed" >&2; exit 1; }
+}
 
 case "$(uname -m)" in
   x86_64)  BINARCH=amd64 ;;
   aarch64) BINARCH=arm64 ;;
   *) echo "Unsupported arch: $(uname -m)" >&2; exit 1 ;;
 esac
-BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+# some projects name their release assets with other architecture labels
+[[ "$BINARCH" == amd64 ]] && CROC_ARCH=64bit || CROC_ARCH=ARM64
+[[ "$BINARCH" == amd64 ]] && GNU_ARCH=x86_64 || GNU_ARCH=aarch64
+[[ "$BINARCH" == amd64 ]] && EZA_ASSET=x86_64-unknown-linux-musl || EZA_ASSET=aarch64-unknown-linux-gnu_no_libgit
 
 # docker-compose symlink
 dpkg -s docker-compose-plugin && \
     ln -s -r /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 # yq
-RELEASE_URL="https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${BINARCH}"
-curl "${GITHUB_API_CURL_ARGS[@]}" -o /usr/local/bin/yq "${RELEASE_URL}"
-chmod 755 /usr/local/bin/yq
+verified_download /usr/local/bin/yq \
+  "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_{arch}" \
+  "yq_${YQ_VERSION}_linux_{arch}"
+###
 
 # croc
-RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
-[[ "$BINARCH" == amd64 ]] && RELEASE_FILE_REGEX="Linux-64bit\\\.tar\\\.gz$" || RELEASE_FILE_REGEX="Linux-ARM64\\\.tar\\\.gz$"
-cd /usr/local/bin
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxvf - croc
-chmod 755 ./croc
-chown root:root ./croc
+verified_download /tmp/croc.tar.gz \
+  "https://github.com/schollz/croc/releases/download/v${CROC_VERSION}/croc_v${CROC_VERSION}_Linux-${CROC_ARCH}.tar.gz" \
+  "croc_${CROC_VERSION}_linux_{arch}.tar.gz"
+tar xzf /tmp/croc.tar.gz -C /usr/local/bin croc || exit 1
+chmod 755 /usr/local/bin/croc
+chown root:root /usr/local/bin/croc
+rm -f /tmp/croc.tar.gz
 ###
 
 # just
-JUST_RELEASE_URL="https://api.github.com/repos/casey/just/releases/latest"
+verified_download /tmp/just.tar.gz \
+  "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-${GNU_ARCH}-unknown-linux-musl.tar.gz" \
+  "just_${JUST_VERSION}_linux_{arch}.tar.gz"
 mkdir -p /tmp/just
-cd /tmp
-just_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$JUST_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
-just_arch=$([[ "$BINARCH" == amd64 ]] && echo x86_64 || echo aarch64)
-just_tar_url="$(
-  curl "${GITHUB_API_CURL_ARGS[@]}" "$just_assets_url" |
-    jq -r --arg arch "$just_arch" '
-      .[] | select(.browser_download_url | contains($arch + "-unknown-linux-musl.tar.gz"))
-      | .browser_download_url
-    '
-)"
-curl "${GITHUB_API_CURL_ARGS[@]}" "${just_tar_url}" | tar xzf - -C ./just
-mv ./just/just /usr/local/bin/just
+tar xzf /tmp/just.tar.gz -C /tmp/just || exit 1
+mv /tmp/just/just /usr/local/bin/just
 chmod 755 /usr/local/bin/just
 chown root:root /usr/local/bin/just
-rm -rf /tmp/just
+rm -rf /tmp/just /tmp/just.tar.gz
 ###
 
 # eza
-EZA_RELEASE_URL="https://api.github.com/repos/eza-community/eza/releases/latest"
+verified_download /tmp/eza.tar.gz \
+  "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_${EZA_ASSET}.tar.gz" \
+  "eza_${EZA_VERSION}_linux_{arch}.tar.gz"
 mkdir -p /tmp/eza
-cd /tmp
-eza_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$EZA_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
-eza_arch=$([[ "$BINARCH" == amd64 ]] && echo x86_64 || echo aarch64)
-eza_pattern=$([[ "$BINARCH" == amd64 ]] && echo '-unknown-linux-musl.tar.gz' || echo '-unknown-linux-gnu_no_libgit.tar.gz')
-eza_tar_url="$(
-  curl "${GITHUB_API_CURL_ARGS[@]}" "$eza_assets_url" |
-    jq -r --arg arch "$eza_arch" --arg pattern "$eza_pattern" '
-      .[] | select(.browser_download_url | contains($arch + $pattern))
-      | .browser_download_url
-    '
-)"
-curl "${GITHUB_API_CURL_ARGS[@]}" "${eza_tar_url}" | tar xzf - -C ./eza
-mv ./eza/eza /usr/local/bin/eza
+tar xzf /tmp/eza.tar.gz -C /tmp/eza || exit 1
+mv /tmp/eza/eza /usr/local/bin/eza
 chmod 755 /usr/local/bin/eza
 chown root:root /usr/local/bin/eza
-rm -rf /tmp/eza
+rm -rf /tmp/eza /tmp/eza.tar.gz
 ###
 
 # terminal font
+verified_download /tmp/Hack.tar.xz \
+  "https://github.com/ryanoasis/nerd-fonts/releases/download/v${NERD_FONTS_VERSION}/Hack.tar.xz" \
+  "nerd-fonts-hack_${NERD_FONTS_VERSION}.tar.xz"
 mkdir -p /usr/share/fonts/truetype/hack
-cd /usr/share/fonts/truetype/hack
-curl -sSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz | tar xfJ -
+tar xfJ /tmp/Hack.tar.xz -C /usr/share/fonts/truetype/hack || exit 1
+rm -f /tmp/Hack.tar.xz
 chmod 755 /usr/share/fonts/truetype/hack
 chmod 644 /usr/share/fonts/truetype/hack/*
 fc-cache -f -v
 ###
 
 # stern
-RELEASE_URL="https://api.github.com/repos/stern/stern/releases/latest"
-[[ "$BINARCH" == amd64 ]] && RELEASE_FILE_REGEX="_linux_amd64\\\.tar\\\.gz$" || RELEASE_FILE_REGEX="_linux_arm64\\\.tar\\\.gz$"
-cd /tmp
-mkdir -p ./stern
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./stern
-mv ./stern/stern /usr/local/bin/stern
+verified_download /tmp/stern.tar.gz \
+  "https://github.com/stern/stern/releases/download/v${STERN_VERSION}/stern_${STERN_VERSION}_linux_{arch}.tar.gz" \
+  "stern_${STERN_VERSION}_linux_{arch}.tar.gz"
+mkdir -p /tmp/stern
+tar xzf /tmp/stern.tar.gz -C /tmp/stern || exit 1
+mv /tmp/stern/stern /usr/local/bin/stern
 chmod 755 /usr/local/bin/stern
 chown root:root /usr/local/bin/stern
 rm -rf /tmp/stern*
 ###
 
 # kubectl
-curl -sSL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/$BINARCH/kubectl"
-chmod 755 /usr/local/bin/kubectl
+verified_download /usr/local/bin/kubectl \
+  "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/{arch}/kubectl" \
+  "kubectl_${KUBECTL_VERSION}_linux_{arch}"
 chown root:root /usr/local/bin/kubectl
 ###
 

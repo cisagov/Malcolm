@@ -3,6 +3,7 @@ FROM redhat/ubi9:latest AS ubi-micro-build
 RUN mkdir -p /mnt/rootfs && \
     dnf install --nodocs -y --releasever 9 --setopt install_weak_deps=false --installroot /mnt/rootfs \
       curl-minimal \
+      gawk \
       jq \
       postgresql \
       procps-ng \
@@ -62,13 +63,13 @@ COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+  --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
   mkdir -p /var/local/ca-trust && \
     chown -R $PUSER:$PGROUP /var/local/ca-trust && \
-  curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-    chmod +x /usr/bin/tini
+  sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}"
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/keycloak.sh /usr/local/bin/container_health.sh

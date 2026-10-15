@@ -36,7 +36,8 @@ ENV HTADMIN_COMMIT="eedf183a951d4b7c6f03beb9b53f1a98fb3de71f"
 ENV HTADMIN_SHA256="66beaeaa2b680f178b9a3260a675c35f8c85f2a6e9db00ac15bdb51fcee9c243"
 ENV HTADMIN_URL="https://codeload.github.com/mmguero-dev/htadmin/tar.gz/${HTADMIN_COMMIT}"
 
-RUN apt-get -q update && \
+RUN --mount=type=bind,source=shared/checksums/htadmin-assets.sha256,target=/usr/local/share/htadmin-assets.sha256,ro \
+    apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
       ca-certificates \
       curl \
@@ -60,18 +61,26 @@ RUN apt-get -q update && \
     find /tmp/htadmin -type f -exec sed -i 's/index.php/htadmin.php/g' "{}" \; && \
     mv /tmp/htadmin/sites/html/htadmin /var/www/htadmin && \
     cd /var/www/htadmin && \
-    ( grep -rhoPi "(src|href)=['\"]https?://.+?['\"]" ./includes/* | sed "s/^[a-zA-Z]*=['\"]*//" | sed "s/['\"]$//" | xargs -r -l curl -s -S -L -J -O ) && \
+    mkdir -p /tmp/htadmin-assets/fonts && \
+    ( grep -rhoPi "(src|href)=['\"]https?://.+?['\"]" ./includes/* | sed "s/^[a-zA-Z]*=['\"]*//" | sed "s/['\"]$//" | ( cd /tmp/htadmin-assets && xargs -r -l curl -fsSL -J -O ) ) && \
     sed -i "s@http[^'\"]*/@@gI" ./includes/* && \
     mkdir -p fonts config auth default && \
-    cd fonts && \
-    curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.ttf" && \
-    curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff" && \
-    curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff2" && \
+    ( cd /tmp/htadmin-assets/fonts && \
+      curl -fsSL -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.ttf" && \
+      curl -fsSL -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff" && \
+      curl -fsSL -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff2" ) && \
+    ( cd /tmp/htadmin-assets && \
+      grep -v -e '^#' -e '^$' /usr/local/share/htadmin-assets.sha256 > /tmp/htadmin-assets.expected && \
+      awk '{print $2}' /tmp/htadmin-assets.expected | sort > /tmp/htadmin-assets.expected-names && \
+      find . -type f | sed 's#^\./##' | sort > /tmp/htadmin-assets.found-names && \
+      diff -u /tmp/htadmin-assets.expected-names /tmp/htadmin-assets.found-names && \
+      sha256sum -c --strict /tmp/htadmin-assets.expected ) && \
+    cp -a /tmp/htadmin-assets/. /var/www/htadmin/ && \
   chown -R ${PUSER}:${PGROUP} /var/www && \
   apt-get clean -y -q && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/html
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/htadmin.sh /usr/local/bin/container_health.sh

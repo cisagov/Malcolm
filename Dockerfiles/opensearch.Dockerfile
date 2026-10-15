@@ -46,7 +46,6 @@ USER root
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
-    export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
   yum install -y gettext openssl util-linux procps jq rsync findutils && \
     yum remove -y vim-* && \
   sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
@@ -63,13 +62,12 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config \
                           /var/local/ca-trust \
                           /opt/opensearch/backup && \
-  curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-    chmod +x /usr/bin/tini && \
+  sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
   sed -i 's/^\([[:space:]]*\)echo "Disabling execution of install_demo_configuration.*/\1\/usr\/local\/bin\/setup-internal-users.sh || true/' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/keystore-bootstrap.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
