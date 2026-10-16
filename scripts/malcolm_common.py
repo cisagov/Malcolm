@@ -612,6 +612,75 @@ def str2boolorextra(v):
 
 ###################################################################################################
 # get interactive user response to Y/N question
+def _yes_or_no_dialog_reply(question, default, yesLabel, noLabel, extraLabel):
+    # dialog places its extra button between Yes and No. Swapping the labels
+    # keeps the existing visual order and default-button selection.
+    default_yes = (default is not None) and str2boolorextra(default)
+    yes_label = yesLabel.capitalize() if default_yes else noLabel.capitalize()
+    no_label = noLabel.capitalize() if default_yes else yesLabel.capitalize()
+    has_extra = extraLabel is not None
+    height, width = _dialog_size_for(str(question))
+    reply = MainDialog.yesno(
+        str(question),
+        yes_label=str(yes_label),
+        no_label=str(extraLabel) if has_extra else str(no_label),
+        extra_button=has_extra,
+        extra_label=str(no_label) if has_extra else "",
+        height=height,
+        width=width,
+    )
+    if has_extra:
+        reply = {Dialog.EXTRA: Dialog.CANCEL, Dialog.CANCEL: Dialog.EXTRA}.get(reply, reply)
+    if default_yes:
+        return 'y' if reply == Dialog.OK else ('e' if reply == Dialog.EXTRA else 'n')
+    return 'n' if reply == Dialog.OK else ('e' if reply == Dialog.EXTRA else 'y')
+
+
+def _yes_or_no_prompt(question, default, defaultBehavior, yesLabel, noLabel):
+    yes = 'Y'
+    no = 'N'
+    if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
+        if str2boolorextra(default):
+            no = 'n'
+        else:
+            yes = 'y'
+    yes_suffix = '' if yesLabel == 'Yes' else f' ({yesLabel})'
+    no_suffix = '' if noLabel == 'No' else f' ({noLabel})'
+    return f'\n{question} ({yes}{yes_suffix} / {no}{no_suffix}): '
+
+
+def _yes_or_no_terminal_reply(question, default, defaultBehavior, yesLabel, noLabel):
+    prompt = _yes_or_no_prompt(question, default, defaultBehavior, yesLabel, noLabel)
+    while True:
+        reply = str(input(prompt)).lower().strip()
+        if reply:
+            try:
+                str2boolorextra(reply)
+                return reply
+            except ValueError:
+                continue
+        if default is not None and defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept:
+            return reply
+
+
+def _yes_or_no_is_noninteractive(default, defaultBehavior):
+    return default is not None and bool(
+        defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept
+        and defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive
+    )
+
+
+def _yes_or_no_finalize(reply, question, default, defaultBehavior, clearScreen):
+    if not reply and defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept:
+        reply = 'y' if (default is not None) and str2boolorextra(default) else 'n'
+    if clearScreen is True:
+        ClearScreen()
+    result = str2boolorextra(reply)
+    if result == BoolOrExtra.EXTRA:
+        raise DialogBackException(question)
+    return bool(result)
+
+
 def YesOrNo(
     question,
     default=None,
@@ -624,73 +693,25 @@ def YesOrNo(
 ):
     global Dialog
     global MainDialog
-    result = None
 
-    if (default is not None) and (
-        (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
-        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
-    ):
-        reply = ""
+    if _yes_or_no_is_noninteractive(default, defaultBehavior):
+        reply = ''
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        defaultYes = (default is not None) and str2boolorextra(default)
-        # by default the "extra" button is between "Yes" and "No" which looks janky, IMO.
-        #   so we're going to switch things around a bit.
-        yesLabelTmp = yesLabel.capitalize() if defaultYes else noLabel.capitalize()
-        noLabelTmp = noLabel.capitalize() if defaultYes else yesLabel.capitalize()
-        replyMap = {}
-        if hasExtraLabel := (extraLabel is not None):
-            replyMap[Dialog.EXTRA] = Dialog.CANCEL
-            replyMap[Dialog.CANCEL] = Dialog.EXTRA
-        _h, _w = _dialog_size_for(str(question))
-        kwargs = {
-            "yes_label": str(yesLabelTmp),
-            "no_label": (str(extraLabel) if hasExtraLabel else str(noLabelTmp)),
-            "extra_button": hasExtraLabel,
-            "extra_label": (str(noLabelTmp) if hasExtraLabel else ""),
-            "height": _h,
-            "width": _w,
-        }
-        reply = MainDialog.yesno(str(question), **kwargs)
-        reply = replyMap.get(reply, reply)
-        if defaultYes:
-            reply = 'y' if (reply == Dialog.OK) else ('e' if (reply == Dialog.EXTRA) else 'n')
-        else:
-            reply = 'n' if (reply == Dialog.OK) else ('e' if (reply == Dialog.EXTRA) else 'y')
+        reply = _yes_or_no_dialog_reply(question, default, yesLabel, noLabel, extraLabel)
 
     elif uiMode & UserInterfaceMode.InteractionInput:
-        if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
-            if str2boolorextra(default):
-                questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / n{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
-            else:
-                questionStr = f"\n{question} (y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
-        else:
-            questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
-
-        while True:
-            reply = str(input(questionStr)).lower().strip()
-            if len(reply) > 0:
-                try:
-                    str2boolorextra(reply)
-                    break
-                except ValueError:
-                    pass
-            elif (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (default is not None):
-                break
+        reply = _yes_or_no_terminal_reply(question, default, defaultBehavior, yesLabel, noLabel)
 
     else:
-        raise RuntimeError("No user interfaces available")
-
-    if (len(reply) == 0) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
-        reply = "y" if (default is not None) and str2boolorextra(default) else "n"
-
-    if clearScreen is True:
-        ClearScreen()
+        raise RuntimeError('No user interfaces available')
 
     try:
-        result = str2boolorextra(reply)
+        return _yes_or_no_finalize(reply, question, default, defaultBehavior, clearScreen)
     except ValueError:
-        result = YesOrNo(
+        # Match the original behaviour when dialog supplied an invalid reply:
+        # a second prompt is required with auto-accept disabled.
+        return YesOrNo(
             question,
             default=default,
             uiMode=uiMode,
@@ -701,10 +722,6 @@ def YesOrNo(
             extraLabel=extraLabel,
         )
 
-    if result == BoolOrExtra.EXTRA:
-        raise DialogBackException(question)
-
-    return bool(result)
 
 
 ###################################################################################################
