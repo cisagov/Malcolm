@@ -158,7 +158,7 @@ CASES = [
     ),
     ("no_transport_at_all", fields(transport=None), "true", None),
     ("existing_id_preserved", fields(community_id="1:existing"), "true", "1:existing"),
-    ("icmp_skipped", fields(transport="icmp"), "true", None),
+    ("icmp4_type10_code20", fields(transport="icmp"), "true", "1:qhJTvE/Qez7ZPSOGlcKJAzRpSO0="),
     ("ambiguous_transport", fields(transport=["tcp", "udp"]), "true", None),
     ("missing_source_ip", fields(src_ip=None), "true", None),
     ("missing_destination_port", fields(dst_port=None), "true", None),
@@ -169,6 +169,126 @@ CASES = [
     ("negative_port", fields(src_port=-1), "true", None),
     ("port_out_of_range", fields(dst_port=65536), "true", None),
 ]
+
+
+# ICMP reference vectors calculated independently with Corelight's
+# pycommunityid 1.5.0. A paired request/reply hashes identically; unknown
+# ICMP types are directional (their "code" isn't a reverse flow port).
+CASES.extend(
+    [
+        (
+            "icmp4_echo_request",
+            fields(src_ip="192.0.2.10", dst_ip="198.51.100.20", src_port=8, dst_port=0, transport="icmp"),
+            "true",
+            "1:kJP941FpZUgBnMTPeXDec/dQsNI=",
+        ),
+        (
+            "icmp4_echo_reply",
+            fields(src_ip="198.51.100.20", dst_ip="192.0.2.10", src_port=0, dst_port=0, transport="icmp"),
+            "true",
+            "1:kJP941FpZUgBnMTPeXDec/dQsNI=",
+        ),
+        (
+            "icmp4_unpaired_directional_error",
+            fields(src_ip="198.51.100.20", dst_ip="192.0.2.10", src_port=3, dst_port=1, transport="icmp"),
+            "true",
+            "1:k0BJr5lCW523qXtI7Bo9qcw/T1A=",
+        ),
+        (
+            "icmp4_unpaired_reverse_is_different",
+            fields(src_ip="192.0.2.10", dst_ip="198.51.100.20", src_port=3, dst_port=1, transport="icmp"),
+            "true",
+            "1:LhnFv6YrUYoASS78q9+va3PQLy4=",
+        ),
+        (
+            "icmp4_router_solicitation",
+            fields(src_ip="192.0.2.10", dst_ip="198.51.100.20", src_port=10, dst_port=0, transport="icmp"),
+            "true",
+            "1:rFQiBRNNBLl5OQhpNF/B1mJJqFg=",
+        ),
+        (
+            "icmp6_echo_request",
+            fields(src_ip="2001:db8::10", dst_ip="2001:db8::20", src_port=128, dst_port=0, transport="icmp"),
+            "true",
+            "1:CeMkKROiy4oSmNhnlMLU0//2Jks=",
+        ),
+        (
+            "icmp6_echo_reply",
+            fields(src_ip="2001:db8::20", dst_ip="2001:db8::10", src_port=129, dst_port=0, transport="icmpv6"),
+            "true",
+            "1:CeMkKROiy4oSmNhnlMLU0//2Jks=",
+        ),
+        (
+            "icmp6_router_solicitation",
+            fields(src_ip="2001:db8::10", dst_ip="2001:db8::20", src_port=133, dst_port=0, transport="icmp6"),
+            "true",
+            "1:zuO1YXG8eWQAEcHMGWmJVyfJFqE=",
+        ),
+        (
+            "icmp6_router_advertisement",
+            fields(src_ip="2001:db8::20", dst_ip="2001:db8::10", src_port=134, dst_port=0, transport="icmp6"),
+            "true",
+            "1:zuO1YXG8eWQAEcHMGWmJVyfJFqE=",
+        ),
+        (
+            "icmp6_unpaired_error",
+            fields(src_ip="2001:db8::20", dst_ip="2001:db8::10", src_port=1, dst_port=3, transport="icmp"),
+            "true",
+            "1:qA2gBZFTn5h1LVVovfCgbVXxFa8=",
+        ),
+        (
+            "icmp4_echo_request_reverse_address_order",
+            fields(src_ip="198.51.100.20", dst_ip="192.0.2.10", src_port=8, dst_port=0, transport="icmp"),
+            "true",
+            "1:XMzFeG2fOFAj0aiNKy47VkosojY=",
+        ),
+        (
+            "icmp4_echo_reply_reverse_address_order",
+            fields(src_ip="192.0.2.10", dst_ip="198.51.100.20", src_port=0, dst_port=0, transport="icmp"),
+            "true",
+            "1:XMzFeG2fOFAj0aiNKy47VkosojY=",
+        ),
+        (
+            "icmp6_echo_request_reverse_address_order",
+            fields(src_ip="2001:db8::20", dst_ip="2001:db8::10", src_port=128, dst_port=0, transport="icmp"),
+            "true",
+            "1:1SVOvJt9K1GnQh4QJs3qbociO80=",
+        ),
+        (
+            "icmp6_echo_reply_reverse_address_order",
+            fields(src_ip="2001:db8::10", dst_ip="2001:db8::20", src_port=129, dst_port=0, transport="icmpv6"),
+            "true",
+            "1:1SVOvJt9K1GnQh4QJs3qbociO80=",
+        ),
+        (
+            "icmp4_explicit_ipv6_mismatch_is_rejected",
+            fields(src_ip="192.0.2.10", dst_ip="198.51.100.20", src_port=8, dst_port=0, transport="icmp6"),
+            "true",
+            None,
+        ),
+        (
+            "icmp6_explicit_ipv4_mismatch_is_rejected",
+            fields(src_ip="2001:db8::10", dst_ip="2001:db8::20", src_port=128, dst_port=0, transport="icmp4"),
+            "true",
+            None,
+        ),
+        ("icmp4_invalid_type", fields(transport="icmp", src_port=256, dst_port=0), "true", None),
+        ("icmp4_invalid_code", fields(transport="icmp", src_port=8, dst_port=256), "true", None),
+        ("icmp4_missing_code", fields(transport="icmp", src_port=8, dst_port=None), "true", None),
+        (
+            "icmp4_existing_id_is_preserved",
+            fields(transport="icmp", src_port=8, dst_port=0, community_id="1:existing"),
+            "true",
+            "1:existing",
+        ),
+        (
+            "icmp4_inferred_explicit_only",
+            fields(transport=None, inferred_transport="icmp", src_port=8, dst_port=0),
+            "true",
+            "1:YcMyyWJfhc95EW1GfXt6jlZ3DiQ=",
+        ),
+    ]
+)
 
 
 @pytest.fixture(scope="module")

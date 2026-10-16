@@ -6,7 +6,8 @@ require 'digest'
 require 'ipaddr'
 
 # Computes Community ID v1 for flow-oriented Zeek events with a complete
-# TCP, UDP or SCTP tuple. Other protocols are left unchanged. The transport
+# TCP, UDP, SCTP or ICMP type/code tuple. Other protocols are left unchanged.
+# The transport
 # comes from [network][transport], or from [@metadata][inferred_transport]
 # when the log has no proto column.
 def filter(event)
@@ -17,13 +18,6 @@ def filter(event)
   transport = event.get('[network][transport]')
   transport = event.get('[@metadata][inferred_transport]') if transport.nil? || transport == []
   transport = transport.first if transport.is_a?(Array) && transport.size == 1
-  protocol = case transport.to_s.downcase
-             when 'tcp' then 6
-             when 'udp' then 17
-             when 'sctp' then 132
-             end
-  return [event] if protocol.nil?
-
   source_ip = event.get('[source][ip]')
   destination_ip = event.get('[destination][ip]')
   return [event] unless source_ip.is_a?(String) && destination_ip.is_a?(String)
@@ -33,14 +27,33 @@ def filter(event)
   destination = IPAddr.new(destination_ip)
   return [event] unless source.ipv4? == destination.ipv4?
 
+  protocol = community_id_protocol(transport.to_s.downcase, source.ipv4?)
+  return [event] if protocol.nil?
+
   source_port = community_id_port(event.get('[source][port]'))
   destination_port = community_id_port(event.get('[destination][port]'))
   return [event] if source_port.nil? || destination_port.nil?
 
+  # In Zeek conn.log, the two port fields represent ICMP type and code.
+  # Paired request/reply types must map to equivalent port pairs for a
+  # direction-independent ID. Other ICMP types are one-way, so their source
+  # and destination IPs must not be swapped (per the Community ID spec).
+  one_way = false
+  if protocol == 1 || protocol == 58
+    return [event] if source_port > 255 || destination_port > 255
+
+    mapped_type = community_id_icmp_counter_type(protocol, source_port)
+    unless mapped_type.nil?
+      destination_port = mapped_type
+    else
+      one_way = true
+    end
+  end
+
   source_bytes = source.hton
   destination_bytes = destination.hton
   order = source_bytes <=> destination_bytes
-  if order.positive? || (order.zero? && source_port > destination_port)
+  if !one_way && (order.positive? || (order.zero? && source_port > destination_port))
     source_bytes, destination_bytes = destination_bytes, source_bytes
     source_port, destination_port = destination_port, source_port
   end
@@ -62,4 +75,29 @@ def community_id_port(value)
 
   port = value.to_i
   port if (0..65_535).cover?(port)
+end
+
+# Zeek and Corelight's Community ID protocol handling use these counter-type
+# pairs for bidirectional ICMP flows; other ICMP messages remain directional.
+ICMP_COUNTER_TYPES = {
+  1 => { 0 => 8, 8 => 0, 9 => 10, 10 => 9, 13 => 14, 14 => 13,
+         15 => 16, 16 => 15, 17 => 18, 18 => 17 },
+  58 => { 128 => 129, 129 => 128, 130 => 131, 131 => 130,
+          133 => 134, 134 => 133, 135 => 136, 136 => 135,
+          139 => 140, 140 => 139, 144 => 145, 145 => 144 }
+}.freeze
+
+def community_id_icmp_counter_type(protocol, message_type)
+  ICMP_COUNTER_TYPES.fetch(protocol, {})[message_type]
+end
+
+def community_id_protocol(transport, ipv4)
+  case transport
+  when 'tcp' then 6
+  when 'udp' then 17
+  when 'sctp' then 132
+  when 'icmp' then ipv4 ? 1 : 58
+  when 'icmp4', 'icmpv4' then 1 if ipv4
+  when 'icmp6', 'icmpv6' then 58 unless ipv4
+  end
 end
