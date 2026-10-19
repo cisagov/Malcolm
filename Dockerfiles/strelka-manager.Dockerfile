@@ -1,4 +1,4 @@
-FROM ghcr.io/idaholab/strelka/manager:malcolm@sha256:1501f31dc91d3d50f25d8cbf2f54d966ee9292074893d7219f5b86b6fa3a97eb
+FROM ghcr.io/idaholab/strelka/manager:malcolm@sha256:e5da71d1d59d484e8695df331063887aa3b22a66fc5a10e04da6ded10b8d4e28
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
