@@ -103,12 +103,12 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       FILEPOND_INDEX_PHP="/var/www/upload/server/php/index.php"; \
         FILEPOND_INDEX_TMP="$(mktemp "${FILEPOND_INDEX_PHP}.XXXXXX")"; \
         awk ' \
-            index($0, "FETCH_REMOTE_FILE") && \
-            index($0, "handle_fetch_remote_file") { \
+            /(FETCH_REMOTE_FILE|RESTORE_FILE_TRANSFER|LOAD_LOCAL_FILE|PATCH_FILE_TRANSFER)/ && \
+            /handle_(fetch_remote_file|restore_file_transfer|load_local_file|patch_file_transfer)/ { \
                 next; \
             } \
             !removing && \
-            $0 ~ /^[[:space:]]*function[[:space:]]+handle_fetch_remote_file[[:space:]]*\(/ { \
+            $0 ~ /^[[:space:]]*function[[:space:]]+handle_(fetch_remote_file|restore_file_transfer|load_local_file|patch_file_transfer)[[:space:]]*\(/ { \
                 removing = 1; \
                 depth = 0; \
             } \
@@ -123,6 +123,10 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
             } \
             { print; } \
         ' "$FILEPOND_INDEX_PHP" > "$FILEPOND_INDEX_TMP" && \
+        if grep -Eq 'handle_(fetch_remote_file|restore_file_transfer|load_local_file|patch_file_transfer)' "$FILEPOND_INDEX_TMP"; then \
+            echo "FilePond index.php fetch/restore/load/patch handler removal failed; vendored library may have changed, update this patch" >&2; \
+            exit 1; \
+        fi && \
         chmod --reference="$FILEPOND_INDEX_PHP" "$FILEPOND_INDEX_TMP" && \
         mv -- "$FILEPOND_INDEX_TMP" "$FILEPOND_INDEX_PHP" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt  && \
