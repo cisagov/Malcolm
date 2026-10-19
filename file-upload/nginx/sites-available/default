@@ -10,14 +10,48 @@ server {
     index index.php index.html;
     autoindex off;
 
-    # Explicitly block execution from the upload storage directory
-    location ^~ /server/php/files/ {
-        try_files $uri =404;
-        # No fastcgi_pass — static files only
+    # Applies to every location below that doesn't set its own add_header
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # Everything this container serves is allowlisted below. Uploaded content
+    # (server/php/files, server/php/chroot/files, and the same paths reached
+    # through the /var/www/upload/upload symlink) is never served back.
+    location / {
+        return 404;
     }
 
-    # PHP execution only for known entrypoints
+    # Upload page (also what the container health check requests)
+    location = / {
+    }
+
+    location = /index.html {
+    }
+
+    # Static assets referenced by index.html. The main nginx proxy rewrites
+    # /upload/<path> to /<path>, so the page's relative "upload/..." references
+    # arrive here with a single leading /upload/ that resolves through the
+    # /var/www/upload/upload symlink.
+    location ~ ^/(?:upload/)?(?<asset>(?:filepond(?:-plugin-[a-z-]+)?|@jcubic/tagger)/.+\.(?:css|js)|Malcolm_banner\.png)$ {
+        try_files /$asset =404;
+    }
+
+    # FilePond API base. A rewrite is used here instead of the index directive
+    # because nginx's index module only handles GET, HEAD and POST; FilePond's
+    # revert is a DELETE to this URL and would otherwise get a 405.
+    location = /server/php/ {
+        rewrite ^ /server/php/index.php last;
+    }
+
+    # PHP execution only for known entrypoints. The upload page only POSTs
+    # (process, submit) and DELETEs (revert). FilePond's GET/HEAD/PATCH routes
+    # (fetch, restore, load, patch) are unused, and restore and load echo
+    # stored uploads back to the browser, so those methods are refused here.
     location ~ ^/server/php/(index|submit)\.php$ {
+        limit_except POST DELETE {
+            deny all;
+        }
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
         include snippets/fastcgi-php.conf;
         fastcgi_buffers 16 64k;
         fastcgi_buffer_size 256k;
@@ -26,13 +60,5 @@ server {
         fastcgi_busy_buffers_size 384k;
         fastcgi_request_buffering off;
         fastcgi_pass unix:/run/php/php8.4-fpm.sock;
-    }
-
-    location ~ \.php$ {
-        deny all;
-    }
-
-    location ~ /\.ht {
-        deny all;
     }
 }
