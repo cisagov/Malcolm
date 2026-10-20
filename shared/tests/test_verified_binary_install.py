@@ -39,9 +39,7 @@ cp "$MOCK_ARTIFACT" "$outfile"
             encoding="utf-8",
         )
         uname_stub = self.bin / "uname"
-        uname_stub.write_text(
-            '#!/bin/sh\nprintf "%s\n" "$MOCK_ARCH"\n', encoding="utf-8"
-        )
+        uname_stub.write_text('#!/bin/sh\nprintf "%s\n" "$MOCK_ARCH"\n', encoding="utf-8")
         curl_stub.chmod(0o755)
         uname_stub.chmod(0o755)
 
@@ -88,9 +86,7 @@ cp "$MOCK_ARTIFACT" "$outfile"
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(self.target.read_bytes(), b"verified")
                 self.assertTrue(self.target.stat().st_mode & 0o111)
-                self.assertTrue(
-                    self.request.read_text().endswith(f"yq_linux_{suffix}\n")
-                )
+                self.assertTrue(self.request.read_text().endswith(f"yq_linux_{suffix}\n"))
 
     def test_unexpected_download_never_replaces_existing_binary(self):
         self.target.write_bytes(b"previous-version")
@@ -132,9 +128,9 @@ cp "$MOCK_ARTIFACT" "$outfile"
     def test_generic_versioned_artifact_name(self):
         digest = hashlib.sha256(b"verified").hexdigest()
         result = self.run_installer(
-            artifact="supercronic_0.2.49_linux_{arch}",
+            artifact="supercronic_0.2.50_linux_{arch}",
             url="https://example.invalid/supercronic-{arch}",
-            manifest=f"{digest}  supercronic_0.2.49_linux_amd64\n",
+            manifest=f"{digest}  supercronic_0.2.50_linux_amd64\n",
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
