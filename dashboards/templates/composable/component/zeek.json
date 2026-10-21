@@ -531,7 +531,7 @@
                 "cif_confidence": {
                   "type": "float"
                 },
-                "file_description": {
+                "file_desc": {
                   "type": "keyword",
                   "ignore_above": 1024,
                   "fields": {
@@ -560,9 +560,6 @@
                   "type": "keyword"
                 },
                 "verdict_source": {
-                  "type": "keyword"
-                },
-                "associated": {
                   "type": "keyword"
                 },
                 "category": {
