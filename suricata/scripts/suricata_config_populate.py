@@ -32,7 +32,6 @@ from malcolm_utils import (
     deep_set,
     pushd,
     run_process,
-    append_to_file,
     set_logging,
     get_verbosity_env_var_count,
     log_level_is_debug,
@@ -720,6 +719,15 @@ def GetIncludeConfigSources():
 
 
 ###################################################################################################
+def SetIncludes(cfg, includeFiles):
+    # replace any existing include key (including duplicates from older versions of this script, which
+    #   wrote one "include:" line per file) with a single array, as the last key in the config
+    cfg.pop('include', None)
+    if includeFiles:
+        cfg['include'] = list(includeFiles)
+
+
+###################################################################################################
 def main():
     global args
     global DEFAULT_VARS
@@ -1372,17 +1380,12 @@ def main():
             cfg.pop('rule-files', None)
             deep_set(cfg, ['rule-files'], GetRuleFiles())
 
-            # Hackety-hack, don't talk back! Despite the "Including multiple files" section of
+            # Include any extra config files as an array, per "Including multiple files" in
             #   https://docs.suricata.io/en/latest/configuration/includes.html#including-multiple-files
-            #   saying this can be set as an array, it does not seem to be working for me.
-            #   The sample suricata.yaml file shows it should be done like this:
-            #     include: include1.yaml
-            #     include: include2.yaml
-            # The reason this is a pain is that this is not actually valid YAML. So
-            #   what we are going to do is remove the 'include' section here,
-            #   write the YAML to a file, and then append the includes: afterwards
-            #   just in plain text.
-            cfg.pop('include', None)
+            #   (repeated "include:" keys at the same level are deprecated as of Suricata 8). Popping and
+            #   re-adding the key puts it last, so the included files are applied after (and can override)
+            #   everything else in this file.
+            SetIncludes(cfg, extraConfigFiles)
 
             with open('suricata.yaml', 'w') as outTestFile:
                 outTestYaml = YAML(typ='rt')
@@ -1393,9 +1396,6 @@ def main():
                 outTestYaml.boolean_representation = ['no', 'yes']
                 outTestYaml.version = YAML_VERSION
                 outTestYaml.dump(cfg, outTestFile)
-
-            # see note on 'include' above
-            append_to_file('suricata.yaml', [''] + [f"include: {x}" for x in extraConfigFiles] + [''])
 
             script_return_code, output = run_process(
                 [
@@ -1422,7 +1422,7 @@ def main():
     deep_set(cfg, ['rule-files'], GetRuleFiles())
 
     # see note on 'include' above
-    cfg.pop('include', None)
+    SetIncludes(cfg, extraConfigFiles)
 
     ##################################################################################################
 
@@ -1436,9 +1436,6 @@ def main():
         outYaml.boolean_representation = ['no', 'yes']
         outYaml.version = YAML_VERSION
         outYaml.dump(cfg, outfile)
-
-    # see note on 'include' above
-    append_to_file(args.output, [''] + [f"include: {x}" for x in extraConfigFiles] + [''])
 
     ##################################################################################################
 
