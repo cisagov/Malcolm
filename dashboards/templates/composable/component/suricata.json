@@ -11,6 +11,12 @@
                 },
                 "metadata": {
                   "properties": {
+                    "affected_product": {
+                      "type": "keyword"
+                    },
+                    "attack_target": {
+                      "type": "keyword"
+                    },
                     "confidence": {
                       "type": "keyword"
                     },

@@ -330,6 +330,8 @@ class MalcolmSource extends WISESource {
       "source.segment.tenant",
       "suricata.action",
       "suricata.alert.action",
+      "suricata.alert.metadata.affected_product",
+      "suricata.alert.metadata.attack_target",
       "suricata.alert.metadata.created_at",
       "suricata.alert.metadata.malware_family",
       "suricata.alert.metadata.performance_impact",
