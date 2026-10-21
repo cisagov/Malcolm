@@ -11,7 +11,6 @@ import time
 import malcolm_utils
 from typing import Optional, Dict, Any, Tuple, Union
 
-
 SuricataMaxRetriesDefault = 30
 SuricataQueueSizeError = 999
 SuricataRuleReloadTimeoutDefault = int(os.getenv('SURICATA_SOCKET_RULE_RELOAD_TIMEOUT_SEC', '900'))
@@ -33,7 +32,7 @@ class SuricataSocketClient:
     #   socket file's (device, inode, ctime) to tell when the instance behind a path has restarted (Suricata
     #   recreates its socket on startup; ctime is included because a recreated socket can reuse the same
     #   inode number). Shared by every client in this process, so each instance is reloaded once no matter
-    #   how many clients connect to it or how often they reconnect. See reload_rules for why the reload
+    #   how many clients connect to it or how often they reconnect. See _ensure_rules_reloaded for why the reload
     #   is needed.
     _reloaded_instances: Dict[str, Tuple[int, int, int]] = {}
     _reloaded_instances_lock = threading.Lock()
@@ -269,9 +268,7 @@ class SuricataSocketClient:
         queue_response = self._send_command({"command": "pcap-file-number"}, retries=1)
         if (not current_response) or (not queue_response):
             return False
-        return (current_response.get("message") in (None, "", "None")) and (
-            str(queue_response.get("message")) == "0"
-        )
+        return (current_response.get("message") in (None, "", "None")) and (str(queue_response.get("message")) == "0")
 
     def _warm_up(
         self,
@@ -332,9 +329,8 @@ class SuricataSocketClient:
     ) -> bool:
         """Reload the ruleset and wait for it to finish (blocking)
 
-        In unix-socket mode, Suricata parses its rules once at startup, before the outputs used for
-        each pcap-file run are set up, so rule metadata (alert.metadata in eve.json) is never built
-        for that initial ruleset. A reload re-parses the rules with metadata enabled.
+        Note that in unix-socket mode this only enables rule metadata if the instance has already
+        processed a pcap-file run; see _ensure_rules_reloaded.
         """
         previous_timeout = self.sock.gettimeout()
         try:
