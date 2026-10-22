@@ -12,8 +12,8 @@ https://github.com/cisagov/icsnpp-c1222|3f2631a24e8c4def74f4db2ad73e69c7311a12c2
 https://github.com/cisagov/icsnpp-dnp3|b31dbadeceb1cbcda16aef89c650559cd177dd7e|HEAD||
 https://github.com/cisagov/icsnpp-enip|3fbd32e3d2838d5e2bcd6c9ed79f036d23a0642e|HEAD||
 https://github.com/cisagov/icsnpp-ethercat|a7126b3c66adfefcfff61d4a073c128c5d17c8da|HEAD||
-https://github.com/cisagov/icsnpp-ge-srtp|b621f43bebd57bbc9d7e07cae1cf11b40609ece4|HEAD||
-https://github.com/cisagov/icsnpp-genisys|bcae17803297f50fe0d602e5c9976072b3b867bc|HEAD||
+https://github.com/cisagov/icsnpp-ge-srtp|cc28a311bf8dbb64b2fa83610f609992df3f8281|HEAD||
+https://github.com/cisagov/icsnpp-genisys|442841b407abc1de95f7c37f9f90607bdbec00d8|HEAD||
 https://github.com/cisagov/icsnpp-hart-ip|0b9f6b18e6ea1002319262c5d9d0eed1158f840c|HEAD||
 https://github.com/cisagov/icsnpp-modbus|16428919f5efb034eda625bf989c68543e2a5e76|v2.0.0||
 https://github.com/cisagov/icsnpp-omron-fins|c157d8782720e703b64583c471f46fb02a2ee922|HEAD||
@@ -21,7 +21,7 @@ https://github.com/cisagov/icsnpp-opcua-binary|efca88a3f65c58ad496588aba8e9dfe79
 https://github.com/cisagov/icsnpp-profinet-io-cm|4fa4d446efff2f01d8921c7455fb6e1298856041|HEAD||
 https://github.com/cisagov/icsnpp-roc-plus|d1adecb17d808e43bd6c20ef9417b3b41362af71|HEAD||
 https://github.com/cisagov/icsnpp-s7comm|5cf1e1ee397bef97ba1e1daa917703d447f6519f|HEAD||
-https://github.com/cisagov/icsnpp-synchrophasor|e744998ea7f99f15b3c6c1951f64e1e4526b4c6c|HEAD||
+https://github.com/cisagov/icsnpp-synchrophasor|c43c5891cf9eed08dab313189eb6a3e4409e2e26|HEAD||
 https://github.com/corelight/callstranger-detector|3f9a68eb82d7f3dc4f10c227ee2ce63ce156338d|HEAD||
 https://github.com/corelight/CVE-2020-16898|6226bb9f922589faa403bf14b4bee2233575e4af|HEAD||
 https://github.com/corelight/CVE-2021-1675|f84970e64e3f490e4438c8628083bdc04559667d|HEAD||
@@ -43,8 +43,8 @@ https://github.com/corelight/ExtendIntel|0707d5c7fd097dfaeffb38a0e1ea20b947feb7a
 https://github.com/corelight/hassh|8280c8d1c70b6b8a419e9733230740e395d744fb|v1.0.1||
 https://github.com/corelight/http-more-files-names|29f03ea6ef6bd86e68381c5b59a0007738e8e0b2|HEAD||
 https://github.com/corelight/pingback|2deb7f48b5c2eaf5d58fee70f6e658a6d0a5b100|v0.1.2||
-https://github.com/corelight/php2shell-detect|6ffebbc873465d4e99a97e671f55ef06c2cb3a07|v1.0.0||
-https://github.com/corelight/ripple20|d760a839a76fc8839ebd516f1edb601a3bcfa87b|HEAD||
+https://github.com/corelight/php2shell-detect|4d5131c7f7812d7b84a85cb61c64837c125920fe|v1.0.1||
+https://github.com/mmguero-dev/ripple20|24272d4cf7e689ff8ef3e5edfb5025792e67c7f4|master||
 https://github.com/corelight/SIGRed|b462f27066ea878c91fd604387f3d585e2fef325|HEAD||
 https://github.com/corelight/zeek-agenttesla-detector|23613c884cff488303d72aeb08ce00e0fe80f275|v0.1.1||
 https://github.com/corelight/zeek-asyncrat-detector|0c08b157a218b7aa9732c2ab27e0faa53f99cb0f|v0.1.3||

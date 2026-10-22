@@ -65,6 +65,7 @@ ZEEK_INTEL_META_ASSOCIATED = 'meta.associated'
 ZEEK_INTEL_META_CATEGORY = 'meta.category'
 ZEEK_INTEL_META_CAMPAIGNS = 'meta.campaigns'
 ZEEK_INTEL_META_REPORTS = 'meta.reports'
+ZEEK_INTEL_META_KILL_CHAIN_PHASES = 'meta.kill_chain_phases'
 ZEEK_INTEL_META_DO_NOTICE = 'meta.do_notice'
 ZEEK_INTEL_CIF_TAGS = 'meta.cif_tags'
 ZEEK_INTEL_CIF_CONFIDENCE = 'meta.cif_confidence'
@@ -74,9 +75,6 @@ ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 # TODO: STILL NEED TO MAP THESE:
-#   - ZEEK_INTEL_META_ASSOCIATED
-#   - ZEEK_INTEL_META_CAMPAIGNS
-#   - ZEEK_INTEL_META_REPORTS
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
 
@@ -95,6 +93,12 @@ MANDIANT_INCLUDE_THREAT_RATING_DEFAULT = False
 MANDIANT_INCLUDE_MISP_DEFAULT = True
 MANDIANT_INCLUDE_CATEGORY_DEFAULT = True
 MISP_REQUIRE_TO_IDS_DEFAULT = True
+MISP_GALAXY_THREAT_ACTOR_TAG_PREFIX = 'misp-galaxy:threat-actor='
+# meta.source is a required field in Intel::MetaData, so Zeek skips any intel item without one;
+#   these are used when a feed doesn't provide a source for an indicator
+MANDIANT_SOURCE_DEFAULT = 'Mandiant'
+MISP_SOURCE_DEFAULT = 'MISP'
+GOOGLE_SOURCE_DEFAULT = 'Google Threat Intelligence'
 
 # See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -268,6 +272,26 @@ def mandiant_indicator_as_json_str(indicator, skip_attr_map=None):
         return 'unknown indicator'
 
 
+def _zeek_intel_source(values, default):
+    """Render source name(s) as the escaped value for the required meta.source field.
+
+    Empty or missing values are dropped, and the default is used if none remain, since
+    Zeek skips (with a warning) any intel item whose meta.source is unset.
+    """
+    if isinstance(values, str) or not isinstance(values, (list, tuple, set)):
+        values = [values]
+    cleaned = []
+    for value in values:
+        if value is None:
+            continue
+        value = str(value).strip()
+        if value and (value not in cleaned):
+            cleaned.append(value)
+    if not cleaned:
+        cleaned = [default]
+    return '\\x7c'.join([x.replace(',', '\\x2c') for x in cleaned])
+
+
 def _mandiant_related_refs(entries, field):
     """Render one kind of Mandiant reference as escaped Zeek set items.
 
@@ -408,8 +432,7 @@ def map_mandiant_indicator_to_zeek(
                     tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
                     if newId := hashish.get('id'):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
-                    if sources:
-                        tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
+                    tmpItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(sources, MANDIANT_SOURCE_DEFAULT)
                     results.append(tmpItem)
                     if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                         logger.debug(tmpItem)
@@ -417,8 +440,7 @@ def map_mandiant_indicator_to_zeek(
         elif hasattr(indicator, 'value') and (val := indicator.value):
             # handle other types besides the file hash
             zeekItem[ZEEK_INTEL_INDICATOR] = val
-            if sources:
-                zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
+            zeekItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(sources, MANDIANT_SOURCE_DEFAULT)
             results.append(zeekItem)
             if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                 logger.debug(zeekItem)
@@ -455,7 +477,29 @@ def map_google_indicator_to_zeek(
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         zeekItem[ZEEK_INTEL_INDICATOR] = indicator
         zeekItem[ZEEK_INTEL_META_CATEGORY] = collection.collection_type
-        zeekItem[ZEEK_INTEL_META_SOURCE] = collection.get('origin', "Google Threat Intelligence")
+
+        # origin is "Google Threat Intelligence" for Google's own collections; qualify others (e.g., "Partner")
+        #   so the source still says where they came from
+        origin = str(collection.get('origin') or '').strip()
+        if origin and not origin.lower().startswith(GOOGLE_SOURCE_DEFAULT.lower()):
+            origin = f"{GOOGLE_SOURCE_DEFAULT} ({origin})"
+        zeekItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(origin, GOOGLE_SOURCE_DEFAULT)
+
+        # threat actor collections: the actor's name and preferred alternate name -> meta.associated
+        #   (other vendors' names for the actor in alt_names stay in meta.desc)
+        if collection.collection_type == 'threat-actor':
+            actors = []
+            for actor in (collection.get('name'), collection.get('preferred_alt_name')):
+                actor = str(actor or '').strip()
+                if actor and (actor not in actors):
+                    actors.append(actor)
+            if actors:
+                zeekItem[ZEEK_INTEL_META_ASSOCIATED] = '\\x7c'.join([x.replace(',', '\\x2c') for x in actors])
+
+        # campaign collections: the campaign's name -> meta.campaigns
+        elif collection.collection_type == 'campaign':
+            if campaign := str(collection.get('name') or '').strip():
+                zeekItem[ZEEK_INTEL_META_CAMPAIGNS] = campaign.replace(',', '\\x2c')
 
         names = []
         if collection.get('name', []):
@@ -889,11 +933,7 @@ def map_stix_indicator_to_zeek(
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
 
-        zeekItem[ZEEK_INTEL_META_SOURCE] = (
-            '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
-            if source is not None and len(source) > 0
-            else str(indicator.id)
-        )
+        zeekItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(source, str(indicator.id))
         zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         # STIX 2.1 confidence is 0-100, not the indicator's threat severity.
@@ -919,6 +959,19 @@ def map_stix_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
         if indicatorTypes := [x for x in indicator.get('indicator_types', []) if x]:
             zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in indicatorTypes])
+        # kill chain phases are written as kill_chain_name:phase_name (e.g., mitre-ics-attack:collection) so
+        #   Logstash can tell which framework a phase belongs to, since ATT&CK Enterprise and ICS share
+        #   many tactic names with different IDs
+        killChainPhases = set()
+        for phase in indicator.get('kill_chain_phases', []):
+            phaseName = str(phase.get('phase_name') or '').strip()
+            chainName = str(phase.get('kill_chain_name') or '').strip()
+            if phaseName:
+                killChainPhases.add(f"{chainName}:{phaseName}" if chainName else phaseName)
+        if killChainPhases:
+            zeekItem[ZEEK_INTEL_META_KILL_CHAIN_PHASES] = '\\x7c'.join(
+                [x.replace(',', '\\x2c') for x in sorted(killChainPhases)]
+            )
 
         results.append(zeekItem)
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
@@ -1020,6 +1073,7 @@ def map_misp_attribute_to_zeek(
     tags: Union[Tuple[str], None] = None,
     confidence: Union[float, None] = None,
     note: Union[str, None] = None,
+    associated: Union[Tuple[str], None] = None,
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
     """
@@ -1080,8 +1134,7 @@ def map_misp_attribute_to_zeek(
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
 
-        if source is not None and len(source) > 0:
-            zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
+        zeekItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(source, MISP_SOURCE_DEFAULT)
         if combinedDescription is not None:
             zeekItem[ZEEK_INTEL_META_DESC] = combinedDescription
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
@@ -1096,6 +1149,8 @@ def map_misp_attribute_to_zeek(
         zeekItem[ZEEK_INTEL_META_CATEGORY] = attribute.category.replace(',', '\\x2c')
         if tags:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
+        if associated:
+            zeekItem[ZEEK_INTEL_META_ASSOCIATED] = '\\x7c'.join([x.replace(',', '\\x2c') for x in associated])
         if confidence is not None:
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
             zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(confidence)
@@ -1151,6 +1206,7 @@ class FeedParserZeekPrinter(object):
                     ZEEK_INTEL_META_CATEGORY,
                     ZEEK_INTEL_META_CAMPAIGNS,
                     ZEEK_INTEL_META_REPORTS,
+                    ZEEK_INTEL_META_KILL_CHAIN_PHASES,
                 ]
             )
         if notice:
@@ -1293,6 +1349,7 @@ class FeedParserZeekPrinter(object):
                 if source is None:
                     source = []
                 tags = []
+                associated = []
                 certainty = None
 
                 # determine if we're processing an event or an attribute
@@ -1332,6 +1389,20 @@ class FeedParserZeekPrinter(object):
                                 and not x.name.startswith('source:')
                             ]
                             source.extend([x.name[7:] for x in event.Tag if x.name.startswith('source:')])
+                            # threat-actor galaxy clusters (e.g., misp-galaxy:threat-actor="APT28") -> meta.associated
+                            associated = sorted(
+                                {
+                                    actor
+                                    for x in event.Tag
+                                    if x.name.startswith(MISP_GALAXY_THREAT_ACTOR_TAG_PREFIX)
+                                    and (
+                                        actor := x.name[len(MISP_GALAXY_THREAT_ACTOR_TAG_PREFIX) :]
+                                        .strip()
+                                        .strip('"')
+                                        .strip()
+                                    )
+                                }
+                            )
                             certaintyTags = [
                                 x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')
                             ]
@@ -1360,6 +1431,7 @@ class FeedParserZeekPrinter(object):
                                     tags=tags,
                                     confidence=certainty,
                                     note=note,
+                                    associated=associated,
                                     logger=self.logger,
                                 )
                             )

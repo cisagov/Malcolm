@@ -136,6 +136,65 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @endif
 @if (!disable_intel)
   @load intel
+
+  # When reading a PCAP file, hold off on packet processing until every intel file has
+  #   finished its initial read. The input framework loads Intel::read_files asynchronously,
+  #   so without this, packets at the start of a PCAP (or all of a small one) are processed
+  #   against an empty or partially-loaded intel store and never generate intel.log hits.
+  #   Live capture is left alone, and files that don't exist aren't counted, since they
+  #   never raise Input::end_of_data and would otherwise leave processing suspended. If an
+  #   intel file fails outright, stop waiting and continue so the PCAP still gets processed
+  #   rather than hanging. File-level reader problems (e.g., a header missing a required field)
+  #   are reported as "<file>/Input::READER_...: ..." reporter warnings/errors and leave the
+  #   stream open waiting for the file to be fixed, so they never raise Input::end_of_data;
+  #   per-line problems are prefixed "<file>:<line>: ..." instead and don't match.
+  global intel_files_pending: count = 0;
+
+  event zeek_init() &priority=10 {
+    if (!reading_traces())
+      return;
+    for (intel_file in Intel::read_files) {
+      if (file_size(intel_file) >= 0.0)
+        ++intel_files_pending;
+    }
+    if (intel_files_pending > 0)
+      suspend_processing();
+  }
+
+  event Input::end_of_data(name: string, source: string) {
+    if ((intel_files_pending > 0) && (source in Intel::read_files)) {
+      --intel_files_pending;
+      if (intel_files_pending == 0)
+        continue_processing();
+    }
+  }
+
+  event Intel::read_error(desc: Input::EventDescription, message: string, level: Reporter::Level) {
+    if ((intel_files_pending > 0) && (level == Reporter::ERROR) && (desc$source in Intel::read_files)) {
+      intel_files_pending = 0;
+      continue_processing();
+    }
+  }
+
+  function intel_files_reader_problem(msg: string) {
+    if (intel_files_pending == 0)
+      return;
+    for (intel_file in Intel::read_files) {
+      if (starts_with(msg, intel_file + "/Input::READER_")) {
+        intel_files_pending = 0;
+        continue_processing();
+        return;
+      }
+    }
+  }
+
+  event reporter_warning(t: time, msg: string, location: string) {
+    intel_files_reader_problem(msg);
+  }
+
+  event reporter_error(t: time, msg: string, location: string) {
+    intel_files_reader_problem(msg);
+  }
 @endif
 @load custom
 

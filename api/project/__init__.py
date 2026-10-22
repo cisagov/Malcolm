@@ -422,9 +422,15 @@ def _parse_query_time(value):
     """Parse a query time, interpreting timezone-free inputs as UTC."""
     if not value:
         return None
-    if value.isdigit():
+    if isinstance(value, (int, float)) or str(value).isdigit():
         return datetime.fromtimestamp(int(value), timezone.utc)
-    return dateparser.parse(value, settings={'TIMEZONE': 'UTC', 'RETURN_AS_TIMEZONE_AWARE': True})
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError:
+        dt = dateparser.parse(value, settings={'TIMEZONE': 'UTC', 'RETURN_AS_TIMEZONE_AWARE': True})
+        if dt is None:
+            raise BadRequest(f"Unable to parse time value: {value}")
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
 def gettimes(args):
@@ -945,7 +951,7 @@ def document():
         s = s.sort(*sorts)
     if track_total_hits is not None:
         s = s.extra(track_total_hits=track_total_hits)
-    start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
+    start_time_ms, end_time_ms, s = filtertime(s, args, default_from="0", default_to="now")
     filters, s = filtervalues(s, args)
     response = s.execute().to_dict()
     if debugApi:
@@ -1405,9 +1411,7 @@ def ready():
     # run the checks concurrently so the total time is bounded by the slowest single check
     #   rather than the sum of all of them
     with ThreadPoolExecutor(max_workers=len(checks)) as executor:
-        futures = {
-            name: executor.submit(safe_check, name, func, default) for name, (func, default) in checks.items()
-        }
+        futures = {name: executor.submit(safe_check, name, func, default) for name, (func, default) in checks.items()}
         results = {name: future.result() for name, future in futures.items()}
 
     return jsonify(
