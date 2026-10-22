@@ -477,7 +477,29 @@ def map_google_indicator_to_zeek(
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         zeekItem[ZEEK_INTEL_INDICATOR] = indicator
         zeekItem[ZEEK_INTEL_META_CATEGORY] = collection.collection_type
-        zeekItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(collection.get('origin'), GOOGLE_SOURCE_DEFAULT)
+
+        # origin is "Google Threat Intelligence" for Google's own collections; qualify others (e.g., "Partner")
+        #   so the source still says where they came from
+        origin = str(collection.get('origin') or '').strip()
+        if origin and not origin.lower().startswith(GOOGLE_SOURCE_DEFAULT.lower()):
+            origin = f"{GOOGLE_SOURCE_DEFAULT} ({origin})"
+        zeekItem[ZEEK_INTEL_META_SOURCE] = _zeek_intel_source(origin, GOOGLE_SOURCE_DEFAULT)
+
+        # threat actor collections: the actor's name and preferred alternate name -> meta.associated
+        #   (other vendors' names for the actor in alt_names stay in meta.desc)
+        if collection.collection_type == 'threat-actor':
+            actors = []
+            for actor in (collection.get('name'), collection.get('preferred_alt_name')):
+                actor = str(actor or '').strip()
+                if actor and (actor not in actors):
+                    actors.append(actor)
+            if actors:
+                zeekItem[ZEEK_INTEL_META_ASSOCIATED] = '\\x7c'.join([x.replace(',', '\\x2c') for x in actors])
+
+        # campaign collections: the campaign's name -> meta.campaigns
+        elif collection.collection_type == 'campaign':
+            if campaign := str(collection.get('name') or '').strip():
+                zeekItem[ZEEK_INTEL_META_CAMPAIGNS] = campaign.replace(',', '\\x2c')
 
         names = []
         if collection.get('name', []):
