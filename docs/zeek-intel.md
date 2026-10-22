@@ -1022,7 +1022,6 @@ These other parameters can also optionally be provided:
   exclude_osint: False
   include_campaigns: False
   include_category: True
-  include_misp: True
   include_reports: False
   include_threat_rating: False
 ```
