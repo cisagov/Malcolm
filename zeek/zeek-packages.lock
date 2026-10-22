@@ -20,7 +20,7 @@ https://github.com/cisagov/icsnpp-omron-fins|c157d8782720e703b64583c471f46fb02a2
 https://github.com/cisagov/icsnpp-opcua-binary|efca88a3f65c58ad496588aba8e9dfe79d9f92a1|v2.0.0||
 https://github.com/cisagov/icsnpp-profinet-io-cm|4fa4d446efff2f01d8921c7455fb6e1298856041|HEAD||
 https://github.com/cisagov/icsnpp-roc-plus|d1adecb17d808e43bd6c20ef9417b3b41362af71|HEAD||
-https://github.com/cisagov/icsnpp-s7comm|5cf1e1ee397bef97ba1e1daa917703d447f6519f|HEAD||
+https://github.com/cisagov/icsnpp-s7comm|102a35c8f967f20640bd2427bb28a7c609b37493|HEAD||
 https://github.com/cisagov/icsnpp-synchrophasor|c43c5891cf9eed08dab313189eb6a3e4409e2e26|HEAD||
 https://github.com/corelight/callstranger-detector|3f9a68eb82d7f3dc4f10c227ee2ce63ce156338d|HEAD||
 https://github.com/corelight/CVE-2020-16898|6226bb9f922589faa403bf14b4bee2233575e4af|HEAD||
@@ -40,6 +40,7 @@ https://github.com/corelight/CVE-2022-26937|04e677d4fdf2c25879ad5c2a8779a03e559b
 https://github.com/corelight/CVE-2022-30216|d27620cade383bc7c9cf9e8f3dc0de72b03b6a67|HEAD||
 https://github.com/corelight/CVE-2022-3602|6ab0c2330d66b9668bade5df377fe63f25337178|v0.1.0||
 https://github.com/corelight/ExtendIntel|0707d5c7fd097dfaeffb38a0e1ea20b947feb7a3|v4.1||
+https://github.com/corelight/emudhra-weak-keys|33cc5d89c9167c6d34918c21a407f57440b0cf38|HEAD||
 https://github.com/corelight/hassh|8280c8d1c70b6b8a419e9733230740e395d744fb|v1.0.1||
 https://github.com/corelight/http-more-files-names|29f03ea6ef6bd86e68381c5b59a0007738e8e0b2|HEAD||
 https://github.com/corelight/pingback|2deb7f48b5c2eaf5d58fee70f6e658a6d0a5b100|v0.1.2||
