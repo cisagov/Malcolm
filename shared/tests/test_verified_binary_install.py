@@ -128,9 +128,9 @@ cp "$MOCK_ARTIFACT" "$outfile"
     def test_generic_versioned_artifact_name(self):
         digest = hashlib.sha256(b"verified").hexdigest()
         result = self.run_installer(
-            artifact="supercronic_0.2.50_linux_{arch}",
+            artifact="supercronic_0.2.51_linux_{arch}",
             url="https://example.invalid/supercronic-{arch}",
-            manifest=f"{digest}  supercronic_0.2.50_linux_amd64\n",
+            manifest=f"{digest}  supercronic_0.2.51_linux_amd64\n",
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
