@@ -1,6 +1,9 @@
 # <a name="UpgradePlan"></a>Upgrading Malcolm
 
 * [Upgrading Malcolm](#UpgradePlan)
+    - [Choose the upgrade procedure](#UpgradeChoose)
+    - [Before changing anything: preflight and backup checklist](#UpgradePreflight)
+    - [Recovery when an upgrade fails](#UpgradeRecovery)
     - [Scenario 1: Malcolm was installed from the ISO installer or a prepackaged or release tarball](#UpgradeISOEnv)
     - [Scenario 2: Malcolm was installed from a GitHub clone](#UpgradeGitEnv)
     - [Final Steps](#UpgradeFinalSteps)
@@ -8,6 +11,124 @@
 At this time there is not an "official" version upgrade procedure for Malcolm, as such procedures vary from platform to platform. However, the process is fairly simple and can be done by following the guidelines outlined in this document.
 
 The Malcolm project uses [calendar versioning](https://calver.org/) for its [releases]({{ site.github.repository_url }}/releases/latest). A careful reading of the release notes between the source and target version before upgrading Malcolm is highly recommended.
+
+
+## <a name="UpgradeChoose"></a>Choose the upgrade procedure
+
+**Do not start with the operating-system upgrade commands until you have
+identified how Malcolm was installed.** The two scenarios below change
+different things:
+
+| Existing installation | Procedure | What it changes |
+| --- | --- | --- |
+| Malcolm/Hedgehog installer ISO | [Scenario 1](#UpgradeISOEnv) | Host operating system (only when required), Malcolm application files, and container images |
+| Downloaded Malcolm release tarball or ZIP | [Scenario 1](#UpgradeISOEnv), skipping the ISO-only Debian steps on other Linux distributions | Malcolm application files and container images |
+| Git clone (including a locally modified clone) | [Scenario 2](#UpgradeGitEnv) | Checked-out Git revision, local configuration, and container images |
+
+Hedgehog Linux ISO installations follow the ISO path because both variants
+now share the same base distribution. For a Git clone used on a host with an
+independently managed operating system, use the Git scenario, not the Debian
+Bookworm-to-Trixie instructions. For a release archive installed on a
+non-ISO Linux distribution, run Scenario 1's stop step, **skip its ISO-specific
+steps 2 through 10**, and continue with the Malcolm application/image steps
+only after the backups below have been verified.
+
+If you are unsure which kind of installation you have, inspect the installation
+directory from your normal user account:
+
+~~~bash
+cd ~/Malcolm
+test -d .git && git remote -v && git status --short
+test -f .os-info && cat .os-info
+~~~
+
+The presence of a Git working tree is a useful clue, but it is **not** a
+substitute for knowing how the host was installed. The release archive and ISO
+paths can have different operating-system and deployment responsibilities.
+
+## <a name="UpgradePreflight"></a>Before changing anything: preflight and backup checklist
+
+The steps below are non-destructive; perform them **before** stopping services
+or following either upgrade scenario.
+
+1. Confirm the currently deployed Malcolm version and the target release.
+   Read **every intervening release note** and check whether the update also
+   requires a Debian major-version upgrade, container format changes, or a
+   migration of persistent data.
+2. Confirm a maintenance window and access to the local console or another
+   recovery channel. Do not rely on being able to SSH back after changing
+   the OS networking or package sources.
+3. Record the baseline, retaining command output in an administrator-controlled
+   location:
+
+   ~~~bash
+   cd ~/Malcolm
+   ./scripts/status
+   docker compose version
+   df -h .
+   test -d .git && git status --short && git describe --tags --always
+   ~~~
+
+   Run the last command only for a Git checkout. In a deployment that uses
+   Kubernetes rather than Docker Compose, use the Kubernetes [status commands](kubernetes.md#Running)
+   instead; the Docker commands do not describe a Kubernetes installation.
+4. **Back up both configuration and data.** The `rsync` application-directory
+   backups in the scenarios below intentionally **exclude** the large runtime
+   directories (OpenSearch indices, PCAPs, Zeek/Suricata logs, and extracted
+   files). Make a separate backup or snapshot of each dataset you need to
+   preserve, following your data retention and encryption requirements.
+5. Protect application-specific configuration and credentials: `config/`,
+   authentication material (including generated certificates and keys),
+   deployment secrets, local `.env` files, and any customized proxy, ingest,
+   and sensor settings. Store backups outside the directory that is about
+   to be replaced and restrict their access.
+6. **Verify the backups** before making changes: confirm the archives exist,
+   can be read, and the chosen OpenSearch backup/snapshot can be restored to a
+   separate test environment. A successful copy operation is not a recovery
+   test. Record the backup location, old version, and any image tags needed
+   for recovery.
+7. For an ISO host migration between major Debian versions, take a
+   hypervisor/bare-metal image or snapshot *in addition to* application/data
+   backups. Simply restoring the old Malcolm application directory does not
+   undo an operating-system upgrade.
+
+Do not run the destructive image-removal and archive-cleanup commands below
+until the source data, snapshots, and release artifacts are verified.
+
+## <a name="UpgradeRecovery"></a>Recovery when an upgrade fails
+
+Stop and diagnose at the **first** failed checkpoint. Avoid repeating
+the update blindly, resetting your data, or erasing the configuration in an
+attempt to make services start.
+
+| Failure checkpoint | Safer recovery path |
+| --- | --- |
+| OS upgrade or reboot fails | Restore the verified *host/VM snapshot*, or repair the OS from console/recovery media. Restoring only the Malcolm directory will not revert Debian packages or system services. |
+| New application files or Git checkout are incorrect | Keep Malcolm stopped, inspect the application backup and recorded previous Git revision, then restore the prior application and configuration together on a recovery/staging host. |
+| Git stash or merge conflict | See [Scenario 2: resolving merge conflicts](#UpgradeGitEnv). Preserve the stash until the intended configuration has been inspected; do not run `git stash clear`. |
+| OpenSearch fails after a version change | Preserve the existing indices and logs. Check the target version's supported data format and restore a **tested snapshot** to a compatible version when necessary. Never point an older OpenSearch version at data that may have been migrated by a newer version without confirming compatibility. |
+| Authentication or sensor communication fails | Check the preserved TLS certificates, trust roots, secrets, and environment configuration first. Regenerating identity material can break previously enrolled sensors. |
+
+For a simple Git checkout with **no persistent data migration**, the
+previous checkout can be identified using:
+
+~~~bash
+cd ~/Malcolm
+git reflog -n 10
+git stash list
+~~~
+
+This is an inspection step, **not** permission to reset branches or overwrite
+changes. Restoring a previous release should be a controlled operation using
+the previously recorded revision, matching container images, preserved
+configuration, and compatible data. Check that a rollback has not invalidated
+any migrations run by the newer release.
+
+After either a successful upgrade **or** a recovery, use the
+[Final Steps](#UpgradeFinalSteps) checks to confirm web login, dashboards,
+services, packet capture and data continuity before reopening ingestion to
+normal traffic.
+
 
 ## <a name="UpgradeISOEnv"></a> Scenario 1: Malcolm was installed from the [ISO installer](malcolm-hedgehog-e2e-iso-install.md#ISOInstallMalcolm) or a [prepackaged or release tarball](development.md#Packager)
 
