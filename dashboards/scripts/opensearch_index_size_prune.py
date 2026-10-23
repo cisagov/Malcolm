@@ -181,26 +181,16 @@ def get_version(args, session):
 
 def calculate_percent_limit(args, session, percent):
     """Fetch node allocation data and compute limit as percentage of disk.total."""
-    url = f'{args.opensearch_url}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json'
-    response = session.get(url)
+    url = f'{args.opensearch_url}/_cat/allocation{f"/{args.node}" if args.node else ""}'
+    response = session.get(url, params={'format': 'json', 'bytes': 'b'})
     response.raise_for_status()
-    allocation = response.json()
-
-    stats = [
-        {
-            k: (humanfriendly.parse_size(v) if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', v, flags=re.IGNORECASE) else v)
-            for k, v in entry.items()
-        }
-        for entry in allocation
-        if entry.get('node') != 'UNASSIGNED'
-    ]
+    stats = [entry for entry in response.json() if entry.get('node') != 'UNASSIGNED']
 
     logging.debug(json.dumps(stats))
-    if len(stats) != 1 or 'disk.total' not in stats[0]:
+    if len(stats) != 1 or not stats[0].get('disk.total'):
         raise RuntimeError("Unable to determine disk.total for node")
 
-    total_bytes = float(stats[0]['disk.total'])
-    return int(total_bytes * (percent / 100.0)) // 1_000_000
+    return int(stats[0]['disk.total']) * percent // 100 // 1_000_000
 
 
 def parse_limit_megabytes(args, session):
@@ -247,7 +237,11 @@ def get_indices_for_deletion(args, session, total_size_mb, limit_mb):
     for idx in args.index:
         r = session.get(
             f'{args.opensearch_url}/_cat/indices/{idx}',
-            params={'format': 'json', 'bytes': 'b', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
+            params={
+                'format': 'json',
+                'bytes': 'b',
+                'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size',
+            },
         )
         r.raise_for_status()
         os_info.update((index['i'], index) for index in r.json())
