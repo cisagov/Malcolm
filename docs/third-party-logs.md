@@ -14,6 +14,8 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 
 The types of third-party logs and metrics discussed in this document are *not* the same as the network session metadata provided by Arkime, Zeek, and Suricata. Please refer to the [Malcolm Contributor Guide](contributing-guide.md) for information on integrating a new network traffic analysis provider.
 
+For AWS VPC Flow Logs exported to S3, see the [cloud-log conversion and TLS forwarding guide](cloud-logs.md), which uses the existing Filebeat TCP ingestion service.
+
 <a name="ThirdPartyLogsTableOfContents"></a>
 
 * [Configuring Malcolm](#Malcolm)
@@ -24,6 +26,7 @@ The types of third-party logs and metrics discussed in this document are *not* t
 * [Beats](#Beats)
 * [Syslog](#Syslog)
     - [ISO-installed Desktop Environment Firewall](#SyslogISOFirewall)
+* [AWS VPC Flow Logs from Cloud Exports](cloud-logs.md)
 * [Uploading Third-Party Logs](#ThirdPartyUpload)
 * [Data Format and Visualization](#Data)
 * [Document Indices](#Indices)
