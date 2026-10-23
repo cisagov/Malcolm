@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import os
 import time
 from unittest.mock import Mock, patch
+from werkzeug.exceptions import BadRequest
 
 import pytest
 
@@ -64,9 +65,39 @@ def test_equivalent_query_times_produce_the_same_instants(host_timezone, style):
     assert bounds == {'gte': low, 'lte': high, 'format': 'epoch_millis'}
 
 
-def test_absent_and_invalid_inputs_keep_existing_none_behavior():
+def test_absent_and_empty_inputs_return_none():
     assert api.gettimes({}) == (None, None)
-    assert api.gettimes({'from': '', 'to': 'not-a-date-value'}) == (None, None)
+    assert api.gettimes({'from': '', 'to': ''}) == (None, None)
+    assert api.gettimes({'from': None, 'to': None}) == (None, None)
+
+
+@pytest.mark.parametrize(
+    'args',
+    [
+        {'from': 'not-a-date-value'},
+        {'to': 'not-a-date-value'},
+        {'from': '', 'to': 'not-a-date-value'},
+    ],
+)
+def test_unparseable_inputs_are_rejected(args):
+    with pytest.raises(BadRequest, match='not-a-date-value'):
+        api.gettimes(args)
+
+
+@pytest.mark.parametrize('method', ['get', 'post'])
+def test_unparseable_inputs_return_400_without_querying(method):
+    values = {'from': 'not-a-date-value', 'to': 'now'}
+    search = Mock()
+    with patch.object(api.databaseClient, 'search', new=search), patch.object(
+        api.databaseClient.indices, 'get_field_mapping', return_value={}
+    ):
+        with api.app.test_client() as client:
+            url = '/' + api.app.config['MALCOLM_API_PREFIX'].strip('/') + '/agg'
+            response = getattr(client, method)(
+                url, **({'query_string': values} if method == 'get' else {'json': values})
+            )
+    assert response.status_code == 400, response.data
+    search.assert_not_called()
 
 
 def test_custom_naive_defaults_are_utc(host_timezone):
