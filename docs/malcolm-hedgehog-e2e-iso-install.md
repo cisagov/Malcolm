@@ -617,6 +617,10 @@ Users will be prompted to do the following:
 
 As of Malcolm v25.12.0, the same base operating system is used for both Malcolm and Hedgehog Linux. All of the sections above under [Malcolm Installation and Configuration](#MalcolmInstallAndConfig) also apply to Hedgehog Linux.
 
+In addition to the yes/no questions asked at the end of the [ISO installation](#ISOInstallMalcolm), the Hedgehog Linux installer asks:
+
+* **Display the sensor status kiosk at startup?** *(if "No" is selected, neither the kiosk's backend service nor the full-screen browser that displays it will start at boot)*
+
 The following section outlines the Hedgehog-specific steps needed to establish communication between the Hedgehog Linux sensor and the Malcolm aggregator. See [**Configuring Hedgehog for Standalone Use**](hedgehog-standalone.md) for how to use Hedgehog Linux without a Malcolm aggregator.
 
 ### <a name="HedgehogMalcolmPorts"></a> TCP Ports Required for Malcolm ↔ Hedgehog Communication
