@@ -336,23 +336,67 @@ def LocalPathForContainerBindMount(
     return local_path
 
 
+_WILDCARD_HOST_IPS = ("", "0.0.0.0", "::")
+
+
+def _split_short_port(port_str):
+    """Split compose short-syntax ports into (host_ip, host_port, container_port_and_protocol).
+
+    Handles bracketed IPv6 host IPs ("[::]:443:443"). Returns None for entries with no host port.
+    """
+    host_ip = ""
+    rest = port_str.strip()
+    if rest.startswith("["):
+        end = rest.find("]:")
+        if end < 0:
+            return None
+        host_ip, rest = rest[1:end], rest[end + 2 :]
+        parts = rest.split(":")
+        return (host_ip, parts[0], parts[1]) if len(parts) == 2 else None
+    parts = rest.split(":")
+    if len(parts) == 3:
+        return tuple(parts)
+    if len(parts) == 2:
+        return ("", parts[0], parts[1])
+    return None
+
+
+def _port_sort_key(port):
+    first = port.split("/", 1)[0].split(":", 1)[0]
+    return (int(first) if first.isdigit() else float("inf"), port)
+
+
 def GetExposedPorts(docker_compose_contents, exclude_ports=None):
-    exclude_ports = exclude_ports or set()
+    exclude_ports = {str(p) for p in (exclude_ports or set())}
     host_ports = set()
 
-    for svc in docker_compose_contents.get("services", {}).values():
-        for port_str in svc.get("ports", []):
-            parts = port_str.split(":")
-            if len(parts) == 3:
-                ip, host_port, _ = parts
-                if ip in ("", "0.0.0.0") and host_port not in exclude_ports:
-                    host_ports.add(host_port)
-            elif len(parts) == 2:
-                host_port, _ = parts
-                if host_port not in exclude_ports:
-                    host_ports.add(host_port)
+    for svc in (docker_compose_contents.get("services") or {}).values():
+        for port_def in (svc or {}).get("ports") or []:
+            if isinstance(port_def, dict):
+                # long syntax
+                host_ip = str(port_def.get("host_ip") or "")
+                host_port = str(port_def.get("published") or "")
+                protocol = str(port_def.get("protocol") or "tcp").lower()
+            elif isinstance(port_def, (str, int)):
+                # short syntax; a bare container port (e.g., 443) gets a random host port, so nothing to open
+                if not (split := _split_short_port(str(port_def))):
+                    continue
+                host_ip, host_port, container_part = split
+                protocol = container_part.split("/", 1)[1].lower() if "/" in container_part else "tcp"
+            else:
+                continue
 
-    return sorted(host_ports, key=int)
+            if (host_ip not in _WILDCARD_HOST_IPS) or (not host_port) or (host_port in exclude_ports):
+                continue
+
+            if "-" in host_port:
+                # ranges use ufw's start:end/protocol syntax, which requires a protocol
+                start, _, end = host_port.partition("-")
+                host_ports.add(f"{start}:{end}/{protocol}")
+            else:
+                host_ports.add(host_port)
+
+    return sorted(host_ports, key=_port_sort_key)
 
 
 def BuildBoundPathReplacers(
@@ -440,16 +484,36 @@ def GetMemMegabytesFromJavaOptsLine(val):
 
 
 ##################################################################################################
+_K8S_QUANTITY_RE = re.compile(r'^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(?:[eE]([+-]?\d+))?(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E|m)?$')
+_K8S_QUANTITY_MULTIPLIERS = {
+    None: 1,
+    'm': 1e-3,
+    'k': 1000,
+    'M': 1000**2,
+    'G': 1000**3,
+    'T': 1000**4,
+    'P': 1000**5,
+    'E': 1000**6,
+    'Ki': 1024,
+    'Mi': 1024**2,
+    'Gi': 1024**3,
+    'Ti': 1024**4,
+    'Pi': 1024**5,
+    'Ei': 1024**6,
+}
+
+
 def ParseK8sMemoryToMib(val):
-    val = str(val).strip()
-    units = {'Ki': 1 / 1024, 'Mi': 1, 'Gi': 1024, 'Ti': 1024 * 1024}
+    """Convert a Kubernetes memory quantity (e.g., "512Mi", "2G", "1.5Gi", "1e9", "1073741824") to whole MiB.
 
-    for unit in units:
-        if val.endswith(unit):
-            value = float(val.replace(unit, ''))
-            return int(value * units[unit])
-
-    return 0
+    Returns 0 if the value can't be parsed.
+    """
+    match = _K8S_QUANTITY_RE.match(str(val).strip())
+    if not match:
+        return 0
+    number, exponent, suffix = match.groups()
+    num_bytes = float(number) * (10 ** int(exponent) if exponent else 1) * _K8S_QUANTITY_MULTIPLIERS[suffix]
+    return int(num_bytes / 1024**2)
 
 
 ##################################################################################################
@@ -1183,48 +1247,51 @@ def posInt(value):
 
 
 ###################################################################################################
+def _netbox_cidr_list_parses(cidr_list):
+    entries = [c.strip() for c in cidr_list.split(',') if c.strip()]
+    if not entries:
+        return False
+    for entry in entries:
+        try:
+            ipaddress.ip_network(entry[1:] if entry.startswith('!') else entry, strict=False)
+        except ValueError:
+            return False
+    return True
+
+
+def SplitNetBoxSubnetFilterSite(entry):
+    """Split one ';'-separated entry into (site_key, cidr_list).
+
+    The site key is optional, and a missing one becomes '*'. An entry that parses as a CIDR list in
+    its entirety (e.g., "!fc00::/7,fd12:3456:789a:1::/64") has no site key, even though IPv6 CIDRs
+    contain colons; otherwise the site key is whatever comes before the first colon.
+    """
+    entry = entry.strip()
+    if (':' not in entry) or _netbox_cidr_list_parses(entry):
+        return '*', entry
+    site_key, cidr_list = entry.split(':', 1)
+    return site_key.strip(), cidr_list
+
+
 def FormatNetBoxSubnetFilter(value):
     if (not value) or (not isinstance(value, str)) or (not value.strip()):
         return ""
 
     stripSpacePattern = re.compile(r'\s+')
     return ';'.join(
-        f"{k.strip()}:{stripSpacePattern.sub('', v)}"
-        for item in value.split(';')
-        for k, v in [item.split(':', 1) if ':' in item else ('*', item)]
+        f"{site_key}:{stripSpacePattern.sub('', cidr_list)}"
+        for site_key, cidr_list in (SplitNetBoxSubnetFilterSite(item) for item in value.split(';') if item.strip())
     )
 
 
-###################################################################################################
 def ValidNetBoxSubnetFilter(value):
     if not value.strip():
         return True
 
-    site_entries = [entry.strip() for entry in value.split(';') if entry.strip()]
-    cidr_pattern = re.compile(r'^!?([0-9a-fA-F:.]+/\d+)$')
-
-    for entry in site_entries:
-        if ':' in entry:
-            site_key, cidr_list = entry.split(':', 1)
-            site_key = site_key.strip()
-        else:
-            site_key = '*'
-            cidr_list = entry
-
-        if not site_key:  # site name can be '*', any string, or omitted (becomes '*')
+    for entry in (e.strip() for e in value.split(';') if e.strip()):
+        site_key, cidr_list = SplitNetBoxSubnetFilterSite(entry)
+        if (not site_key) or (not _netbox_cidr_list_parses(cidr_list)):
             return False
-
-        cidr_entries = [cidr.strip() for cidr in cidr_list.split(',') if cidr.strip()]
-        for cidr_entry in cidr_entries:
-            match = cidr_pattern.match(cidr_entry)
-            if not match:
-                return False
-
-            cidr = match.group(1)
-            try:
-                ipaddress.ip_network(cidr, strict=False)
-            except ValueError:
-                return False
 
     return True
 
@@ -1488,7 +1555,7 @@ def get_malcolm_version():
                         image = service_def.get("image")
                         if image and ":" in image:
                             image_tags.append(image.rsplit(":", 1)[1])
-                    result = get_highest_calver(image_tags)
+                    result = get_highest_calver(image_tags) or MALCOLM_VERSION
         except Exception as e:
             eprint(f'Error deciphering docker-compose.yml: {e}')
 
@@ -1893,9 +1960,7 @@ def _format_service_json(service, output_json, message_time_match, debug):
 
 def ProcessLogLine(line, debug=False):
     """Normalize and format a container log line, including timestamped JSON."""
-    output_str = CONTAINER_REPL_REGEX.sub(
-        r"\1\2", URL_USER_PASS_REGEX.sub(r"\1xxxxxxxx\2", line.decode().strip())
-    )
+    output_str = CONTAINER_REPL_REGEX.sub(r"\1\2", URL_USER_PASS_REGEX.sub(r"\1xxxxxxxx\2", line.decode().strip()))
     output_escaped = EscapeAnsi(output_str)
     if LOG_IGNORE_REGEX.match(output_escaped):
         return None
@@ -1915,7 +1980,6 @@ def ProcessLogLine(line, debug=False):
         return _format_service_json(service, output_json, message_time_match, debug)
 
     return output_str if coloramaImported else output_escaped
-
 
 
 ##################################################################################################

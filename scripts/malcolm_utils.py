@@ -26,6 +26,8 @@ import textwrap
 import types
 
 from base64 import b64encode, b64decode, binascii
+from collections.abc import Iterable, Mapping
+from collections import defaultdict, OrderedDict
 from dataclasses import dataclass
 from datetime import datetime
 from multiprocessing import RawValue
@@ -40,11 +42,6 @@ try:
 except ImportError:
     rapidjson = None
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
-from collections import defaultdict, OrderedDict
 
 # Dynamically create a module named "scripts" which points to this directory
 if "scripts" not in sys.modules:
@@ -97,7 +94,8 @@ class AtomicInt:
         return self.increment()
 
     def __exit__(self, type, value, traceback):
-        return self.decrement()
+        self.decrement()
+        return False
 
 
 ###################################################################################################
@@ -397,6 +395,8 @@ def deep_get(d, keys, default=None):
         return default
     if not keys:
         return d
+    if not isinstance(d, Mapping):
+        return default
     return deep_get(d.get(k[0]), k[1:], default)
 
 
@@ -564,7 +564,7 @@ def EVP_BytesToKey(key_length: int, iv_length: int, md, salt: bytes, data: bytes
         c.update(salt)
         md_buf = c.digest()
         for i in range(1, count):
-            md_buf = md(md_buf)
+            md_buf = md(md_buf).digest()
 
         md_buf2 = md_buf
 
@@ -909,7 +909,7 @@ def isfloat(value):
     try:
         float(value)
         return True
-    except ValueError:
+    except (TypeError, ValueError):
         return False
 
 
@@ -935,7 +935,7 @@ def isprivateip(value):
     try:
         if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
             for v in value:
-                result = result and ipaddress.ip_network(value).is_private
+                result = result and ipaddress.ip_network(v).is_private
                 if not result:
                     break
         else:

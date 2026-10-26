@@ -107,23 +107,25 @@ See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for m
 
 ### <a name="NetBoxAutoPopSubnets"></a> Subnets considered for autopopulation
 
-When [passive device autopopulation](#NetBoxPopPassive) is enabled, devices with addresses in private IP space will be autopopulated by default. You can control this behavior using the `NETBOX_AUTO_POPULATE_SUBNETS` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars). This variable accepts a comma-separated list of private CIDR subnets, with the following logic:
+When [passive device autopopulation](#NetBoxPopPassive) is enabled, devices with addresses in private IP space will be autopopulated by default. You can control this behavior using the `NETBOX_AUTO_POPULATE_SUBNETS` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars). This variable accepts a comma-separated list of IPv4 and IPv6 CIDR subnets, with the following logic:
 
-* If left blank, *all private* IPv4 and IPv6 address ranges (as defined in [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) and [RFC 4193](https://datatracker.ietf.org/doc/html/rfc4193)) will be autopopulated.
+* If left blank, *all private* IPv4 and IPv6 address ranges (as defined in [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) and [RFC 4193](https://datatracker.ietf.org/doc/html/rfc4193)) will be autopopulated. Public addresses are never autopopulated in this case.
+* Listing a CIDR, private or public, makes the addresses in it eligible for autopopulation.
 * Use an exclamation point (`!`) before a CIDR to explicitly *exclude* that subnet.
-* If only exclusions are listed, all private IPs are allowed *except* those excluded.
-* If both inclusions and exclusions are listed:
-    * Only addresses matching the allowed subnets will be considered.
-    * Among those, any matching excluded subnets will be rejected.
-* Network base and broadcast addresses (e.g., `.0` and `.255`) are not considered assignable and will be ignored.
+* If only exclusions are listed, all private IPs are allowed *except* those excluded. Public IPs remain ineligible.
+* If both inclusions and exclusions are listed, the entries are evaluated in order, and the last entry that matches a given address decides whether it is autopopulated. An address that doesn't match any entry is not autopopulated.
+* An address given without a prefix length (e.g., `10.0.10.5`) is treated as a single host (`/32` for IPv4, `/128` for IPv6).
+* For IPv4 subnets of `/30` or larger, the network base and broadcast addresses (e.g., `.0` and `.255` in a `/24`) are not considered assignable and will be ignored. This doesn't apply to `/31` or `/32` entries, where every address is usable.
 
-This variable is especially useful for excluding dynamic address ranges such as those used by DHCP, which should generally not trigger autopopulation in NetBox. Since these addresses can change frequently and aren't tied to specific devices, including them could result in inaccurate or noisy inventory data. By fine-tuning which private subnets are included or excluded, users can ensure that only meaningful, typically static assignments are autopopulated.
+This variable is especially useful for excluding dynamic address ranges such as those used by DHCP, which should generally not trigger autopopulation in NetBox. Since these addresses can change frequently and aren't tied to specific devices, including them could result in inaccurate or noisy inventory data. By fine-tuning which subnets are included or excluded, users can ensure that only meaningful, typically static assignments are autopopulated.
 
 #### Multiple NetBox Sites
 
-Users may wish to apply different CIDR subnet filters for autopopulation within different NetBox sites. To support this, the `NETBOX_AUTO_POPULATE_SUBNETS` environment variable can accept multiple site-specific entries, each specifying a NetBox site name or numeric site ID, followed by a colon (`:`), and a comma-separated list of subnet rules (just like the single-site case described above). Multiple site entries should be separated by semicolons (`;`).
+Users may wish to apply different CIDR subnet filters for autopopulation within different NetBox sites. To support this, the `NETBOX_AUTO_POPULATE_SUBNETS` environment variable can accept multiple site-specific entries, each specifying a NetBox site name or numeric site ID, followed by a colon (`:`), and a comma-separated list of subnet rules (just like the single-site case described above). Multiple site entries should be separated by semicolons (`;`). A rule keyed by site name also applies when Malcolm looks up that site by its numeric ID.
 
-If no matching site-specific rule is found, the default rule — defined using an asterisk (`*`) as the site key, or by omitting the site name or ID — will be used as a fallback if present. If no fallback is defined, then all private IPs are autopopulated by default.
+If no matching site-specific rule is found, the default rule will be used as a fallback if present. The default rule is defined using an asterisk (`*`) as the site key, or by omitting the site name or ID. If no fallback is defined, then all private IPs are autopopulated by default.
+
+An entry without a site key may begin with an IPv6 CIDR (e.g., `!fc00::/7,fd12:3456:789a:1::/64`). Malcolm recognizes that the colons in such an entry belong to the IPv6 addresses. However, a numeric site ID followed by an IPv6 CIDR can sometimes combine into what looks like a single IPv6 address (e.g., `2:2001:db8::/32`). To avoid this, use the site's name rather than its numeric ID when the site's rule list begins with an IPv6 CIDR.
 
 #### Examples
 
@@ -133,11 +135,11 @@ If no matching site-specific rule is found, the default rule — defined using a
     * Allow all private IPs *except* `172.16.0.0/12`
 * `!10.0.0.0/8,10.0.10.0/24`
     * Exclude `10.0.0.0/8` generally, but *allow* `10.0.10.0/24` as an override
-* `10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32`
-    * Allow all of `10.0.0.0/8` *except* `10.0.10.0/16`, *but still allow* `10.0.10.5`
+* `10.0.0.0/8,!10.0.0.0/16,10.0.10.5/32`
+    * Allow all of `10.0.0.0/8` *except* `10.0.0.0/16`, *but still allow* `10.0.10.5`
 * `!fc00::/7,fd12:3456:789a:1::/64`
     * Exclude all [ULA](https://en.wikipedia.org/wiki/Unique_local_address) IPv6 ranges, *except* a specific subnet
-* `site1:10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32;site2:!172.16.0.0/12;site3:!fc00::/7,fd12:3456:789a:1::/64;!192.168.0.0/16`
+* `site1:10.0.0.0/8,!10.0.0.0/16,10.0.10.5/32;site2:!172.16.0.0/12;site3:!fc00::/7,fd12:3456:789a:1::/64;!192.168.0.0/16`
     * Specify different autopopulation rules for different NetBox sites
 
 ### <a name="NetBoxPopPassiveOUIMatch"></a> Matching device manufacturers to OUIs
