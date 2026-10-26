@@ -90,17 +90,28 @@ Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.gith
 
 ## Creating pre-packaged installation files
 
-`scripts/malcolm_appliance_packager.sh` can be run to package up the configuration files (and, if necessary, the images), which can be copied to a network share or USB drive for distribution to non-networked machines. For example:
+`scripts/malcolm_appliance_packager.sh` can be run to package up the configuration files (and, if necessary, the images), which can be copied to a network share or USB drive for distribution to non-networked machines.
+
+After packaging the configuration files, the script asks whether to package container images. Answer `m` to save the images used by the `malcolm` [run profile](live-analysis.md#Profiles), `h` to save the images used by the `hedgehog` run profile, or `N` (the default) to skip saving images. The images are saved from the local container image cache, so the images for the chosen profile must already be present (built or pulled) on the system running the script.
+
+The images archive is named for the chosen profile and for the CPU architecture of the system running the script:
+
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - Malcolm profile, `amd64` (`x86_64`)
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.arm64.tar.xz` - Malcolm profile, `arm64` (`aarch64`)
+* `hedgehog_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - Hedgehog profile, `amd64` (`x86_64`)
+* `hedgehog_YYYYMMDD_HHNNSS_xxxxxxx_images.arm64.tar.xz` - Hedgehog profile, `arm64` (`aarch64`)
+
+The configuration tarball (`malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`) is the same for both profiles and all architectures. For example:
 
 ```
 $ ./scripts/malcolm_appliance_packager.sh 
 ...
 Packaged Malcolm to "/home/user/Downloads/malcolm_20251029_140727_d22a504f.tar.gz"
 
-Do you need to package container images also [y/N]? y
+Do you need to package container images also [m/h/N]? m
 This might take a few minutes...
 
-Packaged Malcolm images to "/home/user/Downloads/malcolm_20251029_140727_d22a504f_images.tar.xz"
+Packaged Malcolm container images to "/home/user/Downloads/malcolm_20251029_140727_d22a504f_images.tar.xz"
 
 To install and configure Malcolm, run install.py
 
@@ -138,7 +149,7 @@ If you have obtained pre-packaged installation files to install Malcolm on a non
 
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains minimal setup instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternatively, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
-* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - This tarball contains the images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - This tarball contains the images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`. Depending on the run profile and architecture it was packaged for, it may instead be named `hedgehog_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` (Hedgehog profile), and either name may include an `.arm64` suffix before `.tar.xz` for `arm64` systems (e.g., `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.arm64.tar.xz`). Make sure the archive matches the run profile and CPU architecture of the system where it will be loaded.
 * `install.py` - This install script can load the images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you (see [Running `install.py`](ubuntu-install-example.md#UIOpts)).
 
 Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. If you do not already have Docker and Docker Compose installed, the `install.py` script will help you install them.

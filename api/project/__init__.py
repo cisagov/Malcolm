@@ -256,6 +256,10 @@ databaseClient = DatabaseClass(
     **DatabaseInitArgs,
 )
 
+# both client libraries expose their exception hierarchy under .exceptions, so the
+#   handlers below work regardless of which backend was imported above
+DatabaseNotFoundError = DatabaseImport.exceptions.NotFoundError
+
 
 def doctype_is_host_logs(d):
     return any([str(d).lower().startswith(x) for x in ['host', 'beat', 'miscbeat']])
@@ -779,6 +783,45 @@ def debug_search_response(endpoint, response, **details):
             print(f"{endpoint} shard failures: {json.dumps(failures, default=str)}")
 
 
+def bucket_missing_value(fieldname, idx):
+    """Return the bucket 'missing' (empty bucket) label to use for fieldname in index idx.
+
+    Looks up the field's mapping type to pick a type-appropriate placeholder. The
+    mapping is only a cosmetic hint, so any failure to retrieve it falls back to the
+    default placeholder instead of failing the whole aggregation. The backend answers
+    404 when the index pattern matches nothing at all, which happens routinely before
+    the first documents have been indexed.
+    """
+    try:
+        mapping = databaseClient.indices.get_field_mapping(
+            fields=fieldname,
+            index=idx,
+        )
+    except DatabaseNotFoundError:
+        # index/pattern doesn't exist yet (e.g., Malcolm is still initializing)
+        if debugApi:
+            print(f"agg: no mapping for '{fieldname}', index '{idx}' does not exist yet")
+        return missing_field_map[None]
+    except Exception as e:
+        if debugApi:
+            print(f"agg: {type(e).__name__}: {str(e)} getting mapping for '{fieldname}' in '{idx}'")
+        return missing_field_map[None]
+
+    if (not mapping) or (not isinstance(mapping, dict)):
+        return missing_field_map[None]
+
+    return missing_field_map[
+        next(
+            iter(
+                malcolm_utils.dictsearch(
+                    mapping[next(iter(OrderedDict(sorted(mapping.items(), reverse=True))))], 'type'
+                )
+            ),
+            None,
+        )
+    ]
+
+
 def aggfields(fieldnames, args, urls=None):
     """Returns a bucket aggregation for a particular field over a given time range
 
@@ -818,40 +861,32 @@ def aggfields(fieldnames, args, urls=None):
     last_bucket = s.aggs
 
     for fname in malcolm_utils.get_iterable(fieldnames):
-        # Get the field mapping type for this field, and map it to a good default "missing"
-        #   (empty bucket) label for the bucket missing= parameter below
-        mapping = databaseClient.indices.get_field_mapping(
-            fields=fname,
-            index=idx,
-        )
-        missing_val = (
-            missing_field_map[
-                next(
-                    iter(
-                        malcolm_utils.dictsearch(
-                            mapping[next(iter(OrderedDict(sorted(mapping.items(), reverse=True))))], 'type'
-                        )
-                    ),
-                    None,
-                )
-            ]
-            if (mapping and isinstance(mapping, dict))
-            else missing_field_map[None]
-        )
-
-        # chain on the aggregation for the next field
+        # chain on the aggregation for the next field, labelling documents where the
+        #   field is absent with a type-appropriate "missing" value
         last_bucket = last_bucket.bucket(
             fname,
             "terms",
             field=fname,
             size=bucket_limit,
-            missing=missing_val,
+            missing=bucket_missing_value(fname, idx),
         )
 
-    response = s.execute().to_dict()
+    try:
+        response = s.execute().to_dict()
+    except DatabaseNotFoundError:
+        # index/pattern doesn't exist and the backend rejected the search outright
+        if debugApi:
+            print(f"agg: index '{idx}' does not exist yet, returning empty aggregation")
+        response = {}
+
+    # When the index pattern matches no indices the backend answers 200 with zero
+    #   shards and omits 'aggregations' entirely, so normalize the bucket container
+    #   here. Callers can then always iterate result[field]['buckets'].
+    top_bucket = response.get('aggregations', {}).get(top_bucket_name) or {}
+    top_bucket.setdefault('buckets', [])
 
     result_dict = {
-        top_bucket_name: response.get('aggregations', {}).get(top_bucket_name, {}),
+        top_bucket_name: top_bucket,
         'range': (start_time_ms // 1000, end_time_ms // 1000),
         'filter': filters,
         'fields': malcolm_utils.get_iterable(fieldnames),

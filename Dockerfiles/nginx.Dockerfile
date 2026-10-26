@@ -139,9 +139,38 @@ ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=$NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 # Update the revision and SHA-256 together when upgrading the LDAP module.
 ARG NGINX_AUTH_LDAP_REVISION=394261b38c77ef692d98e9a05d28843b5a355921
 
+# Lua modules for OpenID Connect (Keycloak auth), fetched from GitHub instead of
+# opm. Each is pinned to an immutable commit and verified by BuildKit against
+# the SHA-256 below; update the revision and SHA-256 together when upgrading.
+# Dependency graph:
+#   lua-resty-openidc -> lua-resty-http, lua-resty-session, lua-resty-jwt
+#   lua-resty-jwt     -> lua-resty-hmac
+# To get a revision and checksum for a tag:
+#   pin() { local repo="$1" ref="$2" sha; \
+#     sha="$(git ls-remote "https://github.com/${repo}" "refs/tags/${ref}" "refs/tags/${ref}^{}" | tail -n1 | cut -f1)"; \
+#     echo "${repo} ${ref} ${sha} $(curl -fsSL "https://codeload.github.com/${repo}/tar.gz/${sha}" | sha256sum | cut -d' ' -f1)"; }
+# pin ledgetech/lua-resty-http v0.17.1
+ARG LUA_RESTY_HTTP_REVISION=4ab4269cf442ba52507aa2c718f606054452fcad
+# bungle/lua-resty-session v3.10 (stay on 3.x, see "no session state" note in the RUN below)
+# https://github.com/zmartzone/lua-resty-openidc/issues/514#issuecomment-2123720551
+ARG LUA_RESTY_SESSION_REVISION=e6bf2630c90df7b3db35e859f0aa7e096af3e918
+# jkeys089/lua-resty-hmac 0.06-1 (required by lua-resty-jwt)
+ARG LUA_RESTY_HMAC_REVISION=23da759b69f208576526c8ac21b7c5ad66740321
+# cdbattags/lua-resty-jwt v0.3.2
+ARG LUA_RESTY_JWT_REVISION=fc0ddeb009e42740506a848552631efc3a24a19e
+# zmartzone/lua-resty-openidc v1.7.5
+ARG LUA_RESTY_OPENIDC_REVISION=85e30a13e08156ef3d782ecf7236758334234c6c
+
 # NGINX source
 COPY --from=getresty /usr/local/src/openresty/openresty.tar.gz /openresty.tar.gz
 ADD --checksum=sha256:925d2b368db64d4bee6b17bb5b1958c44d20a1b945ac194f1db4fdd551614743 https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_REVISION /nginx-auth-ldap.tar.gz
+
+# Lua module sources (see revisions above)
+ADD --checksum=sha256:89384290054663289026f7072d49a670ae5be04c8c916537a6df3834bb783a61 https://codeload.github.com/ledgetech/lua-resty-http/tar.gz/$LUA_RESTY_HTTP_REVISION /lua-src/lua-resty-http.tar.gz
+ADD --checksum=sha256:eaaf5bce91dfb1a870bd1eaa85700d37da965b2999baa232c9486b954d1ba8ea https://codeload.github.com/bungle/lua-resty-session/tar.gz/$LUA_RESTY_SESSION_REVISION /lua-src/lua-resty-session.tar.gz
+ADD --checksum=sha256:e15c6441d29f4289ed1ec205363c19f7cce989a95a70a650b6e4d0b2a2a57126 https://codeload.github.com/jkeys089/lua-resty-hmac/tar.gz/$LUA_RESTY_HMAC_REVISION /lua-src/lua-resty-hmac.tar.gz
+ADD --checksum=sha256:f71e8ed92998c87368f2d57937c4baad4c1fe7d4786bc89db799a83317cd6553 https://codeload.github.com/cdbattags/lua-resty-jwt/tar.gz/$LUA_RESTY_JWT_REVISION /lua-src/lua-resty-jwt.tar.gz
+ADD --checksum=sha256:a22dd62d400b645f2b6d15452001de4d62472016a20871835dcedc77735518f0 https://codeload.github.com/zmartzone/lua-resty-openidc/tar.gz/$LUA_RESTY_OPENIDC_REVISION /lua-src/lua-resty-openidc.tar.gz
 
 # component icons from original sources and stuff for offline landing page
 ADD --checksum=sha256:44e0882ef03a40fefc148bab511a9b6bbc394c1865500206f6532f66bf4f4482 https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
@@ -169,7 +198,7 @@ ADD --checksum=sha256:ad6157926c1622ba4e1d03d478f1541368524bfc46f51e42fe0d945f7e
 
 ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
 
-RUN set -x ; \
+RUN set -eux; \
     CONFIG="\
     --prefix=/usr/local/openresty \
     --sbin-path=/usr/sbin/nginx \
@@ -260,11 +289,9 @@ RUN set -x ; \
   make install ; \
   rm -rf /etc/nginx/html/ ; \
   mkdir -p /etc/nginx/conf.d/ /etc/nginx/templates/ /etc/nginx/auth/ /usr/share/nginx/html/ ; \
-  ln -s /usr/local/openresty/bin/openresty /usr/sbin/nginx ; \
   ln -s ../../usr/lib/nginx/modules /etc/nginx/modules ; \
   strip /usr/sbin/nginx* ; \
   strip /usr/lib/nginx/modules/*.so ; \
-  rm -rf /usr/src/openresty-$OPENRESTY_VERSION ; \
   \
   # Bring in gettext so we can get `envsubst`, then throw
   # the rest away. To do this, we need to install `gettext`
@@ -295,18 +322,23 @@ RUN set -x ; \
     tzdata \
     wget; \
   update-ca-certificates; \
-  # trying to solve "no session state" error:
-  # https://github.com/zmartzone/lua-resty-openidc/issues/514#issuecomment-2123720551
-  /usr/local/openresty/bin/opm install ledgetech/lua-resty-http ; \
-  /usr/local/openresty/bin/opm install bungle/lua-resty-session=3.10 ; \
-  /usr/local/openresty/bin/opm install cdbattags/lua-resty-jwt ; \
-  /usr/local/openresty/bin/opm install zmartzone/lua-resty-openidc ; \
+  # install OpenID Connect Lua modules from the pinned GitHub tarballs into the
+  # same site/lualib tree opm would have used.
+  mkdir -p /usr/local/openresty/site/lualib ; \
+  for t in /lua-src/*.tar.gz; do \
+    d="$(mktemp -d)" ; \
+    tar -xzf "$t" -C "$d" --strip-components=1 ; \
+    cp -rv "$d"/lib/* /usr/local/openresty/site/lualib/ ; \
+    rm -rf "$d" ; \
+  done ; \
+  # fail the build here if any module or transitive dependency is missing
+  /usr/local/openresty/bin/resty -e 'require "resty.http"; require "resty.session"; require "resty.hmac"; require "resty.jwt"; require "resty.openidc"' ; \
   cd /usr/local/src/ ; \
     pip3 install --break-system-packages --no-compile --no-cache-dir -r ./requirements.txt ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /usr/local/src/* /var/tmp/* /var/cache/apk/* /openresty.tar.gz /nginx-auth-ldap.tar.gz ; \
+  rm -rf /usr/src/* /usr/local/src/* /var/tmp/* /var/cache/apk/* /openresty.tar.gz /nginx-auth-ldap.tar.gz /lua-src ; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf ; \
   find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; ; \
   find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; ; \

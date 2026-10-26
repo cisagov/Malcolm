@@ -59,6 +59,15 @@ $ ./malcolm-iso/build_via_vagrant.sh -f -i malcolm -d malcolm_YYYYMMDD_HHNNSS_xx
 …
 ```
 
+The images tarball must match the ISO flavor being built. For the Hedgehog Linux flavor, answer `h` at the packaging script's image prompt, then pass the resulting `hedgehog_`-prefixed tarball:
+
+```
+$ ./malcolm-iso/build_via_vagrant.sh -f -i hedgehog -d hedgehog_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz
+…
+```
+
+Images tarballs packaged on an `arm64` system carry an `.arm64` suffix (e.g., `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.arm64.tar.xz`). Use a tarball whose architecture matches the systems the ISO will be installed on.
+
 A system installed from the resulting ISO will load the Malcolm images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
 
 Alternatively, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm images before building the ISO. The resulting ISO file is wrapped in an image that provides an HTTP server from which the ISO may be downloaded.  See [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners) for more information.
