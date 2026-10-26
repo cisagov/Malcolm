@@ -142,24 +142,73 @@ ARG NGINX_AUTH_LDAP_REVISION=394261b38c77ef692d98e9a05d28843b5a355921
 # Lua modules for OpenID Connect (Keycloak auth), fetched from GitHub instead of
 # opm. Each is pinned to an immutable commit and verified by BuildKit against
 # the SHA-256 below; update the revision and SHA-256 together when upgrading.
-# Dependency graph:
-#   lua-resty-openidc -> lua-resty-http, lua-resty-session, lua-resty-jwt
-#   lua-resty-jwt     -> lua-resty-hmac
+# Dependency graph, verified against the rockspecs at the pinned revisions:
+#   lua-resty-openidc 1.9.3  -> lua-resty-http    >= 0.08
+#                            -> lua-resty-session == 4.2.0-1   (equality, not a floor)
+#                            -> lua-resty-jwt     >= 0.2.0
+#                            -> lua-resty-openssl >= 1.8.0
+#   lua-resty-session 4.2.0  -> lua-ffi-zlib      >= 0.5
+#                            -> lua-resty-openssl >= 1.5.0
+#   lua-resty-jwt     0.3.2  -> lua-resty-openssl >= 0.6.8
+#   lua-resty-openssl 1.8.0  -> (none)
+#   lua-resty-http    0.17.1 -> (none)
+#   lua-resty-hmac    0.06-1 -> (none)
+# lua-resty-openssl 1.8.0 therefore satisfies all three openssl floors, the
+#   >= 1.8.0 from openidc being the binding one.
+# NOTE: lua-resty-jwt no longer declares lua-resty-hmac; it vendors its own copy
+#   at third-party/lua-resty-hmac/lib/resty/hmac.lua, which the lib/-only copy
+#   loop below does NOT install. The separate jkeys089 pin is what actually
+#   provides resty.hmac. If jwt ever moves that file under lib/, two tarballs
+#   would write the same path and glob order would decide the winner.
+# Re-read every rockspec on each openidc bump: nothing in this build resolves or
+#   validates these constraints at image build time.
 # To get a revision and checksum for a tag:
 #   pin() { local repo="$1" ref="$2" sha; \
 #     sha="$(git ls-remote "https://github.com/${repo}" "refs/tags/${ref}" "refs/tags/${ref}^{}" | tail -n1 | cut -f1)"; \
 #     echo "${repo} ${ref} ${sha} $(curl -fsSL "https://codeload.github.com/${repo}/tar.gz/${sha}" | sha256sum | cut -d' ' -f1)"; }
 # pin ledgetech/lua-resty-http v0.17.1
+# Satisfies openidc 1.9.3's ">= 0.08" with room to spare, so deliberately NOT
+#   bumped here. Unlike the other Lua modules, Malcolm calls this one directly
+#   (nginx_auth_keycloak_basic.conf and nginx_auth_helpers.lua use
+#   http.new/request_uri/set_keepalive), so bump it on its own commit and re-test
+#   the NGINX_KEYCLOAK_BASIC_AUTH service-account path when you do.
 ARG LUA_RESTY_HTTP_REVISION=4ab4269cf442ba52507aa2c718f606054452fcad
-# bungle/lua-resty-session v3.10 (stay on 3.x, see "no session state" note in the RUN below)
-# https://github.com/zmartzone/lua-resty-openidc/issues/514#issuecomment-2123720551
-ARG LUA_RESTY_SESSION_REVISION=e6bf2630c90df7b3db35e859f0aa7e096af3e918
-# jkeys089/lua-resty-hmac 0.06-1 (required by lua-resty-jwt)
+# pin bungle/lua-resty-session v4.2.0
+# openidc 1.9.3's rockspec requires EXACTLY lua-resty-session 4.2.0-1 ("=="), so
+#   this is not independently upgradable -- it moves only when openidc moves.
+#   openidc 1.7.x required session 3.x, so the two MUST be bumped together.
+# The 4.x session_opts schema is flat (cookie_secure/cookie_same_site/...) rather
+#   than 3.x's nested cookie={...} table, and 4.x silently ignores unknown keys,
+#   so a stale 3.x-shaped table yields a session cookie with no Secure flag and
+#   no error. See nginx/nginx_auth_keycloak.conf.
+#   Background: https://github.com/zmartzone/lua-resty-openidc/issues/514
+ARG LUA_RESTY_SESSION_REVISION=9c7e43735b62819b69927b3104c9e1f47696c30a
+# pin fffonion/lua-resty-openssl 1.8.0
+# Required directly by openidc 1.9.3 (>= 1.8.0), by session 4.2.0 (>= 1.5.0) and
+#   by jwt (>= 0.6.8). 1.8.0 is the tightest floor, so this sits exactly on it.
+#   Declares no dependencies of its own, but it is a LuaJIT FFI binding to
+#   libssl/libcrypto: check its README compatibility matrix against the OpenSSL
+#   the OpenResty build above links, since the rockspec constrains nothing there.
+ARG LUA_RESTY_OPENSSL_REVISION=16faff4c825eab8d5a78cfabe07adec69d9e2fa5
+# pin hamishforbes/lua-ffi-zlib v0.6
+# Required by lua-resty-session 4.2.0 (>= 0.5) for session payload compression.
+#   Transitive via session, so openidc's own rockspec never names it. Easy to
+#   miss, and if session loads it lazily a missing pin would surface on the first
+#   login rather than at build time -- hence the explicit require in the smoke
+#   test below.
+ARG LUA_FFI_ZLIB_REVISION=61e95cb434e4047c8bc65a180c293a05bf754416
+# jkeys089/lua-resty-hmac 0.06-1 (rockspec package name is lua-resty-hmac-ffi).
+#   No longer declared by lua-resty-jwt, but still the only installed source of
+#   resty.hmac, which jwt lists in its build.modules. Verify that
+#   lib/resty/jwt.lua at LUA_RESTY_JWT_REVISION really does require it before
+#   considering this pin removable.
 ARG LUA_RESTY_HMAC_REVISION=23da759b69f208576526c8ac21b7c5ad66740321
-# cdbattags/lua-resty-jwt v0.3.2
+# cdbattags/lua-resty-jwt v0.3.2 (satisfies openidc 1.9.3's ">= 0.2.0").
+#   NB: this repo only carries a dev-0 rockspec (source = "file://."), so its
+#   declared dependencies are indicative rather than release-accurate.
 ARG LUA_RESTY_JWT_REVISION=fc0ddeb009e42740506a848552631efc3a24a19e
-# zmartzone/lua-resty-openidc v1.7.5
-ARG LUA_RESTY_OPENIDC_REVISION=85e30a13e08156ef3d782ecf7236758334234c6c
+# pin zmartzone/lua-resty-openidc v1.9.3
+ARG LUA_RESTY_OPENIDC_REVISION=a4755bffdfe7b122123c972ce5820529c3e83fdc
 
 # NGINX source
 COPY --from=getresty /usr/local/src/openresty/openresty.tar.gz /openresty.tar.gz
@@ -167,10 +216,12 @@ ADD --checksum=sha256:925d2b368db64d4bee6b17bb5b1958c44d20a1b945ac194f1db4fdd551
 
 # Lua module sources (see revisions above)
 ADD --checksum=sha256:89384290054663289026f7072d49a670ae5be04c8c916537a6df3834bb783a61 https://codeload.github.com/ledgetech/lua-resty-http/tar.gz/$LUA_RESTY_HTTP_REVISION /lua-src/lua-resty-http.tar.gz
-ADD --checksum=sha256:eaaf5bce91dfb1a870bd1eaa85700d37da965b2999baa232c9486b954d1ba8ea https://codeload.github.com/bungle/lua-resty-session/tar.gz/$LUA_RESTY_SESSION_REVISION /lua-src/lua-resty-session.tar.gz
+ADD --checksum=sha256:97f9536a3ef61a3e4a007294d5f2f9bbc566ea715689b5a5ebc2c07703516d97 https://codeload.github.com/bungle/lua-resty-session/tar.gz/$LUA_RESTY_SESSION_REVISION /lua-src/lua-resty-session.tar.gz
+ADD --checksum=sha256:74c470302ca13cb7d6940cf986c2212b9ec524d4f10c5391c32a262bc3a14290 https://codeload.github.com/fffonion/lua-resty-openssl/tar.gz/$LUA_RESTY_OPENSSL_REVISION /lua-src/lua-resty-openssl.tar.gz
+ADD --checksum=sha256:664c5b40d4fefce3c4566f209377d23c9e42e1ac342df314944241aa8e3000bb https://codeload.github.com/hamishforbes/lua-ffi-zlib/tar.gz/$LUA_FFI_ZLIB_REVISION /lua-src/lua-ffi-zlib.tar.gz
 ADD --checksum=sha256:e15c6441d29f4289ed1ec205363c19f7cce989a95a70a650b6e4d0b2a2a57126 https://codeload.github.com/jkeys089/lua-resty-hmac/tar.gz/$LUA_RESTY_HMAC_REVISION /lua-src/lua-resty-hmac.tar.gz
 ADD --checksum=sha256:f71e8ed92998c87368f2d57937c4baad4c1fe7d4786bc89db799a83317cd6553 https://codeload.github.com/cdbattags/lua-resty-jwt/tar.gz/$LUA_RESTY_JWT_REVISION /lua-src/lua-resty-jwt.tar.gz
-ADD --checksum=sha256:a22dd62d400b645f2b6d15452001de4d62472016a20871835dcedc77735518f0 https://codeload.github.com/zmartzone/lua-resty-openidc/tar.gz/$LUA_RESTY_OPENIDC_REVISION /lua-src/lua-resty-openidc.tar.gz
+ADD --checksum=sha256:f6c1f81bfcf8988b6f9e0547d864c6abb06a95afd780dae08d0b9cfd26fbd0ab https://codeload.github.com/zmartzone/lua-resty-openidc/tar.gz/$LUA_RESTY_OPENIDC_REVISION /lua-src/lua-resty-openidc.tar.gz
 
 # component icons from original sources and stuff for offline landing page
 ADD --checksum=sha256:44e0882ef03a40fefc148bab511a9b6bbc394c1865500206f6532f66bf4f4482 https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
@@ -325,14 +376,27 @@ RUN set -eux; \
   # install OpenID Connect Lua modules from the pinned GitHub tarballs into the
   # same site/lualib tree opm would have used.
   mkdir -p /usr/local/openresty/site/lualib ; \
+  # Most of these tarballs put their modules under lib/, but lua-ffi-zlib
+  # publishes ffi-zlib.lua at the repo root, so a lib/-only copy would silently
+  # install nothing for it. Handle both layouts.
   for t in /lua-src/*.tar.gz; do \
     d="$(mktemp -d)" ; \
     tar -xzf "$t" -C "$d" --strip-components=1 ; \
-    cp -rv "$d"/lib/* /usr/local/openresty/site/lualib/ ; \
+    if [ -d "$d"/lib ]; then \
+      cp -rv "$d"/lib/* /usr/local/openresty/site/lualib/ ; \
+    else \
+      find "$d" -maxdepth 1 -name '*.lua' -exec cp -v {} /usr/local/openresty/site/lualib/ \; ; \
+    fi ; \
     rm -rf "$d" ; \
   done ; \
-  # fail the build here if any module or transitive dependency is missing
-  /usr/local/openresty/bin/resty -e 'require "resty.http"; require "resty.session"; require "resty.hmac"; require "resty.jwt"; require "resty.openidc"' ; \
+  # Fail the build here if any module or transitive dependency is missing.
+  #   Each entry is load-bearing:
+  #     resty.openssl.version  - FFI entry point that actually dlopens libcrypto,
+  #                              so an ABI mismatch fails here, not on first login
+  #     ffi-zlib               - transitive via session 4.x; session may require it
+  #                              lazily, so assert it eagerly
+  #     resty.session.utils    - what drags lua-resty-openssl in under session 4.x
+  /usr/local/openresty/bin/resty -e 'require "resty.http"; require "resty.openssl.version"; require "ffi-zlib"; require "resty.session"; require "resty.session.utils"; require "resty.hmac"; require "resty.jwt"; require "resty.openidc"' ; \
   cd /usr/local/src/ ; \
     pip3 install --break-system-packages --no-compile --no-cache-dir -r ./requirements.txt ; \
   apk del .nginx-build-deps ; \
