@@ -22,9 +22,19 @@ global c1222_resolve_service = (getenv("ZEEK_C1222_RESOLVE_SERVICE") == true_reg
 global c1222_trace_service = (getenv("ZEEK_C1222_TRACE_SERVICE") == true_regex) ? T : F;
 global omron_fins_detailed = (getenv("ZEEK_OMRON_FINS_DETAILED") == true_regex) ? T : F;
 global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_regex) ? T : F;
-global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
-global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
-global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
+global bacnet_ports_str = getenv("ZEEK_PORTS_BACNET");
+global c1222_ports_str = getenv("ZEEK_PORTS_C1222");
+global enip_ports_str = getenv("ZEEK_PORTS_ENIP");
+global ge_srtp_ports_str = getenv("ZEEK_PORTS_GE_SRTP");
+global genisys_ports_str = getenv("ZEEK_PORTS_GENISYS");
+global hart_ip_ports_str = getenv("ZEEK_PORTS_HART_IP");
+global modbus_ports_str = getenv("ZEEK_PORTS_MODBUS");
+global omron_fins_ports_str = getenv("ZEEK_PORTS_OMRON_FINS");
+global opcua_binary_ports_str = getenv("ZEEK_PORTS_OPCUA_BINARY");
+global profinet_io_cm_ports_str = getenv("ZEEK_PORTS_PROFINET_IO_CM");
+global roc_plus_ports_str = getenv("ZEEK_PORTS_ROC_PLUS");
+global s7comm_ports_str = getenv("ZEEK_PORTS_S7COMM");
+global synchrophasor_ports_str = getenv("ZEEK_PORTS_SYNCHROPHASOR");
 global ja4_ssh_packet_count = (getenv("ZEEK_JA4SSH_PACKET_COUNT") == "") ? 200 : to_count(getenv("ZEEK_JA4SSH_PACKET_COUNT"));
 global local_nets_str = getenv("ZEEK_LOCAL_NETS");
 global long_conn_durations = getenv("ZEEK_LONG_CONN_DURATIONS");
@@ -339,45 +349,48 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
   }
 
-  # register additional ports for Analyzers
-  if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != "")) {
-    local synchrophasor_ports = split_string(synchrophasor_ports_str, /,/);
-    if (|synchrophasor_ports| > 0) {
-      local synch_ports_tcp: set[port] = {};
-      local synch_ports_udp: set[port] = {};
-      for (synch_port_idx in synchrophasor_ports) {
-        local synch_port = to_port(synchrophasor_ports[synch_port_idx]);
-        local synch_prot = get_port_transport_proto(synch_port);
-        if (synch_prot == tcp) {
-          add synch_ports_tcp[synch_port];
-        } else if (synch_prot == udp) {
-          add synch_ports_udp[synch_port];
+  if ((!disable_ics_all) && (!disable_ics_bacnet) && (bacnet_ports_str != "")) {
+    local bacnet_ports = split_string(bacnet_ports_str, /,/);
+    if (|bacnet_ports| > 0) {
+      local bac_ports_tcp: set[port] = {};
+      local bac_ports_udp: set[port] = {};
+      for (bac_port_idx in bacnet_ports) {
+        local bac_port = to_port(bacnet_ports[bac_port_idx]);
+        local bac_prot = get_port_transport_proto(bac_port);
+        if (bac_prot == udp) {
+          add bac_ports_udp[bac_port];
         }
       }
-      if (|synch_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_TCP, synch_ports_tcp);
-      }
-      if (|synch_ports_udp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_UDP, synch_ports_udp);
+      # BACnet::bacnet_ports is a set of UDP ports, so we only redefine it if there are UDP ports specified.
+      if (|bac_ports_udp| > 0) {
+        redef Bacnet::bacnet_ports = bac_ports_udp;
       }
     }
   }
-  if ((!disable_ics_all) && (!disable_ics_genisys) && (genisys_ports_str != "")) {
-    local genisys_ports = split_string(genisys_ports_str, /,/);
-    if (|genisys_ports| > 0) {
-      local gen_ports_tcp: set[port] = {};
-      for (gen_port_idx in genisys_ports) {
-        local gen_port = to_port(genisys_ports[gen_port_idx]);
-        local gen_prot = get_port_transport_proto(gen_port);
-        if (gen_prot == tcp) {
-          add gen_ports_tcp[gen_port];
+
+  if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_ports_str != "")) {
+    local c1222_ports = split_string(c1222_ports_str, /,/);
+    if (|c1222_ports| > 0) {
+      local c1222_ports_tcp: set[port] = {};
+      local c1222_ports_udp: set[port] = {};
+      for (c1222_port_idx in c1222_ports) {
+        local c1222_port = to_port(c1222_ports[c1222_port_idx]);
+        local c1222_prot = get_port_transport_proto(c1222_port);
+        if (c1222_prot == tcp) {
+          add c1222_ports_tcp[c1222_port];
+        } else if (c1222_prot == udp) {
+          add c1222_ports_udp[c1222_port];
         }
       }
-      if (|gen_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_GENISYS_TCP, gen_ports_tcp);
+      if (|c1222_ports_tcp| > 0) {
+        redef C1222::c1222_ports_tcp = c1222_ports_tcp;
+      }
+      if (|c1222_ports_udp| > 0) {
+        redef C1222::c1222_ports_udp = c1222_ports_udp;
       }
     }
   }
+
   if ((!disable_ics_all) && (!disable_ics_enip) && (enip_ports_str != "")) {
     local enip_ports = split_string(enip_ports_str, /,/);
     if (|enip_ports| > 0) {
@@ -397,6 +410,202 @@ event zeek_init() &priority=-5 {
       }
       if (|enip_ports_udp| > 0) {
         Analyzer::register_for_ports(Analyzer::ANALYZER_ENIP_UDP, enip_ports_udp);
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_ge_srtp) && (ge_srtp_ports_str != "")) {
+    local ge_srtp_ports = split_string(ge_srtp_ports_str, /,/);
+    if (|ge_srtp_ports| > 0) {
+      local ge_ports_tcp: set[port] = {};
+      for (ge_port_idx in ge_srtp_ports) {
+        local ge_port = to_port(ge_srtp_ports[ge_port_idx]);
+        local ge_prot = get_port_transport_proto(ge_port);
+        if (ge_prot == tcp) {
+          add ge_ports_tcp[ge_port];
+        }
+      }
+      if (|ge_ports_tcp| > 0) {
+        redef GE_SRTP::tcp_ports = ge_ports_tcp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_genisys) && (genisys_ports_str != "")) {
+    local genisys_ports = split_string(genisys_ports_str, /,/);
+    if (|genisys_ports| > 0) {
+      local gen_ports_tcp: set[port] = {};
+      for (gen_port_idx in genisys_ports) {
+        local gen_port = to_port(genisys_ports[gen_port_idx]);
+        local gen_prot = get_port_transport_proto(gen_port);
+        if (gen_prot == tcp) {
+          add gen_ports_tcp[gen_port];
+        }
+      }
+      if (|gen_ports_tcp| > 0) {
+        redef GENISYS::genisys_ports_tcp = gen_ports_tcp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_hart_ip) && (hart_ip_ports_str != "")) {
+    local hart_ip_ports = split_string(hart_ip_ports_str, /,/);
+    if (|hart_ip_ports| > 0) {
+      local hart_ports_tcp: set[port] = {};
+      local hart_ports_udp: set[port] = {};
+      for (hart_port_idx in hart_ip_ports) {
+        local hart_port = to_port(hart_ip_ports[hart_port_idx]);
+        local hart_prot = get_port_transport_proto(hart_port);
+        if (hart_prot == tcp) {
+          add hart_ports_tcp[hart_port];
+        } else if (hart_prot == udp) {
+          add hart_ports_udp[hart_port];
+        }
+      }
+      if (|hart_ports_tcp| > 0) {
+        redef HART_IP::tcp_ports = hart_ports_tcp;
+      }
+      if (|hart_ports_udp| > 0) {
+        redef HART_IP::udp_ports = hart_ports_udp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_modbus) && (modbus_ports_str != "")) {
+    local modbus_ports = split_string(modbus_ports_str, /,/);
+    if (|modbus_ports| > 0) {
+      local mod_ports_tcp: set[port] = {};
+      for (mod_port_idx in modbus_ports) {
+        local mod_port = to_port(modbus_ports[mod_port_idx]);
+        local mod_prot = get_port_transport_proto(mod_port);
+        if (mod_prot == tcp) {
+          add mod_ports_tcp[mod_port];
+        }
+      }
+      # Modbus_Extended::additional_tcp_ports is a set of TCP ports, so we only redefine it if there are TCP ports specified.
+      if (|mod_ports_tcp| > 0) {
+        redef Modbus_Extended::additional_tcp_ports = mod_ports_tcp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_omron_fins) && (omron_fins_ports_str != "")) {
+    local omron_fins_ports = split_string(omron_fins_ports_str, /,/);
+    if (|omron_fins_ports| > 0) {
+      local fins_ports_tcp: set[port] = {};
+      local fins_ports_udp: set[port] = {};
+      for (fins_port_idx in omron_fins_ports) {
+        local fins_port = to_port(omron_fins_ports[fins_port_idx]);
+        local fins_prot = get_port_transport_proto(fins_port);
+        if (fins_prot == tcp) {
+          add fins_ports_tcp[fins_port];
+        } else if (fins_prot == udp) {
+          add fins_ports_udp[fins_port];
+        }
+      }
+      if (|fins_ports_tcp| > 0) {
+        redef OMRON_FINS::omron_fins_ports_tcp = fins_ports_tcp;
+      }
+      if (|fins_ports_udp| > 0) {
+        redef OMRON_FINS::omron_fins_ports_udp = fins_ports_udp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_opcua_binary) && (opcua_binary_ports_str != "")) {
+    local opcua_binary_ports = split_string(opcua_binary_ports_str, /,/);
+    if (|opcua_binary_ports| > 0) {
+      local opcua_ports_tcp: set[port] = {};
+      for (opcua_port_idx in opcua_binary_ports) {    
+        local opcua_port = to_port(opcua_binary_ports[opcua_port_idx]);
+        local opcua_prot = get_port_transport_proto(opcua_port);
+        if (opcua_prot == tcp) {
+          add opcua_ports_tcp[opcua_port];
+        }
+      }
+      if (|opcua_ports_tcp| > 0) {
+        redef ICSNPP_OPCUA_Binary::ports = opcua_ports_tcp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_profinet_io_cm) && (profinet_io_cm_ports_str != "")) {
+    local profinet_io_cm_ports = split_string(profinet_io_cm_ports_str, /,/);
+    if (|profinet_io_cm_ports| > 0) {
+      local profinet_ports_tcp: set[port] = {};
+      for (profinet_port_idx in profinet_io_cm_ports) {
+        local profinet_port = to_port(profinet_io_cm_ports[profinet_port_idx]);
+        local profinet_prot = get_port_transport_proto(profinet_port);
+        if (profinet_prot == udp) {
+          add profinet_ports_udp[profinet_port];
+        }
+      }
+      if (|profinet_ports_udp| > 0) {
+        redef PROFINET_IO_CM::udp_ports = profinet_ports_udp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_roc_plus) && (roc_plus_ports_str != "")) {
+    local roc_plus_ports = split_string(roc_plus_ports_str, /,/);
+    if (|roc_plus_ports| > 0) {
+      local roc_ports_tcp: set[port] = {};
+      local roc_ports_udp: set[port] = {};
+      for (roc_port_idx in roc_plus_ports) {
+        local roc_port = to_port(roc_plus_ports[roc_port_idx]);
+        local roc_prot = get_port_transport_proto(roc_port);
+        if (roc_prot == tcp) {
+          add roc_ports_tcp[roc_port];
+        } else if (roc_prot == udp) {
+          add roc_ports_udp[roc_port];
+        }
+      }
+      if (|roc_ports_tcp| > 0) {
+        redef ROC_PLUS::roc_plus_ports_tcp = roc_ports_tcp;
+      }
+      if (|roc_ports_udp| > 0) {
+        redef ROC_PLUS::roc_plus_ports_udp = roc_ports_udp;
+      }
+    }
+  }
+
+  if ((!disable_ics_all) && (!disable_ics_s7comm) && (s7comm_ports_str != "")) {
+    local s7comm_ports = split_string(s7comm_ports_str, /,/);
+    if (|s7comm_ports| > 0) {
+      local s7_ports_tcp: set[port] = {};
+      for (s7_port_idx in s7comm_ports) {
+        local s7_port = to_port(s7comm_ports[s7_port_idx]);
+        local s7_prot = get_port_transport_proto(s7_port);
+        if (s7_prot == tcp) {
+          add s7_ports_tcp[s7_port];
+        }
+      }
+      if (|s7_ports_tcp| > 0) {
+        redef S7COMM::ports = s7_ports_tcp;
+      }
+    }
+  }
+  
+  # register additional ports for Analyzers
+  if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != "")) {
+    local synchrophasor_ports = split_string(synchrophasor_ports_str, /,/);
+    if (|synchrophasor_ports| > 0) {
+      local synch_ports_tcp: set[port] = {};
+      local synch_ports_udp: set[port] = {};
+      for (synch_port_idx in synchrophasor_ports) {
+        local synch_port = to_port(synchrophasor_ports[synch_port_idx]);
+        local synch_prot = get_port_transport_proto(synch_port);
+        if (synch_prot == tcp) {
+          add synch_ports_tcp[synch_port];
+        } else if (synch_prot == udp) {
+          add synch_ports_udp[synch_port];
+        }
+      }
+      if (|synch_ports_tcp| > 0) {
+        redef SYNCHROPHASOR::synchrophasor_ports_tcp = synch_ports_tcp;
+      }
+      if (|synch_ports_udp| > 0) {
+        redef SYNCHROPHASOR::synchrophasor_ports_udp = synch_ports_udp;
       }
     }
   }
