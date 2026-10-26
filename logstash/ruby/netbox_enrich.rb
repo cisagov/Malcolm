@@ -115,6 +115,20 @@ end
 
 
 ##############################################################################################
+def cidr_list_parses?(cidr_list)
+  entries = cidr_list.split(',').map(&:strip).reject(&:empty?)
+  return false if entries.empty?
+  entries.all? do |entry|
+    begin
+      IPAddr.new(entry.start_with?('!') ? entry[1..] : entry)
+      true
+    rescue ArgumentError
+      false
+    end
+  end
+end
+
+##############################################################################################
 def parse_autopopulate_config(raw_config)
   return { allow_all_private: true, entries: [] } if raw_config.nil? || raw_config.strip.empty?
 
@@ -140,7 +154,7 @@ def parse_autopopulate_config(raw_config)
       cidr: cidr,
       allow: !is_exclusion,
       network: range.first,
-      broadcast: range.to_a.last
+      broadcast: range.end
     }
   end
 
@@ -162,7 +176,7 @@ def parse_autopopulate_configs_for_sites(raw_config, config_site_hash)
     site_entry = site_entry.strip
     next if site_entry.empty?
 
-    if site_entry.include?(':')
+    if site_entry.include?(':') && !cidr_list_parses?(site_entry)
       site_id, cidr_list = site_entry.split(':', 2)
       site_id = site_id.strip
     else
@@ -559,7 +573,7 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
   allow = nil
   config[:entries].each do |entry|
     if entry[:cidr].include?(ip)
-      next if ip.ipv4? && (ip == entry[:network] || ip == entry[:broadcast])  # Skip unassignable
+      next if ip.ipv4? && (entry[:cidr].prefix <= 30) && (ip == entry[:network] || ip == entry[:broadcast])  # Skip unassignable
       allow = entry[:allow]
     end
   end

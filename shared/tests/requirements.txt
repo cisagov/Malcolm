@@ -17,12 +17,13 @@ inflection==0.5.1
 pydantic==2.11.7; python_version < "3.14"
 pydantic>=2.12; python_version >= "3.14"
 supervisor==4.3.0
-setuptools==83.0.0
+setuptools==84.1.0
 # filescan Strelka bindings (make -C filescan/python-filescan)
 grpcio-tools==1.84.0
 
 # threat feeds (zeek/requirements.txt)
 git+https://github.com/mmguero-dev/mandiant-ti-client@67d084e8a31801b522e859fafac0dbd9ff8c4cf3
+beautifulsoup4==4.14.2
 dateparser==1.2.2
 pymisp==2.5.17.2
 stix2==3.0.1

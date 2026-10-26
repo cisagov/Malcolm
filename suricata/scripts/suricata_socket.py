@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import codecs
 import json
 import logging
 import os
@@ -36,6 +37,7 @@ class SuricataSocketClient:
     #   is needed.
     _reloaded_instances: Dict[str, Tuple[int, int, int]] = {}
     _reloaded_instances_lock = threading.Lock()
+    _json_decoder = json.JSONDecoder()
 
     def __init__(
         self,
@@ -107,25 +109,18 @@ class SuricataSocketClient:
                 # Initial version handshake - this is a special case, not a command
                 handshake = json.dumps({"version": "0.1"}) + "\n"
                 self._debug(f"Sending handshake: {handshake.strip()}")
-                self.sock.send(handshake.encode('utf-8'))
+                self.sock.sendall(handshake.encode('utf-8'))
 
                 # Read response
-                response = self.sock.recv(4096).decode('utf-8')
-                self._debug(f"Handshake response: {response.strip()}")
-
-                try:
-                    handshake_json = json.loads(response)
-                    if handshake_json.get("return") == "OK":
-                        self._debug("Handshake successful")
-                        self._ensure_rules_reloaded()
-                        return
-                    else:
-                        self._debug(f"ERROR: Unexpected handshake response: {handshake_json}")
-                        raise ConnectionError(f"Handshake failed: {handshake_json}")
-                except json.JSONDecodeError as e:
-                    self._debug(f"ERROR: Failed to decode handshake response: {e}")
-                    self._debug(f"ERROR: Raw response was: {repr(response)}")
-                    raise ConnectionError(f"Failed to decode handshake response: {e}")
+                handshake_json = self._recv_json()
+                self._debug(f"Handshake response: {handshake_json}")
+                if handshake_json.get("return") == "OK":
+                    self._debug("Handshake successful")
+                    self._ensure_rules_reloaded()
+                    return
+                else:
+                    self._debug(f"ERROR: Unexpected handshake response: {handshake_json}")
+                    raise ConnectionError(f"Handshake failed: {handshake_json}")
 
             except socket.error as e:
                 last_error = e
@@ -139,49 +134,91 @@ class SuricataSocketClient:
         self._debug(f"ERROR: {error_msg}")
         raise ConnectionError(error_msg)
 
+    def _recv_json(
+        self,
+        max_bytes: int = 16 * 1024 * 1024,
+    ) -> Dict[str, Any]:
+        """Read exactly one JSON object from the socket, however many recv() calls that takes.
+
+        With protocol version 0.1, Suricata doesn't delimit its responses, so the only way to know a
+        response is complete is that it parses. Failures raise ConnectionError (an OSError, like
+        socket.error) because the stream can't be trusted afterwards and the caller should reconnect.
+        """
+        decoder = codecs.getincrementaldecoder('utf-8')()
+        buffer = ""
+        while True:
+            chunk = self.sock.recv(4096)
+            if not chunk:
+                raise ConnectionError(f"Socket closed with incomplete response: {buffer!r}")
+            try:
+                buffer += decoder.decode(chunk)
+            except UnicodeDecodeError as e:
+                raise ConnectionError(f"Failed to decode response: {e}")
+            try:
+                obj, _ = self._json_decoder.raw_decode(buffer.lstrip())
+            except json.JSONDecodeError as e:
+                if len(buffer) > max_bytes:
+                    raise ConnectionError(f"Response exceeded {max_bytes} bytes without parsing: {e}")
+                continue
+            if not isinstance(obj, dict):
+                raise ConnectionError(f"Unexpected response: {obj!r}")
+            return obj
+
+    def _reconnect(
+        self,
+    ) -> None:
+        try:
+            if getattr(self, 'sock', None):
+                self.sock.close()
+        except Exception:
+            pass
+        self.sock = None
+        self._connect()
+
     def _send_command(
         self,
         command: Dict[str, Any],
         retries: int = 3,
+        idempotent: bool = True,
     ) -> Union[Dict[str, Any], None]:
-        """Send a command to Suricata socket and return the response"""
+        """Send a command to Suricata socket and return the response
+
+        A command that changes Suricata's state (e.g., pcap-file) should pass idempotent=False. Once such a
+        command has been sent, it isn't sent again, because Suricata may have acted on it even if the
+        response never arrived.
+        """
+        command_json = json.dumps(command) + "\n"
         attempts = 0
         while attempts < retries:
+            sent = False
             try:
-                # Convert command to JSON and send with newline
-                command_json = json.dumps(command) + "\n"
                 self._debug(f"\nSending command: {command_json.strip()}")
-                self.sock.send(command_json.encode('utf-8'))
+                self.sock.sendall(command_json.encode('utf-8'))
+                sent = True
 
-                # Read response
-                response = self.sock.recv(4096).decode('utf-8')
-                self._debug(f"Response received: {response.strip()}")
-
-                if not response:
-                    self._debug("ERROR: Empty response received")
+                decoded_response = self._recv_json()
+                self._debug(f"Response received: {decoded_response}")
+                if decoded_response.get("return") == "NOK":
+                    self._debug(f"ERROR: Command failed: {decoded_response}")
                     return None
-
-                try:
-                    decoded_response = json.loads(response)
-                    if decoded_response.get("return") == "NOK":
-                        self._debug(f"ERROR: Command failed: {decoded_response}")
-                        return None
-                    return decoded_response
-                except json.JSONDecodeError as e:
-                    self._debug(f"ERROR: Failed to decode response: {e}")
-                    self._debug(f"ERROR: Raw response was: {repr(response)}")
-                    if attempts + 1 >= retries:
-                        return None
-                    attempts += 1
-                    time.sleep(self.retry_delay)
+                return decoded_response
 
             except socket.error as e:
                 self._debug(f"ERROR: Socket error: {e}")
-                if attempts + 1 >= retries:
-                    return None
                 attempts += 1
+                if attempts >= retries:
+                    if sent:
+                        # a late reply could still arrive, so close the socket rather than leave it for the next command
+                        try:
+                            self.sock.close()
+                        except Exception:
+                            pass
+                    return None
                 time.sleep(self.retry_delay)
-                self._connect()
+                self._reconnect()
+                if sent and not idempotent:
+                    self._debug(f"ERROR: Not resending non-idempotent command: {command_json.strip()}")
+                    return None
 
         return None
 
@@ -210,7 +247,8 @@ class SuricataSocketClient:
                         "filename": pcap_file,
                         "output-dir": output_dir,
                     },
-                }
+                },
+                idempotent=False,
             )
             if not submit_response or submit_response.get("return") != "OK":
                 self._debug(f"ERROR: Failed to process PCAP: {submit_response}")
@@ -296,6 +334,7 @@ class SuricataSocketClient:
                     },
                 },
                 retries=1,
+                idempotent=False,
             )
             if (not submit_response) or (submit_response.get("return") != "OK"):
                 self._debug(f"ERROR: Failed to submit warm-up PCAP: {submit_response}")

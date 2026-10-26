@@ -96,11 +96,13 @@ There are two general categories of files that need to be generated to be includ
     - Malcolm installer ISO
     - Hedgehog Linux installer ISO
     - Hedgehog Linux Raspberry Pi image
+    - Container image archives for the Malcolm run profile (`amd64` and `arm64`)
+    - Container image archives for the Hedgehog run profile (`amd64` and `arm64`)
 * Scripts and tarball for a standalone Docker installation
 
 Romeo checks out and switches his GitHub repository's working copy so that it's tracking the [upstream branch]({{ site.github.repository_url }}) (e.g., `git checkout main` and `git branch --set-upstream-to idaholab/main`). Running `git log -1` should show that the latest commit to this branch is the merge of the pull request performed earlier.
 
-Romeo creates a local directory to contain the release artifacts and runs `./scripts/malcolm_appliance_packager.sh` to package up the scripts and tarball for a standalone Docker installation (the output of that script is somewhat verbose, so it's been summarized for display here):
+Romeo creates a local directory to contain the release artifacts and runs `./scripts/malcolm_appliance_packager.sh` to package up the scripts and tarball for a standalone Docker installation. At the image prompt he answers `m`, so the same run also saves the `amd64` container images for the Malcolm run profile, which he pulled and tagged on this workstation in step 4 (the output of that script is somewhat verbose, so it's been summarized for display here):
 
 ```bash
 $ mkdir releases
@@ -110,12 +112,12 @@ $ cd releases
 $ ~/Malcolm/scripts/malcolm_appliance_packager.sh
 …
 mkdir: created directory …
-
-Package Kubernetes manifests in addition to docker-compose.yml [y/N]? y
 …
-Packaged Malcolm to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20241008_215936_deadbeef.tar.gz"
+Packaged Malcolm to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20251029_140727_d22a504f.tar.gz"
 
-Do you need to package container images also [y/N]? n
+Do you need to package container images also [m/h/N]? m
+This might take a few minutes...
+Packaged Malcolm container images to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20251029_140727_d22a504f_images.tar.xz"
 
 To install and configure Malcolm, run install.py
 
@@ -136,6 +138,7 @@ drwxrwxr-x 10 romeogdetlevjr romeogdetlevjr     156 Oct 29 14:15 installer
 -rwxrwxr-x  1 romeogdetlevjr romeogdetlevjr  44,201 Oct 29 14:15 install.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr     460 Oct 29 14:15 malcolm_20251029_140727_d22a504f.README.txt
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr 275,657 Oct 29 14:15 malcolm_20251029_140727_d22a504f.tar.gz
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr 4,281,839,616 Oct 29 14:24 malcolm_20251029_140727_d22a504f_images.tar.xz
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  75,769 Oct 29 14:15 malcolm_common.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr   5,685 Oct 29 14:15 malcolm_constants.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  50,329 Oct 29 14:15 malcolm_kubernetes.py
@@ -144,38 +147,120 @@ drwxrwxr-x 10 romeogdetlevjr romeogdetlevjr     156 Oct 29 14:15 installer
 
 The resultant `.py`, `.tar.gz,` and `.txt` files are ready to be included as assets in the Malcolm release on GitHub.
 
-As described in the documentation for [downloading Malcolm](download.md#JoinISOs), due to [limits on individual files](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas) in GitHub releases, the binary image files have been split into 2GB chunks. The same scripts (for Bash ([release_cleaver.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.sh)) and PowerShell ([release_cleaver.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.ps1))) used to join the files can be used to split them up:
+### Container image archives
+
+The release includes four archives of the container images so that users in air-gapped environments can [load them with `docker load`](malcolm-upgrade.md#UpgradePlan) instead of pulling from ghcr.io: one for each [run profile](live-analysis.md#Profiles) (`malcolm` and `hedgehog`) on each architecture (`amd64` and `arm64`). The packager saves images from the local container image cache and names the archive after the architecture of the machine it runs on, so the `amd64` archives are made on Romeo's `amd64` workstation and the `arm64` archives on the `arm64` machine he used in step 9. Each run of the packager saves the images for one profile.
+
+Romeo already has the Malcolm `amd64` archive from the run above. He runs the packager once more on his workstation, this time answering `h` to save the Hedgehog `amd64` images:
+
+```bash
+$ ~/Malcolm/scripts/malcolm_appliance_packager.sh
+…
+Do you need to package container images also [m/h/N]? h
+This might take a few minutes...
+Packaged Malcolm container images to "/home/romeogdetlevjr/Malcolm/releases/hedgehog_20251029_140727_d22a504f_images.tar.xz"
+…
+```
+
+Next, Romeo switches over to his `arm64` MacBook, which still has the `arm64` images he pulled and tagged in step 9. On macOS the packager uses the GNU versions of its tools, so the MacBook needs `coreutils`, `findutils`, `gawk`, `grep`, and `gnu-tar` from [Homebrew](https://brew.sh/), along with `git`, `rsync`, and `xz`. He checks out the same upstream commit there, so `git log -1` shows the same merge commit as on his workstation. This matters because the packager builds the archive names from the date, time, and hash of that commit, and all four archives should match. He then runs the packager twice, answering `m` the first time and `h` the second:
+
+```bash
+$ ~/Malcolm/scripts/malcolm_appliance_packager.sh
+…
+Do you need to package container images also [m/h/N]? m
+This might take a few minutes...
+Packaged Malcolm container images to "/Users/romeogdetlevjr/Malcolm/releases/malcolm_20251029_140727_d22a504f_images.arm64.tar.xz"
+…
+
+$ ~/Malcolm/scripts/malcolm_appliance_packager.sh
+…
+Do you need to package container images also [m/h/N]? h
+This might take a few minutes...
+Packaged Malcolm container images to "/Users/romeogdetlevjr/Malcolm/releases/hedgehog_20251029_140727_d22a504f_images.arm64.tar.xz"
+…
+```
+
+He copies the two `.arm64.tar.xz` archives into the `releases` directory on his workstation. The packager also wrote a `.tar.gz`, a `.README.txt`, and the `.py` scripts on the MacBook, but the copies from the workstation are the ones that go in the release, so he leaves these behind.
+
+The [upgrade instructions](malcolm-upgrade.md#UpgradePlan) download the image archives by their release names, which use the profile and the Malcolm version in place of the packager's date, time, and commit hash (e.g., `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz`). Romeo renames the four archives to match, before splitting them below, so that the `.sha` files record the final names:
+
+```bash
+$ MALCOLM_VERSION={{ site.malcolm.version }}
+
+$ for f in {malcolm,hedgehog}_*_images*.tar.xz; do
+    [[ "$f" =~ ^(malcolm|hedgehog)_[0-9]{8}_[0-9]{6}_[0-9a-f]+_images(\.arm64)?\.tar\.xz$ ]] || continue
+    mv -v "$f" "${BASH_REMATCH[1]}-${MALCOLM_VERSION}_images${BASH_REMATCH[2]}.tar.xz"
+  done
+renamed 'hedgehog_20251029_140727_d22a504f_images.arm64.tar.xz' -> 'hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz'
+renamed 'hedgehog_20251029_140727_d22a504f_images.tar.xz' -> 'hedgehog-{{ site.malcolm.version }}_images.tar.xz'
+renamed 'malcolm_20251029_140727_d22a504f_images.arm64.tar.xz' -> 'malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz'
+renamed 'malcolm_20251029_140727_d22a504f_images.tar.xz' -> 'malcolm-{{ site.malcolm.version }}_images.tar.xz'
+```
+
+### Splitting the large files
+
+As described in the documentation for [downloading Malcolm](download.md#JoinISOs), due to [limits on individual files](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas) in GitHub releases, the ISO files and container image archives have been split into 2GB chunks. The same scripts (for Bash ([release_cleaver.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.sh)) and PowerShell ([release_cleaver.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.ps1))) used to join the files can be used to split them up:
 
 ```bash
 $ ls -l
-total 8,502,263,808
+total 21,444,331,607
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,240,331,776 Oct 29 15:02 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,317,350,912 Oct 29 14:31 hedgehog-{{ site.malcolm.version }}_images.tar.xz
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,102,553,600 Oct 29 14:55 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,281,839,616 Oct 29 14:24 malcolm-{{ site.malcolm.version }}_images.tar.xz
 
-$ for ISO in *.iso; do ~/Malcolm/scripts/release_cleaver.sh "$ISO"; done
+$ for FILE in *.iso *_images*.tar.xz; do ~/Malcolm/scripts/release_cleaver.sh "$FILE"; done
 Splitting...
-bf6e71385046b39d265af3dfc5b77677a0ac5eeac86bdc5be48791d0900715df  hedgehog-{{ site.malcolm.version }}.iso
+c24207578da379b35f3405f36b6df71d0a4442e58d7f1bed031bf26a90eef5ed  hedgehog-{{ site.malcolm.version }}.iso
 Splitting...
-b4957741420ec06988d975cdb7f71eaa201918245f6fcb7ee2641d7d0ad97c52  malcolm-{{ site.malcolm.version }}.iso
+7d042dd76a6cc55d458672ad6a9987c23df72f2e2f01520c2df2699c575d18cb  malcolm-{{ site.malcolm.version }}.iso
+Splitting...
+8a0af7ff3c0513306da9ed58eeaa56faa18186f96f05101095bfc7802a32f715  hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz
+Splitting...
+b0a085b1f244db2055e19fbe0d559a9375e73e0e371b5e5fa99c36e6fa824ac5  hedgehog-{{ site.malcolm.version }}_images.tar.xz
+Splitting...
+41624b8e4f93b9ce7534ff2e41af450ac1c1d62c1fbda19fa3ed43a1a82eb535  malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz
+Splitting...
+6cbc6f2ff1aa4e80bf855c3d5ab58343448a9c6470724a0ce5a3b0e3b0bd9335  malcolm-{{ site.malcolm.version }}_images.tar.xz
 
 $ ls -l
-total 17,002,364,928
+total 42,886,490,884
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.01
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   664,972,288 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.02
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            87 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   664,972,288 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            87 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,240,331,776 Oct 29 15:02 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   240,331,776 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr           103 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,317,350,912 Oct 29 14:31 hedgehog-{{ site.malcolm.version }}_images.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   317,350,912 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            97 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.tar.xz.sha
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-{{ site.malcolm.version }}.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.01
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.02
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 1,835,110,400 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.03
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            86 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 1,835,110,400 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            86 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,102,553,600 Oct 29 14:55 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   102,553,600 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr           102 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,281,839,616 Oct 29 14:24 malcolm-{{ site.malcolm.version }}_images.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   281,839,616 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            96 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.sha
 ```
 
-The resultant files (with the `.iso.##` and `.iso.sha` extensions) are the files ready to be included as assets in the Malcolm release on GitHub.
+The resultant files with the `.iso.##`, `.iso.sha`, `.tar.xz.##`, and `.tar.xz.sha` extensions are the files ready to be included as assets in the Malcolm release on GitHub. The unsplit `.iso` and `.tar.xz` files stay out of the release.
 
 ## 11. Publish the release
 

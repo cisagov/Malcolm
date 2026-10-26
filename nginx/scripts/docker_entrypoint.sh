@@ -266,6 +266,37 @@ else
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_NETBOX_UPSTREAM_LINK"
 fi
 
+# lua-resty-session 4.x (used by lua-resty-openidc for the Keycloak auth modes)
+#   requires an explicit session secret. If it is not supplied, 4.x derives one
+#   per worker process, which (a) invalidates every live session on restart and
+#   (b) breaks auth entirely if worker_processes is raised above 1, since each
+#   worker would reject session cookies written by its siblings.
+#
+#   If the operator supplied NGINX_SESSION_SECRET (e.g. via keycloak.env) use it.
+#   Otherwise generate one once and persist it under the certs volume so it
+#   survives container restarts. Regenerating it is safe but logs every user out.
+NGINX_SESSION_SECRET_FILE="${NGINX_CONF_DIR}/certs/session_secret"
+if [[ "$NGINX_AUTH_MODE" == keycloak* ]] && [[ -z "${NGINX_SESSION_SECRET:-}" ]]; then
+  if [[ -s "$NGINX_SESSION_SECRET_FILE" ]]; then
+    NGINX_SESSION_SECRET="$(< "$NGINX_SESSION_SECRET_FILE")"
+  else
+    NGINX_SESSION_SECRET="$(openssl rand -hex 32)"
+    # the certs bind mount is read-only in the default compose file, so treat a
+    #   failed write as non-fatal: auth still works, but sessions won't survive
+    #   a restart. Warn loudly so this is diagnosable.
+    if ( umask 077 && echo "$NGINX_SESSION_SECRET" > "$NGINX_SESSION_SECRET_FILE" ) 2>/dev/null; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} "$NGINX_SESSION_SECRET_FILE"
+      [[ -n ${PGID} ]] && chown -f :${PGID} "$NGINX_SESSION_SECRET_FILE"
+      chmod 600 "$NGINX_SESSION_SECRET_FILE"
+    else
+      echo "WARNING: could not persist the OIDC session secret to $NGINX_SESSION_SECRET_FILE." >&2
+      echo "WARNING: A new secret will be generated on every restart, logging out all users." >&2
+      echo "WARNING: Set NGINX_SESSION_SECRET in keycloak.env to pin it explicitly." >&2
+    fi
+  fi
+fi
+export NGINX_SESSION_SECRET
+
 # NGINX_AUTH_MODE basic|ldap|keycloak|keycloak_remote|no_authentication
 if [[ -z $NGINX_AUTH_MODE ]] || [[ "$NGINX_AUTH_MODE" == "basic" ]] || [[ "$NGINX_AUTH_MODE" == "true" ]]; then
   # doing HTTP basic auth
