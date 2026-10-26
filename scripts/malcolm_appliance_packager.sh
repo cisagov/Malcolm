@@ -216,8 +216,15 @@ if "$MKDIR" "$DESTDIR"; then
   CONFIRMATION=${CONFIRMATION:-N}
   if [[ $CONFIRMATION =~ ^[YyMmHh]$ ]]; then
     [[ $CONFIRMATION =~ ^[Hh]$ ]] && IMAGE_PROFILE=hedgehog || IMAGE_PROFILE=malcolm
+    case "$(uname -m)" in
+      x86_64|amd64)  IMAGE_ARCH_SUFFIX="" ;;
+      arm64|aarch64) IMAGE_ARCH_SUFFIX=".arm64" ;;
+      *)             IMAGE_ARCH_SUFFIX=".$(uname -m)" ;;
+    esac
     echo "This might take a few minutes..."
-    DESTNAMEIMAGES="$RUN_PATH/$("$BASENAME" "$DESTDIR")_images.tar.xz"
+    DESTBASE="$("$BASENAME" "$DESTDIR")"
+    DESTBASE="${DESTBASE/#malcolm_/${IMAGE_PROFILE}_}"
+    DESTNAMEIMAGES="$RUN_PATH/${DESTBASE}_images${IMAGE_ARCH_SUFFIX}.tar.xz"
     if command -v yq >/dev/null 2>&1; then
       IMAGES=( $(yq ".services[] | select((.profiles // []) | contains([\"$IMAGE_PROFILE\"])) | .image" $DESTDIR/docker-compose.yml | "$SORT" -u) )
     else

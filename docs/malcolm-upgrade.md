@@ -264,26 +264,51 @@ mkdir -p ~/Downloads
 cd ~/Downloads
 ```
 
+Each release provides a separate image archive for each [run profile](live-analysis.md#Profiles) (`malcolm` or `hedgehog`) and each CPU architecture (`amd64` or `arm64`). Archives for `arm64` carry an `.arm64` suffix after `_images`, and archives for `amd64` have no suffix:
+
+| Run profile | Architecture | Image archive |
+|-------------|--------------|---------------|
+| Malcolm | `amd64` (`x86_64`) | `malcolm-{{ site.malcolm.version }}_images.tar.xz` |
+| Malcolm | `arm64` (`aarch64`) | `malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz` |
+| Hedgehog | `amd64` (`x86_64`) | `hedgehog-{{ site.malcolm.version }}_images.tar.xz` |
+| Hedgehog | `arm64` (`aarch64`) | `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz` |
+
+In your terminal session, set the following variables to describe the system **where the images will be loaded**. That may not be the machine running `curl` (for example, when downloading on an Internet-connected workstation for transfer to an air-gapped installation), so choose the values on purpose:
+
+```bash
+MALCOLM_VERSION={{ site.malcolm.version }}
+IMAGE_PROFILE=malcolm      # malcolm or hedgehog
+IMAGE_ARCH_SUFFIX=         # leave empty for amd64/x86_64, or set to .arm64 for arm64/aarch64
+IMAGES_FILE="${IMAGE_PROFILE}-${MALCOLM_VERSION}_images${IMAGE_ARCH_SUFFIX}.tar.xz"
+```
+
+If you are downloading on the same system that will load the images, you can detect the architecture suffix instead of setting it by hand (run this before setting `IMAGES_FILE`):
+
+```bash
+IMAGE_ARCH_SUFFIX="$(uname -m | sed -e 's/^x86_64$//' -e 's/^arm64$/.arm64/' -e 's/^aarch64$/.arm64/')"
+```
+
 Download the required release files from the Malcolm `v{{ site.malcolm.version }}` GitHub release:
 
 ```bash
-curl -s https://api.github.com/repos/idaholab/Malcolm/releases/tags/v{{ site.malcolm.version }} \
+curl -s "https://api.github.com/repos/idaholab/Malcolm/releases/tags/v${MALCOLM_VERSION}" \
   | grep "browser_download_url" \
-  | grep -E "(docker_install\.zip|release_cleaver\.sh|malcolm.*_images\.tar\.xz)" \
+  | grep -E "(docker_install\.zip|release_cleaver\.sh|/${IMAGES_FILE})" \
   | cut -d '"' -f 4 \
   | xargs -r -I {} curl -L -O {}
 ```
 
-This downloads files such as:
+The `/` before `${IMAGES_FILE}` anchors the match to the start of the file name, so only the archive for the chosen profile and architecture is downloaded. For example, with `IMAGE_PROFILE=hedgehog` and `IMAGE_ARCH_SUFFIX=.arm64`, this downloads files such as:
 
 - `malcolm-{{ site.malcolm.version }}-docker_install.zip`
 - `release_cleaver.sh`
 - Split Docker image archive files named similar to:
-  - `malcolm-{{ site.malcolm.version }}_images.tar.xz.01`
-  - `malcolm-{{ site.malcolm.version }}_images.tar.xz.02`
-  - `malcolm-{{ site.malcolm.version }}_images.tar.xz.03`
-  - `malcolm-{{ site.malcolm.version }}_images.tar.xz.04`
-  - `malcolm-{{ site.malcolm.version }}_images.tar.xz.sha`
+  - `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.01`
+  - `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.02`
+  - `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.03`
+  - `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.sha`
+
+The number of split parts varies by profile and architecture.
 
 For users who want to download only the Docker install ZIP and skip the image tarballs, preferring to pull the new images from GitHub's [ghcr.io container registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) later using `docker compose`:
 
@@ -309,13 +334,13 @@ Make the release helper script executable:
 chmod +x release_cleaver.sh
 ```
 
-Use it to join the split Docker image archive:
+Use it to join the split Docker image archive. These commands use the `IMAGES_FILE` variable from the previous step; if you are in a new shell or on a different machine, set the variables again first.
 
 ```bash
-./release_cleaver.sh malcolm-{{ site.malcolm.version }}_images.tar.xz.*
+./release_cleaver.sh "${IMAGES_FILE}".*
 ```
 
-You should see output similar to:
+You should see output similar to this (shown for the Malcolm profile on `amd64`):
 
 ```
 Joining...
@@ -325,7 +350,7 @@ malcolm-{{ site.malcolm.version }}_images.tar.xz: OK
 After the full archive has been successfully reassembled and verified, remove the split parts:
 
 ```bash
-rm -f malcolm-{{ site.malcolm.version }}_images.tar.xz.*
+rm -f "${IMAGES_FILE}".*
 ```
 
 ---
@@ -337,7 +362,7 @@ Users opting to pull the new Malcolm container images later using `docker compos
 Load the new Malcolm Docker images into the local Docker image cache:
 
 ```bash
-docker load -i malcolm-{{ site.malcolm.version }}_images.tar.xz
+docker load -i "${IMAGES_FILE}"
 ```
 
 This may take some time.
@@ -345,7 +370,7 @@ This may take some time.
 After the images are loaded, remove the large archive to reclaim disk space:
 
 ```bash
-rm -f malcolm-{{ site.malcolm.version }}_images.tar.xz
+rm -f "${IMAGES_FILE}"
 ```
 
 ---
@@ -765,11 +790,19 @@ The goal is to preserve your existing authentication material while ensuring the
 
 If you already loaded the Docker images using `docker load`, you can skip this step.
 
-If you did not load the release image archive, pull the required images instead:
+If you did not load the release image archive, pull the required images instead. For a Malcolm system:
 
 ```bash
 docker compose --profile=malcolm pull
 ```
+
+For a Hedgehog Linux system:
+
+```bash
+docker compose --profile=hedgehog pull
+```
+
+Docker pulls the images matching the architecture of the system running the command.
 
 This downloads the Malcolm images from the GitHub container registry.
 
