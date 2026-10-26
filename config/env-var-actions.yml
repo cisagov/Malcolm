@@ -210,6 +210,14 @@ copied_environment_variables:
     netbox_secret:
       REDIS_PASSWORD:
         REDIS_PASSWORD
+  zeek:
+    zeek:
+      ZEEK_GENYSIS_PORTS:
+        ZEEK_PORTS_GENISYS
+      ZEEK_ENIP_PORTS:
+        ZEEK_PORTS_ENIP
+      ZEEK_SYNCHROPHASOR_PORTS:
+        ZEEK_PORTS_SYNCHROPHASOR
 removed_environment_variables:
   # env_file:
   #   - key1
