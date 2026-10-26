@@ -207,6 +207,12 @@ class SuricataSocketClient:
                 self._debug(f"ERROR: Socket error: {e}")
                 attempts += 1
                 if attempts >= retries:
+                    if sent:
+                        # a late reply could still arrive, so close the socket rather than leave it for the next command
+                        try:
+                            self.sock.close()
+                        except Exception:
+                            pass
                     return None
                 time.sleep(self.retry_delay)
                 self._reconnect()

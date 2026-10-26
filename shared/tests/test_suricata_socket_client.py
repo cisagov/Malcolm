@@ -376,6 +376,24 @@ def test_reconnect_closes_the_old_socket(fake_suricata, socket_dir):
         client.close()
 
 
+def test_late_reply_is_not_read_by_the_next_command(fake_suricata, socket_dir):
+    def responder(command, number):
+        if command['command'] == 'pcap-current':
+            time.sleep(0.5)
+            return reply({'return': 'OK', 'message': 'late'})
+        return reply({'return': 'OK', 'message': 7})
+
+    server = fake_suricata(responder)
+    client = connect(server, socket_dir)
+    client.sock.settimeout(0.1)
+    try:
+        assert client._send_command({'command': 'pcap-current'}, retries=1) is None
+        time.sleep(0.6)
+        assert client.queue_size() == 7
+    finally:
+        client.close()
+
+
 ###################################################################################################
 # process_pcap and queue_size
 
