@@ -48,6 +48,10 @@ Malcolm user accounts can be used to access the [interfaces](quickstart.md#UserI
 
 Users may change their passwords via the **Malcolm User Management** page by clicking **User Self Service**.
 
+When forwarding data from a [Hedgehog Linux](live-analysis.md#Hedgehog) sensor, the administrator should go to the **Malcolm User Management** page (**https://﹤Malcolm host or IP address﹥/auth**) and create a service account for the sensor to use. The sensor's Arkime `capture` sends session data to Malcolm's OpenSearch instance and queries Malcolm's [WISE service](arkime.md#ArkimeWISE) with these credentials. They're given to the sensor during [configuration](malcolm-hedgehog-e2e-iso-install.md#HedgehogCommConfig) by answering **Y** to **Store username/password for OpenSearch/Elasticsearch instance?** when running `auth_setup` on Hedgehog Linux.
+
+Create this service account *even if* Malcolm's normal user authentication method is [LDAP](#AuthLDAP) or [Keycloak](#AuthKeycloak). Hedgehog Linux always connects to Malcolm over HTTP(S) basic authentication using this local account, while people signing in to Malcolm's interfaces keep using LDAP or Keycloak as usual. See [**Known Limitation with Hedgehog Linux**](#AuthKeycloakHedgehog) for how this fits alongside Keycloak.
+
 ## <a name="AuthLDAP"></a>Lightweight Directory Access Protocol (LDAP) authentication
 
 The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
@@ -344,7 +348,7 @@ For the WISE service, and if Malcolm is using a local OpenSearch service (typica
 
 When specifying the remote Malcolm aggregator credentials on Hedgehog Linux (e.g., *Store username/password for OpenSearch/Elasticsearch instance?* in `auth_setup`), use the Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
 
-* The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://<malcolm-host>/auth).
+* The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://﹤Malcolm host or IP address﹥/auth).
 * These basic credentials apply *only* to Malcolm's OpenSearch API and Arkime WISE endpoints.
 
 This limitation does not apply if Malcolm is connected to a remote OpenSearch or Elasticsearch [instance](opensearch-instances.md#OpenSearchInstance).

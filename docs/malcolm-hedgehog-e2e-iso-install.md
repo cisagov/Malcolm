@@ -613,6 +613,8 @@ Users will be prompted to do the following:
     - In order for a sensor running Hedgehog Linux to securely communicate with Malcolm, it needs a copy of the client certificates generated when "(Re)generate self-signed certificates for a remote log forwarder" was selected earlier. Malcolm can facilitate the secure transfer of these certificates. If users will be continuing on to configure a sensor running Hedgehog Linux, they should answer **Y** here. They will be prompted to "Run auth_setup on the sensor and select 'Receive client certificates from Malcolm'". Users should continue on with the instructions for [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig), then return here and press **Enter** once they have chosen the corresponding `auth_setup` operation [below](#HedgehogCommConfig). After that process is complete, users may press **OK** and Malcolm will continue to start up.
     * ![SSL Certificate Transfer, Malcolm Side - 01](./images/screenshots/ssl-cert-transfer-01.png)
 
+Once Malcolm has started, users forwarding data from Hedgehog Linux should create a service account for the sensor at `https://﹤Malcolm host or IP address﹥/auth`, signing in with the credentials set under **Store administrator username/password for local Malcolm access**. See [**Local account management**](authsetup.md#AuthBasicAccountManagement) for details. This step applies no matter which authentication method was selected above. Some Hedgehog Linux forwarding processes always connect to Malcolm over HTTP(s) basic authentication with this account, even when Malcolm uses LDAP or Keycloak for its users. The sensor will need this username and password when [configuring communication between Hedgehog and Malcolm](#HedgehogCommConfig).
+
 ## <a name="HedgehogInstallAndConfig"></a> Hedgehog Linux Installation and Configuration
 
 As of Malcolm v25.12.0, the same base operating system is used for both Malcolm and Hedgehog Linux. All of the sections above under [Malcolm Installation and Configuration](#MalcolmInstallAndConfig) also apply to Hedgehog Linux.
@@ -703,6 +705,8 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
 …
 ```
 
+When running `auth_setup` on Hedgehog Linux, users should also select **Store username/password for OpenSearch/Elasticsearch instance?** and enter the username and password of the service account created on Malcolm [above](#MalcolmAuthSetup). Hedgehog uses these credentials to run a communication test against the running Malcolm instance and tells the user whether they work. The test needs Malcolm up and the service account already created. If Malcolm is still waiting on the certificate transfer described below, finish that transfer first. Then, once Malcolm has started and the service account exists, run `auth_setup` on the sensor again and choose this option.
+
 The `auth_setup` script on Hedgehog Linux has a **Receive client certificates from Malcolm** option corresponding to Malcolm's **Transfer self-signed client certificates to a remote log forwarder** option described [above](#MalcolmAuthSetup). In order for a Hedgehog Linux to securely communicate with Malcolm, it needs the client certificates generated when users answered **Y** to **(Re)generate self-signed certificates for a remote log forwarder** during that setup. Malcolm can facilitate the secure transfer of these to a sensor running Hedgehog.
 
 Select **Receive client certificates from Malcolm**, then press **OK** when prompted "Run auth_setup on Malcolm and select 'Transfer self-signed client certificates...'".
@@ -729,7 +733,7 @@ Once completed, users can click the "play" icon (▷) in the panel at the top of
 
 The easiest way to verify network traffic is being captured by the sensor and forwarded to Malcolm is through Malcolm's Arkime [Sessions](arkime.md#ArkimeSessions) interface.
 
-If logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If connecting from another browser, connect to **https://<Malcolm host or IP address>**.
+If logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If connecting from another browser, connect to **https://﹤Malcolm host or IP address﹥**.
 
 As Malcolm is using [self-signed TLS certificates](authsetup.md#TLSCerts), users will likely have to confirm a browser exception to allow the self-signed certificates to proceed. Enter the credentials specified during [the configure authentication process](#MalcolmAuthSetup).
 
