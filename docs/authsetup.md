@@ -93,8 +93,6 @@ Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics
 
 Note that as an alternative to the nginx LDAP integration described in this section, [Keycloak](#AuthKeycloak) can also be configured to [federate one or more LDAP servers](https://www.keycloak.org/docs/latest/server_admin/index.html#_ldap).
 
-The **Malcolm User Management** page described above is not available when using LDAP authentication.
-
 ### <a name="AuthLDAPSecurity"></a>LDAP connection security
 
 Authentication over LDAP can be done using one of three methods, [two of which](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/8e73932f-70cf-46d6-88b1-8d9f86235e81) offer data confidentiality protection: 
