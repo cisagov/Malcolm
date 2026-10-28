@@ -22,9 +22,19 @@ global c1222_resolve_service = (getenv("ZEEK_C1222_RESOLVE_SERVICE") == true_reg
 global c1222_trace_service = (getenv("ZEEK_C1222_TRACE_SERVICE") == true_regex) ? T : F;
 global omron_fins_detailed = (getenv("ZEEK_OMRON_FINS_DETAILED") == true_regex) ? T : F;
 global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_regex) ? T : F;
-global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
-global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
-global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
+global bacnet_ports_str = getenv("ZEEK_PORTS_BACNET");
+global c1222_ports_str = getenv("ZEEK_PORTS_C1222");
+global enip_ports_str = getenv("ZEEK_PORTS_ENIP");
+global ge_srtp_ports_str = getenv("ZEEK_PORTS_GE_SRTP");
+global genisys_ports_str = getenv("ZEEK_PORTS_GENISYS");
+global hart_ip_ports_str = getenv("ZEEK_PORTS_HART_IP");
+global modbus_ports_str = getenv("ZEEK_PORTS_MODBUS");
+global omron_fins_ports_str = getenv("ZEEK_PORTS_OMRON_FINS");
+global opcua_binary_ports_str = getenv("ZEEK_PORTS_OPCUA_BINARY");
+global profinet_io_cm_ports_str = getenv("ZEEK_PORTS_PROFINET_IO_CM");
+global roc_plus_ports_str = getenv("ZEEK_PORTS_ROC_PLUS");
+global s7comm_ports_str = getenv("ZEEK_PORTS_S7COMM");
+global synchrophasor_ports_str = getenv("ZEEK_PORTS_SYNCHROPHASOR");
 global ja4_ssh_packet_count = (getenv("ZEEK_JA4SSH_PACKET_COUNT") == "") ? 200 : to_count(getenv("ZEEK_JA4SSH_PACKET_COUNT"));
 global local_nets_str = getenv("ZEEK_LOCAL_NETS");
 global long_conn_durations = getenv("ZEEK_LONG_CONN_DURATIONS");
@@ -208,6 +218,31 @@ redef JSONStreaming::enabled_logs = set(PacketFilter::LOG);
 #   gives up and discards any internal state related to the file.
 redef default_file_timeout_interval = file_analyzer_timeout;
 
+
+type PortSets: record {
+    tcp: set[port];
+    udp: set[port];
+};
+
+function split_ports_by_protocol(ports_str: string): PortSets{
+  local tcp_ports: set[port] = set();
+  local udp_ports: set[port] = set();
+
+  local ports = split_string(ports_str, /,/);
+
+  for (idx in ports){
+    local p = to_port(ports[idx]);
+    local prot = get_port_transport_proto(p);
+
+    if ( prot == tcp )
+        add tcp_ports[p];
+    else if ( prot == udp )
+        add udp_ports[p];
+  }
+
+  return [$tcp = tcp_ports, $udp = udp_ports];
+  }
+
 event zeek_init() &priority=-5 {
 
   if (local_nets_str != "") {
@@ -339,46 +374,7 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
   }
 
-  # register additional ports for Analyzers
-  if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != "")) {
-    local synchrophasor_ports = split_string(synchrophasor_ports_str, /,/);
-    if (|synchrophasor_ports| > 0) {
-      local synch_ports_tcp: set[port] = {};
-      local synch_ports_udp: set[port] = {};
-      for (synch_port_idx in synchrophasor_ports) {
-        local synch_port = to_port(synchrophasor_ports[synch_port_idx]);
-        local synch_prot = get_port_transport_proto(synch_port);
-        if (synch_prot == tcp) {
-          add synch_ports_tcp[synch_port];
-        } else if (synch_prot == udp) {
-          add synch_ports_udp[synch_port];
-        }
-      }
-      if (|synch_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_TCP, synch_ports_tcp);
-      }
-      if (|synch_ports_udp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_UDP, synch_ports_udp);
-      }
-    }
-  }
-  if ((!disable_ics_all) && (!disable_ics_genisys) && (genisys_ports_str != "")) {
-    local genisys_ports = split_string(genisys_ports_str, /,/);
-    if (|genisys_ports| > 0) {
-      local gen_ports_tcp: set[port] = {};
-      for (gen_port_idx in genisys_ports) {
-        local gen_port = to_port(genisys_ports[gen_port_idx]);
-        local gen_prot = get_port_transport_proto(gen_port);
-        if (gen_prot == tcp) {
-          add gen_ports_tcp[gen_port];
-        }
-      }
-      if (|gen_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_GENISYS_TCP, gen_ports_tcp);
-      }
-    }
-  }
-  if ((!disable_ics_all) && (!disable_ics_enip) && (enip_ports_str != "")) {
+if ((!disable_ics_all) && (!disable_ics_enip) && (enip_ports_str != "")) {
     local enip_ports = split_string(enip_ports_str, /,/);
     if (|enip_ports| > 0) {
       local enip_ports_tcp: set[port] = {};
@@ -419,6 +415,113 @@ redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;
 redef LongConnection::repeat_last_duration = long_conn_repeat_last_duration;
 redef LongConnection::do_notice=long_conn_do_notice;
+
+@if ((!disable_ics_all) && (!disable_ics_bacnet) && (bacnet_ports_str != ""))
+  global split_bacnet_ports = split_ports_by_protocol(bacnet_ports_str);
+  # BACnet::bacnet_ports is a set of UDP ports, so we only redefine it if there are UDP ports specified.
+  @if (|split_bacnet_ports$udp| > 0)
+    redef Bacnet::bacnet_ports = split_bacnet_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_ports_str != ""))
+  global split_c1222_ports = split_ports_by_protocol(c1222_ports_str);
+  @if (|split_c1222_ports$tcp| > 0)
+    redef C1222::c1222_ports_tcp = split_c1222_ports$tcp;
+  @endif
+  @if (|split_c1222_ports$udp| > 0)
+    redef C1222::c1222_ports_udp = split_c1222_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_ge_srtp) && (ge_srtp_ports_str != ""))
+  global split_ge_srtp_ports = split_ports_by_protocol(ge_srtp_ports_str);
+  @if (|split_ge_srtp_ports$tcp| > 0)
+    redef GE_SRTP::tcp_ports = split_ge_srtp_ports$tcp;
+  @endif
+  @if (|split_ge_srtp_ports$udp| > 0)
+    redef GE_SRTP::udp_ports = split_ge_srtp_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_genisys) && (genisys_ports_str != ""))
+  global split_genisys_ports = split_ports_by_protocol(genisys_ports_str);
+  @if (|split_genisys_ports$tcp| > 0)
+    redef GENISYS::genisys_ports_tcp = split_genisys_ports$tcp;
+  @endif
+  @if (|split_genisys_ports$udp| > 0)
+    redef GENISYS::genisys_ports_udp = split_genisys_ports$udp;
+  @endif
+@endif
+    
+@if ((!disable_ics_all) && (!disable_ics_hart_ip) && (hart_ip_ports_str != ""))
+  global split_hart_ip_ports = split_ports_by_protocol(hart_ip_ports_str);
+  @if (|split_hart_ip_ports$tcp| > 0)
+    redef HART_IP::tcp_ports = split_hart_ip_ports$tcp;
+  @endif
+  @if (|split_hart_ip_ports$udp| > 0)
+    redef HART_IP::udp_ports = split_hart_ip_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_modbus) && (modbus_ports_str != ""))
+  global split_modbus_ports = split_ports_by_protocol(modbus_ports_str);
+  @if (|split_modbus_ports$tcp| > 0)
+    redef Modbus_Extended::additional_tcp_ports = split_modbus_ports$tcp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_omron_fins) && (omron_fins_ports_str != ""))
+  global split_omron_fins_ports = split_ports_by_protocol(omron_fins_ports_str);
+  @if (|split_omron_fins_ports$tcp| > 0)
+    redef OMRON_FINS::omron_fins_ports_tcp = split_omron_fins_ports$tcp;
+  @endif
+  @if (|split_omron_fins_ports$udp| > 0)
+    redef OMRON_FINS::omron_fins_ports_udp = split_omron_fins_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_opcua_binary) && (opcua_binary_ports_str != ""))
+  global split_opcua_binary_ports = split_ports_by_protocol(opcua_binary_ports_str);
+  @if (|split_opcua_binary_ports$tcp| > 0)
+    redef ICSNPP_OPCUA_Binary::ports = split_opcua_binary_ports$tcp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_profinet_io_cm) && (profinet_io_cm_ports_str != ""))
+  global split_profinet_io_cm_ports = split_ports_by_protocol(profinet_io_cm_ports_str);
+  @if (|split_profinet_io_cm_ports$udp| > 0)
+    redef PROFINET_IO_CM::udp_ports = split_profinet_io_cm_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_roc_plus) && (roc_plus_ports_str != ""))
+  global split_roc_plus_ports = split_ports_by_protocol(roc_plus_ports_str);
+  @if (|split_roc_plus_ports$tcp| > 0)
+    redef ROC_PLUS::roc_plus_ports_tcp = split_roc_plus_ports$tcp;
+  @endif
+  @if (|split_roc_plus_ports$udp| > 0)
+    redef ROC_PLUS::roc_plus_ports_udp = split_roc_plus_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_s7comm) && (s7comm_ports_str != ""))
+  global split_s7comm_ports = split_ports_by_protocol(s7comm_ports_str);
+  @if (|split_s7comm_ports$tcp| > 0)
+    redef S7COMM::ports = split_s7comm_ports$tcp;
+  @endif
+@endif
+
+# register additional ports for Analyzers
+@if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != ""))
+  global split_synchrophasor_ports = split_ports_by_protocol(synchrophasor_ports_str);
+  @if (|split_synchrophasor_ports$tcp| > 0)
+    redef SYNCHROPHASOR::synchrophasor_ports_tcp = split_synchrophasor_ports$tcp;
+  @endif
+  @if (|split_synchrophasor_ports$udp| > 0)
+    redef SYNCHROPHASOR::synchrophasor_ports_udp = split_synchrophasor_ports$udp;
+  @endif
+@endif
 
 @if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (!synchrophasor_detailed))
   hook SYNCHROPHASOR::log_policy_sychrophasor_data_detail(
