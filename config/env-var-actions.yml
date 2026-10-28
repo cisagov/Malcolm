@@ -212,12 +212,12 @@ copied_environment_variables:
         REDIS_PASSWORD
   zeek:
     zeek:
-      ZEEK_GENYSIS_PORTS:
-        ZEEK_PORTS_GENISYS
-      ZEEK_ENIP_PORTS:
-        ZEEK_PORTS_ENIP
-      ZEEK_SYNCHROPHASOR_PORTS:
-        ZEEK_PORTS_SYNCHROPHASOR
+      ZEEK_PORTS_GENISYS:
+        ZEEK_GENISYS_PORTS
+      ZEEK_PORTS_ENIP:
+        ZEEK_ENIP_PORTS
+      ZEEK_PORTS_SYNCHROPHASOR:
+        ZEEK_SYNCHROPHASOR_PORTS
 removed_environment_variables:
   # env_file:
   #   - key1
@@ -319,6 +319,9 @@ removed_environment_variables:
     - EXTRACTED_FILE_YARA_CUSTOM_ONLY
     - VTOT_REQUESTS_PER_MINUTE
     - YARA_MAX_REQUESTS
+    - ZEEK_ENIP_PORTS
+    - ZEEK_GENISYS_PORTS
+    - ZEEK_SYNCHROPHASOR_PORTS
   zeek_offline:
     - ZEEK_PCAP_PROCESSOR
   zeek_secret:
