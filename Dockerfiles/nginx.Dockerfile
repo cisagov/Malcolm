@@ -52,10 +52,10 @@ RUN --mount=type=secret,id=GITHUB_TOKEN,env=JEKYLL_GITHUB_TOKEN \
 FROM alpine:3.24 AS getresty
 
 # OPENRESTY_VERSION can be like "1.29.2.4" or "318a52b814ef903066002ffa3166b7714b3b9c6f"
-ARG OPENRESTY_VERSION=1.31.1.1
+ARG OPENRESTY_VERSION=1.31.8.1
 ENV OPENRESTY_VERSION=$OPENRESTY_VERSION
 # SHA-256 of openresty-${OPENRESTY_VERSION}.tar.gz; only used for release versions (a commit checkout is verified by git)
-ARG OPENRESTY_SHA256=65b78baadd3f0984055de89bf13f4a1932e5bfe9c31932037a134ea2b1a0ce42
+ARG OPENRESTY_SHA256=b569c63b420f80a4ac8466f2deffe73ed93ab760026532e039c3658409a997f4
 
 RUN set -e; \
     apk update --no-cache; \
