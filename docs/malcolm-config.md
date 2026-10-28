@@ -247,19 +247,19 @@ Although the configuration script automates many of the following configuration 
     - `ZEEK_DISABLE_…` - if set to `true`, each of these variables can be used to disable a certain Zeek function or network analyzer when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
     - `ZEEK_DISABLE_SPICY_ZIP` - with Strelka's archive scanners enabled, this should be `true` to avoid duplicate processing
     - `ZEEK_PORTS_…` - used to specify non-default ports to register certain Zeek analyzers formatted as a comma-separated list of [Zeek ports](https://docs.zeek.org/en/master/scripting/basics.html#port) (e.g., `12345/tcp` or `4041/tcp,4042/udp`)
-    - `ZEEK_PORTS_BACNET` - Specify the ports for the [ICSNPP-BACnet analyzer](https://github.com/cisagov/icsnpp-bacnet). BACnet only supports UDP ports.
-    - `ZEEK_PORTS_C1222` - Specify the ports for the [ICSNPP-C1222 analyzer](https://github.com/cisagov/icsnpp-c1222). C1222 supports both TCP and UDP ports.
-    - `ZEEK_PORTS_ENIP` - Specify the ports for the [ICSNPP-ENIP analyzer](https://github.com/cisagov/icsnpp-enip/). ENIP supports both TCP and UDP ports.
-    - `ZEEK_PORTS_GE_SRTP` - Specify the ports for the [ICSNPP-GE-SRTP analyzer](https://github.com/cisagov/icsnpp-ge-srtp). GE-SRTP only supports TCP ports.
-    -`ZEEK_PORTS_GENISYS` - Specify the ports for the [ICSNPP-Genysis analyzer](https://github.com/cisagov/icsnpp-genisys/). Genysis only supports TCP ports.
-    -`ZEEK_PORTS_HART_IP` - Specify the ports for the [ICSNPP-HART-IP analyzer](https://github.com/cisagov/icsnpp-hart-ip). HART-IP supports both UDP and TCP ports.
-    - `ZEEK_PORTS_MODBUS` - Specify the ports for the [ICSNPP-Modbus analyzer](https://github.com/cisagov/icsnpp-modbus). Modbus only supports TCP ports.
-    - `ZEEK_PORTS_OMRON_FINS` - Specify the ports for the [ICSNPP-Omron-FINS analyzer](https://github.com/cisagov/icsnpp-omron-fins). Omron FINS supports but UDP and TCP ports.
-    - `ZEEK_PORTS_OPCUA_BINARY` - Specify the ports for the [ICSNPP-OPCUA-Binary analyzer](https://github.com/cisagov/icsnpp-opcua-binary). OPCUA Binary only supports TCP ports.
-    - `ZEEK_PORTS_PROFINET_IO_CM` - Specify the ports for the [ICSNPP-Profinet-IO-CM analyzer](https://github.com/cisagov/icsnpp-profinet-io-cm). Profinet-IO-CM only supports UDP ports.
-    - `ZEEK_PORTS_ROC_PLUS` - Specify the ports for the [ICSNPP-ROC+ analyzer](https://github.com/cisagov/icsnpp-roc-plus). ROC+ supports both TCP and UDP ports. 
-    - `ZEEK_PORTS_S7COMM` - Specify the ports for the [ICSNPP-S7Comm analyzer](https://github.com/cisagov/icsnpp-roc-plus). S7Comm only supports TCP ports.
-    - `ZEEK_PORTS_SYNCHROPHASOR` - Specify the ports for the [ICSNPP-Synchrophasor analyzer](https://github.com/cisagov/icsnpp-synchrophasor/). ROC+ supports both TCP and UDP ports. 
+        + `ZEEK_PORTS_BACNET` - Specify the ports for the [ICSNPP-BACnet analyzer](https://github.com/cisagov/icsnpp-bacnet). BACnet only supports UDP ports.
+        + `ZEEK_PORTS_C1222` - Specify the ports for the [ICSNPP-C1222 analyzer](https://github.com/cisagov/icsnpp-c1222). C1222 supports both TCP and UDP ports.
+        + `ZEEK_PORTS_ENIP` - Specify the ports for the [ICSNPP-ENIP analyzer](https://github.com/cisagov/icsnpp-enip/). ENIP supports both TCP and UDP ports.
+        + `ZEEK_PORTS_GE_SRTP` - Specify the ports for the [ICSNPP-GE-SRTP analyzer](https://github.com/cisagov/icsnpp-ge-srtp). GE-SRTP only supports TCP ports.
+        + `ZEEK_PORTS_GENISYS` - Specify the ports for the [ICSNPP-Genysis analyzer](https://github.com/cisagov/icsnpp-genisys/). Genysis only supports TCP ports.
+        + `ZEEK_PORTS_HART_IP` - Specify the ports for the [ICSNPP-HART-IP analyzer](https://github.com/cisagov/icsnpp-hart-ip). HART-IP supports both UDP and TCP ports.
+        + `ZEEK_PORTS_MODBUS` - Specify the ports for the [ICSNPP-Modbus analyzer](https://github.com/cisagov/icsnpp-modbus). Modbus only supports TCP ports.
+        + `ZEEK_PORTS_OMRON_FINS` - Specify the ports for the [ICSNPP-Omron-FINS analyzer](https://github.com/cisagov/icsnpp-omron-fins). Omron FINS supports but UDP and TCP ports.
+        + `ZEEK_PORTS_OPCUA_BINARY` - Specify the ports for the [ICSNPP-OPCUA-Binary analyzer](https://github.com/cisagov/icsnpp-opcua-binary). OPCUA Binary only supports TCP ports.
+        + `ZEEK_PORTS_PROFINET_IO_CM` - Specify the ports for the [ICSNPP-Profinet-IO-CM analyzer](https://github.com/cisagov/icsnpp-profinet-io-cm). Profinet-IO-CM only supports UDP ports.
+        + `ZEEK_PORTS_ROC_PLUS` - Specify the ports for the [ICSNPP-ROC+ analyzer](https://github.com/cisagov/icsnpp-roc-plus). ROC+ supports both TCP and UDP ports.
+        + `ZEEK_PORTS_S7COMM` - Specify the ports for the [ICSNPP-S7Comm analyzer](https://github.com/cisagov/icsnpp-roc-plus). S7Comm only supports TCP ports.
+        + `ZEEK_PORTS_SYNCHROPHASOR` - Specify the ports for the [ICSNPP-Synchrophasor analyzer](https://github.com/cisagov/icsnpp-synchrophasor/). ROC+ supports both TCP and UDP ports.
     - `ZEEK_DISABLE_INTEL_OFFLINE`/`ZEEK_DISABLE_INTEL_LIVE` - if set to `true`, Zeek will not `@load` the files under `./zeek/intel` as described in [**Zeek Intelligence Framework**](zeek-intel.md#ZeekIntel) for historical PCAP processing/live traffic capture, respectively
     - `ZEEK_DISABLE_ICS_ALL` and `ZEEK_DISABLE_ICS_…` - if set to `true`, these variables can be used to disable Zeek's protocol analyzers for Operational Technology/Industrial Control Systems (OT/ICS) protocols
     - `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess)
