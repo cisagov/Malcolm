@@ -23,7 +23,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES,
 )
 from scripts.malcolm_common import ValidNetBoxSubnetFilter
-from scripts.malcolm_constants import WidgetType, MALCOLM_ENRICHABLE_LOG_TYPES, MALCOLM_ENRICHABLE_LOG_TYPES_DEFAULT
+from scripts.malcolm_constants import WidgetType, MALCOLM_ENRICHABLE_LOG_TYPES
 
 CONFIG_ITEM_NETBOX_MODE = ConfigItem(
     key=KEY_CONFIG_ITEM_NETBOX_MODE,
@@ -94,7 +94,7 @@ CONFIG_ITEM_NETBOX_SITE_NAME = ConfigItem(
 CONFIG_ITEM_NETBOX_ENRICHED_LOG_TYPES = ListOfStringsConfigItem(
     key=KEY_CONFIG_ITEM_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES,
     label="NetBox-Enriched Log Types",
-    default_value=MALCOLM_ENRICHABLE_LOG_TYPES_DEFAULT,
+    default_value=["default"],
     validator=lambda x: (isinstance(x, str) and (x in MALCOLM_ENRICHABLE_LOG_TYPES))
     or (
         isinstance(x, list)

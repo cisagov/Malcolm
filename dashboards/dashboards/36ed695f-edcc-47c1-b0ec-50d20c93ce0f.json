@@ -360,7 +360,7 @@
           "zeek.intel.category",
           "threat.indicator.type",
           "zeek.intel.seen_where",
-          "threat.group.name,"
+          "threat.group.name",
           "zeek.intel.threat_score",
           "threat.indicator.provider",
           "event.id"
