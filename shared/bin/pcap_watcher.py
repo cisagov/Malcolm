@@ -89,6 +89,17 @@ DatabaseClass, DatabaseInitArgs, SearchClass, ConnectionError, ConnectionTimeout
 
 
 ###################################################################################################
+# printable name for a DatabaseMode, for log messages. Never raises, since some of these messages
+#   are logged from exception handlers (e.g., the fail-open duplicate check) where a formatting
+#   error would escape the handler and cost us the capture.
+def database_mode_str(mode):
+    try:
+        return malcolm_utils.DatabaseModeEnumToStr(mode) or str(mode)
+    except Exception:
+        return str(mode)
+
+
+###################################################################################################
 # watch files written to and moved to this directory
 class EventWatcher:
     def __init__(self, logger=None):
@@ -116,7 +127,7 @@ class EventWatcher:
             while (not connected) and (not shuttingDown[0]):
                 try:
                     try:
-                        self.logger.info(f"{scriptName}:\tconnecting to {args.opensearchMode} {args.opensearchUrl}...")
+                        self.logger.info(f"{scriptName}:\tconnecting to {database_mode_str(args.opensearchMode)} {args.opensearchUrl}...")
                         self.openSearchClient = DatabaseClass(
                             hosts=[args.opensearchUrl],
                             **DatabaseInitArgs,
@@ -141,11 +152,11 @@ class EventWatcher:
                         NewConnectionError,
                         AuthenticationException,
                     ) as connError:
-                        self.logger.critical(f"{scriptName}:\t{args.opensearchMode} connection error: {connError}")
+                        self.logger.critical(f"{scriptName}:\t{database_mode_str(args.opensearchMode)} connection error: {connError}")
 
                 except Exception as genericError:
                     self.logger.critical(
-                        f"{scriptName}:\tUnexpected exception while connecting to {args.opensearchMode}: {genericError}"
+                        f"{scriptName}:\tUnexpected exception while connecting to {database_mode_str(args.opensearchMode)}: {genericError}"
                     )
 
                 if (not connected) and args.opensearchWaitForHealth:
@@ -158,7 +169,7 @@ class EventWatcher:
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
             while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown[0]):
                 try:
-                    self.logger.info(f"{scriptName}:\twaiting for {args.opensearchMode} to be healthy")
+                    self.logger.info(f"{scriptName}:\twaiting for {database_mode_str(args.opensearchMode)} to be healthy")
                     self.openSearchClient.cluster.health(
                         index=ARKIME_FILES_INDEX,
                         wait_for_status='yellow',
@@ -173,12 +184,12 @@ class EventWatcher:
                     NewConnectionError,
                     AuthenticationException,
                 ) as connError:
-                    self.logger.debug(f"{scriptName}:\t{args.opensearchMode} health check: {connError}")
+                    self.logger.debug(f"{scriptName}:\t{database_mode_str(args.opensearchMode)} health check: {connError}")
 
                 if not healthy:
                     time.sleep(1)
 
-            self.useOpenSearch = connected and healthy
+            self.useOpenSearch = connected and (healthy or not args.opensearchWaitForHealth)
 
         # initialize ZeroMQ context and socket(s) to publish messages to
         self.context = zmq.Context()
@@ -215,17 +226,24 @@ class EventWatcher:
                 # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
                 fileIsDuplicate = False
                 if self.useOpenSearch:
-                    s = (
-                        SearchClass(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
-                        .filter("regexp", node=fr"{args.nodeName}(-upload)?")
-                        .query("wildcard", name=f"*{os.path.sep}{relativePath}")
-                    )
-                    response = s.execute()
-                    for hit in response:
-                        fileInfo = hit.to_dict()
-                        if (ARKIME_FILE_SIZE_FIELD in fileInfo) and (fileInfo[ARKIME_FILE_SIZE_FIELD] == fileSize):
-                            fileIsDuplicate = True
-                            break
+                    try:
+                        s = (
+                            SearchClass(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
+                            .filter("terms", node=[args.nodeName, f"{args.nodeName}-upload"])
+                            .query("wildcard", name=f"*{os.path.sep}{relativePath}")
+                        )
+                        response = s.execute()
+                        for hit in response:
+                            fileInfo = hit.to_dict()
+                            if (ARKIME_FILE_SIZE_FIELD in fileInfo) and (fileInfo[ARKIME_FILE_SIZE_FIELD] == fileSize):
+                                fileIsDuplicate = True
+                                break
+                    except Exception as e:
+                        # An unavailable cluster or missing index must not cost us a capture.
+                        self.logger.warning(
+                            f"{scriptName}:\t{database_mode_str(args.opensearchMode)} duplicate check failed for {pathname}, "
+                            f"processing it anyway: {e}"
+                        )
 
                 if fileIsDuplicate:
                     # this is duplicate file (it's been processed before) so ignore it

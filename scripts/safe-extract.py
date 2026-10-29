@@ -14,6 +14,11 @@ import re
 import shutil
 import subprocess
 
+try:
+    from compression import zstd as _zstd
+except ImportError:
+    _zstd = None
+
 ARCHIVE_EXTRACT_FLAGS = (
     libarchive.extract.EXTRACT_SECURE_NODOTDOT
     | libarchive.extract.EXTRACT_SECURE_NOABSOLUTEPATHS
@@ -34,9 +39,12 @@ ARCHIVE_RAW_STREAM_MIMES = {
     'application/x-xz': lzma.open,
     'application/x-lzma': lzma.open,
 }
+if _zstd:
+    ARCHIVE_RAW_STREAM_MIMES['application/zstd'] = _zstd.open
+    ARCHIVE_RAW_STREAM_MIMES['application/x-zstd'] = _zstd.open
 
 TAR_COMPRESSED_EXTS = re.compile(
-    r'\.(tgz|tbz2?|txz|tlz|tar\.(gz|bz2|xz|lz|lzma))$',
+    r'\.(tgz|tbz2?|txz|tlz|tzst|tar\.(gz|bz2|xz|lz|lzma|zst))$',
     flags=re.IGNORECASE,
 )
 
@@ -50,7 +58,7 @@ class ArchiveBombError(Exception):
 def _strip_compression_ext(path):
     return (
         re.sub(
-            r'\.(gz|bz2|xz|lz|lzma)$',
+            r'\.(gz|bz2|xz|lz|lzma|zst)$',
             '',
             os.path.basename(path),
             flags=re.IGNORECASE,
@@ -104,10 +112,11 @@ def _extract_libarchive(archive, dest):
     Validates directory entry paths to prevent traversal outside dest."""
     count = 0
     total_bytes = 0
+    real_source = os.path.realpath(archive)
     real_dest = os.path.realpath(dest)
 
     with malcolm_utils.pushd(dest):
-        with libarchive.read.file_reader(archive) as a:
+        with libarchive.read.file_reader(real_source) as a:
             for entry in a:
                 count += 1
                 total_bytes += getattr(entry, 'size', 0) or 0
@@ -132,7 +141,7 @@ def _extract_libarchive(archive, dest):
                     # Validate resolved path stays within dest before creating;
                     # os.makedirs with a raw entry.pathname has no traversal
                     # protection unlike file entries handled via ARCHIVE_EXTRACT_FLAGS.
-                    target = os.path.realpath(os.path.join(dest, entry.pathname))
+                    target = os.path.realpath(os.path.join(real_dest, entry.pathname))
                     if target != real_dest and not target.startswith(real_dest + os.sep):
                         raise ArchiveBombError(
                             f"directory traversal detected: {entry.pathname!r} resolves outside dest"
@@ -145,8 +154,8 @@ def _extract_libarchive(archive, dest):
 
 def safe_extract(archive, dest):
     os.makedirs(dest, exist_ok=False)
-    file_mime_type = magic.from_file(archive, mime=True)
     try:
+        file_mime_type = magic.from_file(archive, mime=True)
         if TAR_COMPRESSED_EXTS.search(archive):
             _extract_libarchive(archive, dest)
         elif file_mime_type in ARCHIVE_RAW_STREAM_MIMES:
@@ -155,7 +164,9 @@ def safe_extract(archive, dest):
             _extract_lzip(archive, dest)
         else:
             _extract_libarchive(archive, dest)
-    except ArchiveBombError:
+    except Exception:
+        # This call created dest, so remove incomplete output on any extraction
+        # failure before a caller can mistake partial logs for a valid archive.
         shutil.rmtree(dest, ignore_errors=True)
         raise
 

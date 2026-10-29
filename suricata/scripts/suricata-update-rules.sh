@@ -79,11 +79,12 @@ if type suricata-update >/dev/null 2>&1; then
 
     SURICATA_RUN_DIR="${SURICATA_RUN_DIR:-}"
     [[ -z "$SURICATA_RUN_DIR" ]] && SURICATA_RUN_DIR="${SUPERVISOR_PATH:-/var/run}/suricata"
-    SURICATA_SOCKET="$SURICATA_RUN_DIR"/suricata-command.socket
-
-    if test -S "$SURICATA_SOCKET" 2>/dev/null; then
-      suricatasc "$SURICATA_SOCKET" -c ruleset-reload-nonblocking >/dev/null 2>&1 || true
-    fi
+    # live capture uses suricata-command.socket, PCAP processing uses suricata-command-N.socket
+    for SURICATA_SOCKET in "$SURICATA_RUN_DIR"/suricata-command*.socket; do
+      if test -S "$SURICATA_SOCKET" 2>/dev/null; then
+        suricatasc "$SURICATA_SOCKET" -c ruleset-reload-nonblocking >/dev/null 2>&1 || true
+      fi
+    done
 
 else
   exit 1

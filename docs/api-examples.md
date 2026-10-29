@@ -1,6 +1,12 @@
 # <a name="APIExamples"></a>Examples
 
-Some security-related API examples:
+The following examples illustrate field aggregations over sample security data. Counts, time ranges, and dashboard links vary with the query and indexed data. The example shard counters illustrate a healthy search; inspect the values returned by your own requests.
+
+Responses use the requested field names as aggregation keys, including nested levels. Each example includes `shards` and `timed_out`. An HTTP 200 response can still contain partial results; see [Search completeness](api.md#search-completeness).
+
+For document sorting, offset paging, and total hit counts, see [Document Lookup](api-document-lookup.md#examples).
+
+Aggregation examples:
 
 * [Protocols](#Protocols)
 * [Software](#Software)
@@ -34,22 +40,22 @@ Some security-related API examples:
     "urls": [
         "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "network.type": {
         "buckets": [
             {
                 "doc_count": 442240,
                 "key": "ipv4",
-                "values": {
+                "network.transport": {
                     "buckets": [
                         {
                             "doc_count": 279538,
                             "key": "udp",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [
                                     {
                                         "doc_count": 266527,
                                         "key": "bacnet",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -58,7 +64,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 12365,
                                         "key": "dns",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -67,7 +73,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 78,
                                         "key": "dhcp",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -76,7 +82,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 44,
                                         "key": "ntp",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [
                                                 {
                                                     "doc_count": 22,
@@ -90,7 +96,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 3,
                                         "key": "enip",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -99,7 +105,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 2,
                                         "key": "krb",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -108,7 +114,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 1,
                                         "key": "syslog",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -122,12 +128,12 @@ Some security-related API examples:
                         {
                             "doc_count": 30824,
                             "key": "tcp",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [
                                     {
                                         "doc_count": 7097,
                                         "key": "smb",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [
                                                 {
                                                     "doc_count": 4244,
@@ -145,7 +151,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 1792,
                                         "key": "http",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [
                                                 {
                                                     "doc_count": 829,
@@ -163,7 +169,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 1280,
                                         "key": "dce_rpc",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -172,7 +178,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 857,
                                         "key": "s7comm",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -181,7 +187,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 426,
                                         "key": "ntlm",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -190,7 +196,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 378,
                                         "key": "gssapi",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -199,7 +205,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 146,
                                         "key": "tds",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -208,7 +214,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 125,
                                         "key": "ssl",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -217,7 +223,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 91,
                                         "key": "tls",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [
                                                 {
                                                     "doc_count": 48,
@@ -235,7 +241,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 29,
                                         "key": "ssh",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [
                                                 {
                                                     "doc_count": 18,
@@ -249,7 +255,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 26,
                                         "key": "modbus",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -258,7 +264,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 17,
                                         "key": "iso_cotp",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -267,7 +273,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 8,
                                         "key": "enip",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -276,7 +282,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 6,
                                         "key": "rdp",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -285,7 +291,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 4,
                                         "key": "ftp",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -294,7 +300,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 4,
                                         "key": "krb",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -303,7 +309,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 4,
                                         "key": "rfb",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -312,7 +318,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 3,
                                         "key": "ldap",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -321,7 +327,7 @@ Some security-related API examples:
                                     {
                                         "doc_count": 2,
                                         "key": "telnet",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -335,7 +341,7 @@ Some security-related API examples:
                         {
                             "doc_count": 848,
                             "key": "icmp",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -349,17 +355,17 @@ Some security-related API examples:
             {
                 "doc_count": 1573,
                 "key": "ipv6",
-                "values": {
+                "network.transport": {
                     "buckets": [
                         {
                             "doc_count": 1486,
                             "key": "udp",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [
                                     {
                                         "doc_count": 1433,
                                         "key": "dns",
-                                        "values": {
+                                        "network.protocol_version": {
                                             "buckets": [],
                                             "doc_count_error_upper_bound": 0,
                                             "sum_other_doc_count": 0
@@ -373,7 +379,7 @@ Some security-related API examples:
                         {
                             "doc_count": 80,
                             "key": "icmp",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -387,7 +393,14 @@ Some security-related API examples:
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -411,12 +424,12 @@ Some security-related API examples:
     "urls": [
         "/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "zeek.software.name": {
         "buckets": [
             {
                 "doc_count": 6,
                 "key": "Chrome",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -446,7 +459,7 @@ Some security-related API examples:
             {
                 "doc_count": 6,
                 "key": "Nmap-SSH",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 3,
@@ -464,7 +477,7 @@ Some security-related API examples:
             {
                 "doc_count": 5,
                 "key": "MSIE",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -490,7 +503,7 @@ Some security-related API examples:
             {
                 "doc_count": 4,
                 "key": "Firefox",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -512,7 +525,7 @@ Some security-related API examples:
             {
                 "doc_count": 3,
                 "key": "ECS (sec",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -530,7 +543,7 @@ Some security-related API examples:
             {
                 "doc_count": 3,
                 "key": "NmapNSE",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 3,
@@ -544,7 +557,7 @@ Some security-related API examples:
             {
                 "doc_count": 2,
                 "key": "<unknown browser>",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -558,7 +571,7 @@ Some security-related API examples:
             {
                 "doc_count": 2,
                 "key": "Microsoft-Windows",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -572,7 +585,7 @@ Some security-related API examples:
             {
                 "doc_count": 2,
                 "key": "Microsoft-Windows-NT",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -586,7 +599,7 @@ Some security-related API examples:
             {
                 "doc_count": 2,
                 "key": "SimpleHTTP",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -600,7 +613,7 @@ Some security-related API examples:
             {
                 "doc_count": 2,
                 "key": "Windows-Media-Player-DMS",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 2,
@@ -614,7 +627,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "A-B WWW",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -628,7 +641,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "CONF-CTR-NAE1",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -642,7 +655,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "ClearSCADA",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -656,7 +669,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "GoAhead-Webs",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -670,7 +683,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "MSFT",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -684,7 +697,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "Microsoft-IIS",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -698,7 +711,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "Microsoft-WebDAV-MiniRedir",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -712,7 +725,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "Python-urllib",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -726,7 +739,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "Schneider-WEB/V",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -740,7 +753,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "Version",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -754,7 +767,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "nginx",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -768,7 +781,7 @@ Some security-related API examples:
             {
                 "doc_count": 1,
                 "key": "sublime-license-check",
-                "values": {
+                "zeek.software.unparsed_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -782,7 +795,14 @@ Some security-related API examples:
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -802,7 +822,7 @@ Some security-related API examples:
         1970,
         1643067845
     ],
-    "values": {
+    "user_agent.original": {
         "buckets": [
             {
                 "doc_count": 230,
@@ -883,7 +903,14 @@ Some security-related API examples:
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -913,7 +940,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
     "urls": [
         "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "network.protocol": {
         "buckets": [
             {
                 "doc_count": 202597,
@@ -942,7 +969,14 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -971,17 +1005,17 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
     "urls": [
         "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "source.segment": {
         "buckets": [
             {
                 "doc_count": 6893,
                 "key": "Corporate",
-                "values": {
+                "destination.segment": {
                     "buckets": [
                         {
                             "doc_count": 6893,
                             "key": "OT",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [
                                     {
                                         "doc_count": 891,
@@ -1016,12 +1050,12 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 189,
                 "key": "OT",
-                "values": {
+                "destination.segment": {
                     "buckets": [
                         {
                             "doc_count": 138,
                             "key": "Corporate",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [
                                     {
                                         "doc_count": 128,
@@ -1035,7 +1069,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
                         {
                             "doc_count": 51,
                             "key": "DMZ",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -1049,12 +1083,12 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 28,
                 "key": "Battery Network",
-                "values": {
+                "destination.segment": {
                     "buckets": [
                         {
                             "doc_count": 25,
                             "key": "Combined Cycle BOP",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -1063,7 +1097,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
                         {
                             "doc_count": 3,
                             "key": "Solar Panel Network",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -1077,12 +1111,12 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 20,
                 "key": "Combined Cycle BOP",
-                "values": {
+                "destination.segment": {
                     "buckets": [
                         {
                             "doc_count": 11,
                             "key": "Battery Network",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -1091,7 +1125,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
                         {
                             "doc_count": 9,
                             "key": "Solar Panel Network",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -1105,12 +1139,12 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 1,
                 "key": "Solar Panel Network",
-                "values": {
+                "destination.segment": {
                     "buckets": [
                         {
                             "doc_count": 1,
                             "key": "Combined Cycle BOP",
-                            "values": {
+                            "network.protocol": {
                                 "buckets": [],
                                 "doc_count_error_upper_bound": 0,
                                 "sum_other_doc_count": 0
@@ -1124,7 +1158,14 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -1151,7 +1192,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
     "urls": [
         "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "network.protocol": {
         "buckets": [
             {
                 "doc_count": 20,
@@ -1160,7 +1201,14 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -1188,12 +1236,12 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
     "urls": [
         "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "network.protocol": {
         "buckets": [
             {
                 "doc_count": 4244,
                 "key": "smb",
-                "values": {
+                "network.protocol_version": {
                     "buckets": [
                         {
                             "doc_count": 4244,
@@ -1207,7 +1255,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 2,
                 "key": "ftp",
-                "values": {
+                "network.protocol_version": {
                     "buckets": [],
                     "doc_count_error_upper_bound": 0,
                     "sum_other_doc_count": 0
@@ -1216,7 +1264,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 2,
                 "key": "rdp",
-                "values": {
+                "network.protocol_version": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -1234,7 +1282,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 2,
                 "key": "telnet",
-                "values": {
+                "network.protocol_version": {
                     "buckets": [],
                     "doc_count_error_upper_bound": 0,
                     "sum_other_doc_count": 0
@@ -1243,7 +1291,14 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -1268,12 +1323,12 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         "/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))",
         "/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "zeek.notice.category": {
         "buckets": [
             {
                 "doc_count": 100,
                 "key": "ATTACK",
-                "values": {
+                "zeek.notice.sub_category": {
                     "buckets": [
                         {
                             "doc_count": 42,
@@ -1307,7 +1362,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 14,
                 "key": "EternalSafety",
-                "values": {
+                "zeek.notice.sub_category": {
                     "buckets": [
                         {
                             "doc_count": 11,
@@ -1325,7 +1380,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 6,
                 "key": "Scan",
-                "values": {
+                "zeek.notice.sub_category": {
                     "buckets": [
                         {
                             "doc_count": 6,
@@ -1339,7 +1394,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             {
                 "doc_count": 1,
                 "key": "Ripple20",
-                "values": {
+                "zeek.notice.sub_category": {
                     "buckets": [
                         {
                             "doc_count": 1,
@@ -1353,7 +1408,14 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```
 
@@ -1377,7 +1439,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         "/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))",
         "/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
-    "values": {
+    "event.severity_tags": {
         "buckets": [
             {
                 "doc_count": 160180,
@@ -1474,6 +1536,13 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
         ],
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
-    }
+    },
+    "shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+    },
+    "timed_out": false
 }
 ```

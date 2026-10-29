@@ -67,9 +67,9 @@ class Program(BaseModel):
     healthy: bool | None = None
 
 
-HAS_STARTED: Final = {'RUNNING', 'EXITED', 'FATAL', 'BACKOFF', 'STOPPING'}
-NOT_RUNNING: Final = {'STOPPED', 'EXITED', 'FATAL', 'BACKOFF'}
-ERRORED: Final = {'FATAL', 'BACKOFF', 'UNKNOWN'}
+HAS_STARTED: Final = {'running', 'exited', 'fatal', 'backoff', 'stopping'}
+NOT_RUNNING: Final = {'stopped', 'exited', 'fatal', 'backoff'}
+ERRORED: Final = {'fatal', 'backoff', 'unknown'}
 
 
 @app.route('/')
@@ -91,10 +91,10 @@ def health() -> Any:
         procs: list[dict] = cast(list[dict], rpc.supervisor.getAllProcessInfo())
         programs: dict[str, list[Program]] = {}
 
-        for cfg, proc in zip(
-            sorted(config, key=lambda e: e['name']),
-            sorted(procs, key=lambda e: e['name']),
-        ):
+        # Configurations can include unloaded groups, and names repeat across groups.
+        config_by_process = {(cfg['group'], cfg['name']): cfg for cfg in config}
+        for proc in sorted(procs, key=lambda e: e['name']):
+            cfg = config_by_process[(proc['group'], proc['name'])]
             prog = Program(
                 name=proc['name'],
                 state=proc['statename'].lower(),
@@ -105,7 +105,7 @@ def health() -> Any:
                 prog.start = proc['start']
             if prog.state in NOT_RUNNING:
                 if prog.start:
-                    prog.stop = proc['end']
+                    prog.stop = proc['stop']
                     prog.exitstatus = proc['exitstatus']
             if (
                 (prog.state in ERRORED)

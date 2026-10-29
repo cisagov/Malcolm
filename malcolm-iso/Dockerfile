@@ -1,4 +1,4 @@
-FROM ghcr.io/mmguero/qemu-live-iso:latest
+FROM ghcr.io/mmguero/qemu-live-iso:latest@sha256:5b59c90d26b4727f754ad15493043f6b10849a9ba73f446839e68ab56e9a5c39
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -18,6 +18,6 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title="ghcr.io/idaholab/malcolm/${IMAGE_NAME}"
 LABEL org.opencontainers.image.description="Malcolm network traffic analysis tool suite ISO (${IMAGE_NAME} flavor) in qemu"
 
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/icon/favicon.ico /image/favicon.ico
+ADD --checksum=sha256:cccc06ae4a8db2b22ed7951e62d82bcc7284a6d0e9ae35a919b1e20e6082454a --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/icon/favicon.ico /image/favicon.ico
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} ${IMAGE_NAME}-*.log /image/
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} ${IMAGE_NAME}-*.iso /image/live.iso

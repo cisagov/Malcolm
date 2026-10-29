@@ -56,3 +56,4 @@ __pypackages__/
 *.py[cod]
 *$py.class
 .DS_Store
+filescan/python-filescan/filescan/strelka/proto/strelka_pb2*

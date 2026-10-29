@@ -24,11 +24,13 @@ jobs:
   test-lua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install Lua
-        run: sudo apt-get install -y --no-install-recommends lua5.4
+        run: sudo apt-get install -y --no-install-recommends lua5.4 lua-rex-pcre2
       - name: Run normalize_uri_for_rbac regression tests
         run: lua5.4 nginx/lua/test_normalize_uri.lua
+      - name: Run OpenSearch RBAC regression tests
+        run: lua5.4 nginx/lua/test_opensearch_rbac.lua
 
   docker:
     needs: test-lua

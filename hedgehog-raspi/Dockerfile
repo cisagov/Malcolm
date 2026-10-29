@@ -1,4 +1,4 @@
-FROM ghcr.io/mmguero/qemu-live-iso:latest
+FROM ghcr.io/mmguero/qemu-live-iso:latest@sha256:5b59c90d26b4727f754ad15493043f6b10849a9ba73f446839e68ab56e9a5c39
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -21,7 +21,7 @@ ENV NOVNC_START false
 ENV QEMU_RESTART false
 ENV QEMU_START false
 
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/hedgehog/logo/favicon.ico /image/favicon.ico
+ADD --checksum=sha256:b1d94443c94669edeb65089043f3cc1c43c1903270cfe09acdec5f57ddafcdba --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/hedgehog/logo/favicon.ico /image/favicon.ico
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} raspi_*.* /image/
 
 RUN ls /image/raspi_*.img.xz

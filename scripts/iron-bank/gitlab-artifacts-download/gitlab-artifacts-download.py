@@ -50,6 +50,9 @@ SERVICE_TO_PROJECT_ID_MAP: dict[str, int] = {
     # Malcolm IB project IDs
     "api": 18631,
     "arkime": 18632,
+    "base_alpine": 19333,
+    "base_debian": 19331,
+    "base_debian_python": 19332,
     "dashboards_helper": 18633,
     "dashboards": 18634,
     "dirinit": 18635,

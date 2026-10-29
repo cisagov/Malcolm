@@ -266,7 +266,7 @@ def checkEnvFilesAndValues():
                             )
                             if not os.path.isfile(sourceEnvFileName):
                                 sourceEnvFileName = os.path.join(
-                                    examplesConfigDir, next(iter(get_iterable(sourceEnv))).replace('_', '-') + '.env'
+                                    examplesConfigDir, next(iter(get_iterable(sourceEnv))).replace('_', '-') + '.env.example'
                                 )
                             if os.path.isfile(sourceEnvFileName):
                                 sourceVars = dotenvImported.dotenv_values(sourceEnvFileName)
@@ -324,9 +324,12 @@ def checkEnvFilesAndValues():
                                             )
 
                                         elif isinstance(sourceKey, dict) and (
-                                            destVal := {
-                                                str(k): str(v) for k, v in sourceKey[sourceVarName].items()
-                                            }.get(str(sourceVars[sourceVarName]), None)
+                                            (
+                                                destVal := {
+                                                    str(k): str(v) for k, v in sourceKey[sourceVarName].items()
+                                                }.get(str(sourceVars[sourceVarName]), None)
+                                            )
+                                            is not None
                                         ):
                                             logging.info(
                                                 f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
@@ -340,10 +343,7 @@ def checkEnvFilesAndValues():
                                                 )
                                             )
                                 if destEnvValues:
-                                    UpdateEnvFiles(
-                                        destEnvValues,
-                                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
-                                    )
+                                    UpdateEnvFiles(destEnvValues)
 
                 # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
                 if 'removed_environment_variables' in envVarActionsYaml:
@@ -1452,8 +1452,8 @@ def start():
             os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')),
         ]:
             if os.path.isfile(authFile):
-                # chmod 644 authFile
-                os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+                # chmod 640 authFile
+                os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
         for authFile in [
             os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')),
             os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'),
@@ -1883,9 +1883,9 @@ def authSetup():
             ),
             (
                 'arkime',
-                "Store password hash secret for Arkime viewer cluster",
+                "Store viewer password hash secret and WISE web config code for Arkime",
                 False,
-                (not args.cmdAuthSetupNonInteractive) or bool(args.authArkimePassword),
+                (not args.cmdAuthSetupNonInteractive) or bool(args.authArkimePassword) or bool(args.authArkimeWisePin),
                 [],
             ),
             (
@@ -2896,14 +2896,46 @@ def authSetup():
                     if (not arkimePassword) and args.cmdAuthSetupNonInteractive and args.authArkimePassword:
                         arkimePassword = args.authArkimePassword
 
+                    # prompt WISE pin
+                    arkimeWisePin = None
+                    arkimeWisePinConfirm = None
+
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid WISE web config code')
+                    while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
+                        arkimeWisePin = AskForPassword(
+                            f"Arkime WISE web config code: ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        if arkimeWisePin:
+                            arkimeWisePinConfirm = AskForPassword(
+                                f"Arkime WISE web config code (again): ",
+                                default='',
+                                defaultBehavior=defaultBehavior,
+                            )
+                            if arkimeWisePin and (arkimeWisePin == arkimeWisePinConfirm):
+                                break
+                            logging.error("Values do not match")
+                        else:
+                            break
+
+                    if (not arkimeWisePin) and args.cmdAuthSetupNonInteractive and args.authArkimeWisePin:
+                        arkimeWisePin = args.authArkimeWisePin
+
                     with pushd(args.configDir):
                         UpdateEnvFiles(
                             [
                                 EnvValue(
-                                    True,
+                                    bool(arkimePassword),
                                     'arkime-secret.env',
                                     'ARKIME_PASSWORD_SECRET',
                                     arkimePassword,
+                                ),
+                                EnvValue(
+                                    bool(arkimeWisePin),
+                                    'arkime-secret.env',
+                                    'ARKIME_WISE_CONFIG_PIN_CODE',
+                                    arkimeWisePin,
                                 ),
                             ],
                             stat.S_IRUSR | stat.S_IWUSR,
@@ -3217,7 +3249,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "26.09.0"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "26.10.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
@@ -3318,8 +3350,17 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default='Malcolm',
-        help='Password hash secret for Arkime viewer cluster (for --auth-noninteractive)',
+        default='',
+        help='Password hash secret for Arkime viewer (for --auth-noninteractive)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-arkime-wise-pin',
+        dest='authArkimeWisePin',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='WISE web config code for Arkime (for --auth-noninteractive)',
     )
     authSetupGroup.add_argument(
         '--auth-generate-webcerts',

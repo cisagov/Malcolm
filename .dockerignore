@@ -55,3 +55,4 @@ netbox/custom-plugins
 netbox/custom-scripts
 zeek/custom
 logstash/maps/otkb_fixture.json
+filescan/python-filescan/filescan/strelka/proto/strelka_pb2*

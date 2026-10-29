@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""Aggregate GitHub release downloads and GHCR package pull counts."""
+
 import argparse
-import github3 as github
+from collections import defaultdict
+from datetime import datetime
 import json
 import logging
-import mmguero
 import os
 import re
-import requests
 import sys
 
-from collections import defaultdict
-from dateparser import parse as ParseDate
-from datetime import datetime
-from tzlocal import get_localzone
 from bs4 import BeautifulSoup
+from dateparser import parse as ParseDate
+import github3 as github
+import mmguero
+import requests
+from tzlocal import get_localzone
 
-###################################################################################################
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
-
 GITHUB_API_REQUESTS_PER_PAGE = 30
 
 
-###################################################################################################
-# main
-def main():
+def build_parser():
     parser = argparse.ArgumentParser(
         description='\n'.join(
             [
@@ -53,7 +51,7 @@ def main():
         '-t',
         '--token',
         dest='githubToken',
-        help=f'GitHub API token',
+        help='GitHub API token',
         metavar='<str>',
         type=str,
         default=os.getenv('GITHUB_TOKEN', os.getenv('GITHUB_OAUTH_TOKEN', '')),
@@ -61,7 +59,7 @@ def main():
     parser.add_argument(
         '--token-file',
         dest='githubTokenFile',
-        help=f'GitHub API token (read from filename)',
+        help='GitHub API token (read from filename)',
         metavar='<str>',
         type=str,
         default=os.getenv('GITHUB_TOKEN_FILE', os.getenv('GITHUB_OAUTH_TOKEN_FILE', '')),
@@ -125,217 +123,210 @@ def main():
         default=[],
         help="List of regular expressions against which to match container image tags (e.g., ^24\\.10)",
     )
+    return parser
+
+
+def compile_patterns(expressions):
+    """Compile user-supplied filters, retaining their original labels."""
+    return {text: re.compile(text) for text in expressions}
+
+
+def matches_any(value, patterns):
+    """Match the start of a value, or accept everything if filters are empty."""
+    return isinstance(value, str) and (not patterns or any(regex.match(value) for regex in patterns.values()))
+
+
+def parse_timestamp(value, local_zone):
+    """Convert a date string or datetime into an offset-aware datetime."""
+    parsed = ParseDate(value) if isinstance(value, str) else value
+    if not isinstance(parsed, datetime):
+        return None
+    return parsed.replace(tzinfo=local_zone) if parsed.tzinfo is None else parsed
+
+
+def parse_date_range(date_from, date_to):
+    """Resolve the requested inclusive time window before accessing the API."""
+    zone = get_localzone()
+    start = parse_timestamp(date_from, zone)
+    end = parse_timestamp(date_to, zone)
+    if start is None or end is None:
+        raise ValueError('Invalid date range: both --date-from and --date-to must be valid dates')
+    if start > end:
+        raise ValueError('--date-from must be earlier than or equal to --date-to')
+    return start, end
+
+
+def inside_range(value, date_from, date_to):
+    date_value = parse_timestamp(value, date_from.tzinfo)
+    return date_value is not None and date_from <= date_value <= date_to
+
+
+def collect_release_downloads(repo, owner, date_from, date_to, asset_patterns, release_patterns, counts):
+    """Count matching assets in matching releases for one repository."""
+    if not asset_patterns or repo is None:
+        return
+    for release in repo.releases():
+        if not inside_range(release.published_at, date_from, date_to):
+            continue
+        if not matches_any(release.tag_name, release_patterns):
+            continue
+        logging.debug('%s %s at %s', repo.full_name, release.tag_name, release.published_at)
+        for asset in release.assets():
+            for label, pattern in asset_patterns.items():
+                if pattern.match(asset.name):
+                    key = f'{owner}/{label}'
+                    counts[key] = counts.get(key, 0) + asset.download_count
+
+
+def iter_api_pages(session, url, extra_params=None):
+    """Yield all items from a paginated GitHub REST list, stopping on failure."""
+    page = 0
+    while True:
+        page += 1
+        params = {'page': page, 'per_page': GITHUB_API_REQUESTS_PER_PAGE}
+        if extra_params:
+            params.update(extra_params)
+        try:
+            response = session.get(url, params=params, allow_redirects=True)
+            response.raise_for_status()
+            records = mmguero.load_str_if_json(response.content)
+            if not isinstance(records, list):
+                return
+        except Exception as error:
+            logging.error('Listing GitHub API results for %s: %s', url, error)
+            return
+        yield from records
+        if len(records) < GITHUB_API_REQUESTS_PER_PAGE:
+            return
+
+
+def package_versions(session, package, tag_patterns, date_from, date_to):
+    """Select matching GHCR package versions by creation time and tag."""
+    owner = mmguero.deep_get(package, ['owner', 'login'])
+    if not owner:
+        return
+    image_name = mmguero.aggressive_url_encode(package['name'])
+    url = f'https://api.github.com/orgs/{owner}/packages/container/{image_name}/versions'
+    for version in iter_api_pages(session, url):
+        if not inside_range(version.get('created_at'), date_from, date_to):
+            continue
+        tags = mmguero.deep_get(version, ['metadata', 'container', 'tags']) or []
+        if any(matches_any(tag, tag_patterns) for tag in tags) or not tag_patterns:
+            yield version
+
+
+def version_download_count(session, version):
+    """Read the public GitHub package page's total-downloads figure."""
+    if not version.get('html_url'):
+        return 0
+    try:
+        response = session.get(version['html_url'], allow_redirects=True)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        label = soup.find('span', string='Total downloads')
+        count = label.find_next('span') if label else None
+        return int(count.get_text().replace(',', '')) if count else 0
+    except (AttributeError, ValueError, requests.RequestException) as error:
+        logging.error('Parsing package download count for %s: %s', version['html_url'], error)
+        return 0
+
+
+def collect_package_pull_counts(package, api_session, html_session, tag_patterns, date_from, date_to):
+    """Return keyed pull counts for one matching GHCR package."""
+    pulls = {}
+    owner = mmguero.deep_get(package, ['owner', 'login'])
+    for version in package_versions(api_session, package, tag_patterns, date_from, date_to):
+        pull_count = version_download_count(html_session, version)
+        if not pull_count:
+            continue
+        tags = mmguero.deep_get(version, ['metadata', 'container', 'tags']) or []
+        if len(tags) > 1:
+            suffix = f':({"|".join(tags)})'
+        elif tags:
+            suffix = f':{tags[0]}'
+        else:
+            suffix = '@' + version['name']
+        pulls[f"{owner}/{package['name']}{suffix}"] = pull_count
+    return pulls
+
+
+def collect_image_downloads(orgs, api_session, html_session, image_patterns, tag_patterns, date_from, date_to):
+    """Fetch qualifying GHCR images once for each distinct organisation."""
+    pulls = {}
+    if not image_patterns:
+        return pulls
+    for org in dict.fromkeys(orgs):
+        url = f'https://api.github.com/orgs/{org}/packages'
+        for package in iter_api_pages(api_session, url, {'package_type': 'container'}):
+            if not isinstance(package, dict) or not matches_any(package.get('name'), image_patterns):
+                continue
+            pulls.update(collect_package_pull_counts(
+                package, api_session, html_session, tag_patterns, date_from, date_to
+            ))
+    return pulls
+
+
+def combine_statistics(asset_downloads, image_pulls):
+    """Build JSON-friendly counters with a total for each populated section."""
+    stats = {}
+    if asset_downloads:
+        stats['release_assets'] = {**asset_downloads, 'total': sum(asset_downloads.values())}
+    if image_pulls:
+        stats['image_pulls'] = {**image_pulls, 'total': sum(image_pulls.values())}
+    return stats
+
+
+def main():
+    parser = build_parser()
     try:
         args = parser.parse_args()
-    except SystemExit as e:
-        if e.code == 2:
+    except SystemExit as error:
+        if error.code == 2:
             parser.print_help()
-        sys.exit(e.code)
+        raise
 
-    # if the GitHub token was not obtained from environment variable or as an argument,
-    #   see if it can be loaded from a file
-    if (not args.githubToken) and os.path.isfile(args.githubTokenFile):
-        with open(args.githubTokenFile) as f:
-            args.githubToken = f.readline().strip()
+    if not args.githubToken and args.githubTokenFile and os.path.isfile(args.githubTokenFile):
+        with open(args.githubTokenFile, encoding='utf-8') as token_file:
+            args.githubToken = token_file.readline().strip()
 
-    args.verbose = mmguero.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(script_path, script_name))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    args.verbose = mmguero.set_logging(os.getenv('LOGLEVEL', ''), args.verbose, set_traceback_limit=True)
+    logging.info('%s', os.path.join(script_path, script_name))
+    # Never log sys.argv or the entire Namespace: both can contain the PAT.
+    logging.info('Repositories: %s', args.repos)
 
-    # resolve the start and end times for searching
-    dateFrom = ParseDate(args.dateFromStr)
-    dateTo = ParseDate(args.dateToStr)
-    localZone = get_localzone()
-    if dateFrom.tzinfo is None:
-        dateFrom = dateFrom.replace(tzinfo=localZone)
-    if dateTo.tzinfo is None:
-        dateTo = dateTo.replace(tzinfo=localZone)
-    logging.info(f'Searching {dateFrom} to {dateTo}')
+    date_from, date_to = parse_date_range(args.dateFromStr, args.dateToStr)
+    logging.info('Searching %s to %s', date_from, date_to)
+    asset_patterns = compile_patterns(args.assetRegexes)
+    release_patterns = compile_patterns(args.releaseRegexes)
+    image_patterns = compile_patterns(args.imageRegexes)
+    tag_patterns = compile_patterns(args.imageTagRegexes)
 
-    # objects to hold our final results
-    finalResults = {}
-    imagePulls = defaultdict(lambda: 0)
-    assetDownloads = defaultdict(lambda: 0)
-    packages = []
-
-    # compile the regular expressions used for matching asset download counts
-    assetRegexes = {}
-    for reStr in args.assetRegexes:
-        assetRegexes[reStr] = re.compile(reStr)
-    releaseRegexes = {}
-    for reStr in args.releaseRegexes:
-        releaseRegexes[reStr] = re.compile(reStr)
-    imageRegexes = {}
-    for reStr in args.imageRegexes:
-        imageRegexes[reStr] = re.compile(reStr)
-    imageTagRegexes = {}
-    for reStr in args.imageTagRegexes:
-        imageTagRegexes[reStr] = re.compile(reStr)
-
-    # log in to GitHub given the token provided
     gh = github.login(token=args.githubToken)
-    logging.info(gh)
-
-    # unfortunately not all of the APIs we need are covered by github3 ಠ_ಥ
-    #   so we have to do some manual API pulling with requests, and even (gasp)
-    #   some web scraping with bs4
-    ghSession = requests.Session()
-    ghSession.headers = {
+    api_session = requests.Session()
+    api_session.headers.update({
         'Accept': 'application/vnd.github.v3+json',
         'Authorization': f'token {args.githubToken}',
         'X-GitHub-Api-Version': '2022-11-28',
-    }
-    ghHTMLSession = requests.Session()
+    })
+    html_session = requests.Session()
 
-    # loop over the repos provided
-    orgsPolledForImages = set()
-    for repoSpec in args.repos:
-        repoParts = repoSpec.split('/')
-        if len(repoParts) == 2:
-            if repo := gh.repository(repoParts[0], repoParts[1]):
+    asset_downloads = defaultdict(int)
+    orgs = []
+    for repo_spec in args.repos:
+        parts = repo_spec.split('/')
+        if len(parts) != 2 or not all(parts):
+            logging.warning('Skipping invalid repository: %s', repo_spec)
+            continue
+        owner, name = parts
+        orgs.append(owner)
+        if asset_patterns:
+            repo = gh.repository(owner, name)
+            collect_release_downloads(repo, owner, date_from, date_to, asset_patterns, release_patterns, asset_downloads)
 
-                # loop over the releases for this repo, examining those in the search time frame
-                if assetRegexes:
-                    for release in repo.releases():
-                        if dateFrom <= release.published_at <= dateTo and (
-                            (
-                                (not releaseRegexes)
-                                or any([v.match(release.tag_name) for k, v in releaseRegexes.items()])
-                            )
-                        ):
-                            logging.debug(f'{repo.full_name} {release.tag_name} at {release.published_at}')
-                            # aggregate download counts for assets matching the regular expressions provided
-                            for asset in release.assets():
-                                for reStr, reObj in assetRegexes.items():
-                                    if reObj.match(asset.name):
-                                        assetDownloads[f"{repoParts[0]}/{reStr}"] = (
-                                            assetDownloads[f"{repoParts[0]}/{reStr}"] + asset.download_count
-                                        )
-
-            if imageRegexes and (repoParts[0] not in orgsPolledForImages):
-                # make requests to list container images in the ghcr.io repository for this organization
-                page = 0
-                orgsPolledForImages.add(repoParts[0])
-                while True:
-                    try:
-                        page = page + 1
-                        params = {
-                            'package_type': 'container',
-                            'page': page,
-                            'per_page': GITHUB_API_REQUESTS_PER_PAGE,
-                        }
-                        pkgsResponse = ghSession.get(
-                            f'https://api.github.com/orgs/{repoParts[0]}/packages',
-                            params=params,
-                            allow_redirects=True,
-                        )
-                        pkgsResponse.raise_for_status()
-                        if (packagesJson := mmguero.load_str_if_json(pkgsResponse.content)) and isinstance(
-                            packagesJson, list
-                        ):
-                            packages.extend(
-                                [x for x in packagesJson if any([v.match(x['name']) for k, v in imageRegexes.items()])]
-                            )
-                            if len(packagesJson) < GITHUB_API_REQUESTS_PER_PAGE:
-                                break
-                        else:
-                            break
-                    except Exception as e:
-                        logging.error(f"Listing packages: {e}")
-                        break
-
-    # for the packages we accumulated earlier, put together a list of matching image tags
-    for packageInfo in packages:
-        versions = []
-        page = 0
-        while True:
-            try:
-                page = page + 1
-                params = {
-                    'page': page,
-                    'per_page': GITHUB_API_REQUESTS_PER_PAGE,
-                }
-                versionsResponse = ghSession.get(
-                    f"https://api.github.com/orgs/{mmguero.deep_get(packageInfo, ['owner', 'login'])}/packages/container/{mmguero.aggressive_url_encode(packageInfo['name'])}/versions",
-                    params=params,
-                    allow_redirects=True,
-                )
-                versionsResponse.raise_for_status()
-                if (versionsJson := mmguero.load_str_if_json(versionsResponse.content)) and isinstance(
-                    versionsJson, list
-                ):
-                    # only consider versions where the tag creation date is in our search time frame, and
-                    #   the tag name(s) match the regex filter (if specified)
-                    versions.extend(
-                        [
-                            x
-                            for x in versionsJson
-                            if (dateFrom <= ParseDate(x.get('created_at')) <= dateTo)
-                            and (
-                                (
-                                    (not imageTagRegexes)
-                                    or any(
-                                        [
-                                            v.match(t)
-                                            for t in mmguero.deep_get(x, ['metadata', 'container', 'tags'])
-                                            for k, v in imageTagRegexes.items()
-                                        ]
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                    if len(versionsJson) < GITHUB_API_REQUESTS_PER_PAGE:
-                        break
-                else:
-                    break
-            except Exception as e:
-                # give up
-                logging.error(f"Listing package versions: {e}")
-                break
-
-        # the GitHub packages API apparently doesn't surface pull counts, so we've got to do some scraping to get that number
-        for version in versions:
-            try:
-                if 'html_url' in version:
-                    tmpResponse = ghHTMLSession.get(
-                        version['html_url'],
-                        allow_redirects=True,
-                    )
-                    tmpResponse.raise_for_status()
-                    soup = BeautifulSoup(tmpResponse.text, 'html.parser')
-                    # look for the "Total downloads" <span>, then get the contents of its next sibling
-                    if totalDownloadsLabel := soup.find('span', string="Total downloads"):
-                        if tags := mmguero.deep_get(version, ['metadata', 'container', 'tags']):
-                            tagsStr = f':{"(" if len(tags) > 1 else ""}{"|".join(tags)}{")" if len(tags) > 1 else ""}'
-                        else:
-                            tagsStr = '@' + version['name']
-                        if pullCount := int(totalDownloadsLabel.find_next('span').text.replace(",", "")):
-                            imagePulls[
-                                f"{mmguero.deep_get(packageInfo, ['owner', 'login'])}/{packageInfo['name']}{tagsStr}"
-                            ] = int(pullCount)
-            except Exception as e:
-                logging.error(f"Parsing HTML page for package: {e}")
-
-    # put things together for the final output
-    if assetDownloads:
-        finalResults['release_assets'] = assetDownloads
-    if imagePulls:
-        finalResults['image_pulls'] = imagePulls
-
-    # add a total to each sub-dictionary
-    for key, subDict in finalResults.items():
-        subDict["total"] = sum(subDict.values())
-
-    print(json.dumps(finalResults))
-
+    image_pulls = collect_image_downloads(orgs, api_session, html_session, image_patterns, tag_patterns, date_from, date_to)
+    print(json.dumps(combine_statistics(asset_downloads, image_pulls)))
     return 0
 
 
-###################################################################################################
 if __name__ == '__main__':
-    if main() > 0:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    sys.exit(main())

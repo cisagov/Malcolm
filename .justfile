@@ -64,6 +64,7 @@ _base_config +CAPTURE_FLAG:
     | .configuration.autoArkime = ${AUTO_ARKIME:-true}
     | .configuration.autoFreq = ${AUTO_FREQ:-true}
     | .configuration.autoOui = ${AUTO_OUI:-true}
+    | .configuration.autoZeekCommunityID = ${AUTO_COMMUNITY_ID:-true}
     | .configuration.autoSuricata = ${AUTO_SURICATA:-true}
     | .configuration.autoZeek = ${AUTO_ZEEK:-true}
     | .configuration.captureLiveNetworkTraffic = ${CAPTURE_LIVE}
@@ -247,7 +248,8 @@ auth-setup:
     --auth-admin-username "${AUTH_ADMIN_USERNAME}" \
     --auth-admin-password-openssl "$(echo -n "${AUTH_ADMIN_PASSWORD}" | openssl passwd -6 --stdin)" \
     --auth-admin-password-htpasswd "$(echo -n "${AUTH_ADMIN_PASSWORD}" | htpasswd -i -n -B username | cut -d: -f2 | head -n 1)" \
-    --auth-arkime-password "${AUTH_ARKIME_PASSWORD:-Malcolm}" \
+    --auth-arkime-password "${AUTH_ARKIME_PASSWORD:-}" \
+    --auth-arkime-wise-pin "${AUTH_ARKIME_WISE_PIN:-}" \
     --auth-generate-webcerts "${AUTH_GENERATE_WEBCERTS:-true}" \
     --auth-generate-fwcerts "${AUTH_GENERATE_FWCERTS:-true}" \
     --auth-keycloak-realm "${AUTH_KEYCLOAK_REALM:-master}" \

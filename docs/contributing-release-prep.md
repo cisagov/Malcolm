@@ -96,11 +96,13 @@ There are two general categories of files that need to be generated to be includ
     - Malcolm installer ISO
     - Hedgehog Linux installer ISO
     - Hedgehog Linux Raspberry Pi image
+    - Container image archives for the Malcolm run profile (`amd64` and `arm64`)
+    - Container image archives for the Hedgehog run profile (`amd64` and `arm64`)
 * Scripts and tarball for a standalone Docker installation
 
 Romeo checks out and switches his GitHub repository's working copy so that it's tracking the [upstream branch]({{ site.github.repository_url }}) (e.g., `git checkout main` and `git branch --set-upstream-to idaholab/main`). Running `git log -1` should show that the latest commit to this branch is the merge of the pull request performed earlier.
 
-Romeo creates a local directory to contain the release artifacts and runs `./scripts/malcolm_appliance_packager.sh` to package up the scripts and tarball for a standalone Docker installation (the output of that script is somewhat verbose, so it's been summarized for display here):
+Romeo creates a local directory to contain the release artifacts and runs `./scripts/malcolm_appliance_packager.sh` to package up the scripts and tarball for a standalone Docker installation. At the image prompt he answers `m`, so the same run also saves the `amd64` container images for the Malcolm run profile, which he pulled and tagged on this workstation in step 4 (the output of that script is somewhat verbose, so it's been summarized for display here):
 
 ```bash
 $ mkdir releases
@@ -110,12 +112,12 @@ $ cd releases
 $ ~/Malcolm/scripts/malcolm_appliance_packager.sh
 …
 mkdir: created directory …
-
-Package Kubernetes manifests in addition to docker-compose.yml [y/N]? y
 …
-Packaged Malcolm to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20241008_215936_deadbeef.tar.gz"
+Packaged Malcolm to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20251029_140727_d22a504f.tar.gz"
 
-Do you need to package container images also [y/N]? n
+Do you need to package container images also [m/h/N]? m
+This might take a few minutes...
+Packaged Malcolm container images to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20251029_140727_d22a504f_images.tar.xz"
 
 To install and configure Malcolm, run install.py
 
@@ -136,6 +138,7 @@ drwxrwxr-x 10 romeogdetlevjr romeogdetlevjr     156 Oct 29 14:15 installer
 -rwxrwxr-x  1 romeogdetlevjr romeogdetlevjr  44,201 Oct 29 14:15 install.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr     460 Oct 29 14:15 malcolm_20251029_140727_d22a504f.README.txt
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr 275,657 Oct 29 14:15 malcolm_20251029_140727_d22a504f.tar.gz
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr 4,281,839,616 Oct 29 14:24 malcolm_20251029_140727_d22a504f_images.tar.xz
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  75,769 Oct 29 14:15 malcolm_common.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr   5,685 Oct 29 14:15 malcolm_constants.py
 -rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  50,329 Oct 29 14:15 malcolm_kubernetes.py
@@ -144,38 +147,120 @@ drwxrwxr-x 10 romeogdetlevjr romeogdetlevjr     156 Oct 29 14:15 installer
 
 The resultant `.py`, `.tar.gz,` and `.txt` files are ready to be included as assets in the Malcolm release on GitHub.
 
-As described in the documentation for [downloading Malcolm](download.md#JoinISOs), due to [limits on individual files](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas) in GitHub releases, the binary image files have been split into 2GB chunks. The same scripts (for Bash ([release_cleaver.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.sh)) and PowerShell ([release_cleaver.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.ps1))) used to join the files can be used to split them up:
+### Container image archives
+
+The release includes four archives of the container images so that users in air-gapped environments can [load them with `docker load`](malcolm-upgrade.md#UpgradePlan) instead of pulling from ghcr.io: one for each [run profile](live-analysis.md#Profiles) (`malcolm` and `hedgehog`) on each architecture (`amd64` and `arm64`). The packager saves images from the local container image cache and names the archive after the architecture of the machine it runs on, so the `amd64` archives are made on Romeo's `amd64` workstation and the `arm64` archives on the `arm64` machine he used in step 9. Each run of the packager saves the images for one profile.
+
+Romeo already has the Malcolm `amd64` archive from the run above. He runs the packager once more on his workstation, this time answering `h` to save the Hedgehog `amd64` images:
+
+```bash
+$ ~/Malcolm/scripts/malcolm_appliance_packager.sh
+…
+Do you need to package container images also [m/h/N]? h
+This might take a few minutes...
+Packaged Malcolm container images to "/home/romeogdetlevjr/Malcolm/releases/hedgehog_20251029_140727_d22a504f_images.tar.xz"
+…
+```
+
+Next, Romeo switches over to his `arm64` MacBook, which still has the `arm64` images he pulled and tagged in step 9. On macOS the packager uses the GNU versions of its tools, so the MacBook needs `coreutils`, `findutils`, `gawk`, `grep`, and `gnu-tar` from [Homebrew](https://brew.sh/), along with `git`, `rsync`, and `xz`. He checks out the same upstream commit there, so `git log -1` shows the same merge commit as on his workstation. This matters because the packager builds the archive names from the date, time, and hash of that commit, and all four archives should match. He then runs the packager twice, answering `m` the first time and `h` the second:
+
+```bash
+$ ~/Malcolm/scripts/malcolm_appliance_packager.sh
+…
+Do you need to package container images also [m/h/N]? m
+This might take a few minutes...
+Packaged Malcolm container images to "/Users/romeogdetlevjr/Malcolm/releases/malcolm_20251029_140727_d22a504f_images.arm64.tar.xz"
+…
+
+$ ~/Malcolm/scripts/malcolm_appliance_packager.sh
+…
+Do you need to package container images also [m/h/N]? h
+This might take a few minutes...
+Packaged Malcolm container images to "/Users/romeogdetlevjr/Malcolm/releases/hedgehog_20251029_140727_d22a504f_images.arm64.tar.xz"
+…
+```
+
+He copies the two `.arm64.tar.xz` archives into the `releases` directory on his workstation. The packager also wrote a `.tar.gz`, a `.README.txt`, and the `.py` scripts on the MacBook, but the copies from the workstation are the ones that go in the release, so he leaves these behind.
+
+The [upgrade instructions](malcolm-upgrade.md#UpgradePlan) download the image archives by their release names, which use the profile and the Malcolm version in place of the packager's date, time, and commit hash (e.g., `hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz`). Romeo renames the four archives to match, before splitting them below, so that the `.sha` files record the final names:
+
+```bash
+$ MALCOLM_VERSION={{ site.malcolm.version }}
+
+$ for f in {malcolm,hedgehog}_*_images*.tar.xz; do
+    [[ "$f" =~ ^(malcolm|hedgehog)_[0-9]{8}_[0-9]{6}_[0-9a-f]+_images(\.arm64)?\.tar\.xz$ ]] || continue
+    mv -v "$f" "${BASH_REMATCH[1]}-${MALCOLM_VERSION}_images${BASH_REMATCH[2]}.tar.xz"
+  done
+renamed 'hedgehog_20251029_140727_d22a504f_images.arm64.tar.xz' -> 'hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz'
+renamed 'hedgehog_20251029_140727_d22a504f_images.tar.xz' -> 'hedgehog-{{ site.malcolm.version }}_images.tar.xz'
+renamed 'malcolm_20251029_140727_d22a504f_images.arm64.tar.xz' -> 'malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz'
+renamed 'malcolm_20251029_140727_d22a504f_images.tar.xz' -> 'malcolm-{{ site.malcolm.version }}_images.tar.xz'
+```
+
+### Splitting the large files
+
+As described in the documentation for [downloading Malcolm](download.md#JoinISOs), due to [limits on individual files](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas) in GitHub releases, the ISO files and container image archives have been split into 2GB chunks. The same scripts (for Bash ([release_cleaver.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.sh)) and PowerShell ([release_cleaver.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.ps1))) used to join the files can be used to split them up:
 
 ```bash
 $ ls -l
-total 8,502,263,808
+total 21,444,331,607
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,240,331,776 Oct 29 15:02 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,317,350,912 Oct 29 14:31 hedgehog-{{ site.malcolm.version }}_images.tar.xz
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,102,553,600 Oct 29 14:55 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,281,839,616 Oct 29 14:24 malcolm-{{ site.malcolm.version }}_images.tar.xz
 
-$ for ISO in *.iso; do ~/Malcolm/scripts/release_cleaver.sh "$ISO"; done
+$ for FILE in *.iso *_images*.tar.xz; do ~/Malcolm/scripts/release_cleaver.sh "$FILE"; done
 Splitting...
-bf6e71385046b39d265af3dfc5b77677a0ac5eeac86bdc5be48791d0900715df  hedgehog-{{ site.malcolm.version }}.iso
+c24207578da379b35f3405f36b6df71d0a4442e58d7f1bed031bf26a90eef5ed  hedgehog-{{ site.malcolm.version }}.iso
 Splitting...
-b4957741420ec06988d975cdb7f71eaa201918245f6fcb7ee2641d7d0ad97c52  malcolm-{{ site.malcolm.version }}.iso
+7d042dd76a6cc55d458672ad6a9987c23df72f2e2f01520c2df2699c575d18cb  malcolm-{{ site.malcolm.version }}.iso
+Splitting...
+8a0af7ff3c0513306da9ed58eeaa56faa18186f96f05101095bfc7802a32f715  hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz
+Splitting...
+b0a085b1f244db2055e19fbe0d559a9375e73e0e371b5e5fa99c36e6fa824ac5  hedgehog-{{ site.malcolm.version }}_images.tar.xz
+Splitting...
+41624b8e4f93b9ce7534ff2e41af450ac1c1d62c1fbda19fa3ed43a1a82eb535  malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz
+Splitting...
+6cbc6f2ff1aa4e80bf855c3d5ab58343448a9c6470724a0ce5a3b0e3b0bd9335  malcolm-{{ site.malcolm.version }}_images.tar.xz
 
 $ ls -l
-total 17,002,364,928
+total 42,886,490,884
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.01
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   664,972,288 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.02
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            87 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   664,972,288 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            87 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,240,331,776 Oct 29 15:02 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   240,331,776 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr           103 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.arm64.tar.xz.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,317,350,912 Oct 29 14:31 hedgehog-{{ site.malcolm.version }}_images.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   317,350,912 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            97 Oct 29 15:20 hedgehog-{{ site.malcolm.version }}_images.tar.xz.sha
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-{{ site.malcolm.version }}-build.log
 -rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-{{ site.malcolm.version }}.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.01
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.02
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 1,835,110,400 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.03
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            86 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 1,835,110,400 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            86 Oct 29 15:20 malcolm-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,102,553,600 Oct 29 14:55 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   102,553,600 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr           102 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.arm64.tar.xz.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 4,281,839,616 Oct 29 14:24 malcolm-{{ site.malcolm.version }}_images.tar.xz
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   281,839,616 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            96 Oct 29 15:20 malcolm-{{ site.malcolm.version }}_images.tar.xz.sha
 ```
 
-The resultant files (with the `.iso.##` and `.iso.sha` extensions) are the files ready to be included as assets in the Malcolm release on GitHub.
+The resultant files with the `.iso.##`, `.iso.sha`, `.tar.xz.##`, and `.tar.xz.sha` extensions are the files ready to be included as assets in the Malcolm release on GitHub. The unsplit `.iso` and `.tar.xz` files stay out of the release.
 
 ## 11. Publish the release
 
@@ -188,3 +273,272 @@ After reviewing the contents of this page, Romeo pushes the green **Publish rele
 ## 12. Close project milestone
 
 Finally, Romeo navigates back to the [GitHub project](https://github.com/orgs/idaholab/projects/1) and changes the status of each issue under the now-released milestone from **Done** to **Released**. He then navigates to the [milestones]({{ site.github.repository_url }}/milestones) page on GitHub and clicks **Close** for that milestone.
+
+# <a name="IronBankRelease"></a>Updating Malcolm Iron Bank Images
+
+Malcolm publishes hardened container images to the DoD's Iron Bank (IB), the centralized repository of vetted, continuously rescanned images maintained under Platform One ([official documentation](https://p1docs.dso.mil/iron-bank/faq)). The images themselves are available at [repo1.dso.mil/dsop/afdco/malcolm](https://repo1.dso.mil/dsop/afdco/malcolm). These builds exist because government and defense teams often cannot pull from public container registries at all, and even when they can, an Authority to Operate (ATO) usually requires proof that a container has passed vulnerability scanning, STIG checks, and supply-chain validation. Iron Bank handles much of that work up front, so anyone deploying Malcolm inside a DoD network, on an Impact Level 2 system, or as part of an accreditation package already has the scan history and documentation available alongside the image. Users outside that environment, running Malcolm in a non-U.S. government setting, will generally find the official upstream `ghcr.io/idaholab` images simpler and faster to update. But for systems integrators, ISSOs pursuing an ATO, or anyone who needs to answer "where did this container come from" during an audit, the Iron Bank builds may be worth using.
+
+This section describes how Malcolm developers update the Iron Bank images after a [Malcolm release](#ReleasePrep).
+
+## 1. Clone the git repositories for the Malcolm Iron Bank images
+
+If working copies for the Malcolm IB image repositories don't yet exist locally, clone them:
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+mkdir -p "$IRON_BANK_PARENT_PATH"
+
+for REPO in \
+    api \
+    arkime \
+    dashboards \
+    dashboards-helper \
+    dirinit \
+    filebeat \
+    filescan \
+    file-upload \
+    freq \
+    htadmin \
+    keycloak \
+    logstash-oss \
+    netbox \
+    nginx \
+    opensearch \
+    pcap-capture \
+    pcap-monitor \
+    postgresql \
+    redis \
+    strelka-backend \
+    strelka-frontend \
+    strelka-manager \
+    suricata \
+    zeek \
+; do
+    git clone https://repo1.dso.mil/dsop/afdco/malcolm/"$REPO".git
+    pushd "$REPO" >/dev/null 2>&1
+    for BRANCH in master development inl-26.x; do
+        git checkout "$BRANCH"
+    done
+    popd >/dev/null 2>&1
+done
+```
+
+As illustrated above, users will likely want the `master` and `development` branches, as well as whatever "working" or "update" branch is going to be used to stage the changes.
+
+## 2. Perform automated version bumps in the hardening manifests
+
+Run [`./scripts/iron-bank/bump-iron-bank-hardening-manifest.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/iron-bank/bump-iron-bank-hardening-manifest.sh) for each image's `hardening_manifest.yaml`:
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+MALCOLM_TAG={{ site.malcolm.version }}
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    GITHUB_TOKEN=ghp_xxxxxxxxxxxx bump-iron-bank-hardening-manifest.sh "$MALCOLM_TAG"
+    popd >/dev/null 2>&1
+done
+```
+
+This script bumps the version tag in a `hardening_manifest.yaml`, resolves the new upstream container digest via `docker buildx imagetools`, re-downloads the Malcolm source tarball (if necessary) to compute its new sha512 sum, and pulls the commit sha and commit date for the corresponding git tag into `VCS_REVISION` and `BUILD_DATE`. A GitHub personal access token can be picked up from `$GITHUB_TOKEN` to authenticate the GitHub API call and avoid the unauthenticated rate limit (60 req/hr per IP).
+
+For each image working copy, this script will output something like:
+
+```
+Using GitHub token for API authentication
+Old version: 26.08.0
+New version: 26.09.0
+Updated tags: entry
+Updated org.opencontainers.image.version label
+Inspecting ghcr.io/idaholab/malcolm/api:26.09.0 ...
+New digest: sha256:d2d1d6f2df02bbb895e3b2e9c69e47915185e4b3bc79b74797952eee6a312944
+Downloading https://github.com/idaholab/Malcolm/archive/refs/tags/v26.09.0.tar.gz ...
+New sha512: 4b856ba57893c76ed28fd936c25dd4bd9caef4b3c774402afd0d9842f64d15ea08dba235d2f9381b08fa471a32b46453f3a79dc597f563014d5e634e1d1ec832
+Resolving commit for tag v26.09.0 on https://github.com/idaholab/Malcolm ...
+New VCS_REVISION: b09a0ad
+Fetching commit date for b09a0adaee18421bcc24f3c5608d2135a6ee84bb ...
+New BUILD_DATE: 2026-09-29T20:47:52Z
+Done. Updated ./hardening_manifest.yaml from 26.08.0 to 26.09.0.
+```
+
+## 3. Perform manual updates to the hardening manifests and Dockerfiles
+
+Review the [`./Dockerfiles`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) of the [latest Malcolm release]({{ site.github.repository_url }}/releases/latest) and make note of all other changes not covered by the automatic version bumps in the previous step. These may include:
+
+* Changes to base Docker images (`BASE_IMAGE` and `BASE_TAG`)
+* Version updates of included tools like [`supercronic`](github.com/aptible/supercronic) or [`yq`](https://github.com/mikefarah/yq)
+* Changed build logic or references to moved or new files or directories
+
+Upstream changes will need to be reflected in `Dockerfile` and `hardening_manifest.yaml` in each Iron Bank Malcolm image repository. One-off changes will likely need to be made by hand, while other things may be able to be done in bulk.
+
+For example, if the `yq` utility had been updated from v4.53.6 to v4.54.1, that update could be done across all hardening manifests at once:
+
+```bash
+$ grep -A 3 yq_linux_amd64 */hardening_manifest.yaml
+dashboards-helper/hardening_manifest.yaml:  - filename: yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.53.6/yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml-    validation:
+dashboards-helper/hardening_manifest.yaml-      type: sha512
+dashboards-helper/hardening_manifest.yaml-      value: 508f4ee34c6d093d136ff3c1b36db4105e686c3d68d435c064448ba16e2616d528efafb2cb0a1890b7724890373a226a38b7da27e6796396ee759bed39a8c671
+--
+filebeat/hardening_manifest.yaml:  - filename: yq_linux_amd64
+filebeat/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.53.6/yq_linux_amd64
+filebeat/hardening_manifest.yaml-    validation:
+filebeat/hardening_manifest.yaml-      type: sha512
+filebeat/hardening_manifest.yaml-      value: 508f4ee34c6d093d136ff3c1b36db4105e686c3d68d435c064448ba16e2616d528efafb2cb0a1890b7724890373a226a38b7da27e6796396ee759bed39a8c671
+--
+...
+```
+
+Both the version number and sha sum for the updated version would need to be changed. For the version number:
+
+```bash
+OLD_VERSION=4.53.6
+
+NEW_VERSION=4.54.1
+
+sed -i "s@\(yq/releases/download/\)v$OLD_VERSION@\1v$NEW_VERSION@" */hardening_manifest.yaml
+```
+
+For the sha sum, the new binary will need to be downloaded and the new checksum calculated:
+
+```bash
+OLD_SUM=508f4ee34c6d093d136ff3c1b36db4105e686c3d68d435c064448ba16e2616d528efafb2cb0a1890b7724890373a226a38b7da27e6796396ee759bed39a8c671
+
+curl -fsSLOJ 'https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64'
+
+NEW_SUM=$(sha512sum yq_linux_amd64 | awk '{print $1}')
+
+sed -i "s@$OLD_SUM@$NEW_SUM@" */hardening_manifest.yaml
+
+rm -f yq_linux_amd64
+```
+
+Verify the updated version and sha sum was written:
+
+```bash
+$ grep -A 3 yq_linux_amd64 */hardening_manifest.yaml
+dashboards-helper/hardening_manifest.yaml:  - filename: yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64
+dashboards-helper/hardening_manifest.yaml-    validation:
+dashboards-helper/hardening_manifest.yaml-      type: sha512
+dashboards-helper/hardening_manifest.yaml-      value: 57a5e74afd5aafb63c373be84c37fb778957051af3f2d1f563ae77df27b16f0e221cd64a6b7d7729f087fccbfe7d5b4aa1b42e9004d6c2df478f160b17392ead
+--
+filebeat/hardening_manifest.yaml:  - filename: yq_linux_amd64
+filebeat/hardening_manifest.yaml:    url: https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64
+filebeat/hardening_manifest.yaml-    validation:
+filebeat/hardening_manifest.yaml-      type: sha512
+filebeat/hardening_manifest.yaml-      value: 57a5e74afd5aafb63c373be84c37fb778957051af3f2d1f563ae77df27b16f0e221cd64a6b7d7729f087fccbfe7d5b4aa1b42e9004d6c2df478f160b17392ead
+--
+...
+```
+
+## 4. Commit and push the updates to the repositories
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+MALCOLM_TAG={{ site.malcolm.version }}
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    git add ./Dockerfile ./hardening_manifest.yaml && \
+        git commit -m "Updates to the $REPO_NAME image for Malcolm v$MALCOLM_TAG" && \
+        git push
+    popd >/dev/null 2>&1
+done
+```
+
+## 5. Monitor the image builds for failures
+
+Open the Iron Bank pipeline page for each repository (this example requires xdg-open from xdg-utils) and monitor each pipeline build for failures.
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    xdg-open "https://repo1.dso.mil/dsop/afdco/malcolm/$REPO_NAME/-/pipelines"
+    popd >/dev/null 2>&1
+done
+```
+
+Investigate and fix any failed builds.
+
+## 6. Test Malcolm Iron Bank images
+
+Pull and tag the Iron Bank images:
+
+```bash
+IRON_BANK_PARENT_PATH=/path/to/iron-bank
+BRANCH=inl-26.x
+TAG=26.08.0-ib
+CONTAINER_ENGINE=docker
+
+for REPO_DIR in $(find "$IRON_BANK_PARENT_PATH" -mindepth 1 -maxdepth 1 -type d | sed "s@\./@@") \
+; do
+    pushd "$REPO_DIR" >/dev/null 2>&1
+    REPO_NAME="$(basename `git config --get remote.origin.url` | sed 's/\.git$//')"
+    gitlab-artifacts-download.py \
+        -p "$REPO_NAME" \
+        -b "$BRANCH" \
+        -j create-tar \
+        -t ghcr.io/idaholab/malcolm/"$REPO_NAME":"$TAG"
+    popd >/dev/null 2>&1
+done
+
+for PAIR in filebeat:filebeat-oss \
+            nginx:nginx-proxy \
+            redis:valkey; do \
+    "$CONTAINER_ENGINE" tag ghcr.io/idaholab/malcolm/${PAIR%:*}:$TAG ghcr.io/idaholab/malcolm/${PAIR#*:}:$TAG
+done
+```
+
+You'll need to modify your local Malcolm installation's `docker-compose.yml` file:
+
+* `yq -i '.services[] |= . + {"user": "0:0"}' docker-compose.yml`
+* Add `-ib` (or whatever else you used as  tag suffix in the commands above, if any, to the `image:` line of each service)
+
+Start Malcolm and verify that all containers are running as expected.
+
+## 7. Submit pull requests to Iron Bank
+
+The script [`./scripts/iron-bank/malcolm-iron-bank-merge-requests.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/iron-bank/malcolm-iron-bank-merge-requests.sh) can help get these started in bulk. Verify the variables at the top of that script before running it. The pull requests should be from your working branch (e.g., `inl-26.x`) to `development`. Follow the instructions in Iron Bank for applying labels, etc., to make sure these PRs are flagged to be reviewed by Iron Bank staff.
+
+# <a name="ReleaseHelmChart"></a>Updating the Malcolm Helm Chart
+
+This section outlines updating the [Malcolm-Helm chart](https://github.com/idaholab/Malcolm-Helm) corresponding with a Malcolm release.
+
+These changes should be done in a fork or branch of the Malcolm-Helm git repository then submitted as a pull request.
+
+## 1. Update `Chart.yaml`
+
+Update `version` and `appVersion` in `chart/Chart.yaml`. Note that `version` does not use leading zeroes (`26.8.0`) while `appVersion` does (`26.08.0`).
+
+## 2. Update `values.yaml` and templates
+
+Examine the [latest Malcolm release]({{ site.github.repository_url }}/releases/latest) for changes that may need to be reflected in the helm chart. Likely areas where you will find these changes include, but are not limited to, the following:
+
+* [`docker-compose.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/docker-compose.yml)
+    * Most changes to `docker-compose.yml` will have an analogue in the helm chart service templates. These might include changes to services' `env_file` sections, volume bind mounts, capabilities, etc.
+[`config/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config)
+    * Changes in the `*.env.example` files will need to be reflected in their corresponding `ConfigMap`/`configMapRef` sections.
+* [`kubernetes/`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes)
+    * Malcolm's non-helm [Kubernetes manifests](kubernetes.md) can be found here and will likely have some matching parts in Malcolm-Helm.
+
+## 3. Test updates
+
+Test all changes from the previous version, minimally with the [Vagrant example](https://github.com/idaholab/Malcolm-Helm#VagrantDemo) but also preferrably on a real cluster.
+
+## 4. Submit pull request to idaholab/Malcolm-Helm
+
+Submit a pull request to [idaholab/Malcolm-Helm](https://github.com/idaholab/Malcolm-Helm/pulls) with the changes. This should be reviewed, approved, and merged by a maintainer of that project.
+
+## 4. Update Malcolm-Helm repository with new release
+
+Follow [these instructions](https://github.com/idaholab/Malcolm-Helm/blob/helm-repo/README.md) to package and publish the Malcolm-Helm release.

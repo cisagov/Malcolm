@@ -28,7 +28,12 @@ ARG FREQ_LOOKUP=true
 ENV FREQ_API_PORT=$FREQ_API_PORT
 ENV FREQ_LOOKUP=$FREQ_LOOKUP
 
-ENV FREQ_URL="https://codeload.github.com/markbaggett/freq/tar.gz/master"
+# Pin and verify external source archives before extracting them into the image.
+ARG FREQ_SOURCE_COMMIT=e13f41f43e5fa027b58c6d9da09bd6f5506c488c
+# GitHub may regenerate codeload archives for an unchanged commit.
+# If these archive bytes change, independently verify the pinned source and update this digest.
+ARG FREQ_SOURCE_SHA256=8edc783cc342441b7c1239cec7bb0ce25f34ce5c4c2d686e652aa5f77e6af809
+ENV FREQ_URL="https://codeload.github.com/markbaggett/freq/tar.gz/${FREQ_SOURCE_COMMIT}"
 
 ADD --chmod=644 freq-server/requirements.txt /usr/local/src/
 
@@ -47,7 +52,10 @@ RUN apt-get -q update && \
     pip3 install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd /opt && \
     mkdir -p ./freq_server && \
-      curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \
+      curl -fLsS --retry 3 -o /tmp/freq-source.tar.gz "$FREQ_URL" && \
+      printf '%s  %s\n' "$FREQ_SOURCE_SHA256" /tmp/freq-source.tar.gz | sha256sum -c - && \
+      tar xzvf /tmp/freq-source.tar.gz -C ./freq_server --strip-components 1 && \
+      rm /tmp/freq-source.tar.gz && \
       rm -rf /opt/freq_server/systemd /opt/freq_server/upstart /opt/freq_server/*.md /opt/freq_server/*.exe && \
       mv -v "$(ls /opt/freq_server/*.freq | tail -n 1)" /opt/freq_server/freq_table.freq && \
       awk '/Remember:/ {gsub(/\\&/, "\\\\&")} {print}' /opt/freq_server/freq_server.py > /tmp/freq_server.py && \
@@ -61,7 +69,7 @@ RUN apt-get -q update && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/freq.sh /usr/local/bin/container_health.sh

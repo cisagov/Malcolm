@@ -46,16 +46,20 @@ ENV DASHBOARDS_TIMEPICKER_FROM=$DASHBOARDS_TIMEPICKER_FROM
 ENV DASHBOARDS_TIMEPICKER_TO=$DASHBOARDS_TIMEPICKER_TO
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION="0.2.49"
+ENV SUPERCRONIC_VERSION="0.2.51"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV ECS_RELEASES_URL="https://api.github.com/repos/elastic/ecs/releases/latest"
+# Keep the ECS schema revision and archive digest in sync when updating.
+ENV ECS_VERSION="9.5.0"
+ENV ECS_COMMIT="401807e0547301525acd28c4fb667203fec66d59"
+ENV ECS_SHA256="8cc199dba1510d14e5623b52dadf03b5da0f3e7bfca0ef5d7a34a7f6d766f3cd"
+ENV ECS_SOURCE_URL="https://codeload.github.com/elastic/ecs/tar.gz/${ECS_COMMIT}"
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD dashboards/dashboards /opt/dashboards
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 # TODO: restore after we resolve cisagov/Malcolm#746
@@ -74,7 +78,8 @@ ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       bash \
@@ -91,16 +96,16 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rsync \
       tini && \
     pip3 install --break-system-packages -r /usr/local/src/requirements.txt && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
-    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
-        chmod 755 /usr/local/bin/yq && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} -d /nonexistent -s /sbin/nologin ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /data/init /opt/ecs && \
       cd /opt && \
-      curl -sSL "$(curl -sSL "$ECS_RELEASES_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./ecs --strip-components 1 && \
+      curl -fsSL -o /tmp/ecs-source.tar.gz "$ECS_SOURCE_URL" && \
+      echo "${ECS_SHA256}  /tmp/ecs-source.tar.gz" | sha256sum -c - && \
+      tar xzf /tmp/ecs-source.tar.gz -C ./ecs --strip-components 1 && \
       mv /opt/ecs/generated/elasticsearch /opt/ecs-templates && \
       rsync -av /opt/ecs-templates/ /opt/ecs-templates-os/ && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \

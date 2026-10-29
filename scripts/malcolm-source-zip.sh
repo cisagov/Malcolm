@@ -118,7 +118,7 @@ function match_source() {
   done < "$TMP_LIST"
 }
 
-export SCRIPT_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export SCRIPT_DIR="$( cd -P "$( dirname "$(realpath -e "${BASH_SOURCE[0]}")" )" && pwd )"
 
 # Resolve Dockerfile args to absolute paths now, before the pushd below
 # changes the working directory out from under any relative path the
@@ -132,8 +132,10 @@ for df in "$@"; do
     :
   elif [[ -f "$SCRIPT_DIR/../Dockerfiles/$(basename "$df")" ]]; then
     df="$SCRIPT_DIR/../Dockerfiles/$(basename "$df")"
+  elif [[ -f "$SCRIPT_DIR/../Dockerfiles/$(basename "$df").Dockerfile" ]]; then
+    df="$SCRIPT_DIR/../Dockerfiles/$(basename "$df").Dockerfile"
   else
-    echo "warning: '$df' not found (also checked Dockerfiles/$(basename "$df")), skipping" >&2
+    echo "warning: '$df' not found (also checked Dockerfiles/$(basename "$df") and Dockerfiles/$(basename "$df").Dockerfile), skipping" >&2
     continue
   fi
   DOCKERFILE_ARGS+=("$(realpath "$df")")

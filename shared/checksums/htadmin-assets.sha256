@@ -1,0 +1,9 @@
+# SHA-256 checksums for the third-party assets htadmin.Dockerfile downloads for the pinned
+# HTADMIN_COMMIT and BOOTSTRAP_VERSION. Paths are relative to the htadmin web root. The build
+# fails if the set of downloaded files differs from this list, so update it when either pin changes.
+eece6e0c65b7007ab0eb1b4998d36dafe381449525824349128efc3f86f4c91c  bootstrap.min.css
+2979f9a6e32fc42c3e7406339ee9fe76b31d1b52059776a02b4a7fa6a4fd280a  bootstrap.min.js
+a3c6ccd19e5c16faefbef429d042458b82c80af040f450b1ee208dba88d5b0df  bootstrap-theme.min.css
+e395044093757d82afcb138957d06a1ea9361bdcf0b442d06a18a8051af57456  fonts/glyphicons-halflings-regular.ttf
+a26394f7ede100ca118eff2eda08596275a9839b959c226e15439557a5a80742  fonts/glyphicons-halflings-regular.woff
+fe185d11a49676890d47bb783312a0cda5a44c4039214094e7957b4c040ef11c  fonts/glyphicons-halflings-regular.woff2

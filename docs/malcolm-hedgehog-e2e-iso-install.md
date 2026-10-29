@@ -20,8 +20,8 @@ In contrast to using the ISO installer, Malcolm can also be installed on any x86
         + [Malcolm Configuration Menu Items](#MalcolmConfigItems)
     - [Setting up Authentication](#MalcolmAuthSetup)
 * [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig)
-    - [Configuring Communication Between Hedgehog and Malcolm](#HedgehogCommConfig)
     - [TCP Ports Required for Malcolm ↔ Hedgehog Communication](#HedgehogMalcolmPorts)
+    - [Configuring Communication Between Hedgehog and Malcolm](#HedgehogCommConfig)
 * [Verifying Traffic Capture and Forwarding](#Verify)
 * [Tuning Live Analysis](live-analysis.md#LiveAnalysisTuning)
 
@@ -277,23 +277,24 @@ Select an item number to configure, or an action:
 ├── 65. Enrich with Reverse DNS Lookups (current: Yes)
 ├── 66. Enrich with Manufacturer (OUI) Lookups (current: Yes)
 ├── 67. Enrich with Frequency Scoring (current: Yes)
-├── 68. NetBox Mode (current: Local)
-│   ├── 69. Auto-Create Subnet Prefixes (current: Yes)
-│   ├── 70. Auto-Populate NetBox Inventory (current: Yes)
-│   ├── 71. NetBox Enrichment (current: Yes)
-│   ├── 72. NetBox IP Autopopulation Filter (current: empty)
-│   └── 73. NetBox Site Name (current: Malcolm)
-├── 74. Expose Malcolm Service Ports (current: No)
-├── 75. Network Traffic Node Name (current: host)
-└── 76. Capture Live Network Traffic (current: Yes)
-    ├── 77. Analyze Live Traffic with Suricata (current: Yes)
-    ├── 78. Analyze Live Traffic with Zeek (current: Yes)
-    ├── 79. Capture Filter (current: empty)
-    ├── 80. Capture Interface(s) (current: eth0)
-    ├── 81. Capture Live Traffic with netsniff-ng (current: Yes)
-    ├── 82. Capture Live Traffic with tcpdump (current: No)
-    ├── 83. Gather Traffic Capture Statistics (current: Yes)
-    └── 84. Optimize Interface Settings for Capture (current: Yes)
+├── 68. Enrich with Community ID (current: Yes)
+├── 69. NetBox Mode (current: Local)
+│   ├── 70. Auto-Create Subnet Prefixes (current: Yes)
+│   ├── 71. Auto-Populate NetBox Inventory (current: Yes)
+│   ├── 72. NetBox Enrichment (current: Yes)
+│   ├── 73. NetBox IP Autopopulation Filter (current: empty)
+│   └── 74. NetBox Site Name (current: Malcolm)
+├── 75. Expose Malcolm Service Ports (current: No)
+├── 76. Network Traffic Node Name (current: host)
+└── 77. Capture Live Network Traffic (current: Yes)
+    ├── 78. Analyze Live Traffic with Suricata (current: Yes)
+    ├── 79. Analyze Live Traffic with Zeek (current: Yes)
+    ├── 80. Capture Filter (current: empty)
+    ├── 81. Capture Interface(s) (current: eth0)
+    ├── 82. Capture Live Traffic with netsniff-ng (current: Yes)
+    ├── 83. Capture Live Traffic with tcpdump (current: No)
+    ├── 84. Gather Traffic Capture Statistics (current: Yes)
+    └── 85. Optimize Interface Settings for Capture (current: Yes)
 
 --- Actions ---
   s. Save and Continue
@@ -504,6 +505,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
     - Malcolm will [map MAC addresses](https://standards.ieee.org/products-programs/regauth/) to hardware manufacturer when possible. Users probably want to select **Y** for this setting.
 * **Enrich with Frequency Scoring**
     - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). Users probably want to select **Y** for this setting.
+* **Enrich with Community ID**
+    - If enabled, Malcolm will calculate a [Community ID](https://github.com/corelight/community-id-spec) flow hash for Zeek logs that don't already include one, making it easier to correlate Zeek logs with each other and with Suricata alerts and Arkime sessions by a single common value. Users probably want to select **Y** for this setting.
 * **NetBox Mode**
     - Specifies whether Malcolm will use [NetBox](https://netbox.dev/), a tool for modeling networks and documenting network assets; options are `local` (use an embedded instance NetBox maintained by Malcolm), `remote` (use a remote instance of NetBox), or `disabled` (do not use NetBox).
     - **Auto-Create Subnet Prefixes**
@@ -610,11 +613,35 @@ Users will be prompted to do the following:
     - In order for a sensor running Hedgehog Linux to securely communicate with Malcolm, it needs a copy of the client certificates generated when "(Re)generate self-signed certificates for a remote log forwarder" was selected earlier. Malcolm can facilitate the secure transfer of these certificates. If users will be continuing on to configure a sensor running Hedgehog Linux, they should answer **Y** here. They will be prompted to "Run auth_setup on the sensor and select 'Receive client certificates from Malcolm'". Users should continue on with the instructions for [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig), then return here and press **Enter** once they have chosen the corresponding `auth_setup` operation [below](#HedgehogCommConfig). After that process is complete, users may press **OK** and Malcolm will continue to start up.
     * ![SSL Certificate Transfer, Malcolm Side - 01](./images/screenshots/ssl-cert-transfer-01.png)
 
+Once Malcolm has started, users forwarding data from Hedgehog Linux should create a service account for the sensor at `https://﹤Malcolm host or IP address﹥/auth`, signing in with the credentials set under **Store administrator username/password for local Malcolm access**. See [**Local account management**](authsetup.md#AuthBasicAccountManagement) for details. This step applies no matter which authentication method was selected above. Some Hedgehog Linux forwarding processes always connect to Malcolm over HTTP(s) basic authentication with this account, even when Malcolm uses LDAP or Keycloak for its users. The sensor will need this username and password when [configuring communication between Hedgehog and Malcolm](#HedgehogCommConfig).
+
 ## <a name="HedgehogInstallAndConfig"></a> Hedgehog Linux Installation and Configuration
 
 As of Malcolm v25.12.0, the same base operating system is used for both Malcolm and Hedgehog Linux. All of the sections above under [Malcolm Installation and Configuration](#MalcolmInstallAndConfig) also apply to Hedgehog Linux.
 
+In addition to the yes/no questions asked at the end of the [ISO installation](#ISOInstallMalcolm), the Hedgehog Linux installer asks:
+
+* **Display the sensor status kiosk at startup?** *(if "No" is selected, neither the kiosk's backend service nor the full-screen browser that displays it will start at boot)*
+
 The following section outlines the Hedgehog-specific steps needed to establish communication between the Hedgehog Linux sensor and the Malcolm aggregator. See [**Configuring Hedgehog for Standalone Use**](hedgehog-standalone.md) for how to use Hedgehog Linux without a Malcolm aggregator.
+
+### <a name="HedgehogMalcolmPorts"></a> TCP Ports Required for Malcolm ↔ Hedgehog Communication
+
+The following TCP ports on the Malcolm instance must be reachable for the sensor to forward data to Malcolm:
+
+| Port | Data | Purpose |
+|-|-|-|
+| 443/tcp | Enrichment lookups for Arkime sessions | Hedgehog's Arkime `capture` contacts Malcolm's Arkime [WISE](https://arkime.com/wise) at `https://﹤Malcolm host or IP address﹥/wise`, if enabled. |
+| 9200/tcp | Arkime sessions | Hedgehog's Arkime `capture` sends session data to Malcolm's OpenSearch instance at `https://﹤Malcolm host or IP address﹥:9200`. Alternatively, 443/tcp may be used at `https://﹤Malcolm host or IP address﹥/mapi/opensearch/`. |
+| 5044/tcp | Zeek logs, Suricata alerts, and file-scanning results | Hedgehog's Filebeat sends data to Malcolm's Logstash. |
+| 5045/tcp | Auxiliary data (resources, temperature, system logs, etc.) | Hedgehog's Fluent Bit sends data to Malcolm's JSON-over-TCP listener. |
+
+The following TCP ports on the Hedgehog sensor must be reachable for Malcolm to retrieve artifacts:
+
+| Port | Data | Purpose |
+|-|-|-|
+| 8005/tcp | PCAP payload requests | Malcolm's Arkime viewer contacts Hedgehog's Arkime viewer when a user views an Arkime [session](arkime.md#ArkimeSessions), [exports a PCAP](arkime.md#ArkimePCAPExport), or runs a [Hunt](arkime.md#ArkimeHunt) job |
+| 8006/tcp | Extracted file requests | Malcolm proxies requests to download [extracted files](file-scanning.md#ZeekFileExtractionUI) stored on the Hedgehog sensor. |
 
 ### <a name="HedgehogCommConfig"></a> Configuring Communication Between Hedgehog and Malcolm
 
@@ -678,6 +705,8 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
 …
 ```
 
+When running `auth_setup` on Hedgehog Linux, users should also select **Store username/password for OpenSearch/Elasticsearch instance?** and enter the username and password of the service account created on Malcolm [above](#MalcolmAuthSetup). Hedgehog uses these credentials to run a communication test against the running Malcolm instance and tells the user whether they work. The test needs Malcolm up and the service account already created. If Malcolm is still waiting on the certificate transfer described below, finish that transfer first. Then, once Malcolm has started and the service account exists, run `auth_setup` on the sensor again and choose this option.
+
 The `auth_setup` script on Hedgehog Linux has a **Receive client certificates from Malcolm** option corresponding to Malcolm's **Transfer self-signed client certificates to a remote log forwarder** option described [above](#MalcolmAuthSetup). In order for a Hedgehog Linux to securely communicate with Malcolm, it needs the client certificates generated when users answered **Y** to **(Re)generate self-signed certificates for a remote log forwarder** during that setup. Malcolm can facilitate the secure transfer of these to a sensor running Hedgehog.
 
 Select **Receive client certificates from Malcolm**, then press **OK** when prompted "Run auth_setup on Malcolm and select 'Transfer self-signed client certificates...'".
@@ -700,29 +729,11 @@ After a few seconds a progress bar will update and show the files have been 100%
 
 Once completed, users can click the "play" icon (▷) in the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm under the [Hedgehog run profile](live-analysis.md#Profiles).
 
-### <a name="HedgehogMalcolmPorts"></a> TCP Ports Required for Malcolm ↔ Hedgehog Communication
-
-The following TCP ports on the Malcolm instance must be reachable for the sensor to forward data to Malcolm:
-
-| Port | Data | Purpose |
-|-|-|-|
-| 443/tcp | Enrichment lookups for Arkime sessions | Hedgehog's Arkime `capture` contacts Malcolm's Arkime [WISE](https://arkime.com/wise) at `https://﹤Malcolm host or IP address﹥/wise`, if enabled. |
-| 9200/tcp | Arkime sessions | Hedgehog's Arkime `capture` sends session data to Malcolm's OpenSearch instance at `https://﹤Malcolm host or IP address﹥:9200`. Alternatively, 443/tcp may be used at `https://﹤Malcolm host or IP address﹥/mapi/opensearch/`. |
-| 5044/tcp | Zeek logs, Suricata alerts, and file-scanning results | Hedgehog's Filebeat sends data to Malcolm's Logstash. |
-| 5045/tcp | Auxiliary data (resources, temperature, system logs, etc.) | Hedgehog's Fluent Bit sends data to Malcolm's JSON-over-TCP listener. |
-
-The following TCP ports on the Hedgehog sensor must be reachable for Malcolm to retrieve artifacts:
-
-| Port | Data | Purpose |
-|-|-|-|
-| 8005/tcp | PCAP payload requests | Malcolm's Arkime viewer contacts Hedgehog's Arkime viewer when a user views an Arkime [session](arkime.md#ArkimeSessions), [exports a PCAP](arkime.md#ArkimePCAPExport), or runs a [Hunt](arkime.md#ArkimeHunt) job |
-| 8006/tcp | Extracted file requests | Malcolm proxies requests to download [extracted files](file-scanning.md#ZeekFileExtractionUI) stored on the Hedgehog sensor. |
-
 ## <a name="Verify"></a>Verifying Traffic Capture and Forwarding
 
 The easiest way to verify network traffic is being captured by the sensor and forwarded to Malcolm is through Malcolm's Arkime [Sessions](arkime.md#ArkimeSessions) interface.
 
-If logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If connecting from another browser, connect to **https://<Malcolm host or IP address>**.
+If logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If connecting from another browser, connect to **https://﹤Malcolm host or IP address﹥**.
 
 As Malcolm is using [self-signed TLS certificates](authsetup.md#TLSCerts), users will likely have to confirm a browser exception to allow the self-signed certificates to proceed. Enter the credentials specified during [the configure authentication process](#MalcolmAuthSetup).
 

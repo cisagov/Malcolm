@@ -17,7 +17,7 @@ from scripts.installer.configs.constants.enums import (
     FileExtractionMode,
     FilePreservationMode,
 )
-from scripts.malcolm_constants import WidgetType, MALCOLM_STRELKA_SCANNERS_DEFAULT
+from scripts.malcolm_constants import WidgetType
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_PIPELINE_ENABLED,
     KEY_CONFIG_ITEM_PIPELINE_WORKERS,
@@ -131,7 +131,7 @@ CONFIG_ITEM_PIPELINE_WORKERS = ConfigItem(
 CONFIG_ITEM_PIPELINE_SCANNERS = ListOfStringsConfigItem(
     key=KEY_CONFIG_ITEM_PIPELINE_SCANNERS,
     label="Enabled Strelka Scanners",
-    default_value=MALCOLM_STRELKA_SCANNERS_DEFAULT,
+    default_value=["default"],
     validator=lambda x: isinstance(x, str) or (isinstance(x, list) and all(isinstance(dataset, str) for dataset in x)),
     question='Comma-separated list of Strelka scanners to enable',
     widget_type=WidgetType.TEXT,

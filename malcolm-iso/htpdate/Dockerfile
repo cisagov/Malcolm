@@ -21,6 +21,6 @@ RUN apt-get -q update && \
       pkg-config && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD build-htpdate-deb.sh /usr/local/bin/
+ADD build-htpdate-deb.sh htpdate.env /usr/local/bin/
 
 ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-htpdate-deb.sh"]

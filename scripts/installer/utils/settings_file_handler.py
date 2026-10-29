@@ -260,9 +260,9 @@ class SettingsFileHandler:
             else:
                 InstallerLogger.warning(f"Unknown configuration item in settings file: {key}")
 
-        # identify configuration items that weren't set and use defaults
+        # identify configuration items absent from the settings file, which use defaults
         for item_key, item in self.malcolm_config.get_all_config_items().items():
-            if not item.is_modified:
+            if item_key not in configuration_section:
                 missing_configuration.append(item_key)
                 InstallerLogger.debug(
                     f"Configuration item {item_key} not found in settings file, using default: {item.get_value()}"

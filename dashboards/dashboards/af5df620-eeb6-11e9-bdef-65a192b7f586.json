@@ -113,6 +113,9 @@
         "description": "",
         "hits": 0,
         "columns": [
+          "event.dataset",
+          "event.action",
+          "event.result",
           "source.ip",
           "destination.ip",
           "zeek.ntp.version",
@@ -130,7 +133,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:ntp\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:(ntp OR ntp_control OR ntp_private)\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:3.8.0 AS permissions
+FROM opensearchproject/opensearch-dashboards:3.9.0 AS permissions
 
 ENV PUSER="opensearch-dashboards"
 ENV PGROUP="opensearch-dashboards"
@@ -53,11 +53,13 @@ ENV PATH="$PATH:$OPENSEARCH_DASHBOARDS_HOME/bin"
 
 USER root
 
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     microdnf install -y \
         bash \
         curl-minimal \
         findutils \
+        gawk \
         gzip \
         jq \
         nss \
@@ -76,19 +78,20 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     groupadd -g $DEFAULT_GID $PGROUP && \
         adduser -u $DEFAULT_UID -g $DEFAULT_GID -d $OPENSEARCH_DASHBOARDS_HOME $PUSER && \
     usermod -a -G tty ${PUSER} && \
-    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
-      chmod +x /usr/bin/tini && \
+    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
     microdnf clean all && \
     rm -rf /var/cache/dnf /var/cache/yum
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/dashboards.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --from=permissions $OPENSEARCH_DASHBOARDS_HOME $OPENSEARCH_DASHBOARDS_HOME
 ADD --chmod=644 dashboards/opensearch_dashboards.yml $OPENSEARCH_DASHBOARDS_HOME/config/opensearch_dashboards.orig.yml
-ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
+ADD --chmod=644 dashboards/scripts/keepalive-finish-fix.js /usr/local/lib/keepalive-finish-fix.js
+ADD --chmod=644 dashboards/scripts/socket-timeout-guard.js /usr/local/lib/socket-timeout-guard.js
+ENV NODE_OPTIONS="$NODE_OPTIONS --require /usr/local/lib/keepalive-finish-fix.js --require /usr/local/lib/socket-timeout-guard.js"
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 

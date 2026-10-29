@@ -44,14 +44,18 @@ build_htpdate() {
 
     # Htpdate in Debian repos doesn't compile https functionality
     htpdate_url='https://github.com/twekkel/htpdate'
-    htpdate_vers="$(curl -sqI $htpdate_url/releases/latest | awk -F '/' '/^location/ {print substr($NF,2,length($NF)-2)}')"
+    # pinned version and SHA-256, shared with the ISO build
+    . "$MALCOLM_SRC/malcolm-iso/htpdate/htpdate.env"
+    htpdate_vers="$HTPDATE_VERSION"
     htpdate_release=1
 
     apt-get update
     apt-get install $BUILD_DEPS -y --no-install-suggests
 
     mkdir -p "${WORK_DIR}"/htpdate && cd "$_"
-    curl -sSL "$htpdate_url/tarball/v$htpdate_vers" | tar xzf - --strip-components=1
+    curl -fsSL -o "${WORK_DIR}/htpdate.tar.gz" "https://codeload.github.com/twekkel/htpdate/tar.gz/refs/tags/v${htpdate_vers}"
+    echo "${HTPDATE_SHA256}  ${WORK_DIR}/htpdate.tar.gz" | sha256sum -c -
+    tar xzf "${WORK_DIR}/htpdate.tar.gz" --strip-components=1
 
     sed -i '/.*man8.*/d' Makefile
     rm -f scripts/*
@@ -207,6 +211,8 @@ install_files() {
 
     cp -r "$MALCOLM_SRC/malcolm-iso/config/requirements.txt" "/opt/requirements.txt"
     cp -r "$MALCOLM_SRC/shared/bin/"* "/usr/local/bin"
+    mkdir -p /usr/local/share
+    cp "$MALCOLM_SRC/shared/checksums/binaries.sha256" /usr/local/share/
     cp "$MALCOLM_SRC/scripts/malcolm_utils.py" "/usr/local/bin/"
     cp "$MALCOLM_SRC/scripts/malcolm_constants.py" "/usr/local/bin/"
     cp "$MALCOLM_SRC/malcolm-iso/config/archives/fluentbit.list.chroot" "/etc/apt/sources.list.d/fluentbit.list"

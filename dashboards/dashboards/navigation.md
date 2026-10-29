@@ -5,6 +5,7 @@
 [Severity](#/dashboard/d2dd0180-06b1-11ec-8c6b-353266ade330)
 [Connections](#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)
 [IP Connections Tree](#/dashboard/89714140-a2d5-11f0-b5ae-e139a66d2205)
+[Multicast](#/dashboard/8120bde0-c80e-11f1-9dbd-a7e2ad7465ef)
 [Biomes](#/dashboard/55c80770-9fdc-11f1-90ac-4b74f5583b0b)
 [Actions and Results](#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)
 [Threat Intelligence](#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)

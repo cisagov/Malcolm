@@ -1,4 +1,4 @@
-git+https://github.com/mmguero-dev/mandiant-ti-client
+git+https://github.com/mmguero-dev/mandiant-ti-client@67d084e8a31801b522e859fafac0dbd9ff8c4cf3
 dateparser==1.2.2
 pymisp==2.5.17.2
 stix2==3.0.1

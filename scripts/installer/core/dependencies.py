@@ -185,6 +185,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
+    KEY_CONFIG_ITEM_AUTO_ZEEK_COMMUNITY_ID: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile == PROFILE_MALCOLM,
+            is_top_level=True,
+        )
+    ),
     KEY_CONFIG_ITEM_OPEN_PORTS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
@@ -1406,11 +1413,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
             condition=lambda auto, live: bool(auto) or bool(live),
             ui_parent=KEY_CONFIG_ITEM_AUTO_SURICATA,
-        ),
-        value=ValueRule(
-            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
-            condition=True,
-            default_value=False,
         ),
     ),
     KEY_CONFIG_ITEM_MALCOLM_ICS: DependencySpec(

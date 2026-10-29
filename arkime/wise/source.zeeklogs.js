@@ -98,6 +98,7 @@ class MalcolmSource extends WISESource {
       "event.severity",
       "event.severity_tags",
       "event.start",
+      "event.submitter",
       "file.accessed",
       "file.created",
       "file.ctime",
@@ -329,6 +330,8 @@ class MalcolmSource extends WISESource {
       "source.segment.tenant",
       "suricata.action",
       "suricata.alert.action",
+      "suricata.alert.metadata.affected_product",
+      "suricata.alert.metadata.attack_target",
       "suricata.alert.metadata.created_at",
       "suricata.alert.metadata.malware_family",
       "suricata.alert.metadata.performance_impact",
@@ -848,7 +851,11 @@ class MalcolmSource extends WISESource {
       "suricata.ts_progress",
       "tags",
       "threat.framework",
+      "threat.group.name",
+      "threat.indicator.confidence",
       "threat.indicator.description",
+      "threat.indicator.first_seen",
+      "threat.indicator.last_seen",
       "threat.indicator.name",
       "threat.indicator.provider",
       "threat.indicator.reference",
@@ -859,6 +866,9 @@ class MalcolmSource extends WISESource {
       "threat.technique.id",
       "threat.technique.name",
       "threat.technique.reference",
+      "threat.technique.subtechnique.id",
+      "threat.technique.subtechnique.name",
+      "threat.technique.subtechnique.reference",
       "tls.cipher",
       "tls.client.issuer",
       "tls.client.ja4",
@@ -1203,7 +1213,6 @@ class MalcolmSource extends WISESource {
       "zeek.files.extracted_size",
       "zeek.files.extracted_uri",
       "zeek.files.filename",
-      "zeek.files.ftime",
       "zeek.files.local_orig",
       "zeek.files.md5",
       "zeek.files.mime_type",
@@ -2000,14 +2009,12 @@ class MalcolmSource extends WISESource {
       "zeek.iec104_write.se",
       "zeek.iec104_write.status",
       "zeek.iec104_write.value",
-      "zeek.intel.associated",
       "zeek.intel.campaigns",
       "zeek.intel.category",
       "zeek.intel.cif_confidence",
       "zeek.intel.confidence",
-      "zeek.intel.file_description",
+      "zeek.intel.file_desc",
       "zeek.intel.file_mime_type",
-      "zeek.intel.kill_chain_phases",
       "zeek.intel.reports",
       "zeek.intel.seen_node",
       "zeek.intel.seen_where",
@@ -3647,6 +3654,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
       "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
       "    +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
+      "    +arrayList(session.event, 'submitter', 'Submitter', 'event.submitter')\n" +
       "    +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
       "    +arrayList(session.rule, 'category', 'Event Category', 'rule.category')\n" +
       "    +arrayList(session.rule, 'ruleset', 'Event Ruleset', 'rule.ruleset')\n" +

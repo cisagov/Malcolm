@@ -1,0 +1,147 @@
+# Transport protocol for Zeek logs that have orig_h/orig_p/resp_h/resp_p but
+# no proto column, keyed by [log_source]. Used only to compute Community ID
+# when [network][transport] is absent. Only protocols whose Zeek analyzer
+# runs over a single transport are listed. Logs that can be either TCP or
+# UDP are omitted on purpose (see the end of this file), since a wrong
+# transport produces a valid-looking but wrong Community ID.
+# Many parsers also set proto themselves, and that value always
+# takes precedence; entries here only apply when it's absent.
+
+# TCP ##########################################################################
+
+# general application protocols
+dce_rpc: tcp
+ftp: tcp
+http: tcp
+irc: tcp
+ja4ssh: tcp
+login: tcp
+mysql: tcp
+ntlm: tcp
+postgresql: tcp
+rdp: tcp
+redis: tcp
+rfb: tcp
+smb_cmd: tcp
+smb_files: tcp
+smb_mapping: tcp
+smtp: tcp
+socks: tcp
+ssh: tcp
+tds: tcp
+tds_rpc: tcp
+tds_sql_batch: tcp
+websocket: tcp
+
+# ICS/OT
+cotp: tcp
+iec104_ctrl: tcp
+iec104_file: tcp
+iec104_param: tcp
+iec104_query: tcp
+iec104_read: tcp
+iec104_telemetry: tcp
+iec104_write: tcp
+modbus: tcp
+modbus_detailed: tcp
+modbus_mask_write_register: tcp
+modbus_read_device_identification: tcp
+modbus_read_write_multiple_registers: tcp
+mqtt_connect: tcp
+mqtt_publish: tcp
+mqtt_subscribe: tcp
+s7comm: tcp
+s7comm_known_devices: tcp
+s7comm_plus: tcp
+s7comm_read_szl: tcp
+s7comm_upload_download: tcp
+opcua_binary: tcp
+opcua_binary_activate_session: tcp
+opcua_binary_activate_session_client_software_cert: tcp
+opcua_binary_activate_session_locale_id: tcp
+opcua_binary_aggregate_filter: tcp
+opcua_binary_browse: tcp
+opcua_binary_browse_description: tcp
+opcua_binary_browse_request_continuation_point: tcp
+opcua_binary_browse_response_references: tcp
+opcua_binary_browse_result: tcp
+opcua_binary_close_session: tcp
+opcua_binary_create_monitored_items: tcp
+opcua_binary_create_monitored_items_create_item: tcp
+opcua_binary_create_session: tcp
+opcua_binary_create_session_discovery: tcp
+opcua_binary_create_session_endpoints: tcp
+opcua_binary_create_session_user_token: tcp
+opcua_binary_create_subscription: tcp
+opcua_binary_data_change_filter: tcp
+opcua_binary_diag_info_detail: tcp
+opcua_binary_event_filter: tcp
+opcua_binary_event_filter_attribute_operand: tcp
+opcua_binary_event_filter_attribute_operand_browse_paths: tcp
+opcua_binary_event_filter_element_operand: tcp
+opcua_binary_event_filter_literal_operand: tcp
+opcua_binary_event_filter_select_clause: tcp
+opcua_binary_event_filter_simple_attribute_operand: tcp
+opcua_binary_event_filter_simple_attribute_operand_browse_paths: tcp
+opcua_binary_event_filter_where_clause: tcp
+opcua_binary_event_filter_where_clause_elements: tcp
+opcua_binary_get_endpoints: tcp
+opcua_binary_get_endpoints_description: tcp
+opcua_binary_get_endpoints_discovery: tcp
+opcua_binary_get_endpoints_locale_id: tcp
+opcua_binary_get_endpoints_profile_uri: tcp
+opcua_binary_get_endpoints_user_token: tcp
+opcua_binary_opensecure_channel: tcp
+opcua_binary_read: tcp
+opcua_binary_read_nodes_to_read: tcp
+opcua_binary_read_results: tcp
+opcua_binary_status_code_detail: tcp
+opcua_binary_variant_array_dims: tcp
+opcua_binary_variant_data: tcp
+opcua_binary_variant_data_value: tcp
+opcua_binary_variant_extension_object: tcp
+opcua_binary_variant_metadata: tcp
+opcua_binary_write: tcp
+
+# UDP ##########################################################################
+
+# general application protocols
+dhcp: udp
+gquic: udp
+ja4d: udp
+ntp: udp
+radius: udp
+sip: udp
+snmp: udp
+tftp: udp
+wireguard: udp
+
+# ICS/OT
+bacnet: udp
+bacnet_device_control: udp
+bacnet_discovery: udp
+bacnet_property: udp
+bsap_ip_header: udp
+bsap_ip_rdb: udp
+cip_io: udp
+profinet: udp
+profinet_dce_rpc: udp
+
+# Deliberately omitted #########################################################
+#
+# Either transport (no way to tell from the log alone):
+#   ssl (DTLS is logged to ssl.log too), kerberos, ldap, ldap_search,
+#   cip, cip_identity, enip, dnp3, dnp3_control, dnp3_objects,
+#   omron_fins_*, roc_plus_* (sub-logs; roc_plus itself has proto), ipsec
+#
+# No meaningful port tuple, or not a single flow:
+#   ospf (IP protocol 89), files, intel, notice, signatures, software,
+#   tunnel, weird, known_*
+#
+# Serial:
+#   bsap_serial_header, bsap_serial_rdb, bsap_serial_rdb_ext
+#
+# Already have a proto column (no mapping needed):
+#   bestguess, c1222*, conn, conn_long, diagnostic analyzer, dns, ge_srtp,
+#   genisys, hart_ip*, notice, omron_fins, profinet_io_cm, roc_plus, stun,
+#   stun_nat, synchrophasor*, syslog

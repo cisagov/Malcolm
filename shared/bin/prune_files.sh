@@ -40,7 +40,7 @@ done
 
 INT_RE='^[0-9]+$'
 
-if [[ -z "$PRUNE_PATH" ]] || [[ ! -e "$PRUNE_PATH" ]] || ! pushd >/dev/null 2>&1 $PRUNE_PATH ; then
+if [[ -z "$PRUNE_PATH" ]] || [[ ! -e "$PRUNE_PATH" ]] || ! pushd >/dev/null 2>&1 "$PRUNE_PATH" ; then
   echo "Please specify prune path with -p" >&2
   exit 1
 fi
@@ -73,7 +73,7 @@ while true ; do
     USAGE_GB=$(UsageGigabytesPwd)
   fi
 
-  if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
+  if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT >= $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB >= $MAXSIZE_GB )) ); then
 
     # we have exceeded the threshold, see if there is something to prune
     [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
@@ -95,7 +95,7 @@ while true ; do
 
           # re-check disk capacity
           USAGE_PCT=$(UsagePercentagePwd)
-          if ( (( THRESHOLD_PCT > 0 )) && (( USAGE_PCT > THRESHOLD_PCT )) ) ; then
+          if ( (( THRESHOLD_PCT > 0 )) && (( USAGE_PCT >= THRESHOLD_PCT )) ) ; then
             # we still exceed the percent threshold, continue to loop
             [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity, pruning..." >&2
             exceeds_pct=true
@@ -108,7 +108,7 @@ while true ; do
           if ! $exceeds_pct; then
               # Perform this expensive check only if needed.
               USAGE_GB=$(UsageGigabytesPwd)
-              if ( (( MAXSIZE_GB > 0 )) && (( USAGE_GB > MAXSIZE_GB )) ); then
+              if ( (( MAXSIZE_GB > 0 )) && (( USAGE_GB >= MAXSIZE_GB )) ); then
                 # we still exceed the threshold, continue to loop
                 [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
               else

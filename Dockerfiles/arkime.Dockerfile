@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 
 FROM debian:13-slim
@@ -33,7 +34,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 ENV ARKIME_DIR="/opt/arkime"
-ENV ARKIME_VERSION="6.7.0"
+ENV ARKIME_VERSION="6.9.1"
 ENV ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH=no
@@ -65,9 +66,6 @@ ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG PCAP_NODE_NAME=malcolm
 ARG PCAP_PROCESSED_DIRECTORY=/data/pcap/processed
-ARG MAXMIND_GEOIP_DB_ACCOUNT_ID=""
-ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
-ARG MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL=""
 
 # Declare envs vars for each arg
 ENV MALCOLM_USERNAME=$MALCOLM_USERNAME
@@ -99,7 +97,9 @@ ENV PCAP_PROCESSED_DIRECTORY=$PCAP_PROCESSED_DIRECTORY
 
 ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 
-RUN export DEBARCH=$(dpkg --print-architecture) && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
@@ -142,12 +142,11 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       wget \
       zlib1g && \
     cd /tmp && \
-      curl -fsSL -o ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
+      sh /usr/local/share/install-verified-binary.sh ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/{arch}/g")" "arkime_${ARKIME_VERSION}-1.debian13_{arch}.deb" && \
       dpkg -i /tmp/arkime.deb && \
       rm -f ${ARKIME_DIR}/etc/*.systemd.service && \
     mkdir -p "${ARKIME_DIR}"/plugins "${ARKIME_DIR}"/rules && \
-      curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
-      chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
+      sh /usr/local/share/install-verified-binary.sh "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/{arch}/g")" "ja4plus_${ARKIME_VERSION}_linux_{arch}.so" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
@@ -158,7 +157,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
@@ -177,11 +176,15 @@ ADD --chmod=644 arkime/rules/*.yml $ARKIME_DIR/rules/
 ADD --chmod=644 arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 
 # MaxMind now requires a (free) license key to download the free versions of
-# their GeoIP databases. This should be provided as a build argument.
+# their GeoIP databases. These credentials are provided as build secrets (not
+# build arguments) so they are not recorded in the image history.
 #   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
 #   see https://github.com/arkime/arkime/issues/1350
 #   see https://github.com/arkime/arkime/issues/1352
-RUN ( /usr/local/bin/maxmind-mmdb-download.sh -o $ARKIME_DIR/etc || true ) && \
+RUN --mount=type=secret,id=MAXMIND_GEOIP_DB_ACCOUNT_ID,env=MAXMIND_GEOIP_DB_ACCOUNT_ID \
+    --mount=type=secret,id=MAXMIND_GEOIP_DB_LICENSE_KEY,env=MAXMIND_GEOIP_DB_LICENSE_KEY \
+    --mount=type=secret,id=MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL,env=MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL \
+    ( /usr/local/bin/maxmind-mmdb-download.sh -o $ARKIME_DIR/etc || true ) && \
     curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
     curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
 

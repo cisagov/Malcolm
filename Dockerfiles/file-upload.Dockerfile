@@ -7,12 +7,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends npm node-encoding git ca-certificates && \
     npm install -g \
-      filepond \
-      filepond-plugin-file-validate-size \
-      filepond-plugin-file-validate-type \
-      filepond-plugin-file-metadata \
-      filepond-plugin-file-rename \
-      @jcubic/tagger
+      filepond@4.32.12 \
+      filepond-plugin-file-validate-size@2.2.8 \
+      filepond-plugin-file-validate-type@1.2.9 \
+      filepond-plugin-file-metadata@1.0.8 \
+      filepond-plugin-file-rename@1.1.8 \
+      @jcubic/tagger@0.6.2
 
 FROM debian:13-slim AS runtime
 
@@ -51,11 +51,13 @@ ENV PHP_VERSION=$PHP_VERSION
 
 ARG FILEPOND_SERVER_BRANCH=75fea06f898ea5f474227be2daba924d06ba6aee
 ENV FILEPOND_SERVER_BRANCH=$FILEPOND_SERVER_BRANCH
+# SHA-256 of the filepond-server-php archive for FILEPOND_SERVER_BRANCH; update both together
+ARG FILEPOND_SERVER_SHA256=2b3baf6eb0fb7304ec5b0be012719fa2e6b72d517ac95c12e74322a3ba74a001
 
 ARG STALE_UPLOAD_DELETE_MIN=360
 ENV STALE_UPLOAD_DELETE_MIN=$STALE_UPLOAD_DELETE_MIN
 
-ENV SUPERCRONIC_VERSION="0.2.49"
+ENV SUPERCRONIC_VERSION="0.2.51"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
@@ -67,7 +69,8 @@ COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-rename /var/
 COPY --from=npmget /usr/local/lib/node_modules/@jcubic /var/www/upload/@jcubic
 ADD --chmod=644 file-upload/requirements.txt /usr/local/src/requirements.txt
 
-RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       ca-certificates \
@@ -88,23 +91,24 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       tini \
       vim-tiny && \
     rm -f /etc/ssh/ssh_host_* && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     mkdir -p /var/www/upload/server/php \
              /tmp/filepond-server && \
     cd /tmp && \
-      curl -sSL "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" | tar xzvf - -C ./filepond-server --strip-components 1 && \
+      curl -fsSL -o ./filepond-server.tar.gz "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" && \
+      echo "${FILEPOND_SERVER_SHA256}  ./filepond-server.tar.gz" | sha256sum -c - && \
+      tar xzf ./filepond-server.tar.gz -C ./filepond-server --strip-components 1 && \
       rsync -a --include="*/" --include="*.php" --exclude="*" ./filepond-server/ /var/www/upload/server/php/ && \
       python3 -c 'import pathlib,sys; p=pathlib.Path("/var/www/upload/server/php/FilePond.class.php"); s=p.read_text(); old="[^a-zA-Z0-9\\_\\s]"; new="[^a-zA-Z0-9\\_\\s.]"; n=s.count(old); sys.exit("FilePond.class.php sanitize_filename_part pattern not found or ambiguous (count=%d); vendored library may have changed, update this patch" % n) if n != 1 else p.write_text(s.replace(old, new))' && \
       FILEPOND_INDEX_PHP="/var/www/upload/server/php/index.php"; \
         FILEPOND_INDEX_TMP="$(mktemp "${FILEPOND_INDEX_PHP}.XXXXXX")"; \
         awk ' \
-            index($0, "FETCH_REMOTE_FILE") && \
-            index($0, "handle_fetch_remote_file") { \
+            /(FETCH_REMOTE_FILE|RESTORE_FILE_TRANSFER|LOAD_LOCAL_FILE|PATCH_FILE_TRANSFER)/ && \
+            /handle_(fetch_remote_file|restore_file_transfer|load_local_file|patch_file_transfer)/ { \
                 next; \
             } \
             !removing && \
-            $0 ~ /^[[:space:]]*function[[:space:]]+handle_fetch_remote_file[[:space:]]*\(/ { \
+            $0 ~ /^[[:space:]]*function[[:space:]]+handle_(fetch_remote_file|restore_file_transfer|load_local_file|patch_file_transfer)[[:space:]]*\(/ { \
                 removing = 1; \
                 depth = 0; \
             } \
@@ -119,6 +123,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
             } \
             { print; } \
         ' "$FILEPOND_INDEX_PHP" > "$FILEPOND_INDEX_TMP" && \
+        if grep -Eq 'handle_(fetch_remote_file|restore_file_transfer|load_local_file|patch_file_transfer)' "$FILEPOND_INDEX_TMP"; then \
+            echo "FilePond index.php fetch/restore/load/patch handler removal failed; vendored library may have changed, update this patch" >&2; \
+            exit 1; \
+        fi && \
         chmod --reference="$FILEPOND_INDEX_PHP" "$FILEPOND_INDEX_TMP" && \
         mv -- "$FILEPOND_INDEX_TMP" "$FILEPOND_INDEX_PHP" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt  && \
@@ -127,7 +135,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
 
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh

@@ -6,9 +6,10 @@ import json
 import logging
 import time
 
-from malcolm_utils import AtomicInt, ContextLockedOrderedDict, same_file_or_dir
+from malcolm_utils import AtomicInt, ContextLockedOrderedDict
 
 from watchdog.events import (
+    EVENT_TYPE_OPENED,
     FileSystemEventHandler,
     FileMovedEvent,
     FileModifiedEvent,
@@ -16,6 +17,7 @@ from watchdog.events import (
     FileClosedEvent,
     FileOpenedEvent,
     FileDeletedEvent,
+    FileClosedNoWriteEvent,
 )
 
 from multiprocessing.pool import ThreadPool
@@ -65,8 +67,36 @@ class FileOperationEventHandler(FileSystemEventHandler):
     def updateTime(self):
         self.nowTime = int(time.time())
 
+    def cancel_read_open(self, event):
+        # IN_CLOSE_NOWRITE means the matching IN_OPEN was a read-only open, which can't change the
+        #   file's contents. Retract one recorded "opened" so the reader's visit doesn't count as
+        #   activity: a file nobody else is tracking drops out of the decks entirely, while an
+        #   "opened" left behind by a writer that still holds the file keeps it waiting for its close.
+        #   This never promotes or appends; a close with no recorded open is ignored.
+        if event.is_directory:
+            return
+        fName = event.src_path
+        with self.deck as d:
+            for deck in (d, self.modDeck):
+                history = deck.get(fName)
+                if history is None:
+                    continue
+                for idx in range(len(history) - 1, -1, -1):
+                    if history[idx].operation == EVENT_TYPE_OPENED:
+                        del history[idx]
+                        break
+                if not history:
+                    deck.pop(fName, None)
+                self.logger.debug(
+                    f"⊖\t{event.event_type: <10}\t{fName}\t{json.dumps(deck.get(fName, []))}\t{self.workerPid}"
+                )
+                break
+
     def on_any_event(self, event):
         fName = None
+        if isinstance(event, FileClosedNoWriteEvent):
+            self.cancel_read_open(event)
+            return
         if not event.is_directory:
             self.updateTime()
 
@@ -106,10 +136,10 @@ class FileOperationEventHandler(FileSystemEventHandler):
                 try:
                     deckInserted = d
 
-                    if fNameOld and same_file_or_dir(os.path.dirname(fNameOld), os.path.dirname(fName)):
-                        # a file was simply renamed in the watched directory (not moved
-                        # from some other directory) so remove the old filename from our list
-                        # and a new one will get added
+                    if fNameOld:
+                        # Moves can cross subdirectories of the watched tree. Retire any
+                        # tracked source path, not just same-directory renames; the file
+                        # will be queued at its destination below.
                         d.pop(fNameOld, None)
                         self.modDeck.pop(fNameOld, None)
 
@@ -128,7 +158,11 @@ class FileOperationEventHandler(FileSystemEventHandler):
                             # don't do *anything*, leave the entry untouched in the list
                             noop = True
 
-                        elif (len(d[fName]) > 0) and (d[fName][-1].operation == event.event_type):
+                        elif (
+                            (len(d[fName]) > 0)
+                            and (d[fName][-1].operation == event.event_type)
+                            and (not isinstance(event, FileOpenedEvent))
+                        ):
                             # if the previous operation (the last one in the history) was the same as this one,
                             # replace the operation rather than appending a new one (effectively just updating the timestamp)
                             if (newOpLog.timestamp > d[fName][-1].timestamp) or (newOpLog.size != d[fName][-1].size):
@@ -157,6 +191,19 @@ class FileOperationEventHandler(FileSystemEventHandler):
                             self.logger.debug(f"𝦸\t{event.event_type: <10}\t{fName}\t{self.workerPid}")
                             d[fName] = self.modDeck.pop(fName)
                             d[fName].append(newOpLog)
+
+                        else:
+                            # not promoted yet: keep staging it in modDeck, recording this event so a later
+                            # size change can be recognized as a real modification. Without this, the
+                            # event fell through to the move_to_end below against the main deck, which
+                            # doesn't contain this file (KeyError), and was never recorded, so a file whose
+                            # first event was "opened" could never be promoted by a "modified" event.
+                            deckInserted = self.modDeck
+                            staged = self.modDeck[fName]
+                            if staged and (staged[-1].operation == event.event_type) and (not isinstance(event, FileOpenedEvent)):
+                                staged[-1] = newOpLog
+                            else:
+                                staged.append(newOpLog)
 
                     else:
                         # this is a file we were not previously tracking at all, in either deck

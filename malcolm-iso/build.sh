@@ -276,6 +276,8 @@ PYCODE
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
+  mkdir -p ./config/includes.chroot/usr/local/share/
+  cp "$SCRIPT_PATH/../shared/checksums/binaries.sha256" ./config/includes.chroot/usr/local/share/
   rsync -a "$SCRIPT_PATH/kiosk/" ./config/includes.chroot/opt/kiosk/
   cp "$SCRIPT_PATH/../scripts/malcolm_utils.py" ./config/includes.chroot/usr/local/bin/
   cp "$SCRIPT_PATH/../scripts/malcolm_constants.py" ./config/includes.chroot/usr/local/bin/
@@ -301,7 +303,7 @@ PYCODE
                 ./config/includes.chroot/etc/xdg/autostart/kiosk-browser.desktop
     XFCE_PANEL_REMOVE=(17 18 20 21 22 23 24)
   else
-    sed -i '/^[[:space:]]*systemctl enable kiosk[[:space:]]*$/d' ./config/hooks/normal/*.hook.chroot
+    sed -i '/^[[:space:]]*systemctl enable kiosk\(\.service\)\?[[:space:]]*$/d' ./config/hooks/normal/*.hook.chroot
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/Malcolm_background.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
     XFCE_PANEL_REMOVE=(30)

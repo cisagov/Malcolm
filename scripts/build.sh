@@ -21,7 +21,7 @@ if $MALCOLM_CONTAINER_RUNTIME compose version >/dev/null 2>&1; then
   DOCKER_COMPOSE_BIN=($MALCOLM_CONTAINER_RUNTIME compose)
   DOCKER_BIN=$MALCOLM_CONTAINER_RUNTIME
 elif ${MALCOLM_CONTAINER_RUNTIME}-compose version >/dev/null 2>&1; then
-  DOCKER_COMPOSE_BIN=(${$MALCOLM_CONTAINER_RUNTIME}-compose)
+  DOCKER_COMPOSE_BIN=("${MALCOLM_CONTAINER_RUNTIME}-compose")
   DOCKER_BIN=$MALCOLM_CONTAINER_RUNTIME
 elif $GREP -q Microsoft /proc/version; then
   if docker.exe compose version >/dev/null 2>&1; then
@@ -50,7 +50,7 @@ fi
 if [[ -d "${MALCOLM_CONFIG_DIR:-}" ]]; then
   CONFIG_ENV_DIR=${MALCOLM_CONFIG_DIR}
 else
-  CONFIG_ENV_DIR=="$($DIRNAME $($REALPATH -e "${CONFIG_FILE}"))"/config
+  CONFIG_ENV_DIR="$($DIRNAME $($REALPATH -e "${CONFIG_FILE}"))"/config
 fi
 
 function filesize_in_image() {
@@ -116,7 +116,6 @@ TARGET_PLATFORM=linux/$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/
 BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 MALCOLM_VERSION="$($GREP -P "^\s+image:.*/malcolm/" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
-GITHUB_API_TOKEN="${GITHUB_TOKEN:-}"
 
 mkdir -p ./config
 pushd ./config >/dev/null 2>&1
@@ -130,7 +129,7 @@ popd >/dev/null 2>&1
 if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
   # prefer a local environment variable
   MAXMIND_API_KEY="$MAXMIND_GEOIP_DB_LICENSE_KEY"
-elif [[ "${CONFIG_ENV_DIR}"/arkime-secret.env ]]; then
+elif [[ -f "${CONFIG_ENV_DIR}"/arkime-secret.env ]]; then
   # but default to what they have saved in ./config/arkime-secret.env
   MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*=\s*" "${CONFIG_ENV_DIR}"/arkime-secret.env | cut -d= -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 else
@@ -139,20 +138,31 @@ fi
 if [ ${#MAXMIND_GEOIP_DB_ACCOUNT_ID} -gt 1 ]; then
   # prefer a local environment variable
   MAXMIND_ACCOUNT_ID="$MAXMIND_GEOIP_DB_ACCOUNT_ID"
-elif [[ "${CONFIG_ENV_DIR}"/arkime-secret.env ]]; then
+elif [[ -f "${CONFIG_ENV_DIR}"/arkime-secret.env ]]; then
   # but default to what they have saved in ./config/arkime-secret.env
   MAXMIND_ACCOUNT_ID="$($GREP -P "^\s*MAXMIND_GEOIP_DB_ACCOUNT_ID\s*=\s*" "${CONFIG_ENV_DIR}"/arkime-secret.env | cut -d= -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 else
   MAXMIND_ACCOUNT_ID=""
 fi
 
+# Credentials are passed to the build as BuildKit secrets sourced from these environment
+#   variables (see the top-level "secrets:" section of the compose file) rather than as
+#   --build-arg values, so they don't appear on the command line or in the image history.
+export GITHUB_TOKEN="${GITHUB_TOKEN:-}"
+export MAXMIND_GEOIP_DB_ACCOUNT_ID="$MAXMIND_ACCOUNT_ID"
+export MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY"
+export MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}"
+
 # build the image(s)
-DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
-if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_ACCOUNT_ID="$MAXMIND_ACCOUNT_ID" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
-else
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_ACCOUNT_ID="$MAXMIND_ACCOUNT_ID" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
-fi
+DOCKER_COMPOSE_COMMAND=("${DOCKER_COMPOSE_BIN[@]}" --profile malcolm -f "$CONFIG_FILE")
+BUILD_FLAGS=()
+[[ $CONFIRMATION =~ ^[Yy] ]] && BUILD_FLAGS+=(--force-rm --no-cache)
+"${DOCKER_COMPOSE_COMMAND[@]}" --progress=plain build "${BUILD_FLAGS[@]}" \
+  --build-arg TARGETPLATFORM="$TARGET_PLATFORM" \
+  --build-arg BUILD_DATE="$BUILD_DATE" \
+  --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" \
+  --build-arg VCS_REVISION="$VCS_REVISION" \
+  "$@"
 
 if (( $# == 0 )); then
   # if we built *all* the images, we're going to do some validation that some things got pulled/built correctly

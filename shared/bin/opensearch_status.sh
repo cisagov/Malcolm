@@ -114,17 +114,18 @@ if (( $WAIT_FOR_LOG_DATA == 1 )); then
   # wait until at least one network traffic log index exists (get index count where docs.count > 0)
   FOUND_INDEX=
   while true; do
-    # use jq if it's available to parse the machine-readable index list as JSON, fall back to awk if it's not
+    # Require a positive document count; missing/null counts are not evidence
+    # of ingested logs. Select the count column explicitly in the text fallback.
     if command -v jq >/dev/null 2>&1; then
-      if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN?format=json" 2>/dev/null | jq '[.[] | select(.["docs.count"] != "0")] | length' 2>/dev/null) > 0 )); then
+      if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN?format=json" 2>/dev/null | jq '[.[] | select((.["docs.count"] | tonumber? // 0) > 0)] | length' 2>/dev/null) > 0 )); then
         FOUND_INDEX="$MALCOLM_NETWORK_INDEX_PATTERN"
-      elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN?format=json" 2>/dev/null | jq '[.[] | select(.["docs.count"] != "0")] | length' 2>/dev/null) > 0 )); then
+      elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN?format=json" 2>/dev/null | jq '[.[] | select((.["docs.count"] | tonumber? // 0) > 0)] | length' 2>/dev/null) > 0 )); then
         FOUND_INDEX="$ARKIME_NETWORK_INDEX_PATTERN"
       fi
     else
-      if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN" 2>/dev/null | awk '$7 != "0"' | wc -l) > 0 )); then
+      if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN?h=docs.count" 2>/dev/null | awk '$1 ~ /^[0-9]+$/ && $1 + 0 > 0' | wc -l) > 0 )); then
         FOUND_INDEX="$MALCOLM_NETWORK_INDEX_PATTERN"
-      elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN" 2>/dev/null | awk '$7 != "0"' | wc -l) > 0 )); then
+      elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN?h=docs.count" 2>/dev/null | awk '$1 ~ /^[0-9]+$/ && $1 + 0 > 0' | wc -l) > 0 )); then
         FOUND_INDEX="$ARKIME_NETWORK_INDEX_PATTERN"
       fi
     fi

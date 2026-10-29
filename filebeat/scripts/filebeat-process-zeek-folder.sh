@@ -74,6 +74,13 @@ if mkdir $LOCKDIR; then
         SOURCEDIR="$(dirname "$FILENAME")"
         DESTDIR="./processed/$SOURCEDIR"
         DESTNAME="$DESTDIR/$(basename "$FILENAME")"
+        if [[ -e "$DESTNAME" ]] || [[ -L "$DESTNAME" ]]; then
+          # do not overwrite an earlier archive of the same name: insert the timestamp ahead of
+          # the extension chain (.tar.gz, .log.gz, etc.) so the format and log name are unchanged
+          DESTBASE="$(basename "$FILENAME")"
+          DESTSTEM="${DESTBASE%%.*}"
+          DESTNAME="$DESTDIR/${DESTSTEM}.${PROCESS_TIME}${DESTBASE#"$DESTSTEM"}"
+        fi
         DESTDIR_EXTRACTED="${DESTNAME}_${PROCESS_TIME}"
         LINKDIR="./current"
         USERTAG=false
@@ -109,7 +116,10 @@ if mkdir $LOCKDIR; then
         else
           # extract archive to DESTDIR_EXTRACTED (dir will be created by safe-extract.py)
           mv "$FILENAME" "$DESTNAME"
-          /usr/local/bin/safe-extract.py "$DESTNAME" "$DESTDIR_EXTRACTED"
+          if ! /usr/local/bin/safe-extract.py "$DESTNAME" "$DESTDIR_EXTRACTED"; then
+            echo "Failed to extract \"$DESTNAME\", skipping" >&2
+            exit 1
+          fi
         fi
 
         ZEEK_LOG_EXT=log

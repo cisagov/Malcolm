@@ -32,6 +32,8 @@ def _ensure_utc(v: str | None | datetime) -> datetime:
         v = datetime.now(UTC)
     elif isinstance(v, str):
         v = datetime.fromisoformat(v)
+    if v.tzinfo is None:
+        v = v.replace(tzinfo=UTC)
     return v.astimezone(UTC)
 
 

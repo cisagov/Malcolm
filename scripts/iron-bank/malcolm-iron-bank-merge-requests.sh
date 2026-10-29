@@ -2,10 +2,68 @@
 
 set -euo pipefail
 
-RELEASE="26.08.0"
-SOURCE_BRANCH="inl-26.x"
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") -r RELEASE -s SOURCE_BRANCH -d IRONBANK_DIR [-t TARGET_BRANCH]
+
+  -r, --release          Malcolm release version, e.g. 26.09.0   (required)
+  -s, --source-branch    Source branch for the merge request     (required)
+  -d, --ironbank-dir     Path to the ironbank checkout directory (required)
+  -t, --target-branch    Target branch for the merge request     (default: development)
+  -h, --help             Show this help text
+EOF
+}
+
+RELEASE=""
+SOURCE_BRANCH=""
+IRONBANK_DIR=""
 TARGET_BRANCH="development"
-IRONBANK_DIR="${HOME}/devel/ironbank"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -r|--release)
+            RELEASE="$2"
+            shift 2
+            ;;
+        -s|--source-branch)
+            SOURCE_BRANCH="$2"
+            shift 2
+            ;;
+        -d|--ironbank-dir)
+            IRONBANK_DIR="$2"
+            shift 2
+            ;;
+        -t|--target-branch)
+            TARGET_BRANCH="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown argument: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+
+missing=()
+[[ -z "$RELEASE" ]] && missing+=("--release")
+[[ -z "$SOURCE_BRANCH" ]] && missing+=("--source-branch")
+[[ -z "$IRONBANK_DIR" ]] && missing+=("--ironbank-dir")
+
+if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "Missing required argument(s): ${missing[*]}" >&2
+    usage >&2
+    exit 1
+fi
+
+if [[ ! -d "$IRONBANK_DIR" ]]; then
+    echo "IRONBANK_DIR does not exist or is not a directory: $IRONBANK_DIR" >&2
+    exit 1
+fi
 
 query="$(
     RELEASE="$RELEASE" \

@@ -49,6 +49,8 @@ class StrelkaFrontend:
         timeout: float = 60.0,
         chunksize: int = 32768,
     ) -> None:
+        if chunksize <= 0:
+            raise ValueError('chunksize must be positive')
         self.server = f'{host}:{port}'
         if secure or cert:
             cert_data = cert.read_bytes() if cert else None
@@ -149,5 +151,10 @@ class StrelkaFrontend:
                 ):
                     yield json.loads(msg.event)
             # see comment above about pygrpc and eating exception
-            except anyio.get_cancelled_exc_class() as e:
-                raise (hold.exception() or e) from None
+            except anyio.get_cancelled_exc_class():
+                # The upload may still be pending when the RPC is cancelled.
+                # Reading a pending concurrent Future would block this event loop.
+                if hold.done() and not hold.cancelled():
+                    if (error := hold.exception()) is not None:
+                        raise error from None
+                raise

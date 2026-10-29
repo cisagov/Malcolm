@@ -18,6 +18,7 @@ KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS = "zeekICSBestGuess"
 KEY_CONFIG_ITEM_REVERSE_DNS = "reverseDns"
 KEY_CONFIG_ITEM_AUTO_OUI = "autoOui"
 KEY_CONFIG_ITEM_AUTO_FREQ = "autoFreq"
+KEY_CONFIG_ITEM_AUTO_ZEEK_COMMUNITY_ID = "autoZeekCommunityID"
 
 # Live traffic capture options
 KEY_CONFIG_ITEM_PCAP_IFACE = "pcapIface"

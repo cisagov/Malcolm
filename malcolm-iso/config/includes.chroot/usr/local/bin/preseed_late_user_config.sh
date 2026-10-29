@@ -8,12 +8,20 @@
 # prompt whether to use U.S. DoD login banner (https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585)
 # prompt for disabling IPV6 or not
 # prompt for enabling SSH password authentication
+# prompt whether to run the sensor status kiosk at startup (Hedgehog Linux only)
 
 # this is a debconf-compatible script
 . /usr/share/debconf/confmodule
 
+# Keep the template private and avoid predictable paths in the shared /tmp.
+PRESEED_TMPDIR="$(mktemp -d /tmp/malcolm-preseed.XXXXXXXXXX)" || exit 1
+trap 'rm -rf -- "$PRESEED_TMPDIR"' EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 # template for user prompt
-cat > /tmp/malcolm.template <<'!EOF!'
+cat > "$PRESEED_TMPDIR/malcolm.template" <<'!EOF!'
 Template: malcolm/autologin
 Type: boolean
 Default: true
@@ -73,10 +81,20 @@ Description:
 Template: malcolm/format_large_storage_title
 Type: text
 Description: Format Non-OS Drive(s)?
+
+Template: malcolm/kiosk
+Type: boolean
+Default: true
+Description:
+ Display the sensor status kiosk at startup?
+
+Template: malcolm/kiosk_title
+Type: text
+Description: Sensor Kiosk
 !EOF!
 
 # load template
-db_x_loadtemplatefile /tmp/malcolm.template malcolm
+db_x_loadtemplatefile "$PRESEED_TMPDIR/malcolm.template" malcolm
 
 # set title
 db_settitle malcolm/format_large_storage_title
@@ -92,8 +110,6 @@ if [ "$RET" = false ]; then
   # capture_storage_format file was already created in preseed, remove it
   rm -f /etc/capture_storage_format*
 fi
-
-echo "malcolm/format_large_storage=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/disable_ipv6_title
@@ -114,8 +130,6 @@ fi
 
 echo "-net.ipv6.conf.all.disable_ipv6 = $DISABLE_IPV6_VAL" >> /etc/sysctl.d/99-ipv6.conf 2>/dev/null || true
 sed -i "s/\(ipv6\.disable=\)[[:digit:]]\+/\1$DISABLE_IPV6_VAL/g" /etc/default/grub 2>/dev/null || true
-
-echo "malcolm/disable_ipv6=$RET" > /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/autologin_title
@@ -138,8 +152,6 @@ if [ -n $RET ] && [ -f /etc/lightdm/lightdm.conf ]; then
   	sed -i 's/^\(autologin-user-timeout=\)/#\1/' /etc/lightdm/lightdm.conf
   fi
 fi
-
-echo "malcolm/autologin=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/xscreensaver_title
@@ -190,8 +202,6 @@ if [ -n $RET ]; then
 
 fi
 
-echo "malcolm/xscreensaver_lock=$RET" >> /tmp/malcolm.answer
-
 # set title
 db_settitle malcolm/dod_banner_title
 
@@ -224,8 +234,6 @@ else
   rm -f /usr/local/bin/dod-login-banner.sh
 fi
 
-echo "malcolm/dod_banner=$RET" >> /tmp/malcolm.answer
-
 # set title
 db_settitle malcolm/ssh_password_auth_title
 
@@ -244,4 +252,32 @@ fi
 
 sed -i "s/^[[:space:]]*#*[[:space:]]*PasswordAuthentication[[:space:]][[:space:]]*[[:alpha:]][[:alpha:]]*[[:space:]]*$/PasswordAuthentication $SSH_PASSWORD_AUTH/g" /etc/ssh/sshd_config 2>/dev/null || true
 
-echo "malcolm/ssh_password_auth=$RET" >> /tmp/malcolm.answer
+# the kiosk prompt only applies to Hedgehog Linux, which build.sh identifies via VARIANT_ID in .os-info
+IS_HEDGEHOG=false
+MAIN_USER_HOME="$(getent passwd 1000 | cut -d: -f6)"
+for OS_INFO_FILE in /etc/skel/Malcolm/.os-info "$MAIN_USER_HOME"/Malcolm/.os-info; do
+  if [ -r "$OS_INFO_FILE" ] && grep -q '^VARIANT_ID="hedgehog"' "$OS_INFO_FILE"; then
+    IS_HEDGEHOG=true
+    break
+  fi
+done
+
+if [ "$IS_HEDGEHOG" = true ]; then
+  # set title
+  db_settitle malcolm/kiosk_title
+
+  # prompt
+  db_input critical malcolm/kiosk
+  db_go
+
+  # get answer to $RET
+  db_get malcolm/kiosk
+
+  if [ "$RET" = false ]; then
+    # kiosk.service (the gunicorn backend) was enabled in 0910-agg-build.hook.chroot
+    systemctl disable kiosk.service >/dev/null 2>&1 || true
+    rm -f /etc/systemd/system/multi-user.target.wants/kiosk.service
+    # kiosk-browser.desktop (the firefox frontend) was linked into /etc/xdg/autostart by build.sh
+    rm -f /etc/xdg/autostart/kiosk-browser.desktop
+  fi
+fi

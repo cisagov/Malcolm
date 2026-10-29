@@ -21,7 +21,6 @@ import signal
 import sys
 import time
 
-import malcolm_utils
 from malcolm_utils import str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
 import watch_common
 
@@ -90,8 +89,24 @@ def file_processor(pathname, **kwargs):
                 # looks like this is a compressed file (or evtx file), we're assuming it's:
                 #  * a zeek log archive to be processed by filebeat
                 #  * a windows event log archive to be processed into JSON and then also sent through filebeat
-                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {destination}")
-                shutil.move(pathname, os.path.join(destination, os.path.basename(pathname)))
+                target = os.path.join(destination, os.path.basename(pathname))
+                if os.path.lexists(target):
+                    # Insert a numeric segment ahead of the complete extension chain (.tar.gz,
+                    # .log.gz, etc.). The extension chain still tells the extractor the format,
+                    # the name before the first dot is unchanged, and the tag splitting in
+                    # filebeat-process-zeek-folder.sh drops all-digit segments.
+                    basename = os.path.basename(pathname)
+                    suffix = ''.join(pathlib.Path(basename).suffixes)
+                    prefix = basename[: -len(suffix)] if suffix else basename
+                    counter = 1
+                    unique_name = f"{prefix}.{counter}{suffix}"
+                    while os.path.lexists(os.path.join(destination, unique_name)):
+                        counter += 1
+                        unique_name = f"{prefix}.{counter}{suffix}"
+                    target = os.path.join(destination, unique_name)
+                    logger.warning(f"{scriptName}:\tarchive name already exists; moving upload as {unique_name}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {target}")
+                shutil.move(pathname, target)
 
             else:
                 # unhandled file type uploaded, delete it

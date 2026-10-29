@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:26.09.0
+        image: ghcr.io/idaholab/malcolm/api:26.10.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -48,6 +48,10 @@ spec:
                "gunicorn",
                "--bind",
                "0:5000",
+               "--workers",
+               "2",
+               "--threads",
+               "4",
                "manage:app"]
         ports:
           - name: http

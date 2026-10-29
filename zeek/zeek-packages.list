@@ -1,0 +1,88 @@
+# Zeek packages installed by zeek/scripts/zeek_install_plugins.sh, with the ref to track for each.
+#   This file is the input to scripts/zeek_packages_lock_refresh.sh, which resolves every entry to a
+#   commit and writes zeek/zeek-packages.lock. The build installs only what's in the lock file, so
+#   after editing this list, run the refresh script and review the lock file diff.
+#
+# Format (one per line; blank lines and # comments are ignored):
+#   URL|ref|environment variables|method
+#   URL     - the GitHub repository URL
+#   ref     - optional branch, tag or commit to track; when empty, track the latest GitHub release,
+#             else the highest version tag, else the default branch (matching zkg's own choice)
+#   env     - optional semicolon-separated variables to set for the install
+#             (e.g., CMAKE_BUILD_TYPE=Debug;HILTI_CXX_FLAGS=-fno-var-tracking-assignments)
+#   method  - optional; "zkg" (the default) or "clone:<path under ZEEK_DIR>" for a plain git checkout
+
+https://github.com/0xl3x1/zeek-EternalSafety
+https://github.com/0xxon/cve-2020-0601
+https://github.com/0xxon/cve-2020-13777
+https://github.com/amzn/zeek-plugin-profinet|master
+https://github.com/amzn/zeek-plugin-tds|master
+https://github.com/cert-lv/spicy-iec104|main
+https://github.com/cisagov/icsnpp-bacnet|main
+https://github.com/cisagov/icsnpp-bsap|main
+https://github.com/cisagov/icsnpp-c1222|main
+https://github.com/cisagov/icsnpp-dnp3|main
+https://github.com/cisagov/icsnpp-enip|main
+https://github.com/cisagov/icsnpp-ethercat|main
+https://github.com/cisagov/icsnpp-ge-srtp|main
+https://github.com/cisagov/icsnpp-genisys|main
+https://github.com/cisagov/icsnpp-hart-ip|main
+https://github.com/cisagov/icsnpp-modbus|main
+https://github.com/cisagov/icsnpp-omron-fins|main
+https://github.com/cisagov/icsnpp-opcua-binary|main
+https://github.com/cisagov/icsnpp-profinet-io-cm|main
+https://github.com/cisagov/icsnpp-roc-plus|main
+https://github.com/cisagov/icsnpp-s7comm|main
+https://github.com/cisagov/icsnpp-synchrophasor|main
+https://github.com/corelight/callstranger-detector
+https://github.com/corelight/CVE-2020-16898
+https://github.com/corelight/CVE-2021-1675
+https://github.com/corelight/CVE-2021-31166
+https://github.com/corelight/CVE-2021-38647
+https://github.com/corelight/CVE-2021-41773
+https://github.com/corelight/CVE-2021-42292
+https://github.com/corelight/cve-2021-44228
+https://github.com/corelight/cve-2022-21907
+https://github.com/corelight/cve-2022-22954
+https://github.com/corelight/CVE-2022-23270-PPTP
+https://github.com/corelight/CVE-2022-24491
+https://github.com/corelight/CVE-2022-24497
+https://github.com/corelight/cve-2022-26809
+https://github.com/corelight/CVE-2022-26937
+https://github.com/corelight/CVE-2022-30216
+https://github.com/corelight/CVE-2022-3602
+https://github.com/corelight/ExtendIntel
+https://github.com/corelight/emudhra-weak-keys
+https://github.com/corelight/hassh
+https://github.com/corelight/http-more-files-names
+https://github.com/corelight/pingback
+https://github.com/corelight/php2shell-detect
+https://github.com/mmguero-dev/ripple20|master
+https://github.com/corelight/SIGRed
+https://github.com/corelight/zeek-agenttesla-detector
+https://github.com/corelight/zeek-asyncrat-detector
+https://github.com/corelight/zeek-long-connections|master
+https://github.com/corelight/zeek-netsupport-detector
+https://github.com/corelight/zeek-quasarrat-detector
+https://github.com/corelight/zeek-spicy-ipsec
+https://github.com/corelight/zeek-spicy-openvpn
+https://github.com/corelight/zeek-spicy-ospf|master
+https://github.com/corelight/zeek-spicy-stun
+https://github.com/corelight/zeek-spicy-wireguard
+https://github.com/corelight/zeek-strrat-detector
+https://github.com/corelight/zeek-xor-exe-plugin|master
+https://github.com/corelight/zerologon
+https://github.com/cybera/zeek-sniffpass
+https://github.com/FoxIO-LLC/ja4|v1.0.1
+https://github.com/J-Gras/zeek-fuzzy-hashing|topic/jgras/hash-all-files
+https://github.com/mmguero-dev/bzar
+https://github.com/corelight/json-streaming-logs|master
+https://github.com/ncsa/bro-is-darknet
+https://github.com/ncsa/bro-simple-scan
+https://github.com/precurse/zeek-httpattacks
+https://github.com/salesforce/GQUIC_Protocol_Analyzer
+https://github.com/SeisoLLC/zeek-kafka|main
+https://github.com/zeek/spicy-tftp|main
+
+# plugins/packages/scripts that don't play nicely with zkg
+https://github.com/cisagov/ACID|||clone:share/zeek/site/ACID

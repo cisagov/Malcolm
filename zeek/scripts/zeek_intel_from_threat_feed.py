@@ -93,6 +93,15 @@ def main():
         help='Add fields for corelight/ExtendIntel',
     )
     parser.add_argument(
+        '--misp-require-to-ids',
+        dest='mispRequireToIds',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=zeek_threat_feed_utils.MISP_REQUIRE_TO_IDS_DEFAULT,
+        help='Skip MISP attributes whose to_ids flag is false (can be overridden per feed with require_to_ids)',
+    )
+    parser.add_argument(
         '--ssl-verify',
         dest='sslVerify',
         type=malcolm_utils.str2bool,
@@ -164,7 +173,13 @@ def main():
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
         zeekPrinter = zeek_threat_feed_utils.FeedParserZeekPrinter(
-            args.extended, args.notice, args.cif, since=since, file=outfile, logger=logging
+            args.extended,
+            args.notice,
+            args.cif,
+            since=since,
+            file=outfile,
+            logger=logging,
+            misp_require_to_ids=args.mispRequireToIds,
         )
 
         # if --input-file is specified, process first and append to  --input
