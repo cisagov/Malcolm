@@ -144,6 +144,7 @@ Although the configuration script automates many of the following configuration 
     - The following variables should only be set if `NETBOX_MODE` is set to `remote`; otherwise, they should be blank:
         + `NETBOX_URL` - the URL of the remote NetBox instance (e.g., `https://netbox.example.org` or `https://example.com/netbox`)
         + `NETBOX_TOKEN` - the [API token](https://netboxlabs.com/docs/netbox/en/stable/integrations/rest-api/#tokens) for the remote NetBox instance (40 hexadecimal characters)
+        + `NETBOX_SSL_CERTIFICATE_VERIFICATION` - whether or not to require TLS certificate validation when communicating with the remote NetBox instance (`true` or `false`; only applies when `NETBOX_URL` begins with `https://`)
 * **`nginx.env`** - settings specific to Malcolm's nginx reverse proxy
     - `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](quickstart.md#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
     - `NGINX_ERROR_LOG_LEVEL` - sets the logging level for nginx's [error log](https://nginx.org/en/docs/ngx_core_module.html#error_log) (e.g., `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`; default `error`)

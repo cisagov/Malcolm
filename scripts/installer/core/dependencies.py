@@ -871,6 +871,16 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
+    # Only meaningful for a remote NetBox reached over https://. The bundled NetBox container is
+    #   reached over plain HTTP inside the internal container network, so there's nothing to verify
+    #   in local mode and no cert infrastructure for it.
+    KEY_CONFIG_ITEM_NETBOX_SSL_VERIFY: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode == NetboxMode.REMOTE.value)),
+            ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
+        )
+    ),
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],

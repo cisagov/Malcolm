@@ -84,6 +84,9 @@ KEY_ENV_NETBOX_AUTO_POPULATE = "NETBOX_AUTO_POPULATE"  # populate the NetBox inv
 KEY_ENV_NETBOX_DEFAULT_SITE = "NETBOX_DEFAULT_SITE"  # NetBox default site name
 KEY_ENV_NETBOX_URL = "NETBOX_URL"  # remote netbox URL
 KEY_ENV_NETBOX_MODE = "NETBOX_MODE"  # netbox mode
+KEY_ENV_NETBOX_SSL_CERTIFICATE_VERIFICATION = (
+    "NETBOX_SSL_CERTIFICATE_VERIFICATION"  # remote NetBox instance needs TLS certificate verification
+)
 
 KEY_ENV_NGINX_SSL = "NGINX_SSL"  # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
 

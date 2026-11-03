@@ -8,6 +8,7 @@ require 'fuzzystringmatch'
 require 'ipaddr'
 require 'json'
 require 'lru_reredux'
+require 'pathname'
 require 'yaml'
 require 'uri'
 require 'stringex_lite'
@@ -67,12 +68,14 @@ class NetBoxConnLazy
   def initialize(
     url,
     token,
-    debug
+    debug,
+    ssl_verify = false
   )
     @object = nil
     @url = url
     @token = token
     @netboxConnDebug = debug
+    @sslVerify = ssl_verify
     @connected = false
   end
 
@@ -104,7 +107,11 @@ class NetBoxConnLazy
   private
 
   def initialize_object
-    @object = Faraday.new(@url) do |conn|
+    # Faraday leaves TLS verification on by default (its net_http adapter defers to Net::HTTP,
+    #   which applies OpenSSL VERIFY_PEER). @sslVerify is based on NETBOX_SSL_CERTIFICATE_VERIFICATION,
+    #   so pass the option through rather than relying on the default either way --
+    #   being explicit keeps the intent readable.
+    @object = Faraday.new(@url, :ssl => { :verify => @sslVerify }) do |conn|
       conn.request :authorization, 'Token', @token
       conn.request :url_encoded
       conn.response :json, :parser_options => { :symbolize_names => true }
@@ -325,6 +332,20 @@ def register(
     @netbox_token = _netbox_token_env.split(/[;,:\s]+/).map { |env| ENV[env].to_s }.find { |val| val && !val.strip.empty? }
   end
 
+  # TLS certificate verification for the NetBox API connection.
+  #   Only meaningful for an https:// NETBOX_URL (i.e. NETBOX_MODE=remote).
+  #   The local NetBox container is reached over plain HTTP, where this has no effect.
+  _netbox_ssl_verify_str = params["netbox_ssl_verify"]
+  _netbox_ssl_verify_env = params["netbox_ssl_verify_env"]
+  if _netbox_ssl_verify_str.nil? && !_netbox_ssl_verify_env.nil?
+    _netbox_ssl_verify_str = ENV[_netbox_ssl_verify_env]
+  end
+  @netbox_ssl_verify = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_netbox_ssl_verify_str.to_s.downcase)
+  if !@netbox_ssl_verify && @netbox_url.to_s.downcase.start_with?('https:')
+    puts "netbox_enrich: TLS certificate verification DISABLED for #{@netbox_url} " \
+         "(via #{_netbox_ssl_verify_env || 'netbox_ssl_verify script_param'})"
+  end
+
   # hash of hashes, where key = site ID and value = hash of lookup types (from @lookup_type),
   #   each of which contains the respective looked-up values
   @site_lookup_types_hash = get_register_cache(:site_lookup_types_hash, 256, true)
@@ -496,7 +517,7 @@ def register(
    end
 
   # make sure required tags exist before starting up
-  _tmp_nb_conn = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
+  _tmp_nb_conn = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose, @netbox_ssl_verify)
   [
     [{ 'name' => 'Autopopulated', 'slug' => 'malcolm-autopopulated', 'color' => 'add8e6' }],
     [{ 'name' => 'Manufacturer Unknown', 'slug' => 'manufacturer-unknown', 'color' => 'd3d3d3' }],
@@ -867,7 +888,7 @@ def lookup_or_create_site(
         _site = nil
 
         # this shouldn't be too often, once the hash gets populated
-        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose) if _nb_to_use.nil?
+        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose, @netbox_ssl_verify) if _nb_to_use.nil?
 
         # look it up by ID
         _query = { :offset => 0,
@@ -901,7 +922,7 @@ def lookup_or_create_site(
         _site_id = 0
 
         # this shouldn't be too often, once the hash gets populated
-        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose) if _nb_to_use.nil?
+        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose, @netbox_ssl_verify) if _nb_to_use.nil?
 
         # try to look it up by name
         _query = { :offset => 0,
@@ -1213,6 +1234,70 @@ def lookup_or_create_role(
   end
 end
 
+##############################################################################################
+# Convert a NetBox-supplied absolute object URL (e.g. the :url field on a device or virtual
+#   machine) into a connection-relative API path that cannot escape the configured NetBox origin.
+#
+# The NetBox API token is attached to every request made on the NetBoxConnLazy/Faraday
+#   connection. Faraday builds the request URL by merging the argument onto the connection's
+#   url_prefix, and URI#merge discards that base entirely when handed an absolute or
+#   protocol-relative reference. So passing a response-supplied URL straight through (even after
+#   delete_prefix) lets whatever answered the previous request redirect the next one -- and the
+#   token with it -- to an arbitrary host or a non-HTTP scheme.
+#
+# Returns the relative path (no leading slash) when url is on the configured NetBox origin and
+#   under its API path, or nil when it should not be followed.
+def netbox_relative_api_path(
+  url,
+  url_base,
+  url_suffix
+)
+  return nil if url.nil?
+  _url_str = url.to_s
+  return nil if _url_str.empty?
+
+  # protocol-relative (//host/path) names a foreign authority; never follow it
+  return nil if _url_str.start_with?('//')
+
+  begin
+    _candidate = URI.parse(_url_str)
+  rescue URI::Error
+    return nil
+  end
+
+  _api_root = url_suffix.to_s.empty? ? '/' : url_suffix.to_s
+
+  if _candidate.absolute?
+    # must be http(s) on the exact same origin as the configured NetBox (scheme + host + port)
+    return nil unless %w[http https].include?(_candidate.scheme.to_s.downcase)
+    begin
+      _base = URI.parse("#{url_base}#{_api_root}")
+    rescue URI::Error
+      return nil
+    end
+    return nil unless _candidate.origin == _base.origin
+    _path = _candidate.path.to_s
+  else
+    # relative reference: resolve it against the API root before validating
+    _path = _candidate.path.to_s
+    _path = "#{_api_root}/#{_path}" unless _path.start_with?('/')
+  end
+
+  # collapse any "." / ".." segments, then require the result to still sit under the API path
+  _normalized = Pathname.new(_path).cleanpath.to_s
+  _api_root_clean = Pathname.new(_api_root).cleanpath.to_s
+  _api_root_prefix = _api_root_clean.end_with?('/') ? _api_root_clean : "#{_api_root_clean}/"
+  return nil unless (_normalized == _api_root_clean) || _normalized.start_with?(_api_root_prefix)
+
+  _relative = _normalized.delete_prefix(_api_root_clean).delete_prefix('/')
+  return nil if _relative.empty?
+
+  # preserve a trailing slash (NetBox object URLs end in one) and any query string
+  _relative = "#{_relative}/" if _path.end_with?('/') && !_relative.end_with?('/')
+  _candidate.query.to_s.empty? ? _relative : "#{_relative}?#{_candidate.query}"
+end
+
+##############################################################################################
 def lookup_devices(
   ip_str,
   site_id,
@@ -1240,8 +1325,15 @@ def lookup_devices(
           then
             _is_device = !_device_obj.nil?
             _device = _is_device ? _device_obj : _virtualized_obj
-            # if we can, follow the :assigned_object's "full" device URL to get more information
-            _device = (_device.has_key?(:url) && (_full_device = nb.get(_device[:url].delete_prefix(url_base).delete_prefix(url_suffix).delete_prefix("/")).body)) ? _full_device : _device
+            # if we can, follow the :assigned_object's "full" device URL to get more information.
+            # :url comes from the NetBox response body and the API token is attached to every
+            #   request on this connection, so resolve it to a path that is guaranteed to stay on
+            #   the configured NetBox origin instead of prefix-stripping the string. A stripped
+            #   absolute URL (https://attacker.example/x, http://169.254.169.254/..., file:///...)
+            #   survives delete_prefix untouched and Faraday's URI merge would then discard the
+            #   base entirely, sending the token to a host of the responder's choosing.
+            _device_rel_url = netbox_relative_api_path(_device[:url], url_base, url_suffix)
+            _device = (_device_rel_url && (_full_device = nb.get(_device_rel_url).body)) ? _full_device : _device
             _device_site_obj = _device.fetch(:site, nil)
             if ((_device_site_obj&.fetch(:id, 0)).to_i == site_id.to_i)
               _device_id = _device.fetch(:id, nil)
@@ -1543,7 +1635,7 @@ def netbox_lookup(
 
   if (@autopopulate || (!@target.nil? && !@target.empty?)) && autopopulate_allowed?(_key_ip, site_id, $global_autopopulate_subnets_config_site_hash)
 
-    _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
+    _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose, @netbox_ssl_verify)
 
     _site_obj = lookup_or_create_site(site_id, '', _nb)
     _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
