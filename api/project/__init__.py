@@ -1629,10 +1629,12 @@ def dashboard_export(dashid):
             )
 
     except Exception as e:
-        errStr = f"{type(e).__name__}: {str(e)} exporting OpenSearch Dashboard {dashid}"
+        # Log the full exception detail server-side only; the caller just gets a generic
+        # message so internal hostnames, URLs, and library/version info aren't leaked.
         if debugApi:
-            print(errStr)
-        return jsonify(error=errStr)
+            print(f"{type(e).__name__}: {str(e)} exporting OpenSearch Dashboard {dashid}")
+            print(traceback.format_exc())
+        return jsonify(error=f'Could not export OpenSearch Dashboard {dashid}')
 
 
 @app.route(
