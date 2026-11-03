@@ -195,3 +195,6 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Style](contributing-style.md#Style)
     - [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners)
     - [Preparing a Malcolm Release](contributing-release-prep.md)
+    - [Malcolm code provenance and software supply chain](contributing-guide-code-provenance.md)
+    - [Malcolm security model](contributing-security-model.md)
+    - [Testing](contributing-malcolm-test.md)
