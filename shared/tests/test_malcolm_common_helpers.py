@@ -490,10 +490,10 @@ def write_compose(directory, *images):
 @pytest.mark.parametrize(
     'images, expected',
     [
-        (['ghcr.io/idaholab/malcolm/zeek:26.10.0', 'ghcr.io/idaholab/malcolm/arkime:26.9.1'], '26.10.0'),
-        (['ghcr.io/idaholab/malcolm/zeek:26.10.0', 'ghcr.io/idaholab/malcolm/arkime:26.10.1-rc1'], '26.10.1'),
+        (['ghcr.io/idaholab/malcolm/zeek:26.11.0', 'ghcr.io/idaholab/malcolm/arkime:26.9.1'], '26.11.0'),
+        (['ghcr.io/idaholab/malcolm/zeek:26.11.0', 'ghcr.io/idaholab/malcolm/arkime:26.10.1-rc1'], '26.10.1'),
         (['ghcr.io/idaholab/malcolm/zeek:26.9.0+build5', 'redis:7.2'], '26.9.0'),
-        (['ghcr.io/idaholab/malcolm/zeek:26.10.0', 'ghcr.io/idaholab/malcolm/arkime:main', None], '26.10.0'),
+        (['ghcr.io/idaholab/malcolm/zeek:26.11.0', 'ghcr.io/idaholab/malcolm/arkime:main', None], '26.11.0'),
     ],
 )
 def test_get_malcolm_version_highest_calver(compose_dir, images, expected):
