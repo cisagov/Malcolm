@@ -81,8 +81,11 @@ local pass, fail = 0, 0
 
 local function check(label, conf_label, nginx_regex, uri, expect_match)
     -- nginx location regexes are matched case-insensitively here because
-    -- both locations use the "~*" modifier.
-    local matched = rex.find(uri, nginx_regex, "i") ~= nil
+    -- both locations use the "~*" modifier. lrexlib's find() takes a numeric
+    -- init offset as its third argument, not a flags string, so the "i"
+    -- flag can't be passed positionally there; use the inline PCRE modifier
+    -- (?i) instead, which both rex_pcre and rex_pcre2 understand the same way.
+    local matched = rex.find(uri, "(?i)" .. nginx_regex) ~= nil
     local ok = (matched == expect_match)
     if ok then
         io.write(string.format("[PASS] %-28s %-42s %s\n", conf_label, label, uri))
