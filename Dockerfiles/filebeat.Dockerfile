@@ -82,6 +82,9 @@ ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/t
 ENV YQ_VERSION="4.54.1"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 ENV EVTX_VERSION="0.15.1"
 ENV EVTX_URL="https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VERSION}/evtx_dump-v${EVTX_VERSION}-XXX-unknown-linux-gnu"
 
@@ -126,6 +129,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" "evtx_dump_${EVTX_VERSION}_linux_{arch}" && \
     microdnf clean all && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
