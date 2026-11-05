@@ -57,8 +57,6 @@ function processFile() {
       #   in the names to have underscores instead, turn integers beyond +/-2^53 into strings
       #   so they keep their exact digits through filebeat, and drop the placeholder that
       #   evtx >= 0.15.0 writes for a FILETIME too large to represent (it isn't a valid date).
-      #   Objects are rebuilt only when one of their keys contains a space, and the rename is a
-      #   literal split/join rather than a regex, since nearly every key needs no change.
       evtx \
          --threads 1 \
          --format jsonl \
