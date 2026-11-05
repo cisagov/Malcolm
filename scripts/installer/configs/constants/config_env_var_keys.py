@@ -155,6 +155,9 @@ KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION = (
     "ZEEK_INTEL_REFRESH_CRON_EXPRESSION"  # Cron expression for scheduled pulls from threat intelligence feeds
 )
 KEY_ENV_ZEEK_INTEL_FEED_SINCE = "ZEEK_INTEL_FEED_SINCE"  # Threat indicator "since" period
+KEY_ENV_ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION = (
+    "ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION"  # require TLS certificate verification for threat intel feeds
+)
 KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION = (
     "ZEEK_INTEL_ITEM_EXPIRATION"  # Intel::item_expiration timeout for intelligence items
 )

@@ -1490,6 +1490,15 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
         )
     ),
+    # Applies to every remote feed type (MISP, TAXII, Google, and URLs given in input files). Local
+    #   STIX/MISP JSON files make no network requests, so the setting only matters for remote feeds.
+    KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SSL_VERIFY: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+        )
+    ),
     KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
