@@ -37,7 +37,11 @@ ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-l
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
-    apk update --no-cache && \
+    apk --no-cache add --virtual .jq-fetch-deps curl && \
+      sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
+      apk del .jq-fetch-deps
+
+RUN apk update --no-cache && \
     apk add --no-cache bash musl-locales procps psmisc rsync shadow tini && \
     # NOTE: as this moves image forward, add old supported versions
     # here for version-to-version upgrades (e.g., postgresql18 postgresql18-contrib)
@@ -49,9 +53,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     ln -s /usr/bin /usr/local/bin && \
     ln -s /usr/share /usr/local/share && \
     ln -s /usr/lib /usr/local/lib && \
-    apk --no-cache add --virtual .jq-fetch-deps curl && \
-      sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
-      apk del .jq-fetch-deps && \
     mkdir -p "${PGDATA}" && \
     chmod 00775 /var/lib/postgresql /var/lib/postgresql/data /run/postgresql
 
