@@ -63,24 +63,19 @@ function processFile() {
          --threads 1 \
          --format jsonl \
          --separate-json-attributes \
-         "${FNAME}" 2>/dev/null | "${JQ}" -c 'def fix:
-                                          if type == "object" then
-                                            map_values(fix)
-                                            | if any(keys[]; index(" ")) then
-                                                with_entries(.key |= (split(" ") | join("_")))
-                                              else
-                                                .
-                                              end
-                                          elif type == "array" then
-                                            map(fix)
-                                          elif type == "number" then
-                                            if . > 9007199254740991 or . < -9007199254740991 then tostring else . end
-                                          elif . == "0000-00-00T00:00:00.0000000Z" then
-                                            null
-                                          else
-                                            .
-                                          end;
-                                        fix' > "${FNAME_JSON}"
+         "${FNAME}" 2>/dev/null | "${JQ}" -c 'def walk(f):
+                                                . as $in
+                                                | if type == "object" then
+                                                    reduce keys[] as $key
+                                                    ( {}; . + {($key | gsub(" "; "_")): ($in[$key] | walk(f))} )
+                                                  elif type == "array" then
+                                                    map( walk(f) )
+                                                  else
+                                                    f
+                                                  end;
+                                              walk(if type == "number" and (. > 9007199254740991 or . < -9007199254740991) then tostring
+                                                   elif . == "0000-00-00T00:00:00.0000000Z" then null
+                                                   else . end)' > "${FNAME_JSON}"
 
       # delete input file if specified
       ( ( [[ -s "${FNAME_JSON}" ]] && [[ "${DELETE_SRC_ON_SUCCESS}" == "1" ]] ) || \
