@@ -51,8 +51,9 @@ function processFile() {
       FNAME_JSON+=.json
 
       # convert the EVTX file to JSON, then pipe it through jq to rename fields with spaces
-      #   in the names to have underscores instead, and to drop the placeholder that evtx >= 0.15.0
-      #   writes for a FILETIME too large to represent (it isn't a valid date)
+      #   in the names to have underscores instead, turn integers beyond +/-2^53 into strings
+      #   so they keep their exact digits through filebeat, and drop the placeholder that
+      #   evtx >= 0.15.0 writes for a FILETIME too large to represent (it isn't a valid date)
       evtx \
          --threads 1 \
          --format jsonl \
@@ -67,7 +68,9 @@ function processFile() {
                                             else
                                               f
                                             end;
-                                        walk(if . == "0000-00-00T00:00:00.0000000Z" then null else . end)' > "${FNAME_JSON}"
+                                        walk(if type == "number" and (. > 9007199254740991 or . < -9007199254740991) then tostring
+                                             elif . == "0000-00-00T00:00:00.0000000Z" then null
+                                             else . end)' > "${FNAME_JSON}"
 
       # delete input file if specified
       ( ( [[ -s "${FNAME_JSON}" ]] && [[ "${DELETE_SRC_ON_SUCCESS}" == "1" ]] ) || \
