@@ -2,8 +2,11 @@
 
 ###################################################################################################
 
-if ! command -v jq >/dev/null 2>&1 || ! command -v evtx >/dev/null 2>&1; then
-  echo "$(basename "${BASH_SOURCE[0]}") requires jq and evtx" >&2
+# jq implementation to use (e.g., JQ=gojq); defaults to jq
+JQ="${JQ:-jq}"
+
+if ! command -v "${JQ}" >/dev/null 2>&1 || ! command -v evtx >/dev/null 2>&1; then
+  echo "$(basename "${BASH_SOURCE[0]}") requires ${JQ} and evtx" >&2
   exit 1
 fi
 
@@ -53,24 +56,31 @@ function processFile() {
       # convert the EVTX file to JSON, then pipe it through jq to rename fields with spaces
       #   in the names to have underscores instead, turn integers beyond +/-2^53 into strings
       #   so they keep their exact digits through filebeat, and drop the placeholder that
-      #   evtx >= 0.15.0 writes for a FILETIME too large to represent (it isn't a valid date)
+      #   evtx >= 0.15.0 writes for a FILETIME too large to represent (it isn't a valid date).
+      #   Objects are rebuilt only when one of their keys contains a space, and the rename is a
+      #   literal split/join rather than a regex, since nearly every key needs no change.
       evtx \
          --threads 1 \
          --format jsonl \
          --separate-json-attributes \
-         "${FNAME}" 2>/dev/null | jq -c 'def walk(f):
-                                          . as $in
-                                          | if type == "object" then
-                                              reduce keys[] as $key
-                                              ( {}; . + {($key | gsub(" "; "_")): ($in[$key] | walk(f))} )
-                                            elif type == "array" then
-                                              map( walk(f) )
-                                            else
-                                              f
-                                            end;
-                                        walk(if type == "number" and (. > 9007199254740991 or . < -9007199254740991) then tostring
-                                             elif . == "0000-00-00T00:00:00.0000000Z" then null
-                                             else . end)' > "${FNAME_JSON}"
+         "${FNAME}" 2>/dev/null | "${JQ}" -c 'def fix:
+                                          if type == "object" then
+                                            map_values(fix)
+                                            | if any(keys[]; index(" ")) then
+                                                with_entries(.key |= (split(" ") | join("_")))
+                                              else
+                                                .
+                                              end
+                                          elif type == "array" then
+                                            map(fix)
+                                          elif type == "number" then
+                                            if . > 9007199254740991 or . < -9007199254740991 then tostring else . end
+                                          elif . == "0000-00-00T00:00:00.0000000Z" then
+                                            null
+                                          else
+                                            .
+                                          end;
+                                        fix' > "${FNAME_JSON}"
 
       # delete input file if specified
       ( ( [[ -s "${FNAME_JSON}" ]] && [[ "${DELETE_SRC_ON_SUCCESS}" == "1" ]] ) || \

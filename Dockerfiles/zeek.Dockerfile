@@ -55,6 +55,9 @@ ENV SUPERCRONIC_VERSION="0.2.51"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="${ZEEK_DIR}/etc/crontab"
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 # build and install system packages, zeek, spicy and plugins
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
@@ -75,7 +78,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       git \
       gnupg2 \
       iproute2 \
-      jq \
       less \
       libatomic1 \
       libcap2-bin \
@@ -127,6 +129,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       zlib1g-dev && \
     python3 -m pip install --break-system-packages --no-cache-dir -r /usr/local/src/requirements.txt && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     cd "${ZEEK_DIR}"/share/zeek/site && \
       COREPACK_DEFAULT_TO_LATEST=0 /usr/share/nodejs/corepack/shims/npm install redis@6.3.0 && \
     cd /tmp && \

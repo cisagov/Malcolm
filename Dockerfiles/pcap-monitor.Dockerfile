@@ -55,12 +55,18 @@ ENV ZEEK_PATH_UPLOAD_SUBDIR=$ZEEK_PATH_UPLOAD_SUBDIR
 
 ADD --chmod=644 pcap-monitor/requirements.txt /usr/local/src/requirements.txt
 
-RUN apt-get -q update && \
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    apt-get -q update && \
     apt-get install --no-install-recommends -y -q \
+      ca-certificates \
+      curl \
       git \
       file \
       inotify-tools \
-      jq \
       libzmq5 \
       procps \
       psmisc \
@@ -71,7 +77,8 @@ RUN apt-get -q update && \
       tini \
       vim-tiny && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove curl git && \
         apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \

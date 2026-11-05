@@ -249,7 +249,12 @@ ADD --checksum=sha256:ad6157926c1622ba4e1d03d478f1541368524bfc46f51e42fe0d945f7e
 
 ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
 
-RUN set -eux; \
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    set -eux; \
     CONFIG="\
     --prefix=/usr/local/openresty \
     --sbin-path=/usr/sbin/nginx \
@@ -362,7 +367,6 @@ RUN set -eux; \
     apache2-utils \
     bash \
     ca-certificates \
-    jq \
     libbsd \
     luajit \
     openldap \
@@ -373,6 +377,7 @@ RUN set -eux; \
     tzdata \
     wget; \
   update-ca-certificates; \
+  sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" ; \
   # install OpenID Connect Lua modules from the pinned GitHub tarballs into the
   # same site/lualib tree opm would have used.
   mkdir -p /usr/local/openresty/site/lualib ; \

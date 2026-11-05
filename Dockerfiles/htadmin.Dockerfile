@@ -36,12 +36,16 @@ ENV HTADMIN_COMMIT="eedf183a951d4b7c6f03beb9b53f1a98fb3de71f"
 ENV HTADMIN_SHA256="66beaeaa2b680f178b9a3260a675c35f8c85f2a6e9db00ac15bdb51fcee9c243"
 ENV HTADMIN_URL="https://codeload.github.com/mmguero-dev/htadmin/tar.gz/${HTADMIN_COMMIT}"
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 RUN --mount=type=bind,source=shared/checksums/htadmin-assets.sha256,target=/usr/local/share/htadmin-assets.sha256,ro \
+    --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
       ca-certificates \
       curl \
-      jq \
       nginx-light \
       php$PHP_VERSION-apcu \
       php$PHP_VERSION-cli \
@@ -51,6 +55,7 @@ RUN --mount=type=bind,source=shared/checksums/htadmin-assets.sha256,target=/usr/
       rsync \
       supervisor \
       tini && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     mkdir -p /run/php && \
   cd /tmp && \
     mkdir -p ./htadmin && \

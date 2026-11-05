@@ -35,13 +35,17 @@ ARG FREQ_SOURCE_COMMIT=e13f41f43e5fa027b58c6d9da09bd6f5506c488c
 ARG FREQ_SOURCE_SHA256=8edc783cc342441b7c1239cec7bb0ce25f34ce5c4c2d686e652aa5f77e6af809
 ENV FREQ_URL="https://codeload.github.com/markbaggett/freq/tar.gz/${FREQ_SOURCE_COMMIT}"
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 ADD --chmod=644 freq-server/requirements.txt /usr/local/src/
 
-RUN apt-get -q update && \
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    apt-get -q update && \
     apt-get -y --no-install-recommends install \
       curl \
       git \
-      jq \
       procps \
       psmisc \
       python3 \
@@ -50,6 +54,7 @@ RUN apt-get -q update && \
       rsync \
       tini && \
     pip3 install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     cd /opt && \
     mkdir -p ./freq_server && \
       curl -fLsS --retry 3 -o /tmp/freq-source.tar.gz "$FREQ_URL" && \

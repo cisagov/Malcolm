@@ -111,7 +111,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         libarchive \
         lzip \
         jo \
-        jq \
         openssl \
         p7zip \
         psmisc \
@@ -124,7 +123,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         unzip \
         util-linux \
         xz && \
-    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
@@ -207,7 +206,7 @@ ENV PCAP_NODE_NAME=$PCAP_NODE_NAME
 # see PUSER_CHOWN comment above
 VOLUME ["/usr/share/filebeat-logs/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-syslog-tcp/data", "/usr/share/filebeat-syslog-udp/data", "/usr/share/filebeat-tcp/data", "/usr/share/filebeat-zeek-files-logs/data"]
 
-ENTRYPOINT ["/usr/bin/tini", \
+ENTRYPOINT ["/usr/local/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
