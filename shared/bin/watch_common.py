@@ -10,8 +10,6 @@ from malcolm_utils import AtomicInt, ContextLockedOrderedDict
 
 from watchdog.events import (
     EVENT_TYPE_OPENED,
-    DirAttribEvent,
-    FileAttribEvent,
     FileClosedEvent,
     FileClosedNoWriteEvent,
     FileCreatedEvent,
@@ -21,6 +19,15 @@ from watchdog.events import (
     FileOpenedEvent,
     FileSystemEventHandler,
 )
+
+try:
+    from watchdog.events import DirAttribEvent, FileAttribEvent
+
+    ATTRIB_EVENT_TYPES = (FileAttribEvent, DirAttribEvent)
+except ImportError:
+    # watchdog < 7 (e.g., the filebeat image on Python 3.9) has no attrib events and reports
+    #   metadata-only changes as FileModifiedEvent, which the size comparison below handles
+    ATTRIB_EVENT_TYPES = ()
 
 from multiprocessing.pool import ThreadPool
 from threading import get_native_id
@@ -97,8 +104,10 @@ class FileOperationEventHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         fName = None
         # watchdog 7+ reports metadata-only changes (chmod, chown, utime, xattr) as
-        # FileAttribEvent/DirAttribEvent; they can't change content, so ignore them
-        if isinstance(event, (FileAttribEvent, DirAttribEvent)):
+        # FileAttribEvent/DirAttribEvent; they can't change content, so ignore them.
+        # with watchdog 6, ATTRIB_EVENT_TYPES is empty so the size-comparison check
+        # handles it and ignores them instead.
+        if isinstance(event, ATTRIB_EVENT_TYPES):
             return
         if isinstance(event, FileClosedNoWriteEvent):
             self.cancel_read_open(event)
