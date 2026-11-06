@@ -1282,7 +1282,7 @@ def identity_scope_site(record, nb)
   end
 end
 
-def identity_local_prefix(ip_str, site_id, nb)
+def identity_scoped_prefix(ip_str, site_id, nb)
   lookup = proc do
     host = IPAddr.new(ip_str.split('/').first)
     prefixes = identity_records('ipam/prefixes/', { :contains => host.to_s }, nb).select do |prefix|
@@ -1293,12 +1293,12 @@ def identity_local_prefix(ip_str, site_id, nb)
       prefixes.select! { |p| IPAddr.new(p[:prefix]).prefix == longest }
     end
     # No VRF is supplied by this filter. Never guess among overlapping contexts.
-    if prefixes.size == 1 && prefixes.first[:vrf].nil? && prefixes.first[:vlan].is_a?(Hash)
+    if prefixes.size == 1 && prefixes.first[:vrf].nil? && prefixes.first.dig(:status, :value) != 'container'
       prefix = prefixes.first
       prefix_site = identity_scope_site(prefix, nb)
       vlan = prefix[:vlan]
       vlan_site = nil
-      if prefix_site.nil? && prefix[:scope_type].nil?
+      if prefix_site.nil? && prefix[:scope_type].nil? && vlan.is_a?(Hash)
         vlan = nb.get("ipam/vlans/#{vlan[:id]}/").body
         if vlan.is_a?(Hash)
           vlan_site = identity_scope_site(vlan, nb)
@@ -1308,8 +1308,8 @@ def identity_local_prefix(ip_str, site_id, nb)
           end
         end
       end
-      if ((prefix_site || vlan_site).to_i == site_id.to_i) && vlan[:vid]
-        { :cidr => prefix[:prefix], :vlan => vlan[:vid] }
+      if ((prefix_site || vlan_site).to_i == site_id.to_i)
+        { :cidr => prefix[:prefix], :vlan => vlan.is_a?(Hash) ? vlan[:vid] : nil }
       end
     end
   end
@@ -1319,8 +1319,8 @@ end
 def identity_observed_prefix(event, ip_str, site_id, nb)
   vlans = Array(event.get("#{@source_vlan}")).compact.map(&:to_s).uniq
   return nil unless vlans.size == 1 && vlans.first.match?(/\A\d+\z/)
-  prefix = identity_local_prefix(ip_str, site_id, nb)
-  prefix && prefix[:vlan].to_i == vlans.first.to_i ? prefix[:cidr] : nil
+  prefix = identity_scoped_prefix(ip_str, site_id, nb)
+  prefix && prefix[:vlan] && prefix[:vlan].to_i == vlans.first.to_i ? prefix[:cidr] : nil
 end
 
 def identity_local_mac(event, ip_str, site_id, nb)
@@ -1328,10 +1328,13 @@ def identity_local_mac(event, ip_str, site_id, nb)
   mac && identity_observed_prefix(event, ip_str, site_id, nb) ? mac : nil
 end
 
-def identity_creation_address(event, ip_str, site_id, nb)
+def identity_creation_address(_event, ip_str, site_id, nb)
   return ip_str unless @autopopulate_inherit_prefix_length && !ip_str.include?('/')
-  prefix = identity_observed_prefix(event, ip_str, site_id, nb)
-  prefix ? "#{ip_str}/#{IPAddr.new(prefix).prefix}" : ip_str
+  # The capture VLAN describes the observation link, not a routed endpoint's
+  # configured network. IP mask policy comes from scoped IPAM; MAC ownership
+  # still requires the separate observed-VLAN check above.
+  prefix = identity_scoped_prefix(ip_str, site_id, nb)
+  prefix ? "#{ip_str}/#{IPAddr.new(prefix[:cidr]).prefix}" : ip_str
 end
 
 def identity_mac_records(mac, nb)

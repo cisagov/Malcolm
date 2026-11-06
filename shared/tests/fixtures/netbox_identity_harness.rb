@@ -324,15 +324,15 @@ check(results,'inheritance_default_off_keeps_host_mask') do |f,nb|
   lookup(f)
   nb.ips.first[:address]=='10.10.0.7/32'
 end
-check(results,'inheritance_missing_vlan_keeps_host_mask') do |f,nb|
+check(results,'inheritance_missing_capture_vlan_uses_scoped_prefix') do |f,nb|
   new_host_fixture(f,nb)
   lookup(f,event(nil,nil))
-  nb.ips.first[:address]=='10.10.0.7/32'
+  nb.ips.first[:address]=='10.10.0.7/24' && nb.macs.empty?
 end
-check(results,'inheritance_routed_vlan_keeps_host_mask') do |f,nb|
+check(results,'inheritance_routed_vlan_uses_prefix_without_gateway_mac') do |f,nb|
   new_host_fixture(f,nb)
-  lookup(f,event(nil,99))
-  nb.ips.first[:address]=='10.10.0.7/32'
+  lookup(f,event('02:11:22:33:44:55',99))
+  nb.ips.first[:address]=='10.10.0.7/24' && nb.macs.empty? && nb.oui_inputs.all?(&:nil?)
 end
 check(results,'inheritance_ambiguous_prefix_keeps_host_mask') do |f,nb|
   new_host_fixture(f,nb)
@@ -385,5 +385,36 @@ check(results,'inheritance_api_failure_does_not_leave_new_device') do |f,nb|
   new_host_fixture(f,nb)
   nb.fail_path='ipam/prefixes/'
   lookup(f,event(nil,10)).nil? && nb.writes.empty?
+end
+check(results,'inheritance_site_scoped_prefix_without_vlan') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:vlan]=nil
+  lookup(f,event('02:11:22:33:44:55',10))
+  nb.ips.first[:address]=='10.10.0.7/24' && nb.macs.empty?
+end
+check(results,'inheritance_rejects_container_prefix') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:status]={ :value=>'container' }
+  lookup(f,event(nil,nil))
+  nb.ips.first[:address]=='10.10.0.7/32' && nb.macs.empty?
+end
+check(results,'inheritance_known_hosts_before_routed_conn_creates_one_24') do |f,nb|
+  new_host_fixture(f,nb)
+  f.filter(event(nil,nil))
+  f.filter(event('02:11:22:33:44:55',99))
+  nb.ips.size==1 && nb.ips.first[:address]=='10.10.0.7/24' && nb.macs.empty? &&
+    nb.writes.count { |w| w[0]==:post && w[1]=='dcim/devices/' }==1
+end
+check(results,'inheritance_unknown_site_is_not_guessed') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:scope_type]=nil;nb.prefixes.first.delete(:scope_id);nb.prefixes.first[:vlan]=nil
+  lookup(f,event(nil,nil))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_site_scoped_vlan_group_without_capture_vlan') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:scope_type]=nil;nb.prefixes.first.delete(:scope_id)
+  lookup(f,event(nil,nil))
+  nb.ips.first[:address]=='10.10.0.7/24' && nb.macs.empty?
 end
 puts JSON.generate(results)

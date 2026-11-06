@@ -24,5 +24,5 @@ def test_netbox_identity_regressions():
         timeout=90,
     )
     checks = json.loads(result.stdout)
-    assert len(checks) == 44
+    assert len(checks) == 49
     assert all(checks.values()), checks
