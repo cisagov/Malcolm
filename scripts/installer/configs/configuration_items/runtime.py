@@ -25,6 +25,7 @@ from scripts.installer.configs.constants.enums import ContainerRuntime
 from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE,
+    KEY_CONFIG_ITEM_DASHBOARDS_DEFAULT_DASHBOARD,
     KEY_CONFIG_ITEM_IMAGE_ARCH,
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
@@ -70,6 +71,24 @@ CONFIG_ITEM_DASHBOARDS_DARK_MODE = ConfigItem(
     question="Enable dark mode for OpenSearch Dashboards?",
     widget_type=WidgetType.CHECKBOX,
 )
+
+# These dashboard IDs are shipped in dashboards/dashboards/ and can be selected
+# during setup. Custom dashboard IDs from existing .env files remain valid.
+CONFIG_ITEM_DASHBOARDS_DEFAULT_DASHBOARD = ConfigItem(
+    key=KEY_CONFIG_ITEM_DASHBOARDS_DEFAULT_DASHBOARD,
+    label="Default OpenSearch Dashboard",
+    default_value="0ad3d7c2-3441-485e-9dfe-dbb22e84e576",
+    choices=[
+        ("0ad3d7c2-3441-485e-9dfe-dbb22e84e576", "Overview"),
+        ("d2dd0180-06b1-11ec-8c6b-353266ade330", "Severity"),
+        ("95479950-41f2-11ea-88fa-7151df485405", "Security Overview"),
+        ("4a4bde20-4760-11ea-949c-bbb5a9feecbf", "ICS/IoT Security Overview"),
+    ],
+    validator=lambda x: isinstance(x, str) and bool(x.strip()),
+    question="Choose which OpenSearch Dashboard opens by default",
+    widget_type=WidgetType.SELECT,
+)
+
 
 _arch_default = SYSTEM_INFO.get("image_architecture", ImageArchitecture.AMD64)
 CONFIG_ITEM_IMAGE_ARCH = ConfigItem(
