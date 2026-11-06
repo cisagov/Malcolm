@@ -13,3 +13,12 @@ wget -nv --timeout=30 --tries=2 -O oui.txt_new https://www.wireshark.org/downloa
   rm -f oui.txt_new
 
 /usr/local/bin/maxmind-mmdb-download.sh -o "$(pwd)"
+download_status=$?
+
+# Arkime retains its own local databases. A separate copy is published to the
+# shared volume for Logstash only when that volume has been mounted.
+shared_dir="${MALCOLM_SHARED_GEOIP_DIR:-/var/local/geoip}"
+if [ -d "$shared_dir" ]; then
+  /usr/local/bin/publish-shared-geoip.sh "$(pwd)" "$shared_dir" || exit 1
+fi
+exit "$download_status"
