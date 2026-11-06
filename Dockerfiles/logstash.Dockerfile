@@ -48,8 +48,11 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_ROOT_USER_ACTION=ignore
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.2"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
 
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
@@ -79,13 +82,13 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         ca-certificates \
         gettext \
         git \
-        jq \
         patch \
         rsync \
         supervisor \
         util-linux && \
-    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     logstash-plugin install --preserve --version "${LOGSTASH_OPENSEARCH_OUTPUT_PLUGIN_VERSION}" logstash-output-opensearch && \
         /usr/share/logstash/bin/ruby -e 'path = Dir["/usr/share/logstash/vendor/bundle/jruby/3.4.0/gems/psych-*/lib/psych/class_loader.rb"].first or abort "psych class_loader not found"; text = File.read(path); changed = text.gsub!(/constants\.each do \|const\|\n\s+konst = const_get const\n\s+class_eval <<~RUBY, __FILE__, __LINE__ \+ 1\n\s+def #\{const\.to_s\.downcase\}\n\s+load #\{konst\.inspect\}\n\s+end\n\s+RUBY\n\s+end/, "constants.each do |const|\n      konst = const_get const\n      define_method(const.to_s.downcase) { load konst }\n    end"); abort "psych patch did not apply" unless changed; File.write(path, text)' && \
@@ -146,7 +149,7 @@ VOLUME ["/logstash-persistent-queue"]
 
 EXPOSE 5044 9001 9600
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh", "-s", "logstash"]
+ENTRYPOINT ["/usr/local/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh", "-s", "logstash"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 ARG BUILD_DATE

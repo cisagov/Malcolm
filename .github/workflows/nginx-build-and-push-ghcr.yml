@@ -31,6 +31,9 @@ jobs:
         run: lua5.4 nginx/lua/test_normalize_uri.lua
       - name: Run OpenSearch RBAC regression tests
         run: lua5.4 nginx/lua/test_opensearch_rbac.lua
+      - name: Run extracted file location regression tests
+        run: lua5.4 nginx/lua/test_extracted_files_location.lua
+
 
   docker:
     needs: test-lua

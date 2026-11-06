@@ -185,6 +185,24 @@ All user authentication happens in the `nginx-proxy` container. Backend services
 
 This means a backend service reached directly, bypassing nginx, applies no user authentication. That is by design and follows from [the internal network being a single trust domain](#InternalNetwork): the only callers that can reach a backend directly are other Malcolm containers.
 
+#### Authentication runs in nginx's access phase
+
+nginx handles each request in a fixed sequence of phases, and the order of directives inside a `location` block does not change it. `rewrite`, `return`, `set`, and `if` run in the rewrite phase. `auth_basic`, `auth_ldap`, `access_by_lua_block` (which carries the Keycloak modes), `allow`/`deny`, and `limit_except` run in the access phase, which comes later. So a location that includes `nginx_auth_rt.conf` and also contains a `return` or a `rewrite ... redirect` answers the request before authentication is evaluated, in every authentication mode.
+
+A location that needs to redirect after authenticating keeps the auth include and hands off from the content phase to a named location that holds the redirect:
+
+```
+location ~* /iddash2ark/(.*) {
+  include /etc/nginx/nginx_auth_rt.conf;
+  content_by_lua_block { return ngx.exec("@iddash2ark_pivot") }
+}
+location @iddash2ark_pivot {
+  rewrite (?i)^.*/iddash2ark/(.*) $scheme://$host/arkime/sessions?expression=($1) redirect;
+}
+```
+
+Named locations can't be requested by a client, so the redirect is reachable only through the gated location. [`shared/tests/test_nginx_auth_phase_order.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/tests/test_nginx_auth_phase_order.py) parses the nginx configuration, including every alternative of the `*_rt.conf` runtime links, and fails on a gated location that finalizes in the rewrite phase or on a location in a user-facing server with no authentication at all. A location that is meant to be public goes on one of that file's allowlists with a reason.
+
 ### <a name="IdentityHeaders"></a>Identity headers
 
 nginx communicates the authenticated user to backends through request headers:

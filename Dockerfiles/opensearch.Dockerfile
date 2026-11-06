@@ -32,8 +32,11 @@ ENV TERM=xterm
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.2"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ARG DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
@@ -46,9 +49,10 @@ USER root
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
     --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
-  yum install -y gettext openssl util-linux procps jq rsync findutils && \
+  yum install -y gettext openssl util-linux procps rsync findutils && \
     yum remove -y vim-* && \
   sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+  sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
   /usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3 && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
@@ -62,7 +66,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config \
                           /var/local/ca-trust \
                           /opt/opensearch/backup && \
-  sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
+  sh /usr/local/share/install-verified-binary.sh /usr/local/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
   sed -i 's/^\([[:space:]]*\)echo "Disabling execution of install_demo_configuration.*/\1\/usr\/local\/bin\/setup-internal-users.sh || true/' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/keystore-bootstrap.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
@@ -93,7 +97,7 @@ ENV path.repo "/opt/opensearch/backup"
 # see PUSER_CHOWN comment above
 VOLUME ["/var/local/ca-trust", "/usr/share/opensearch/config/certs"]
 
-ENTRYPOINT ["/usr/bin/tini", \
+ENTRYPOINT ["/usr/local/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \

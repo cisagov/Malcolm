@@ -1,6 +1,108 @@
 {
   "template": {
     "mappings": {
+      "dynamic_templates": [
+        {
+          "winlog_event_data_string": {
+            "path_match": "winlog.event_data.*",
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_event_data_date": {
+            "path_match": "winlog.event_data.*",
+            "match_mapping_type": "date",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_event_data_long": {
+            "path_match": "winlog.event_data.*",
+            "match_mapping_type": "long",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_event_data_double": {
+            "path_match": "winlog.event_data.*",
+            "match_mapping_type": "double",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_event_data_boolean": {
+            "path_match": "winlog.event_data.*",
+            "match_mapping_type": "boolean",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_user_data_string": {
+            "path_match": "winlog.user_data.*",
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_user_data_date": {
+            "path_match": "winlog.user_data.*",
+            "match_mapping_type": "date",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_user_data_long": {
+            "path_match": "winlog.user_data.*",
+            "match_mapping_type": "long",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_user_data_double": {
+            "path_match": "winlog.user_data.*",
+            "match_mapping_type": "double",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "winlog_user_data_boolean": {
+            "path_match": "winlog.user_data.*",
+            "match_mapping_type": "boolean",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        }
+      ],
       "properties": {
         "evtx": {
           "properties": {
@@ -1194,6 +1296,15 @@
                   "type": "keyword"
                 },
                 "IrpStatus": {
+                  "type": "keyword"
+                },
+                "IsAsyncProcessing": {
+                  "type": "keyword"
+                },
+                "IsBackgroundProcessing": {
+                  "type": "keyword"
+                },
+                "IsDomainJoined": {
                   "type": "keyword"
                 },
                 "IsExecutable": {
@@ -2766,6 +2877,9 @@
                   "type": "keyword"
                 },
                 "WCM_Preferred_Order_List": {
+                  "type": "keyword"
+                },
+                "Weight": {
                   "type": "keyword"
                 },
                 "WorkItemName": {

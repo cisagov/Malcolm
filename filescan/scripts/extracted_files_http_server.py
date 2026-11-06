@@ -27,7 +27,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
 from tempfile import TemporaryDirectory
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote
 
 from malcolm_utils import (
     EVP_BytesToKey,
@@ -52,6 +52,22 @@ filename_truncate_len_malcolm = 20
 filename_truncate_len = 32
 malcolm_forward_header = 'X-Malcolm-Forward'
 
+# Extracted files are untrusted network content (often attacker-controlled HTML, SVG, JS, etc.).
+#   They must never render or execute on the origin serving them, so every extracted-file
+#   response is forced to download: generic content type, no MIME sniffing, attachment
+#   disposition, and a sandboxing CSP as a backstop if a browser renders it anyway.
+#   See https://github.com/cisagov/Malcolm/security/advisories/GHSA-6c6q-2c2m-74h8
+EXTRACTED_FILE_CSP = "sandbox; default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+_unsafe_disposition_chars = re.compile(r'[^\x20-\x7e]|["\\]')
+
+
+###################################################################################################
+# build a Content-Disposition attachment header value that is safe for any filename (RFC 6266):
+#   an ASCII-only quoted fallback plus an RFC 5987 UTF-8 encoded filename*
+def ContentDispositionAttachment(filename):
+    fallback = _unsafe_disposition_chars.sub('_', filename) or 'download'
+    return f"attachment; filename=\"{fallback}\"; filename*=UTF-8''{quote(filename, safe='')}"
+
 
 ###################################################################################################
 # return the names and flags for Zipping a list of files
@@ -75,6 +91,17 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         relpath = os.path.relpath(path, os.getcwd())
         fullpath = os.path.join(self.directory, relpath)
         return fullpath, relpath
+
+    def end_headers(self):
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        super().end_headers()
+
+    # send the headers that force an extracted file to be downloaded rather than rendered
+    def send_download_headers(self, content_type, filename):
+        self.send_header('Content-type', content_type)
+        self.send_header('Content-Disposition', ContentDispositionAttachment(filename))
+        self.send_header('Content-Security-Policy', EXTRACTED_FILE_CSP)
+        self.send_header('Cache-Control', 'no-store')
 
     # override do_GET for fancy directory listing and so that files are encrypted/zipped, if requested
     def do_GET(self):
@@ -416,8 +443,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                 a(href=f'https://github.com/idaholab/Malcolm/', target="_blank")
                             ).add(i(cls="bi-github fs-3", title="GitHub"))
 
-                    script(type="text/javascript", src=f"{assetsDirRespReplacer}js/bootstrap.bundle.min.js")
-                    script(type="text/javascript", src=f"{assetsDirRespReplacer}js/scripts.js")
+                    # no <script> here: the listing is plain links and tables, and Malcolm's nginx serves
+                    #   these paths with script-src 'none' (see GHSA-6c6q-2c2m-74h8)
 
                 # send directory listing HTML to web client
                 self.wfile.write(str.encode(str(doc)))
@@ -465,8 +492,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         if args.zip:
                             # ZIP file (streamed, AES-encrypted with password or unencrypted)
                             self.send_response(200)
-                            self.send_header('Content-type', "application/zip")
-                            self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.zip')
+                            self.send_download_headers('application/zip', f'{fileBaseName}.zip')
                             self.end_headers()
                             for chunk in stream_zip(
                                 LocalFilesForZip([fullpath]), password=args.key if args.key else None
@@ -476,8 +502,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         elif args.key:
                             # openssl-compatible encrypted file
                             self.send_response(200)
-                            self.send_header('Content-type', 'application/octet-stream')
-                            self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.encrypted')
+                            self.send_download_headers('application/octet-stream', f'{fileBaseName}.encrypted')
                             self.end_headers()
                             salt = os.urandom(PKCS5_SALT_LEN)
                             key, iv = EVP_BytesToKey(
@@ -500,11 +525,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         break
 
                         else:
-                            # original file, unencrypted
+                            # original file, unencrypted (still forced to download, never rendered inline,
+                            #   since the content and its extension come from untrusted network traffic)
                             with open(fullpath, 'rb') as f:
                                 fs = os.fstat(f.fileno())
                                 self.send_response(200)
-                                self.send_header('Content-type', self.guess_type(fullpath))
+                                self.send_download_headers('application/octet-stream', fileBaseName)
                                 self.send_header("Content-Length", str(fs[6]))
                                 self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
                                 self.end_headers()

@@ -84,6 +84,9 @@ KEY_ENV_NETBOX_AUTO_POPULATE = "NETBOX_AUTO_POPULATE"  # populate the NetBox inv
 KEY_ENV_NETBOX_DEFAULT_SITE = "NETBOX_DEFAULT_SITE"  # NetBox default site name
 KEY_ENV_NETBOX_URL = "NETBOX_URL"  # remote netbox URL
 KEY_ENV_NETBOX_MODE = "NETBOX_MODE"  # netbox mode
+KEY_ENV_NETBOX_SSL_CERTIFICATE_VERIFICATION = (
+    "NETBOX_SSL_CERTIFICATE_VERIFICATION"  # remote NetBox instance needs TLS certificate verification
+)
 
 KEY_ENV_NGINX_SSL = "NGINX_SSL"  # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
 
@@ -152,6 +155,9 @@ KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION = (
     "ZEEK_INTEL_REFRESH_CRON_EXPRESSION"  # Cron expression for scheduled pulls from threat intelligence feeds
 )
 KEY_ENV_ZEEK_INTEL_FEED_SINCE = "ZEEK_INTEL_FEED_SINCE"  # Threat indicator "since" period
+KEY_ENV_ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION = (
+    "ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION"  # require TLS certificate verification for threat intel feeds
+)
 KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION = (
     "ZEEK_INTEL_ITEM_EXPIRATION"  # Intel::item_expiration timeout for intelligence items
 )
