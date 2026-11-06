@@ -29,6 +29,13 @@ $global_ttl_caches_hash = Concurrent::Map.new
 $global_autopopulate_subnets_config_site_hash = Concurrent::Map.new
 $global_autopopulate_subnets_config_site_hash_populated = Concurrent::AtomicFixnum.new(0)
 
+# Bound lock storage while serializing first observations of the same site/host.
+# This prevents two filter instances in this process from creating the same host.
+$netbox_identity_locks = Array.new(64) { Mutex.new }
+$netbox_mac_write_lock = Mutex.new
+
+class NetboxIdentityError < StandardError; end
+
 def get_register_cache(
   cache_type,
   cache_size,
@@ -348,6 +355,8 @@ def register(
   @source_hostname = params["source_hostname"]
   @source_oui = params["source_oui"]
   @source_mac = params["source_mac"]
+  @source_vlan = params.fetch("source_vlan", "[network][vlan][id]")
+  @identity_context_hash = get_register_ttl_cache(:identity_context_hash, 4096, @cache_ttl, true)
   @source_segment = params["source_segment"]
   @default_status = params.fetch("default_status", "active").to_sym
 
@@ -630,7 +639,11 @@ def filter(
 
   _key.each do |ip_key|
 
-    _lookup_tracking_result = getset_with_tracking(_lookup_hash, ip_key) do
+    # A local MAC match must not leak to a routed or different-VLAN observation
+    # of the same IP through the shared IP-only cache.
+    _identity_key = (@lookup_type == :ip_device) ?
+      [ip_key, event.get("#{@source_mac}"), event.get("#{@source_vlan}"), event.get("#{@source_hostname}")].to_json : ip_key
+    _lookup_tracking_result = getset_with_tracking(_lookup_hash, _identity_key) do
       netbox_lookup(event: event, ip_key: ip_key, site_id: _lookup_site_id)
     end
     if _lookup_tracking_result[:result]
@@ -695,7 +708,7 @@ def filter(
                 result: JSON.generate(_updated_result) }) if @debug
         end
         if _updated_result
-          _lookup_hash[ip_key] = _updated_result
+          _lookup_hash[_identity_key] = [_updated_result, _key_ip, _nb_queried]
           _result = deep_copy(_updated_result)
         end
       end
@@ -1213,13 +1226,148 @@ def lookup_or_create_role(
   end
 end
 
+# Identity decisions must distinguish an empty result from an unavailable API.
+def identity_records(path, query, nb)
+  records = []
+  query = query.merge(:offset => 0, :limit => @page_size)
+  loop do
+    response = nb.get(path, query)
+    body = response.body
+    unless response.success? && body.is_a?(Hash) && body[:results].is_a?(Array)
+      raise NetboxIdentityError, "identity lookup failed: #{path}"
+    end
+    page = body[:results]
+    records.concat(page)
+    break if page.size < @page_size
+    query[:offset] += page.size
+  end
+  records
+end
+
+def identity_ip_records(ip_str, nb)
+  # NetBox's address filter matches a host independently of its stored mask.
+  # Verify that property before allowing any write, even if an API ignores a filter.
+  host = IPAddr.new(ip_str.split('/').first)
+  identity_records('ipam/ip-addresses/', { :address => host.to_s }, nb).select do |record|
+    IPAddr.new(record[:address].to_s.split('/').first) == host
+  end
+end
+
+def identity_mac(value)
+  values = Array(value).compact.map { |v| v.to_s.upcase }.uniq
+  return nil unless values.size == 1 && values.first.match?(/\A[0-9A-F]{2}(?::[0-9A-F]{2}){5}\z/)
+  mac = values.first
+  return nil if mac == '00:00:00:00:00:00' || (mac[0, 2].to_i(16) & 1) != 0
+  mac
+end
+
+def identity_scope_site(record, nb)
+  case record[:scope_type]
+  when 'dcim.site'
+    record[:scope_id] || record.dig(:scope, :id)
+  when 'dcim.location'
+    location = nb.get("dcim/locations/#{record[:scope_id] || record.dig(:scope, :id)}/").body
+    location.is_a?(Hash) ? location.dig(:site, :id) : nil
+  when nil
+    record.dig(:site, :id) # NetBox versions with the older site field
+  end
+end
+
+def identity_local_vlan(ip_str, site_id, nb)
+  lookup = proc do
+    host = IPAddr.new(ip_str.split('/').first)
+    prefixes = identity_records('ipam/prefixes/', { :contains => host.to_s }, nb).select do |prefix|
+      IPAddr.new(prefix[:prefix].to_s).include?(host)
+    end
+    unless prefixes.empty?
+      longest = prefixes.map { |p| IPAddr.new(p[:prefix]).prefix }.max
+      prefixes.select! { |p| IPAddr.new(p[:prefix]).prefix == longest }
+    end
+    # No VRF is supplied by this filter. Never guess among overlapping contexts.
+    if prefixes.size == 1 && prefixes.first[:vrf].nil? && prefixes.first[:vlan].is_a?(Hash)
+      prefix = prefixes.first
+      prefix_site = identity_scope_site(prefix, nb)
+      vlan = prefix[:vlan]
+      vlan_site = nil
+      if prefix_site.nil? && prefix[:scope_type].nil?
+        vlan = nb.get("ipam/vlans/#{vlan[:id]}/").body
+        if vlan.is_a?(Hash)
+          vlan_site = identity_scope_site(vlan, nb)
+          if vlan_site.nil? && vlan[:scope_type].nil? && vlan.dig(:group, :id)
+            group = nb.get("ipam/vlan-groups/#{vlan[:group][:id]}/").body
+            vlan_site = identity_scope_site(group, nb) if group.is_a?(Hash)
+          end
+        end
+      end
+      ((prefix_site || vlan_site).to_i == site_id.to_i) ? vlan[:vid] : nil
+    end
+  end
+  @identity_context_hash ? @identity_context_hash.getset([site_id, ip_str], &lookup) : lookup.call
+end
+
+def identity_local_mac(event, ip_str, site_id, nb)
+  mac = identity_mac(event.get("#{@source_mac}"))
+  vlans = Array(event.get("#{@source_vlan}")).compact.map(&:to_s).uniq
+  return nil unless mac && vlans.size == 1 && vlans.first.match?(/\A\d+\z/)
+  expected_vlan = identity_local_vlan(ip_str, site_id, nb)
+  expected_vlan && expected_vlan.to_i == vlans.first.to_i ? mac : nil
+end
+
+def identity_mac_records(mac, nb)
+  return [] unless mac
+  identity_records('dcim/mac-addresses/', { :mac_address => mac }, nb).select do |record|
+    identity_mac(record[:mac_address]) == mac
+  end
+end
+
+def identity_autopopulated?(device)
+  Array(device[:tags]).any? { |tag| tag[:slug] == @device_tag_autopopulated[:slug] }
+end
+
+def identity_hostname_candidates(hostname, site_id, nb)
+  name = hostname.to_s.downcase.delete_suffix('.').split('.').first
+  return [] if name.to_s.empty? || hostname.to_s.end_with?('.in-addr.arpa')
+  # Names only prevent another candidate from being created. They never establish
+  # identity or promote an address found in an interface description.
+  identity_records('dcim/devices/', { :site_id => site_id, :q => name }, nb).select do |device|
+    device.dig(:site, :id).to_i == site_id.to_i &&
+      device[:name].to_s.downcase.delete_suffix('.').split('.').first == name
+  end
+end
+
+def ensure_interface_mac(interface, object_type, mac, nb)
+  return unless mac && interface.is_a?(Hash) && interface[:id]
+  $netbox_mac_write_lock.synchronize do
+    records = identity_mac_records(mac, nb)
+    record = nil
+    if records.empty?
+      response = nb.post('dcim/mac-addresses/', {
+        :mac_address => mac, :assigned_object_type => object_type,
+        :assigned_object_id => interface[:id]
+      }.to_json, @nb_headers)
+      record = response.body if response.success? && response.body.is_a?(Hash)
+    elsif records.size == 1 && records.first[:assigned_object_type] == object_type &&
+          records.first[:assigned_object_id] == interface[:id]
+      record = records.first
+    end
+    # Do not claim an unassigned imported MAC, move another interface's MAC,
+    # or overwrite an existing primary. The caller only supplies auto-created interfaces.
+    if record && record[:id] && interface[:primary_mac_address].nil?
+      endpoint = object_type == 'dcim.interface' ? 'dcim/interfaces' : 'virtualization/interfaces'
+      nb.patch("#{endpoint}/#{interface[:id]}/", { :primary_mac_address => record[:id] }.to_json, @nb_headers)
+    end
+    record
+  end
+end
+
 def lookup_devices(
   ip_str,
   site_id,
   lookup_service_port,
   url_base,
   url_suffix,
-  nb
+  nb,
+  addresses: nil
 )
   _devices = Array.new
   _query = { :address => ip_str,
@@ -1228,7 +1376,7 @@ def lookup_devices(
   begin
     while true do
       # query all matching IP addresses, but only return devices where the site matches
-      if (_ip_addresses_response = nb.get('ipam/ip-addresses/', _query).body) &&
+      if (_ip_addresses_response = addresses ? { :results => addresses } : nb.get('ipam/ip-addresses/', _query).body) &&
          _ip_addresses_response.is_a?(Hash)
       then
         _tmp_ip_addresses = _ip_addresses_response.fetch(:results, [])
@@ -1293,7 +1441,7 @@ def lookup_devices(
           end
         end
         _query[:offset] += _tmp_ip_addresses.size
-        break unless (_tmp_ip_addresses.size >= @page_size)
+        break if addresses || (_tmp_ip_addresses.size < @page_size)
       else
         # weird/bad response, bail
         break
@@ -1482,14 +1630,14 @@ def create_device_interface(
   _interface_data = { autopopulate_manuf[:vm] ? :virtual_machine : :device => _autopopulate_device[:id],
                       :name => "e0",
                       :type => "other" }
-  if !autopopulate_mac.nil? && !autopopulate_mac.empty?
-    _interface_data[:mac_address] = autopopulate_mac.is_a?(Array) ? autopopulate_mac.first : autopopulate_mac
-  end
   if (_interface_create_reponse = nb.post(autopopulate_manuf[:vm] ? 'virtualization/interfaces/' : 'dcim/interfaces/', _interface_data.to_json, @nb_headers).body) &&
      _interface_create_reponse.is_a?(Hash) &&
      _interface_create_reponse.has_key?(:id)
   then
      _autopopulate_interface = _interface_create_reponse
+     ensure_interface_mac(_autopopulate_interface,
+                          autopopulate_manuf[:vm] ? 'virtualization.vminterface' : 'dcim.interface',
+                          identity_mac(autopopulate_mac), nb)
   elsif @debug
     puts('create_device_interface (%{name}): _interface_create_reponse: %{result}' % { name: ip_str, result: JSON.generate(_interface_create_reponse) })
   end
@@ -1536,6 +1684,25 @@ def netbox_lookup(
   site_id:,
   previous_result: nil
 )
+  if @lookup_type == :ip_device
+    lock = $netbox_identity_locks[[site_id, ip_key].hash % $netbox_identity_locks.size]
+    lock.synchronize do
+      netbox_lookup_unlocked(event: event, ip_key: ip_key, site_id: site_id, previous_result: previous_result)
+    end
+  else
+    netbox_lookup_unlocked(event: event, ip_key: ip_key, site_id: site_id, previous_result: previous_result)
+  end
+rescue NetboxIdentityError, Faraday::Error, IPAddr::InvalidAddressError => e
+  puts "netbox identity lookup skipped (#{ip_key}, #{site_id}): #{e.class}" if @debug
+  return nil, (IPAddr.new(ip_key) rescue nil), false
+end
+
+def netbox_lookup_unlocked(
+  event:,
+  ip_key:,
+  site_id:,
+  previous_result: nil
+)
   _lookup_result = nil
   _nb = nil
 
@@ -1552,8 +1719,10 @@ def netbox_lookup(
     _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
     _autopopulate_hostname = event.get("#{@source_hostname}")
     _autopopulate_hostname = nil if _autopopulate_hostname.to_s.end_with?('.in-addr.arpa')
-    _autopopulate_mac = event.get("#{@source_mac}")
-    _autopopulate_oui = event.get("#{@source_oui}")
+    # Ethernet addresses on a routed capture belong to the next hop, not the IP
+    # endpoint. Only use MAC/OUI after a site-scoped prefix/VLAN check succeeds.
+    _autopopulate_mac = (@lookup_type == :ip_device) ? identity_local_mac(event, ip_key, site_id, _nb) : nil
+    _autopopulate_oui = _autopopulate_mac ? mac_to_oui_lookup(_autopopulate_mac) : nil
 
     _autopopulate_device = nil
     _autopopulate_role = nil
@@ -1574,7 +1743,73 @@ def netbox_lookup(
         # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
         # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
         # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
-        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb)
+        _host_addresses = identity_ip_records(ip_key, _nb)
+        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb,
+                                  addresses: _host_addresses)
+        if _host_addresses.any? { |a| !a[:vrf].nil? }
+          _devices = [{ :identity_status => 'vrf_context_required' }]
+        end
+        _mac_records = identity_mac_records(_autopopulate_mac, _nb)
+        _native_mac_devices = []
+        if _mac_records.size == 1 && _host_addresses.all? { |a| a[:vrf].nil? }
+          _mac_record = _mac_records.first
+          _interface_endpoint = { 'dcim.interface' => 'dcim/interfaces',
+                                  'virtualization.vminterface' => 'virtualization/interfaces' }[_mac_record[:assigned_object_type]]
+          if _interface_endpoint && _mac_record[:assigned_object_id]
+            _interface_response = _nb.get("#{_interface_endpoint}/#{_mac_record[:assigned_object_id]}/")
+            _mac_interface = _interface_response.body
+            if _interface_response.success? && _mac_interface.is_a?(Hash) && _mac_interface[:vrf].nil?
+              _native_mac_devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb,
+                addresses: [{ :assigned_object => _mac_interface }]).reject { |d| identity_autopopulated?(d) }
+            end
+          end
+        end
+        _known_ip_devices = _devices.reject { |d| identity_autopopulated?(d) }
+        if _native_mac_devices.size == 1 && (_known_ip_devices.empty? ||
+            _known_ip_devices.map { |d| d[:url] }.uniq == _native_mac_devices.map { |d| d[:url] }.uniq)
+          _devices = _native_mac_devices
+          _devices.each do |device|
+            device[:identity_source] = 'local_mac'
+            device[:ip_assignment_conflict] = true unless _host_addresses.any? do |a|
+              kind = device[:url].to_s.include?('/virtual-machines/') ? :virtual_machine : :device
+              a.dig(:assigned_object, kind, :id) == device[:id]
+            end
+          end
+        elsif !_native_mac_devices.empty? || _mac_records.size > 1
+          _devices = [{ :identity_status => 'conflict_review' }]
+        end
+        _devices.each { |d| d[:ip_record_conflict] = true } if _host_addresses.size > 1
+
+        # A matching IP object without an interface is still an existing host.
+        # Do not create another /32 or guess which device should own that /24.
+        if _devices.empty? && !_host_addresses.empty?
+          _devices = [{ :identity_status => 'unassigned_or_out_of_scope_ip_review' }]
+        end
+        if _devices.empty? && !_mac_records.empty?
+          _devices = [{ :identity_status => 'existing_mac_review' }]
+        end
+        if @autopopulate && _devices.empty?
+          _name_candidates = identity_hostname_candidates(_autopopulate_hostname, site_id, _nb)
+          unless _name_candidates.empty?
+            _devices = [{ :identity_status => 'hostname_review',
+                          :candidate_name => _name_candidates.map { |d| d[:name] },
+                          :candidate_id => _name_candidates.map { |d| d[:id] } }]
+          end
+        end
+
+        # Backfill only an unambiguous auto-created interface in the local VLAN.
+        # Imported interfaces and their existing primary MACs are never changed.
+        if @autopopulate && _autopopulate_mac && _host_addresses.size == 1 &&
+           _host_addresses.first[:vrf].nil? && _devices.size == 1 && identity_autopopulated?(_devices.first)
+          _address = _host_addresses.first
+          _object_type = _address[:assigned_object_type]
+          _endpoint = { 'dcim.interface' => 'dcim/interfaces',
+                        'virtualization.vminterface' => 'virtualization/interfaces' }[_object_type]
+          if _endpoint && _address[:assigned_object_id]
+            _response = _nb.get("#{_endpoint}/#{_address[:assigned_object_id]}/")
+            ensure_interface_mac(_response.body, _object_type, _autopopulate_mac, _nb) if _response.success?
+          end
+        end
 
         if @autopopulate && (_devices.nil? || _devices.empty?)
           # no results found, autopopulate enabled, eligible IP address...
