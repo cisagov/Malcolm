@@ -27,6 +27,10 @@ if [[ "${NGINX_AUTH_MODE:-keycloak}" == "keycloak" ]] && \
     echo "Ensuring realm exists: \"${KEYCLOAK_AUTH_REALM}\"..." >&2
     "${ADM_SCRIPT}" create realms -s realm="${KEYCLOAK_AUTH_REALM}" -s enabled=true 2>&1 | grep -v "already exists"
 
+    bash "$(dirname "${BASH_SOURCE[0]}")/configure-login-theme.sh" \
+        "${ADM_SCRIPT}" "${KEYCLOAK_AUTH_REALM}" "${KEYCLOAK_LOGIN_THEME-malcolm}" || \
+        echo "Keycloak login theme setup failed; configure it in Realm settings > Themes" >&2
+
     for ROLE_VAR in $(compgen -e); do
       [[ "$ROLE_VAR" == ROLE_* && "$ROLE_VAR" != "ROLE_BASED_ACCESS" ]] || continue
       ROLE_NAME="${!ROLE_VAR}"
