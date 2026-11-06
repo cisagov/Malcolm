@@ -54,6 +54,28 @@ NetBox has the concept of [sites](https://netboxlabs.com/docs/netbox/features/fa
 
 When NetBox enrichment is attempted for a log, the value `netbox` is automatically added to its `tags` field.
 
+### Hostname lookups for non-network logs
+
+Log records such as Windows event logs or system logs often have a `host.name` but no
+network-flow source/destination IP addresses. To enrich these records with **existing**
+NetBox inventory, enable `NETBOX_ENRICHMENT=true` in `config/netbox-common.env` and
+`LOGSTASH_NETBOX_ENRICH_HOSTNAMES=true` in `config/logstash.env` (disabled by default).
+Include the event's actual `event.provider`/`event.dataset` combination in
+`LOGSTASH_NETBOX_ENRICHMENT_DATASETS`; the existing dataset selection still applies.
+
+If the event has a NetBox site identifier it is used; otherwise the configured
+`NETBOX_DEFAULT_SITE` is resolved. Malcolm makes **read-only**, site-scoped lookups
+against NetBox devices and virtual machines using the exact hostname. A unique
+match populates `host.netbox.id`, `host.netbox.name`, `host.netbox.site_id` and
+`host.netbox.kind` (`device` or `virtual_machine`). Multiple candidates,
+unknown sites and missing names are left unenriched, with no inventory creation.
+Lookups are cached using `NETBOX_CACHE_TTL` and `NETBOX_CACHE_SIZE`.
+
+Use this feature only when `host.name` describes the asset that generated the
+event, **not** a collector forwarding logs on behalf of other systems. Events
+that have source or destination IP addresses continue using their existing
+IP-based enrichment path.
+
 ## <a name="NetBoxCompare"></a>Compare and highlight discrepancies between NetBox inventory and observed network traffic
 
 As Malcolm cross-checks network traffic with NetBox's model (as described [above](#NetBoxEnrichment)), the resulting enrichment data (or lack thereof) can highlight devices and services observed in network traffic for which there is no corresponding entry in the list of inventoried assets.
