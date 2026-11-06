@@ -28,6 +28,12 @@ done
 shift "$(($OPTIND -1))"
 EXTRA_ARGS=("${@}")
 
+# Zeek treats any ZEEK_ZAM value as enabled; translate Malcolm's boolean to arguments.
+if [[ "${ZEEK_ZAM:-false}" == "true" ]]; then
+   EXTRA_ARGS+=("-O" "ZAM")
+fi
+unset ZEEK_ZAM
+
 [[ ${VERBOSE} == 1 ]] && set -x
 
 ( [[ -z "${DUMMY_PCAP}" ]] || [[ ! -f "${DUMMY_PCAP}" ]] || [[ ! -s "${DUMMY_PCAP}" ]] ) &&
