@@ -118,19 +118,24 @@ pushd "$WORKDIR" >/dev/null 2>&1
 # if the revision commit has been specified, replace references to site.github.build_revision with it
 [[ -n "$REVISION" ]] && $FIND . -type f -name "*.md" -exec $SED -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$REVISION/g" "{}" \;
 
-# if they want to override some values in _config.yml, do it
-if command -v yq >/dev/null 2>&1; then
-  YQ=yq
-else
-  YQ="$WORKDIR"/yq
-  curl -sSL -o "$YQ" "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64"
-  chmod 755 "$YQ"
-fi
+# Only load yq if we need to change _config.yml. A clean documentation build
+# should not make an unnecessary network request just to fetch the tool.
+if [[ -n "$REPOSITORY_NAME" || -n "$DEFAULT_BRANCH" || -n "$SITEMAP_URL" || -n "$MALCOLM_VERSION" ]]; then
+  if command -v yq >/dev/null 2>&1; then
+    YQ=yq
+  else
+    YQ="$WORKDIR"/yq
+    # Pin to v4.54.1 and validate the release SHA256 before executing.
+    "$SCRIPT_PATH/install-verified-docs-yq.sh" "$YQ"
+  fi
 
-[[ -n "$REPOSITORY_NAME" ]] && "$YQ" eval --inplace ".\"repository\"=\"$REPOSITORY_NAME\""               ./_config.yml
-[[ -n "$DEFAULT_BRANCH" ]] &&  "$YQ" eval --inplace ".\"github\".\"default_branch\"=\"$DEFAULT_BRANCH\"" ./_config.yml
-[[ -n "$SITEMAP_URL" ]] &&     "$YQ" eval --inplace ".\"url\"=\"$SITEMAP_URL\""                          ./_config.yml
-[[ -n "$MALCOLM_VERSION" ]] && "$YQ" eval --inplace ".\"malcolm\".\"version\"=\"$MALCOLM_VERSION\""      ./_config.yml
+  [[ -n "$REPOSITORY_NAME" ]] && "$YQ" eval --inplace ".\"repository\"=\"$REPOSITORY_NAME\""               ./_config.yml
+  [[ -n "$DEFAULT_BRANCH" ]] &&  "$YQ" eval --inplace ".\"github\".\"default_branch\"=\"$DEFAULT_BRANCH\"" ./_config.yml
+  [[ -n "$SITEMAP_URL" ]] &&     "$YQ" eval --inplace ".\"url\"=\"$SITEMAP_URL\""                          ./_config.yml
+  [[ -n "$MALCOLM_VERSION" ]] && "$YQ" eval --inplace ".\"malcolm\".\"version\"=\"$MALCOLM_VERSION\""      ./_config.yml
+
+  : # A false condition on the final override must not stop a set -e build.
+fi # end of optional _config.yml overrides
 
 # pass GitHub API token through to Jekyll if it's available
 if [[ -n "${TOKEN:-}" ]]; then
