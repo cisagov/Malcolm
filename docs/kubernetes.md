@@ -1,16 +1,19 @@
 # <a name="Kubernetes"></a>Deploying Malcolm with Kubernetes
 
 * [Deploying Malcolm with Kubernetes](#Kubernetes)
+    - [Deploying with Malcolm-Helm](#HelmDeployment)
+    - [Migrating an existing deployment](#Migration)
+* [Legacy manifest deployments](#LegacyManifests)
     - [System](#System)
         + [Ingress Controllers](#Ingress)
             * [Traefik Ingress Controller](#IngressTraefik)
         + [Kubernetes Provider Settings](#Limits)
-* [Configuration](#Config)
-    - [OpenSearch and Elasticsearch Instances](#OpenSearchInstances)
-    - [PersistentVolumeClaim Definitions](#PVC)
-* [Running Malcolm](#Running)
-* [Deployment Example](#Example)
-* [Future Enhancements](#Future)
+    - [Configuration](#Config)
+        + [OpenSearch and Elasticsearch Instances](#OpenSearchInstances)
+        + [PersistentVolumeClaim Definitions](#PVC)
+    - [Running Malcolm](#Running)
+    - [Legacy manifest deployment example](#Example)
+* [Kubernetes capabilities](#Future)
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
@@ -18,7 +21,48 @@
 
 This document assumes good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
 
-This document describes deploying Malcolm on Kubernetes using the standard [Kubernetes manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/). The official [Malcolm Helm chart](https://github.com/idaholab/Malcolm-Helm/) is now stable and may be preferable for production deployments, as it better leverages Kubernetes scalability features. Review the Malcolm-Helm documentation to choose the deployment method that best fits your environment.
+Use the official [Malcolm-Helm chart](https://github.com/idaholab/Malcolm-Helm/) for new Kubernetes deployments. The chart provides the configuration, storage, service and workload definitions used to install Malcolm with Helm.
+
+The [legacy manifest instructions](#LegacyManifests) below remain available for existing installations. [Issue #1278](https://github.com/cisagov/Malcolm/issues/1278) tracks checking feature coverage in Malcolm-Helm before removing the older deployment code and manifests.
+
+## <a name="HelmDeployment"></a> Deploying with Malcolm-Helm
+
+Follow the maintained [Malcolm-Helm installation guide](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#HelmRepoQuickstart). Start by reviewing its [cluster requirements](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#ProductionReqs), [node labels](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#Labels) and [storage requirements](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#StorageProvisioner). Apply the documented labels and configure the storage needed by your workloads before installing the chart.
+
+Add the chart repository and inspect the available releases:
+
+```bash
+helm repo add malcolm https://raw.githubusercontent.com/idaholab/Malcolm-Helm/refs/heads/helm-repo/
+helm repo update
+helm search repo malcolm/malcolm --versions
+```
+
+Choose a chart version whose application version matches the Malcolm release you intend to deploy. Review that version's values with `helm show values malcolm/malcolm --version <chart-version>`, and use the same version with `helm install` or `helm upgrade`. The chart's [values file](https://github.com/idaholab/Malcolm-Helm/blob/main/chart/values.yaml) documents its configuration options; values on `main` may differ from the published release you selected.
+
+Use the installation guide to prepare a values file, create the authentication Secret and install the chart. Set `auth.existingSecret` to the Secret you created, and configure storage, ingress, resources and capture interfaces for your cluster. Keep credentials out of committed values files. Helm manages this deployment; the `./scripts/start -f <kubeconfig>` commands in the legacy sections below manage the separate manifest deployment.
+
+Additional maintained examples are available for a [local Vagrant demonstration](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#VagrantDemo), [Azure Kubernetes Service](https://github.com/idaholab/Malcolm-Helm/blob/main/docs/Azure.md), and [multiple OpenSearch nodes](https://github.com/idaholab/Malcolm-Helm/blob/main/docs/MultipleOpenSeachReplicas.md).
+
+## <a name="Migration"></a> Migrating an existing deployment
+
+Moving an installation created by Malcolm's control scripts to Helm requires a migration plan. Helm does not automatically import the local `.env` files, generated Secrets, custom configuration files or existing persistent data used by those scripts.
+
+| Existing manifest configuration | Malcolm-Helm configuration to review |
+| --- | --- |
+| `config/*.env` and installer settings | The selected chart version's values and generated environment configuration |
+| `./scripts/auth_setup` output | The chart's authentication Secret and TLS configuration |
+| `kubernetes/01-volumes.yml` and existing PVCs | Storage classes, claim names, access modes and per-component storage settings |
+| `kubernetes/99-ingress.yml` | Chart ingress values and the cluster's ingress controller |
+| `config/kubernetes-container-resources.yml` | Chart resource requests, limits and workload placement |
+| Local rules, Logstash maps and NetBox customisations | The corresponding chart mounts and configuration support, verified before moving the workload |
+
+Record the existing configuration and make recoverable backups before changing deployment ownership or storage. Validate the chart with the required customisations and data in a separate namespace before a planned cutover. A separate namespace still needs separate storage or restored copies for this validation; avoid mounting the same writable database volumes into both deployments. Keep the existing deployment and its persistent volumes available until the replacement has been verified.
+
+The feature comparison and removal of the legacy scripts are tracked in [#1278](https://github.com/cisagov/Malcolm/issues/1278). The sections below describe the existing manifest workflow during that transition.
+
+## <a name="LegacyManifests"></a> Legacy manifest deployments
+
+These instructions use the [manifests in Malcolm's `kubernetes/` directory]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/) and its Python control scripts. For a new installation, start with [Malcolm-Helm](#HelmDeployment).
 
 ## <a name="System"></a> System
 
@@ -62,6 +106,8 @@ Settings that likely need to be changed in the underlying host running Kubernete
 
 ## <a name="Config"></a> Configuration
 
+This section configures the [legacy manifest deployment](#LegacyManifests). For Helm, use the selected chart version's values and [installation guide](#HelmDeployment).
+
 The steps to configure and tune Malcolm for a Kubernetes deployment are [very similar](malcolm-config.md#ConfigAndTuning) to those for a Docker-based deployment. Both methods use [environment variable files](malcolm-config.md#MalcolmConfigEnvVars) for Malcolm's runtime configuration.
 
 Malcolm's configuration and runtime scripts (e.g., `./scripts/configure`, `./scripts/auth_setup`, `./scripts/start`, etc.) are used for both Docker- and Kubernetes-based deployments. In order to indicate to these scripts that Kubernetes is being used rather than `docker compose`, users can provide the script with the [kubeconfig file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) used to communicate with the API server of the Kubernetes cluster (e.g., `./scripts/configure -f k3s.yaml` or `./scripts/start -f kubeconfig.yaml`, etc.). The scripts will detect whether the YAML file specified is a kubeconfig file or a Docker compose file and act accordingly.
@@ -94,6 +140,8 @@ Exception: Storage objects required by Malcolm are not defined in /home/user/Mal
 ```
 
 ## <a name="Running"></a> Running Malcolm
+
+The commands in this section operate on the [legacy manifest deployment](#LegacyManifests). Use Helm to manage a [Malcolm-Helm deployment](#HelmDeployment).
 
 After [configuring](#Config) Malcolm, use the `./scripts/start` script to create the Malcolm Kubernetes deployment, providing the kubeconfig file with the `-f`/`--file` argument:
 
@@ -163,7 +211,9 @@ The other control scripts (`stop`, `restart`, `logs`, etc.) work in a similar ma
 
 Malcolm's control scripts require the [official Python 3 client library for Kubernetes](https://github.com/kubernetes-client/python) to configure and run Malcolm with Kubernetes. It is also recommended to install **[stern](https://github.com/stern/stern)**, which is used by the `./scripts/logs` script to tail Malcolm's container logs.
 
-# <a name="Example"></a> Deployment Example
+# <a name="Example"></a> Legacy manifest deployment example
+
+This example uses the [legacy manifests](#LegacyManifests). For a demonstration of the Helm deployment, see the [Malcolm-Helm Vagrant example](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#VagrantDemo).
 
 Here is a basic step-by-step example illustrating how to deploy Malcolm with Kubernetes. For the sake of simplicity, this example uses Vagrant: see [kubernetes/vagrant/Vagrantfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile) to create a virtualized Kubernetes cluster with a built-in NFS server for persistent storage. To follow this example, you'll need to download or copy the contents of [kubernetes/vagrant/]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant) from the Malcolm source code to a local directory. This example also assumes users have downloaded and extracted the [release tarball]({{ site.github.repository_url }}/releases/latest) or used `./scripts/malcolm_appliance_packager.sh` to package up the files needed to run Malcolm.
 
@@ -484,18 +534,18 @@ logstash | [2023-04-24T21:00:34,470][INFO ][logstash.agent           ] Pipelines
 
 The Malcolm [user interface](quickstart.md#UserInterfaceURLs) should be accessible at the IP address or hostname of the Kubernetes ingress controller.
 
-# <a name="Future"></a> Future Enhancements
+# <a name="Future"></a> Kubernetes capabilities
 
-Deploying Malcolm with Kubernetes is a new (and still somewhat experimental) feature, and does not yet support the full range of Malcolm features. Development around these features is [ongoing](https://github.com/cisagov/Malcolm/issues?q=is%3Aissue+is%3Aopen+kubernetes). Some of the notable features that are still a work in progress for Kubernetes deployment include:
+Malcolm-Helm is the current Kubernetes deployment path. Review the chart's configuration and examples for the features needed by your installation, and track the transition from the older manifests in [#1278](https://github.com/cisagov/Malcolm/issues/1278).
 
 ## <a name="FutureLiveCap"></a> Live Traffic Analysis
 
-For now, network traffic artifacts for analysis are provided to a Malcolm deployment on Kubernetes via forwarding from a remote instance of [Hedgehog Linux](hedgehog.md) or via PCAP [upload](upload.md#Upload). [Future work](https://github.com/idaholab/Malcolm/issues/175) is needed to design and implement monitoring of network traffic in the cloud.
+Malcolm-Helm includes capture workloads. Follow its [node labelling requirements](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#Labels) and [listener NIC setup](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#NICSetup), and configure the capture interfaces in the chart values. Capturing traffic also requires making that traffic available to those interfaces. Remote [Hedgehog Linux](hedgehog.md) forwarding and PCAP [upload](upload.md#Upload) remain options for providing network artifacts.
 
 ## <a name="FutureScaleOut"></a> Horizontal Scaling
 
-For now, the Malcolm services running in Kubernetes are configured with `replicas: 1`. There is [more investigation and development](https://github.com/idaholab/Malcolm/issues/182) needed to ensure Malcolm's containers work correctly when horizontally scaled.
+Use the selected chart version's [component settings](https://github.com/idaholab/Malcolm-Helm/blob/main/chart/values.yaml) to review replica counts, resources and storage. For OpenSearch, follow the chart's [multiple-node guide](https://github.com/idaholab/Malcolm-Helm/blob/main/docs/MultipleOpenSeachReplicas.md), which describes the additional configuration needed for multiple replicas.
 
 ## <a name="FutureHelmChart"></a> Helm Chart
 
-For now, Malcolm's Kubernetes deployment is managed via standard [Kubernetes manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/). The Malcolm developers need to [look into](https://github.com/idaholab/Malcolm/issues/187) what a Malcolm Helm chart would look like and how it would fit in with the [deployment scripts](https://github.com/idaholab/Malcolm/issues/172) for [configuring](#Config) and [running](#Running) Malcolm, if at all.
+The official [Malcolm-Helm chart](https://github.com/idaholab/Malcolm-Helm/) is available now. See [Deploying with Malcolm-Helm](#HelmDeployment) for installation resources and [Migrating an existing deployment](#Migration) for considerations when moving from the legacy manifests.
