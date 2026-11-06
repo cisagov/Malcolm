@@ -46,6 +46,9 @@ ENV TERM=xterm
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 ARG NODE_OPTIONS="--max_old_space_size=4096"
 ENV NODE_OPTIONS=$NODE_OPTIONS
 ENV OPENSEARCH_DASHBOARDS_HOME=/usr/share/opensearch-dashboards
@@ -61,7 +64,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         findutils \
         gawk \
         gzip \
-        jq \
         nss \
         openssl \
         procps-ng \
@@ -78,7 +80,8 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     groupadd -g $DEFAULT_GID $PGROUP && \
         adduser -u $DEFAULT_UID -g $DEFAULT_GID -d $OPENSEARCH_DASHBOARDS_HOME $PUSER && \
     usermod -a -G tty ${PUSER} && \
-    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     microdnf clean all && \
     rm -rf /var/cache/dnf /var/cache/yum
 
@@ -106,7 +109,7 @@ ENV PUSER_CHOWN="$OPENSEARCH_DASHBOARDS_HOME/config;$OPENSEARCH_DASHBOARDS_HOME/
 VOLUME ["/usr/share/opensearch-dashboards/config"]
 VOLUME ["/usr/share/opensearch-dashboards/data"]
 
-ENTRYPOINT ["/usr/bin/tini", \
+ENTRYPOINT ["/usr/local/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \

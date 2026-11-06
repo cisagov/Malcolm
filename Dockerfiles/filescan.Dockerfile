@@ -57,8 +57,11 @@ ENV SUPERCRONIC_VERSION="0.2.51"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.2"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
 
 ENV STRELKA_HOST=$STRELKA_HOST
 ENV STRELKA_PORT=$STRELKA_PORT
@@ -106,7 +109,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       g++ \
       git \
       inotify-tools \
-      jq \
       libjansson-dev \
       libjansson4 \
       libmagic-dev \
@@ -124,6 +126,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       webfs ; \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" ; \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" ; \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" ; \
     mkdir -p /filescan /filescan/data/files /filescan/data/logs "${FILESCAN_HTTP_SERVER_ASSETS_DIR}" ; \
     cd /tmp && \
       /usr/local/bin/web-ui-asset-download.sh -o "${FILESCAN_HTTP_SERVER_ASSETS_DIR}/css" && \

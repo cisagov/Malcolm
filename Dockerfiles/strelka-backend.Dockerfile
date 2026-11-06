@@ -27,8 +27,11 @@ ENV RULES_UPDATE_ENABLED=$RULES_UPDATE_ENABLED
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.2"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
 
 ENV SUPERCRONIC_VERSION="0.2.51"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
@@ -64,7 +67,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       clamav-freshclam \
       curl \
       git \
-      jq \
       libclamunrar12 \
       procps \
       psmisc \
@@ -72,6 +74,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       tini && \
     usermod -a -G tty ${PUSER} && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     mkdir -p "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" /var/log/clamav "${CLAMAV_RULES_DIR}" && \
     cd "${YARA_RULES_SRC_DIR}" && \

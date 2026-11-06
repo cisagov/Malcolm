@@ -26,8 +26,16 @@ ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/valkey.sh /usr/local/bin/container_health.sh
 
-RUN apk update --no-cache && \
-    apk --no-cache add bash jq psmisc rsync shadow tini && \
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    apk update --no-cache && \
+    apk --no-cache add bash psmisc rsync shadow tini && \
+    apk --no-cache add --virtual .jq-fetch-deps curl && \
+      sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
+      apk del .jq-fetch-deps && \
     addgroup ${PUSER} tty
 
 WORKDIR /home/${PUSER}

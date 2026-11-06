@@ -15,6 +15,7 @@ from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION,
     KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE,
+    KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SSL_VERIFY,
     KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION,
     KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP,
     KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
@@ -47,6 +48,15 @@ CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE = ConfigItem(
     validator=lambda x: isinstance(x, str),
     question="When pulling from threat intelligence feeds, only process indicators created or modified since this time",
     widget_type=WidgetType.TEXT,
+)
+
+CONFIG_ITEM_ZEEK_INTEL_FEED_SSL_VERIFY = ConfigItem(
+    key=KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SSL_VERIFY,
+    label="Verify SSL for Threat Intelligence Feeds",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Require SSL certificate validation when pulling from remote threat intelligence feeds?",
+    widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION = ConfigItem(

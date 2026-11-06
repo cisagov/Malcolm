@@ -1551,10 +1551,12 @@ def get_malcolm_version():
                 with open(compose_file_name, 'r') as f:
                     compose_data = yamlImported.YAML(typ='safe', pure=True).load(f)
                     image_tags = []
-                    for service_name, service_def in compose_data.get("services", {}).items():
+                    for service_def in compose_data.get("services", {}).values():
                         image = service_def.get("image")
-                        if image and ":" in image:
-                            image_tags.append(image.rsplit(":", 1)[1])
+                        if image and "/malcolm/" in image:
+                            image = image.split("@", 1)[0]
+                            if ":" in image:
+                                image_tags.append(image.rsplit(":", 1)[1])
                     result = get_highest_calver(image_tags) or MALCOLM_VERSION
         except Exception as e:
             eprint(f'Error deciphering docker-compose.yml: {e}')

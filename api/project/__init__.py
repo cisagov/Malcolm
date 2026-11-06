@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from malcolm_constants import DatabaseMode
 from werkzeug.exceptions import BadRequest, HTTPException
 
@@ -223,6 +223,15 @@ opensearchLocal = (databaseMode == DatabaseMode.OpenSearchLocal) or (opensearchU
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
 
+# TLS certificate verification for the NetBox API. Only meaningful for NETBOX_MODE=remote over
+#   https://; the bundled NetBox container is reached over plain HTTP on the internal container
+#   network. Defaults to false to preserve existing behavior on upgrade. CA certificates placed
+#   in ./nginx/ca-trust are installed into the container trust store at startup by
+#   docker-uid-gid-setup.sh, so an internally-issued remote NetBox cert works with this enabled.
+netboxSslVerify = app.config["NETBOX_SSL_CERTIFICATE_VERIFICATION"] == "true"
+# scheme/host/port of the configured NetBox, used to bound which URLs we'll send the API token to
+netboxOrigin = urlparse(netboxUrl)
+
 DatabaseInitArgs = {}
 if urlparse(opensearchUrl).scheme == 'https':
     DatabaseInitArgs['verify_certs'] = opensearchSslVerify
@@ -267,6 +276,38 @@ def doctype_is_host_logs(d):
 
 def random_id(length=20):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+def same_origin_as_netbox(url):
+    """Return True if url has the same scheme/host/port as the configured NETBOX_URL.
+
+    Used to bound where the NetBox API token is sent. NetBox paginates with an absolute
+    "next" URL taken from the response body, so without this check a hostile or spoofed
+    response could point the next request (and the Authorization header on it) at a host
+    of the attacker's choosing.
+    """
+
+    def effective_port(parsed):
+        # urlparse().port is None when the URL omits an explicit port, so fill in the
+        #   scheme default to keep https://host and https://host:443 comparable
+        try:
+            return parsed.port or {'http': 80, 'https': 443}.get(parsed.scheme.lower())
+        except ValueError:
+            # malformed port
+            return False
+
+    try:
+        candidate = urlparse(url)
+    except Exception:
+        return False
+    if candidate.scheme.lower() != netboxOrigin.scheme.lower():
+        return False
+    if (candidate.hostname or '').lower() != (netboxOrigin.hostname or '').lower():
+        return False
+    candidatePort = effective_port(candidate)
+    if (candidatePort is False) or (candidatePort != effective_port(netboxOrigin)):
+        return False
+    return True
 
 
 def get_request_arguments(req):
@@ -1422,7 +1463,7 @@ def ready():
             lambda: requests.get(
                 f"{netboxUrl}/api/?format=json",
                 headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
-                verify=False,
+                verify=netboxSslVerify,
                 timeout=readyTimeout,
             ).json(),
             {},
@@ -1588,10 +1629,12 @@ def dashboard_export(dashid):
             )
 
     except Exception as e:
-        errStr = f"{type(e).__name__}: {str(e)} exporting OpenSearch Dashboard {dashid}"
+        # Log the full exception detail server-side only; the caller just gets a generic
+        # message so internal hostnames, URLs, and library/version info aren't leaked.
         if debugApi:
-            print(errStr)
-        return jsonify(error=errStr)
+            print(f"{type(e).__name__}: {str(e)} exporting OpenSearch Dashboard {dashid}")
+            print(traceback.format_exc())
+        return jsonify(error=f'Could not export OpenSearch Dashboard {dashid}')
 
 
 @app.route(
@@ -1709,7 +1752,7 @@ def netbox_sites():
         url = f'{netboxUrl}/api/dcim/sites/?format=json'
         while url:
             try:
-                response = requests.get(url, headers=headers, verify=False, timeout=httpTimeout)
+                response = requests.get(url, headers=headers, verify=netboxSslVerify, timeout=httpTimeout)
                 response.raise_for_status()
             except Exception as e:
                 if debugApi:
@@ -1722,7 +1765,16 @@ def netbox_sites():
                         for site in data.get("results", [])
                     }
                 )
-                url = data.get("next")
+                # The "next" pagination URL comes from the NetBox response body, and we re-send the
+                #   API token with it. Only follow it if it points back at the configured NetBox
+                #   origin, so a hostile or spoofed response can't redirect the token elsewhere.
+                #   Resolved against the current URL first so a relative "next" still works.
+                nextUrl = urljoin(url, data["next"]) if data.get("next") else None
+                if nextUrl and not same_origin_as_netbox(nextUrl):
+                    if debugApi:
+                        print(f"Refusing to follow NetBox pagination URL outside {netboxUrl}: {nextUrl}")
+                    break
+                url = nextUrl
             else:
                 break
 

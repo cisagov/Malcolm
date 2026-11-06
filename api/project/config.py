@@ -37,6 +37,7 @@ class Config(object):
     MALCOLM_OTHER_INDEX_TIME_FIELD = os.getenv('MALCOLM_OTHER_INDEX_TIME_FIELD', '@timestamp')
     MALCOLM_TEMPLATE = os.getenv('MALCOLM_TEMPLATE', 'malcolm_template')
     MALCOLM_VERSION = os.getenv('MALCOLM_VERSION', 'unknown')
+    NETBOX_SSL_CERTIFICATE_VERIFICATION = os.getenv('NETBOX_SSL_CERTIFICATE_VERIFICATION', 'false')
     NETBOX_TOKEN = os.getenv('NETBOX_TOKEN') or os.getenv('SUPERUSER_API_TOKEN', '')
     NETBOX_URL = os.getenv('NETBOX_URL') or 'http://netbox:8080/netbox'
     OPENSEARCH_CREDS_CONFIG_FILE = os.getenv(

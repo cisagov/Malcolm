@@ -29,8 +29,11 @@ ENV NETBOX_INITIALIZERS_VERSION="v4.6.2"
 ENV NETBOX_TOPOLOGY_VERSION="4.5.1"
 ENV NETBOX_HEALTHCHECK_VERSION="0.3.0"
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.2"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
 
 # Keep the device type importer and library fixed and verify each archive before extracting it;
 #   update each commit and SHA-256 together
@@ -80,7 +83,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       file \
       git \
       gpg \
-      jq \
       libmagic-dev \
       libmagic1 \
       libpq-dev \
@@ -101,7 +103,8 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    sh /usr/local/share/install-verified-binary.sh /usr/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     usermod -a -G tty ${PUSER} && \
     mkdir -p "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" "${NETBOX_PRELOAD_PATH}" && \
     cp /tmp/netbox-config/* "${NETBOX_CONFIG_PATH}" && \
