@@ -36,6 +36,9 @@ fi
     if [[ -f "${SURICATA_UPDATE_CONFIG_FILE:-/etc/suricata/update.yaml}" ]]; then
         yq -i '.sources = []' "${SURICATA_UPDATE_CONFIG_FILE:-/etc/suricata/update.yaml}"
     fi
+    for CONF in enable modify drop; do
+        [[ -e /etc/suricata/${CONF}.conf ]] || touch /etc/suricata/${CONF}.conf 2>/dev/null || true
+    done
     if [[ -n "${SURICATA_DISABLE_SIDS}" ]]; then
         tr ',' '\n' <<<"${SURICATA_DISABLE_SIDS}" | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if (length) print }' | \
             while IFS= read -r line; do
@@ -44,7 +47,7 @@ fi
         if [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
             run_startup_rule_update /usr/local/bin/suricata-update-rules.sh
         else
-            run_startup_rule_update env SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false /usr/local/bin/suricata-update-rules.sh
+            run_startup_rule_update env SURICATA_UPDATE_RULES=true SURICATA_UPDATE_SOURCES=false SURICATA_UPDATE_OFFLINE=true /usr/local/bin/suricata-update-rules.sh
         fi
     elif [[ "${SURICATA_UPDATE_RULES:-false}" == "true" ]]; then
         run_startup_rule_update /usr/local/bin/suricata-update-rules.sh
