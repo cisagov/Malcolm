@@ -1,5 +1,7 @@
 # <a name="Logstash"></a>Logstash
 
+See [custom pipeline filters and lookup files](logstash-custom-pipelines.md) to extend pipelines using a read-only bind mount.
+
 ## <a name="LogstashNewSource"></a>Parsing a new log data source
 
 To continue with the example of the `cooltool` service added in the [PCAP processors](contributing-pcap.md#PCAP) section, assuming that `cooltool` generates some textual log files to be parsed and indexed into Malcolm.
