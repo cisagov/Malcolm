@@ -303,7 +303,12 @@ def test_remap_bound_paths():
 
 def test_build_bound_path_replacers_uses_supplied_dirs():
     replacers = malcolm_common.BuildBoundPathReplacers(
-        pcap_dir='/p', suricata_log_dir='/s', zeek_log_dir='/z', filescan_log_dir='/f', index_dir='/i', index_snapshot_dir='/b'
+        pcap_dir='/p',
+        suricata_log_dir='/s',
+        zeek_log_dir='/z',
+        filescan_log_dir='/f',
+        index_dir='/i',
+        index_snapshot_dir='/b',
     )
     by_key = {(r.service, r.target): r.source for r in replacers}
     assert by_key[('arkime', malcolm_common.PCAP_DATA_CONTAINER_PATH)] == '/p'
@@ -490,10 +495,14 @@ def write_compose(directory, *images):
 @pytest.mark.parametrize(
     'images, expected',
     [
-        (['ghcr.io/idaholab/malcolm/zeek:26.11.0', 'ghcr.io/idaholab/malcolm/arkime:26.9.1'], '26.11.0'),
-        (['ghcr.io/idaholab/malcolm/zeek:26.11.0', 'ghcr.io/idaholab/malcolm/arkime:26.10.1-rc1'], '26.10.1'),
+        (['ghcr.io/idaholab/malcolm/zeek:26.10.0', 'ghcr.io/idaholab/malcolm/arkime:26.9.1'], '26.10.0'),
+        (['ghcr.io/idaholab/malcolm/zeek:26.10.0', 'ghcr.io/idaholab/malcolm/arkime:26.10.1-rc1'], '26.10.1'),
         (['ghcr.io/idaholab/malcolm/zeek:26.9.0+build5', 'redis:7.2'], '26.9.0'),
-        (['ghcr.io/idaholab/malcolm/zeek:26.11.0', 'ghcr.io/idaholab/malcolm/arkime:main', None], '26.11.0'),
+        (['ghcr.io/idaholab/malcolm/zeek:26.10.0', 'ghcr.io/idaholab/malcolm/arkime:main', None], '26.10.0'),
+        (
+            ['ghcr.io/idaholab/malcolm/zeek:1.20.0@sha256:' + 'a' * 64, 'ghcr.io/idaholab/malcolm/arkime:1.9.1'],
+            '1.20.0',
+        ),
     ],
 )
 def test_get_malcolm_version_highest_calver(compose_dir, images, expected):
