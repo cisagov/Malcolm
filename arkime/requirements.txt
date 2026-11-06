@@ -1,4 +1,4 @@
 beautifulsoup4==4.14.2
 pyzmq==27.1.0
-watchdog==6.0.0
+watchdog==7.1.0
 supervisor==4.3.0

@@ -40,7 +40,7 @@ opensearch-py==3.2.0
 python-magic==0.4.27
 pyzmq==27.1.0
 requests==2.33.1
-watchdog==6.0.0
+watchdog==7.1.0
 
 # archive extraction (filebeat/requirements.txt)
 libarchive-c==5.3

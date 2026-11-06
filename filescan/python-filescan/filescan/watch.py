@@ -3,10 +3,12 @@ from __future__ import annotations
 from anyio.from_thread import BlockingPortal
 from typing import Any
 from watchdog.events import (
+    DirAttribEvent,
     DirCreatedEvent,
     DirDeletedEvent,
     DirModifiedEvent,
     DirMovedEvent,
+    FileAttribEvent,
     FileClosedEvent,
     FileClosedNoWriteEvent,
     FileCreatedEvent,
@@ -18,7 +20,7 @@ from watchdog.events import (
     FileSystemEventHandler,
 )
 
-
+type AttribEvent = DirAttribEvent | FileAttribEvent
 type ClosedEvent = FileClosedEvent
 type ClosedNoWriteEvent = FileClosedNoWriteEvent
 type CreatedEvent = DirCreatedEvent | FileCreatedEvent
@@ -73,6 +75,9 @@ class AsyncFileSystemEventHandler:
         await getattr(self, f"on_{event.event_type}")(event)
 
     async def on_any_event(self, _: FileSystemEvent, /) -> None:
+        pass
+
+    async def on_attrib(self, _: AttribEvent, /) -> None:
         pass
 
     async def on_closed(self, _: ClosedEvent, /) -> None:
