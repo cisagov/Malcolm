@@ -297,4 +297,93 @@ check(results,'filter_cache_preserves_lookup_tuple_after_update') do |f,nb|
   first.get('[source][device]')[:name]==['NEW-PC'] && second.get('[source][device]')[:name]==['NEW-PC'] &&
     nb.writes.count { |w| w[0]==:patch && w[1]=='dcim/devices/20/' }==1
 end
+def new_host_fixture(filter,nb)
+  filter.instance_variable_set(:@autopopulate_inherit_prefix_length,true)
+  nb.ips=[]; nb.macs=[]; nb.devices={}; nb.interfaces={}
+end
+check(results,'opt_in_inherits_ipv4_prefix_and_repeat_is_idempotent') do |f,nb|
+  new_host_fixture(f,nb)
+  lookup(f); lookup(f)
+  nb.ips.size==1 && nb.ips.first[:address]=='10.10.0.7/24' &&
+    nb.writes.count { |w| w[0]==:post && w[1]=='dcim/devices/' }==1
+end
+check(results,'inheritance_uses_most_specific_prefix') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes << nb.prefixes.first.merge(:id=>2,:prefix=>'10.10.0.0/26')
+  lookup(f)
+  nb.ips.first[:address]=='10.10.0.7/26'
+end
+check(results,'inheritance_without_mac_still_checks_vlan') do |f,nb|
+  new_host_fixture(f,nb)
+  lookup(f,event(nil,10))
+  nb.ips.first[:address]=='10.10.0.7/24' && nb.macs.empty?
+end
+check(results,'inheritance_default_off_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  f.instance_variable_set(:@autopopulate_inherit_prefix_length,false)
+  lookup(f)
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_missing_vlan_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  lookup(f,event(nil,nil))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_routed_vlan_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  lookup(f,event(nil,99))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_ambiguous_prefix_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes << nb.prefixes.first.merge(:id=>2)
+  lookup(f,event(nil,10))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_wrong_site_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:scope_id]=2
+  lookup(f,event(nil,10))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_unresolved_vrf_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:vrf]={ :id=>2 }
+  lookup(f,event(nil,10))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_missing_prefix_keeps_host_mask') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes=[]
+  lookup(f,event(nil,10))
+  nb.ips.first[:address]=='10.10.0.7/32'
+end
+check(results,'inheritance_does_not_rewrite_existing_32') do |f,nb|
+  f.instance_variable_set(:@autopopulate_inherit_prefix_length,true)
+  lookup(f)
+  nb.ips.first[:address]=='10.10.0.7/32' && nb.writes.empty?
+end
+check(results,'inheritance_preserves_explicit_input_mask') do |f,nb|
+  f.instance_variable_set(:@autopopulate_inherit_prefix_length,true)
+  f.identity_creation_address(event,'10.10.0.7/27',1,nb)=='10.10.0.7/27' && nb.writes.empty?
+end
+check(results,'inheritance_supports_ipv6_without_truncating_host') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes.first[:prefix]='fd00:10::/64'
+  e=event(nil,10); e.set('[source][ip]','fd00:10::7')
+  f.netbox_lookup(:event=>e,:ip_key=>'fd00:10::7',:site_id=>1)
+  nb.ips.first[:address]=='fd00:10::7/64'
+end
+check(results,'inheritance_ipv6_fallback_is_128') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.prefixes=[]
+  e=event(nil,10); e.set('[source][ip]','fd00:10::7')
+  f.netbox_lookup(:event=>e,:ip_key=>'fd00:10::7',:site_id=>1)
+  nb.ips.first[:address]=='fd00:10::7/128'
+end
+check(results,'inheritance_api_failure_does_not_leave_new_device') do |f,nb|
+  new_host_fixture(f,nb)
+  nb.fail_path='ipam/prefixes/'
+  lookup(f,event(nil,10)).nil? && nb.writes.empty?
+end
 puts JSON.generate(results)

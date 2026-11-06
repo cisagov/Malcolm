@@ -351,6 +351,15 @@ def register(
   end
   @autopopulate = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_str.to_s.downcase)
 
+  # Optionally use a verified local NetBox prefix length for new host IPs.
+  # This is inventory policy, not a subnet mask measured from packet headers.
+  _inherit_prefix_str = params["autopopulate_inherit_prefix_length"]
+  _inherit_prefix_env = params["autopopulate_inherit_prefix_length_env"]
+  if _inherit_prefix_str.nil? && !_inherit_prefix_env.nil?
+    _inherit_prefix_str = ENV[_inherit_prefix_env]
+  end
+  @autopopulate_inherit_prefix_length = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_inherit_prefix_str.to_s.downcase)
+
   # fields for device autopopulation
   @source_hostname = params["source_hostname"]
   @source_oui = params["source_oui"]
@@ -1273,7 +1282,7 @@ def identity_scope_site(record, nb)
   end
 end
 
-def identity_local_vlan(ip_str, site_id, nb)
+def identity_local_prefix(ip_str, site_id, nb)
   lookup = proc do
     host = IPAddr.new(ip_str.split('/').first)
     prefixes = identity_records('ipam/prefixes/', { :contains => host.to_s }, nb).select do |prefix|
@@ -1299,18 +1308,30 @@ def identity_local_vlan(ip_str, site_id, nb)
           end
         end
       end
-      ((prefix_site || vlan_site).to_i == site_id.to_i) ? vlan[:vid] : nil
+      if ((prefix_site || vlan_site).to_i == site_id.to_i) && vlan[:vid]
+        { :cidr => prefix[:prefix], :vlan => vlan[:vid] }
+      end
     end
   end
   @identity_context_hash ? @identity_context_hash.getset([site_id, ip_str], &lookup) : lookup.call
 end
 
+def identity_observed_prefix(event, ip_str, site_id, nb)
+  vlans = Array(event.get("#{@source_vlan}")).compact.map(&:to_s).uniq
+  return nil unless vlans.size == 1 && vlans.first.match?(/\A\d+\z/)
+  prefix = identity_local_prefix(ip_str, site_id, nb)
+  prefix && prefix[:vlan].to_i == vlans.first.to_i ? prefix[:cidr] : nil
+end
+
 def identity_local_mac(event, ip_str, site_id, nb)
   mac = identity_mac(event.get("#{@source_mac}"))
-  vlans = Array(event.get("#{@source_vlan}")).compact.map(&:to_s).uniq
-  return nil unless mac && vlans.size == 1 && vlans.first.match?(/\A\d+\z/)
-  expected_vlan = identity_local_vlan(ip_str, site_id, nb)
-  expected_vlan && expected_vlan.to_i == vlans.first.to_i ? mac : nil
+  mac && identity_observed_prefix(event, ip_str, site_id, nb) ? mac : nil
+end
+
+def identity_creation_address(event, ip_str, site_id, nb)
+  return ip_str unless @autopopulate_inherit_prefix_length && !ip_str.include?('/')
+  prefix = identity_observed_prefix(event, ip_str, site_id, nb)
+  prefix ? "#{ip_str}/#{IPAddr.new(prefix).prefix}" : ip_str
 end
 
 def identity_mac_records(mac, nb)
@@ -1728,6 +1749,7 @@ def netbox_lookup_unlocked(
     _autopopulate_role = nil
     _autopopulate_dtype = nil
     _autopopulate_manuf = nil
+    _autopopulate_creation_address = ip_key
     _prefixes = nil
     _devices = nil
     _interface_created = false
@@ -1814,6 +1836,7 @@ def netbox_lookup_unlocked(
         if @autopopulate && (_devices.nil? || _devices.empty?)
           # no results found, autopopulate enabled, eligible IP address...
           # let's create an entry for this device
+          _autopopulate_creation_address = identity_creation_address(event, ip_key, site_id, _nb)
           _autopopulate_device,
           _autopopulate_role,
           _autopopulate_dtype,
@@ -1930,6 +1953,7 @@ def netbox_lookup_unlocked(
 
             if _device_to_vm
               # you can't "convert" a device to a VM, so we have to create a new VM then delete the old device
+              _autopopulate_creation_address = identity_creation_address(event, ip_key, site_id, _nb)
               _vm_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
                            :site => site_id,
                            :tags => _tags,
@@ -1957,7 +1981,7 @@ def netbox_lookup_unlocked(
                 end
 
                 # create interface+IP for the new VM now so lookup_devices can find it below
-                _autopopulate_device = create_device_interface(ip_key,
+                _autopopulate_device = create_device_interface(_autopopulate_creation_address,
                                                                _autopopulate_device,
                                                                _autopopulate_manuf,
                                                                _autopopulate_mac,
@@ -2053,7 +2077,7 @@ def netbox_lookup_unlocked(
 
     if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero? && !_interface_created
       # device has been created (fresh autopopulate, not a device->VM conversion), we need to create an interface for it
-      _autopopulate_device = create_device_interface(ip_key,
+      _autopopulate_device = create_device_interface(_autopopulate_creation_address,
                                                      _autopopulate_device,
                                                      _autopopulate_manuf,
                                                      _autopopulate_mac,
