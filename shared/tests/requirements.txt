@@ -44,3 +44,8 @@ watchdog==6.0.0
 
 # archive extraction (filebeat/requirements.txt)
 libarchive-c==5.3
+
+# NetBox database backup/restore initializer (netbox/requirements.txt)
+pynetbox==7.5.0
+python-slugify==8.0.4
+randomcolor==0.4.4.6
