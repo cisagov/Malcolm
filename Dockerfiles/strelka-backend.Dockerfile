@@ -97,6 +97,10 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/log/journal
 
+# make certifi use the system store (populated from /var/local/ca-trust on startup)
+RUN CERTIFI_PEM="$(python3 -c 'import certifi; print(certifi.where())')" && \
+    ln -sf /etc/ssl/certs/ca-certificates.crt "$CERTIFI_PEM"
+
 USER ${PUSER}
 
 RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf

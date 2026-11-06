@@ -85,6 +85,10 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
+# make certifi use the system store (populated from /var/local/ca-trust on startup)
+RUN CERTIFI_PEM="$(python3 -c 'import certifi; print(certifi.where())')" && \
+    ln -sf /etc/ssl/certs/ca-certificates.crt "$CERTIFI_PEM"
+
 ADD --chmod=644 pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/

@@ -135,6 +135,10 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     chmod 400 /opt/maps/* && \
     (echo "*/2 * * * * /usr/local/bin/shared-object-creation.sh\n5,35 * * * * /usr/local/bin/index-init.sh\n*/20 * * * * /usr/local/bin/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
+# make certifi use the system store (populated from /var/local/ca-trust on startup)
+RUN CERTIFI_PEM="$(python3 -c 'import certifi; print(certifi.where())')" && \
+    ln -sf /etc/ssl/certs/ca-certificates.crt "$CERTIFI_PEM"
+
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
 ENTRYPOINT ["/usr/bin/tini", \
