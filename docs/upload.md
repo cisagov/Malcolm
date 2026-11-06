@@ -25,6 +25,27 @@ The upload UI features a readiness indicator at the bottom of the form. Hovering
 
 The upload UI enforces a per-file maximum size limit which defaults to fifty gigabytes. This limit can be adjusted by changing the `PCAP_UPLOAD_MAX_FILE_GB` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in `./config/upload-common.env` and restarting Malcolm.
 
+## <a name="PCAPOverIP"></a>PCAP-over-IP client
+
+Malcolm can import one **complete classic PCAP** from an explicitly chosen TCP producer without opening any new inbound port. For example, on a trusted host that has `sniffed.pcap`:
+
+```sh
+nc -l 57012 < sniffed.pcap
+```
+
+On the Malcolm host, from the repository root:
+
+```sh
+python3 scripts/pcap_over_ip.py --host 127.0.0.1 --port 57012
+```
+
+The client accepts both endian variants of libpcap PCAP and microsecond/nanosecond timestamps, and validates each packet record. It writes to a private temporary directory under `pcap/` and moves a **finished** capture into the watched `pcap/upload/` directory using an atomic hard link. Files are published only after the TCP producer closes the connection cleanly. The usual upload watcher then passes the PCAP to Arkime, Zeek and Suricata using the existing processing pipeline. A malformed, incomplete, timed-out or oversized stream produces an error and no partial uploaded file.
+
+This is an **on-demand, client-mode** workflow for one EOF-terminated capture, not a continuous rollover service. The default size limit is 1 GiB; specify a larger `--max-bytes` explicitly if needed. `--connect-timeout` and `--idle-timeout` bound stalled streams. A different existing upload directory may be selected with `--output-dir`. Only classic PCAP is accepted; **PCAPNG is not supported** by the stream reader.
+
+PCAP-over-IP carries the capture **without encryption or authentication**. Use only trusted local networks or a protected SSH/VPN tunnel; do not expose an unauthenticated PCAP producer on the public internet. The client makes an outbound TCP connection and does not run unless explicitly invoked.
+
+
 ## <a name="Tagging"></a>Tagging
 
 In addition to being processed for uploading, Malcolm events will be tagged according to the components of the filenames of the PCAP files or Zeek log archives files from which the events were parsed. For example, records created from a PCAP file named `ACME_Scada_VLAN10.pcap` would be tagged with `ACME`, `Scada`, and `VLAN10`. Tags are extracted from filenames by splitting on the characters `,` (comma), `-` (dash), and `_` (underscore). These tags are viewable and searchable (via the `tags` field) in Arkime and OpenSearch Dashboards. This behavior can be changed by modifying the `AUTO_TAG` [environment variable in `upload-common.env`](malcolm-config.md#MalcolmConfigEnvVars).
