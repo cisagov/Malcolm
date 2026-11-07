@@ -2,6 +2,8 @@
 
 Malcolm's runtime settings are stored (with a few exceptions) as environment variables in configuration files ending with a `.env` suffix in the `./config` directory. The `./scripts/configure` script can help users configure and tune these settings. For an in-depth treatment of the configuration script, see the **Configuration** section in [**End-to-end Malcolm and Hedgehog Linux ISO Installation**](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems).
 
+If you are following a recorded tutorial from the [Malcolm Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning), consult the [video/configuration errata](learning-tree-errata.md#LearningTreeErrata) for current option names and defaults.
+
 ## <a name="MalcolmConfigEnvVars"></a>Environment variable files
 
 Although the configuration script automates many of the following configuration and tuning parameters, some environment variables of particular interest are listed here for reference.
