@@ -426,7 +426,6 @@ def register(
          "(via #{_ssl_verify_env || 'ssl_verify script_param'})"
   end
 
-
   # Leave the connection nil when no URL is configured. filter can then return immediately without
   # attempting any API or fixture work.
   @otkb_conn = OtkbConnLazy.new(
