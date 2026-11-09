@@ -421,6 +421,11 @@ def register(
     _ssl_verify_str = ENV[_ssl_verify_env]
   end
   @otkb_ssl_verify = [1, true, '1', 'true', 't', 'on'].include?(_ssl_verify_str.to_s.downcase)
+  if @otkb_enabled && !@otkb_ssl_verify && @otkb_url.to_s.downcase.start_with?('https:')
+    puts "otkb_enrich: TLS certificate verification DISABLED for #{@otkb_url} " \
+         "(via #{_ssl_verify_env || 'ssl_verify script_param'})"
+  end
+
 
   # Leave the connection nil when no URL is configured. filter can then return immediately without
   # attempting any API or fixture work.
