@@ -33,7 +33,8 @@ jobs:
         run: lua5.4 nginx/lua/test_opensearch_rbac.lua
       - name: Run extracted file location regression tests
         run: lua5.4 nginx/lua/test_extracted_files_location.lua
-
+      - name: Run mapi passthrough RBAC tests
+        run: lua5.4 nginx/lua/test_mapi_passthrough_rbac.lua
 
   docker:
     needs: test-lua
