@@ -49,7 +49,7 @@ cp "$MOCK_ARTIFACT" "$outfile"
         arch="x86_64",
         payload=b"verified",
         manifest=None,
-        artifact="yq_4.54.2_linux_{arch}",
+        artifact="yq_4.54.3_linux_{arch}",
         url="https://example.invalid/yq_linux_{arch}",
         fail_download=False,
     ):
@@ -58,7 +58,7 @@ cp "$MOCK_ARTIFACT" "$outfile"
         if manifest is None:
             suffix = "amd64" if arch in ("x86_64", "amd64") else "arm64"
             digest = hashlib.sha256(payload).hexdigest()
-            manifest = f"{digest}  yq_4.54.2_linux_{suffix}\n"
+            manifest = f"{digest}  yq_4.54.3_linux_{suffix}\n"
         self.manifest.write_text(manifest, encoding="utf-8")
         env = os.environ.copy()
         env.update(
@@ -91,19 +91,19 @@ cp "$MOCK_ARTIFACT" "$outfile"
     def test_unexpected_download_never_replaces_existing_binary(self):
         self.target.write_bytes(b"previous-version")
         expected = hashlib.sha256(b"not-the-downloaded-bytes").hexdigest()
-        result = self.run_installer(manifest=f"{expected}  yq_4.54.2_linux_amd64\n")
+        result = self.run_installer(manifest=f"{expected}  yq_4.54.3_linux_amd64\n")
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(self.target.read_bytes(), b"previous-version")
 
     def test_missing_checksum_fails_before_download(self):
-        result = self.run_installer(manifest="0" * 64 + "  yq_4.54.2_linux_arm64\n")
+        result = self.run_installer(manifest="0" * 64 + "  yq_4.54.3_linux_arm64\n")
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(self.request.exists())
         self.assertFalse(self.target.exists())
 
     def test_duplicate_checksum_keys_fail_closed(self):
         digest = hashlib.sha256(b"verified").hexdigest()
-        manifest = f"{digest}  yq_4.54.2_linux_amd64\n" * 2
+        manifest = f"{digest}  yq_4.54.3_linux_amd64\n" * 2
         result = self.run_installer(manifest=manifest)
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(self.request.exists())

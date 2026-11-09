@@ -109,7 +109,7 @@ EOF
 # Third-party tools are pinned release assets verified against binaries.sha256
 #   (copied into the build environment as /usr/local/share/binaries.sha256).
 #   When bumping a version here, update the matching manifest entries too.
-YQ_VERSION="4.54.2"
+YQ_VERSION="4.54.3"
 CROC_VERSION="11.5.4"
 JUST_VERSION="1.59.0"
 EZA_VERSION="0.23.5"
