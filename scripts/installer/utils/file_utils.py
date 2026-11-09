@@ -56,6 +56,103 @@ def validate_image_archive(path: str) -> Tuple[bool, Optional[str]]:
         return False, f"Error validating images archive: {e}"
 
 
+_HAS_DATA_FILTER = hasattr(tarfile, "data_filter")
+
+
+def _validate_tar_member(member: tarfile.TarInfo, dest_real_path: str) -> Tuple[bool, Optional[str]]:
+    """Check that a single tar member extracts safely under dest_real_path.
+
+    This must be called immediately before the member is extracted (not in a pre-pass over
+    the whole archive), so that symlinks created by earlier members already exist on disk
+    and are followed by realpath(). Validating every member up front resolves those paths
+    lexically and can be bypassed with chained relative symlinks.
+
+    Rejects:
+    - empty or absolute member names
+    - members whose resolved target falls outside dest_real_path (e.g. ../ traversal or
+      writing through a previously extracted symlink)
+    - symlinks/hardlinks with an empty or absolute target, or whose resolved target falls
+      outside dest_real_path
+    - character/block devices and FIFOs
+
+    dest_real_path must already be resolved with os.path.realpath().
+
+    Returns: (is_safe, error_message)
+    """
+    name = member.name
+
+    if (not name) or os.path.isabs(name) or name.startswith(("/", "\\")):
+        return False, f"member has an absolute or empty path: {name!r}"
+
+    if member.isdev():
+        return False, f"member is a device or FIFO: {name!r}"
+
+    target_path = os.path.realpath(os.path.join(dest_real_path, name))
+    try:
+        if os.path.commonpath([target_path, dest_real_path]) != dest_real_path:
+            return False, f"member resolves outside the install directory: {name!r} -> {target_path!r}"
+    except ValueError:
+        return False, f"member path could not be resolved safely: {name!r}"
+
+    if member.issym() or member.islnk():
+        linkname = member.linkname or ""
+        if (not linkname) or os.path.isabs(linkname):
+            return False, f"member has an absolute or empty link target: {name!r} -> {linkname!r}"
+        if member.issym():
+            # symlink targets are relative to the directory containing the link
+            link_target = os.path.realpath(os.path.join(dest_real_path, os.path.dirname(name), linkname))
+        else:
+            # hardlink targets are relative to the archive root
+            link_target = os.path.realpath(os.path.join(dest_real_path, linkname))
+        try:
+            if os.path.commonpath([link_target, dest_real_path]) != dest_real_path:
+                return False, f"member link target resolves outside the install directory: {name!r} -> {linkname!r}"
+        except ValueError:
+            return False, f"member link target could not be resolved safely: {name!r}"
+
+    return True, None
+
+
+def _safe_extract_tar(tar: tarfile.TarFile, install_path: str) -> Tuple[bool, Optional[str]]:
+    """Extract an open tar archive into install_path, refusing any member that would land
+    outside it (path traversal, symlink/hardlink pivots, device files).
+
+    Where the running Python supports extraction filters (PEP 706), the per-member check
+    runs as the filter, followed by tarfile's own "data" filter as a second layer. Otherwise
+    members are validated and extracted one at a time.
+
+    Returns: (success, error_message)
+    """
+    dest_real_path = os.path.realpath(install_path)
+
+    try:
+        if _HAS_DATA_FILTER:
+
+            def _member_filter(member: tarfile.TarInfo, path: str) -> Optional[tarfile.TarInfo]:
+                is_safe, reason = _validate_tar_member(member, dest_real_path)
+                if not is_safe:
+                    raise tarfile.FilterError(reason)
+                return tarfile.data_filter(member, path)
+
+            tar.errorlevel = 1
+            tar.extractall(path=install_path, numeric_owner=True, filter=_member_filter)
+
+        else:
+            for member in tar:
+                is_safe, reason = _validate_tar_member(member, dest_real_path)
+                if not is_safe:
+                    return False, f"Refusing to extract unsafe archive member: {reason}"
+                tar.extract(member, path=install_path, numeric_owner=True)
+
+    except tarfile.TarError as e:
+        # FilterError (and its subclasses) are TarErrors
+        return False, f"Refusing to extract unsafe archive member: {e}"
+    except Exception as e:
+        return False, f"Error extracting archive: {e}"
+
+    return True, None
+
+
 def detect_malcolm_and_image_files(
     malcolm_file_arg: str = None, image_file_arg: str = None
 ) -> Tuple[List[str], List[str]]:
@@ -133,8 +230,16 @@ def extract_malcolm_tarball(malcolm_install_file: str, install_path: str) -> Tup
     ext_uid = SYSTEM_INFO["recommended_nonroot_uid"]
     ext_gid = SYSTEM_INFO["recommended_nonroot_gid"]
 
-    with tarfile.open(malcolm_install_file, "r:gz") as tar:
-        tar.extractall(path=install_path, numeric_owner=True)
+    try:
+        with tarfile.open(malcolm_install_file, "r:gz") as tar:
+            extract_ok, extract_err = _safe_extract_tar(tar, install_path)
+    except Exception as e:
+        extract_ok, extract_err = False, f"Error opening {malcolm_install_file}: {e}"
+    if not extract_ok:
+        InstallerLogger.error(extract_err)
+        # install_path was created above and is known not to have existed beforehand
+        shutil.rmtree(install_path, ignore_errors=True)
+        return False, None
     ChownRecursive(install_path, ext_uid, ext_gid)
 
     # .tar.gz normally will contain an intermediate subdirectory. if so, move files back one level

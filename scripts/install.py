@@ -99,7 +99,6 @@ from scripts.installer.utils.host_memory_preflight import (
 )
 from scripts.installer.utils.settings_file_handler import SettingsFileHandler
 
-
 ###################################################################################################
 SCRIPT_NAME = os.path.basename(__file__)
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -741,8 +740,9 @@ def main():
             if os.path.isfile(new_installer_py):
                 # exec the new installer and abandon this one (replace the process)
                 cleaned_argv = remove_malcolm_file_args(sys.argv[1:])
-                # send something bogus that doesn't exist for --malcolm-file so we don't loop
+                # send something bogus that doesn't exist for --malcolm-file/--image-file so we don't loop
                 cleaned_argv.extend(["--malcolm-file", secrets.token_hex(32)])
+                cleaned_argv.extend(["--image-file", secrets.token_hex(32)])
                 os.execv(sys.executable, [sys.executable, new_installer_py, *cleaned_argv])
         return
 

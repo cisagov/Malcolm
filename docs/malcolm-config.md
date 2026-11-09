@@ -293,8 +293,12 @@ Although the configuration script automates many of the following configuration 
 The `./scripts/configure` script can also be run noninteractively which can be useful for scripting Malcolm setup. This behavior can be selected by supplying the `-d` or `--defaults` option on the command line. Running with the `--help` option will list the arguments accepted by the script:
 
 ```
-usage: configure [-h] [--debug [true|false]] [--quiet] [--configure [true|false]] [--dry-run] [--log-to-file [filename]] [--skip-splash] [--tui | --dui | --gui | --non-interactive] [--compose-file <string>] [--environment-dir-input <string>] [--environment-dir-output <string>]
-                 [--export-malcolm-config-file [<path>]] [--import-malcolm-config-file <path> | --load-existing-env [true|false] | --defaults] [--malcolm-file <string>] [--image-file <string>] [--extra [EXTRASETTINGS ...]]
+usage: configure [-h] [--debug [true|false]] [--quiet] [--configure [true|false]] [--dry-run]
+                 [--log-to-file [filename]] [--skip-splash] [--tui | --dui | --gui | --non-interactive]
+                 [--compose-file <string>] [--environment-dir-input <string>]
+                 [--environment-dir-output <string>] [--export-malcolm-config-file [<path>]]
+                 [--import-malcolm-config-file <path> | --load-existing-env [true|false] | --defaults]
+                 [--malcolm-file <string>] [--image-file <string>] [--extra [EXTRASETTINGS ...]]
 
 Malcolm Installer
 
@@ -314,9 +318,10 @@ Installer Options:
 
 Interface Mode (mutually exclusive):
   --tui                 Run in command-line text-based interface mode (default)
-  --dui                 Run in python dialogs text-based user interface mode (if available - requires python dialogs)
-  --gui                 Run in graphical user interface mode (if available - requires customtkinter)
-  --non-interactive     Run in non-interactive mode for unattended installations (suppresses all user prompts)
+  --dui                 Run in python dialogs text-based user interface mode (if available - requires
+                        python dialogs)
+  --non-interactive     Run in non-interactive mode for unattended installations (suppresses all user
+                        prompts)
 
 Configuration File Options:
   --compose-file, --configure-file, --kube-file, -f <string>
@@ -328,12 +333,15 @@ Environment Config Options:
   --environment-dir-output, -e <string>
                         Target directory for writing Malcolm's .env files
   --export-malcolm-config-file, --export-mc-file [<path>]
-                        Export configuration to JSON/YAML settings file (auto-generates filename if not specified)
+                        Export configuration to JSON/YAML settings file (auto-generates filename if not
+                        specified)
   --import-malcolm-config-file, --import-mc-file <path>
                         Import configuration from JSON/YAML settings file
   --load-existing-env, -l [true|false]
-                        Automatically load provided config/ .env files from the input directory when present. Can be used in conjunction with --environment-dir-input
-  --defaults, -d        Use built-in default configuration values and skip loading from the config directory
+                        Automatically load provided config/ .env files from the input directory when
+                        present. Can be used in conjunction with --environment-dir-input
+  --defaults, -d        Use built-in default configuration values and skip loading from the config
+                        directory
 
 Installation Files:
   --malcolm-file, -m <string>
@@ -344,7 +352,6 @@ Installation Files:
 Additional Configuration Options:
   --extra [EXTRASETTINGS ...]
                         Extra environment variables to set (e.g., foobar.env:VARIABLE_NAME=value)
-…
 ```
 
 Once Malcolm is configured correctly, the `--export-malcolm-config-file` option can be used to export the configuration to a file that can be used with `--import-malcolm-config-file` to restore it later or transfer it to another Malcolm instance for import.
