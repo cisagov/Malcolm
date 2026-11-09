@@ -98,6 +98,7 @@ Although the configuration script automates many of the following configuration 
         + `KEYCLOAK_CLIENT_ID` and `KEYCLOAK_CLIENT_SECRET` - identify the Keycloak client Malcolm will use and the secret associated with that client
         + `KEYCLOAK_SSL_VERIFY` - if set to `true`, requires SSL certificate verification when connecting to a remote Keycloak endpoint (used when `NGINX_AUTH_MODE` is `keycloak_remote`)`
     - The following variables are only used for Malcolm's embedded [Keycloak instance](authsetup.md#AuthKeycloakEmbedded) (see [**All configuration**](https://www.keycloak.org/server/all-config) in the Keycloak guide for more details on these values):
+        + `KEYCLOAK_LOGIN_THEME` - login theme selected during embedded-realm bootstrap when no theme is set (default `malcolm`). Leave blank to skip theme setup. Existing realm and client theme selections are not overwritten. Remote Keycloak instances are unchanged.
         + [`KC_CACHE`](https://www.keycloak.org/server/all-config#category-cache) - defines the cache mechanism for high-availability (default `local` as Malcolm's embedded Keycloak instance is single-node)
         + [`KC_HEALTH_ENABLED`](https://www.keycloak.org/server/all-config#category-health) - if set to `true`, enables the health check endpoint used internally by the container health script
         + [`KC_HOSTNAME`](https://www.keycloak.org/server/all-config#category-hostname_v2) - address at which the Keycloak server is exposed (defaults to blank, as `KC_HOSTNAME_STRICT` below defaults to `false`)

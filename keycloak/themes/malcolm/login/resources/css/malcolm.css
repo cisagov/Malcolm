@@ -1,0 +1,50 @@
+/* Retain Keycloak's forms, focus indicators and light/dark colour variables. */
+:root {
+    --keycloak-logo-url: url('../img/malcolm.svg');
+    --keycloak-logo-height: 4rem;
+    --keycloak-logo-width: 18rem;
+    --keycloak-card-top-color: #eedd77;
+}
+
+.login-pf body {
+    background: #20252b;
+    min-height: 100vh;
+}
+
+.pf-v5-c-login__container {
+    grid-template-columns: minmax(0, 34rem);
+    width: 100%;
+    margin-inline: auto;
+}
+
+.pf-v5-c-login__main {
+    border-radius: 0.25rem;
+}
+
+div.kc-logo-text {
+    max-width: 100%;
+}
+
+/* Keep the brand name available to screen readers when using the wordmark. */
+div.kc-logo-text span {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+    div.kc-logo-text {
+        background: none;
+        height: auto;
+    }
+    div.kc-logo-text span {
+        position: static;
+        width: auto;
+        height: auto;
+        clip-path: none;
+    }
+}
