@@ -114,6 +114,10 @@ def _pick_valid_value(item: ConfigItem, current_value):
 
     candidates = []
 
+    # List items hold strings (they are written to .env as comma-separated text)
+    if isinstance(current_value, list):
+        candidates.extend([["1"], ["2101", "2102"], [_random_string(6)], ["default"]])
+
     # Boolean toggle
     if isinstance(current_value, bool):
         candidates.extend([not current_value, True, False])
@@ -248,6 +252,12 @@ class TestEnvFullRoundtrip(unittest.TestCase):
 
             except Exception as e:
                 print(e, file=sys.stderr)
+                pass
+
+            # Settle the randomized values the way loading them will: INVARIANT rules override values
+            #   that can't go together (e.g., Hedgehog exposing WISE, or Kubernetes not exposing services),
+            #   while the values set above are left alone by the other rules.
+            with cfg1.bulk_load():
                 pass
 
             cfg1.generate_env_files(td)

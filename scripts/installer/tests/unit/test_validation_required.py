@@ -23,6 +23,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_NETBOX_MODE,
     KEY_CONFIG_ITEM_NETBOX_URL,
+    KEY_CONFIG_ITEM_OPEN_PORTS,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
@@ -39,7 +40,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
     KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
 )
-from scripts.installer.configs.constants.enums import SearchEngineMode, NetboxMode
+from scripts.installer.configs.constants.enums import SearchEngineMode, NetboxMode, OpenPortsChoices
 
 
 def _issue_keys(issues):
@@ -140,7 +141,8 @@ class TestValidationRequired(unittest.TestCase):
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER))
 
     def test_traefik_opensearch_host_required_when_local_primary(self):
-        # traefik labels + local OpenSearch primary
+        # traefik labels + local OpenSearch primary, exposed (which on its own requires "Customize")
+        self.cfg.set_value(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE.value)
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(
@@ -213,49 +215,35 @@ class TestValidationRequired(unittest.TestCase):
         self.assertNotIn(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME, _issue_keys(issues))
 
     # ---------------------- Storage directories ----------------------
-    def test_storage_dirs_required_when_not_using_defaults(self):
-        # Flip off default storage locations
+    def test_storage_dirs_optional_when_not_using_defaults(self):
+        # Turning off default storage locations shows the directory settings, but none of them has to
+        #   be filled in: a blank one uses its default location when the compose file is generated
+        #   (see test_docker_compose_integration.test_blank_storage_dirs_use_default_locations), so a
+        #   user can move only the directories they care about.
         self.cfg.set_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False)
-        issues = validate_required(self.cfg)
-        keys = _issue_keys(issues)
-        # All three directories should be required and visible
-        self.assertIn(KEY_CONFIG_ITEM_PCAP_DIR, keys)
-        self.assertIn(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, keys)
-        self.assertIn(KEY_CONFIG_ITEM_FILESCAN_LOG_DIR, keys)
-        self.assertIn(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, keys)
-        self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_PCAP_DIR))
-        self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_ZEEK_LOG_DIR))
-        self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_FILESCAN_LOG_DIR))
-        self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_SURICATA_LOG_DIR))
+        for key in (
+            KEY_CONFIG_ITEM_PCAP_DIR,
+            KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
+            KEY_CONFIG_ITEM_FILESCAN_LOG_DIR,
+            KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+        ):
+            self.assertTrue(self.cfg.is_item_visible(key), key)
+            self.assertEqual(self.cfg.get_value(key), "", key)
+        self.assertEqual(validate_required(self.cfg), [])
 
-        # Setting values via set_value satisfies the is_modified requirement
+        # setting just one of them is fine too
         self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_DIR, "/data/pcap")
-        self.cfg.set_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, "/data/zeek")
-        self.cfg.set_value(KEY_CONFIG_ITEM_FILESCAN_LOG_DIR, "/data/filescan-logs")
-        self.cfg.set_value(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, "/data/suricata")
-        issues = validate_required(self.cfg)
-        keys = _issue_keys(issues)
-        self.assertNotIn(KEY_CONFIG_ITEM_PCAP_DIR, keys)
-        self.assertNotIn(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, keys)
-        self.assertNotIn(KEY_CONFIG_ITEM_FILESCAN_LOG_DIR, keys)
-        self.assertNotIn(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, keys)
+        self.assertEqual(validate_required(self.cfg), [])
 
     # ---------------------- Index/Snapshot directories ----------------------
-    def test_index_dirs_required_when_not_using_defaults_for_malcolm_local(self):
-        # Not using defaults; defaults are profile=malcolm and primary=opensearch-local
+    def test_index_dirs_optional_when_not_using_defaults_for_malcolm_local(self):
+        # Not using defaults; defaults are profile=malcolm and primary=opensearch-local. The index and
+        #   snapshot directories are shown, but like the other storage directories a blank one uses
+        #   its default location.
         self.cfg.set_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False)
-        issues = validate_required(self.cfg)
-        keys = _issue_keys(issues)
-        # Both index dir and snapshot dir should be required and visible
-        self.assertIn(KEY_CONFIG_ITEM_INDEX_DIR, keys)
-        self.assertIn(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, keys)
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_INDEX_DIR))
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR))
-        # Setting values clears issues
-        self.cfg.set_value(KEY_CONFIG_ITEM_INDEX_DIR, "/data/index")
-        self.cfg.set_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, "/data/snapshot")
-        issues = validate_required(self.cfg)
-        keys = _issue_keys(issues)
+        keys = _issue_keys(validate_required(self.cfg))
         self.assertNotIn(KEY_CONFIG_ITEM_INDEX_DIR, keys)
         self.assertNotIn(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, keys)
 

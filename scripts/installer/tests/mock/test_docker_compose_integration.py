@@ -179,6 +179,28 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         # For zeek, upload directory is remapped to <zeek_dir>/upload
         self.assertIn(f"{os.path.join(custom_zeek, 'upload')}:/zeek/upload", zeek_volumes)
 
+    def test_blank_storage_dirs_use_default_locations(self):
+        """With default storage locations off, a blank directory setting keeps its default mount."""
+        default_volumes = self._volumes_after_update(MalcolmConfig())
+
+        malcolm_config = MalcolmConfig()
+        custom_pcap = os.path.join(self.test_dir, "pcap-custom")
+        os.makedirs(custom_pcap, exist_ok=True)
+        malcolm_config.set_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False)
+        malcolm_config.set_value(KEY_CONFIG_ITEM_PCAP_DIR, custom_pcap)
+        DumpYaml(self.sample_compose, self.compose_file)
+        custom_volumes = self._volumes_after_update(malcolm_config)
+
+        self.assertIn(f"{custom_pcap}:/data/pcap", custom_volumes["arkime"])
+        # the directories left blank are mounted exactly as with default storage locations
+        self.assertEqual(custom_volumes["opensearch"], default_volumes["opensearch"])
+        self.assertEqual(custom_volumes["zeek"], default_volumes["zeek"])
+
+    def _volumes_after_update(self, malcolm_config):
+        """Run update_compose_files on the sample compose file and return each service's volumes."""
+        self.assertTrue(update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext()))
+        return {name: service.get("volumes", []) for name, service in LoadYaml(self.compose_file)["services"].items()}
+
     def test_network_configuration_updates(self):
         """Test that network configuration is updated."""
         malcolm_config = MalcolmConfig()

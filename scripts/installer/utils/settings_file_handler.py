@@ -8,10 +8,11 @@
 import os
 import json
 import datetime
+import tempfile
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from scripts.installer.core.malcolm_config import MalcolmConfig
+from scripts.installer.core.malcolm_config import LoadSource, MalcolmConfig, USE_DEFAULT
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.exceptions import (
     FileOperationError,
@@ -27,11 +28,16 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_USE_HOMEBREW,
 )
 from scripts.malcolm_common import get_malcolm_version, get_main_script_path, DumpYaml, LoadYamlOrJson
-from scripts.malcolm_utils import base64_encode_files_in_dir
+from scripts.malcolm_utils import base64_decode_files_to_dir, base64_encode_files_in_dir
 from scripts.installer.utils.logger_utils import InstallerLogger
 from enum import Enum, Flag
 
 CONFIG_FILE_VERSION = get_malcolm_version()
+
+# Version of the settings file layout itself (independent of the Malcolm version that wrote it).
+#   1: (no "format_version" in metadata) original layout
+#   2: blank values of items that accept blanks are written as "" instead of as the item's default
+SETTINGS_FILE_FORMAT_VERSION = 2
 
 # Sentinel value for None/empty values that maintains format consistency
 CONFIG_ITEM_NONE_SENTINEL = "<MALCOLM_CONFIG_NONE>"
@@ -93,10 +99,25 @@ class SettingsFileHandler:
 
         missing_items = {"missing_configuration": [], "missing_installation": []}
 
-        # process configuration section
-        configuration_section = settings_data.get("configuration", {})
-        if isinstance(configuration_section, dict):
-            missing_items["missing_configuration"] = self._load_configuration_section(configuration_section)
+        format_version = (settings_data.get("metadata") or {}).get("format_version", 1)
+        if isinstance(format_version, int) and format_version > SETTINGS_FILE_FORMAT_VERSION:
+            InstallerLogger.warning(
+                f"{settings_path.name} uses settings file format {format_version}, newer than this installer's "
+                f"({SETTINGS_FILE_FORMAT_VERSION}); some settings may not be read correctly"
+            )
+
+        # The "configuration" section takes precedence over the .env backup in the "raw" section,
+        #   which fills in anything the configuration section doesn't have (e.g., settings that an
+        #   older installer didn't export). Both are loaded together so the dependency rules run once.
+        with self.malcolm_config.bulk_load():
+            configuration_section = settings_data.get("configuration", {})
+            if isinstance(configuration_section, dict):
+                missing_items["missing_configuration"] = self._load_configuration_section(
+                    configuration_section, settings_path.name
+                )
+            raw_section = settings_data.get("raw", {})
+            if isinstance(raw_section, dict) and raw_section:
+                self._load_raw_section(raw_section)
 
         # process installation section
         if not config_only:
@@ -233,30 +254,28 @@ class SettingsFileHandler:
         except Exception as e:
             raise FileOperationError(f"Failed to parse settings file {settings_path}: {e}")
 
-    def _load_configuration_section(self, configuration_section: Dict[str, Any]) -> List[str]:
-        """Load configuration section and apply to MalcolmConfig.
+    def _load_configuration_section(self, configuration_section: Dict[str, Any], file_name: str = "") -> List[str]:
+        """Load configuration section and apply to MalcolmConfig (inside a bulk_load).
 
         Args:
             configuration_section: Configuration settings from file
+            file_name: Settings file name, for the log
 
         Returns:
             List of configuration keys that were missing and used defaults
         """
         missing_configuration = []
 
-        # apply settings to MalcolmConfig
+        # apply settings to MalcolmConfig (normalization and validation are done by MalcolmConfig)
         for key, value in configuration_section.items():
             if self.malcolm_config.get_item(key) is not None:
-                try:
-                    # Skip sentinel values (leave as default None/empty)
-                    if value == CONFIG_ITEM_NONE_SENTINEL:
-                        InstallerLogger.debug(f"Skipping configuration item {key} (sentinel value)")
-                        continue
-                    # delegate normalization and validation to MalcolmConfig
-                    self.malcolm_config.apply_default(key, value)
-                    InstallerLogger.debug(f"Set configuration item {key} = {value}")
-                except Exception as e:
-                    InstallerLogger.warning(f"Failed to set configuration item {key}: {e}")
+                # the sentinel means the exported value was empty, i.e., the item's default
+                self.malcolm_config.load_value(
+                    key,
+                    USE_DEFAULT if value == CONFIG_ITEM_NONE_SENTINEL else value,
+                    LoadSource.SETTINGS_FILE,
+                    detail=file_name,
+                )
             else:
                 InstallerLogger.warning(f"Unknown configuration item in settings file: {key}")
 
@@ -269,6 +288,16 @@ class SettingsFileHandler:
                 )
 
         return missing_configuration
+
+    def _load_raw_section(self, raw_section: Dict[str, Any]) -> None:
+        """Load the .env files backed up in the "raw" section (inside a bulk_load).
+
+        These have lower precedence than the "configuration" section, so they only fill in items
+        it doesn't cover.
+        """
+        with tempfile.TemporaryDirectory(prefix="malcolm-raw-env-") as raw_dir:
+            if base64_decode_files_to_dir(raw_section, raw_dir, "*.env"):
+                self.malcolm_config.load_from_env_files(raw_dir, source=LoadSource.SETTINGS_FILE_RAW)
 
     def _load_installation_section(self, installation_section: Dict[str, Any]) -> List[str]:
         """Load installation section and apply to InstallContext.
@@ -320,12 +349,18 @@ class SettingsFileHandler:
                 "generated_by": "Malcolm Installer",
                 "timestamp": datetime.datetime.now().isoformat(),
                 "version": CONFIG_FILE_VERSION,
+                "format_version": SETTINGS_FILE_FORMAT_VERSION,
             },
         }
 
         # add ALL configuration items from MalcolmConfig.items dictionary
         for key, item in self.malcolm_config.get_all_config_items().items():
             value = item.get_value()
+
+            # a blank the user chose is a real value for items that accept blanks
+            if item.accept_blank and isinstance(value, str) and value == "":
+                settings_data["configuration"][key] = value
+                continue
 
             # if current value is None/empty but default_value is valid, use the default
             if (value is None or (isinstance(value, str) and value == "")) and (
