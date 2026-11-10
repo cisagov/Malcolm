@@ -609,3 +609,32 @@ def test_imported_threshold_without_index_cleanup_does_not_prune(tmp_path):
     env_dir.mkdir()
     imported.generate_env_files(str(env_dir))
     assert _written_prune_limit(env_dir) == "0"
+
+
+# ---------------------------------------------------------------------------------------------
+# the debug log of loaded values
+
+
+def test_load_log_says_when_rules_changed_a_loaded_value(tmp_path):
+    export_settings(MalcolmConfig(), tmp_path / "settings.json")
+    settings = json.loads((tmp_path / "settings.json").read_text())
+    settings["configuration"][KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS] = False  # derived from the next line
+    settings["configuration"][KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP] = True
+    settings["configuration"][KEY_CONFIG_ITEM_MALCOLM_PROFILE] = PROFILE_MALCOLM
+    settings["configuration"][KEY_CONFIG_ITEM_LOGSTASH_HOST] = "10.1.1.1:5044"  # Malcolm always uses its own
+    (tmp_path / "settings.json").write_text(json.dumps(settings))
+
+    with mock.patch.object(InstallerLogger, "debug") as debug:
+        import_settings(tmp_path / "settings.json")
+    lines = {str(c.args[0]).split(" = ")[0].removeprefix("Loaded "): str(c.args[0]) for c in debug.call_args_list}
+
+    assert lines[KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS] == (
+        f'Loaded {KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS} = "True" (recomputed; settings file (settings.json) had "False")'
+    )
+    assert lines[KEY_CONFIG_ITEM_LOGSTASH_HOST] == (
+        f'Loaded {KEY_CONFIG_ITEM_LOGSTASH_HOST} = "{LOCAL_LOGSTASH_HOST}" '
+        '(changed by a dependency rule; settings file (settings.json) had "10.1.1.1:5044")'
+    )
+    assert lines[KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP] == (
+        f'Loaded {KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP} = "True" from settings file (settings.json)'
+    )

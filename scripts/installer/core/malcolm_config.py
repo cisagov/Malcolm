@@ -170,6 +170,7 @@ class MalcolmConfig(ObservableStoreMixin):
         # load state (see bulk_load and load_value)
         self._load_depth = 0  # > 0 while inside bulk_load()
         self._loaded_from: Dict[str, Tuple[LoadSource, str]] = {}  # key -> (source, detail) of the winning value
+        self._loaded_values: Dict[str, Any] = {}  # key -> the winning value as loaded, before any rules ran
         self._loaded_keys: Set[str] = set()  # keys whose loaded value is protected from value rules
         self._load_issues: Dict[str, LoadIssue] = {}  # key -> problem with a value that couldn't be used
 
@@ -414,6 +415,7 @@ class MalcolmConfig(ObservableStoreMixin):
         self._store_without_modifying(item, value)
 
         self._loaded_from[key] = (source, detail)
+        self._loaded_values[key] = item.get_value()
         if not self._dependency_manager.has_derived_rule(key):
             # values with a DERIVED rule are recomputed from their inputs rather than protected
             self._loaded_keys.add(key)
@@ -470,13 +472,25 @@ class MalcolmConfig(ObservableStoreMixin):
         return f"{source.label} ({detail})" if detail else source.label
 
     def _log_loaded_values(self) -> None:
-        """Log where each loaded value came from (debug level)."""
+        """Log each loaded setting's value and where it came from (debug level).
+
+        If the dependency rules changed a value after it was loaded, the line says so and shows
+        what the source had, since the final value didn't come from that source.
+        """
         for key in sorted(self._loaded_from):
             source, detail = self._loaded_from[key]
-            InstallerLogger.debug(
-                f'Loaded {key} = "{self.loggable_value(key, self.get_value(key))}" '
-                f'from {self._describe_source(source, detail)}'
-            )
+            final_value = self.get_value(key)
+            loaded_value = self._loaded_values.get(key)
+            line = f'Loaded {key} = "{self.loggable_value(key, final_value)}"'
+            if final_value != loaded_value:
+                how = "recomputed" if self._dependency_manager.has_derived_rule(key) else "changed by a dependency rule"
+                line += (
+                    f' ({how}; {self._describe_source(source, detail)} '
+                    f'had "{self.loggable_value(key, loaded_value)}")'
+                )
+            else:
+                line += f" from {self._describe_source(source, detail)}"
+            InstallerLogger.debug(line)
 
     def set_value(
         self,
