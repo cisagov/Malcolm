@@ -19,7 +19,8 @@ from unittest import mock
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+if (_repo_root := str(Path(__file__).resolve().parents[3])) not in sys.path:
+    sys.path.append(_repo_root)
 
 from scripts.malcolm_common import SYSTEM_INFO
 from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM, OrchestrationFramework

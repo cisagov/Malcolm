@@ -15,7 +15,7 @@ import unittest
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.actions.shared import update_compose_files
-from scripts.installer.tests.mock.test_framework import MockPlatform
+from installer_mocks import MockPlatform
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,

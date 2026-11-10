@@ -13,15 +13,15 @@ import unittest
 
 # Add the project root directory to the Python path
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
+project_root = os.path.abspath(os.path.join(script_dir, "..", "..", ".."))
 if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+    sys.path.append(project_root)
 
 from scripts.malcolm_common import DumpYaml, LoadYaml
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.actions.shared import update_compose_files
 from scripts.installer.core.install_context import InstallContext
-from scripts.installer.tests.mock.test_framework import MockPlatform
+from installer_mocks import MockPlatform
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
@@ -33,7 +33,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
 )
-from scripts.installer.tests.mock.test_framework import BaseInstallerTest
+from installer_mocks import BaseInstallerTest
 
 
 class TestDockerComposeIntegration(BaseInstallerTest):
