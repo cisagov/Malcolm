@@ -264,8 +264,9 @@ class DependencyManager:
                     if self.config.is_loaded(item_key):
                         # only an INVARIANT rule can get here for a loaded value
                         InstallerLogger.warning(
-                            f'Loaded value "{old_val}" for {item_key} conflicts with other settings; '
-                            f'using "{self.config.get_value(item_key)}"'
+                            f'Loaded value "{self.config.loggable_value(item_key, old_val)}" for {item_key} '
+                            f'conflicts with other settings; '
+                            f'using "{self.config.loggable_value(item_key, self.config.get_value(item_key))}"'
                         )
             if not changed:
                 return

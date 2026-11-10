@@ -386,7 +386,7 @@ def test_failed_save_leaves_existing_files_untouched(tmp_path):
             write_configuration_files(cfg, str(out_dir))
 
     assert {p.name: p.read_bytes() for p in out_dir.glob("*.env")} == before
-    assert not [p for p in tmp_path.iterdir() if "staging" in p.name]
+    assert not [p for p in out_dir.iterdir() if "staging" in p.name]
 
 
 def test_save_writes_configuration_raw_backup_and_extras(tmp_path):
@@ -414,6 +414,7 @@ def test_save_writes_configuration_raw_backup_and_extras(tmp_path):
     reloaded = MalcolmConfig()
     reloaded.load_from_env_files(str(out_dir))
     assert reloaded.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME) is False
+    assert not [p for p in out_dir.iterdir() if "staging" in p.name]
 
 
 def test_raw_restore_prefers_the_backup_for_variables_in_both(tmp_path):
@@ -458,3 +459,114 @@ def test_generated_env_files_end_with_a_newline(tmp_path):
     assert env_files
     for env_file in env_files:
         assert env_file.read_bytes().endswith(b"\n"), env_file.name
+
+
+# ---------------------------------------------------------------------------------------------
+# found reviewing the changes as a whole
+
+
+def test_malformed_value_is_a_load_issue_not_a_failed_load():
+    cfg = MalcolmConfig()
+    with cfg.bulk_load():
+        # a list where a string belongs makes this item's validator raise TypeError
+        cfg.load_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE, ["opensearch-local"], LoadSource.SETTINGS_FILE)
+    assert KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE in cfg.get_load_issues()
+
+
+def test_hidden_loaded_values_are_not_protected(tmp_path):
+    # .env files hold every setting; one hidden because it doesn't apply wasn't chosen by anyone
+    loaded = env_round_trip(MalcolmConfig(), tmp_path)  # live capture off, so the capture engines are hidden
+    assert not loaded.is_item_visible(KEY_CONFIG_ITEM_PCAP_NETSNIFF)
+    assert not loaded.is_loaded(KEY_CONFIG_ITEM_PCAP_NETSNIFF)
+    assert loaded.is_loaded(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
+
+
+def test_enabling_live_capture_after_load_picks_the_same_defaults_as_a_fresh_session(tmp_path):
+    for profile_settings in ({}, {KEY_CONFIG_ITEM_MALCOLM_PROFILE: PROFILE_HEDGEHOG}):
+        saved = MalcolmConfig()
+        for key, value in profile_settings.items():
+            saved.set_value(key, value)
+        fresh = MalcolmConfig()
+        for key, value in profile_settings.items():
+            fresh.set_value(key, value)
+        loaded = env_round_trip(saved, tmp_path / str(len(profile_settings)))
+
+        fresh.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True)
+        loaded.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True)
+        for key in (
+            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+            KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+            KEY_CONFIG_ITEM_LIVE_ARKIME,
+            KEY_CONFIG_ITEM_CAPTURE_STATS,
+        ):
+            assert loaded.get_value(key) == fresh.get_value(key), (profile_settings, key)
+
+
+def test_switching_an_existing_malcolm_to_hedgehog_stops_using_local_opensearch(tmp_path):
+    loaded = env_round_trip(MalcolmConfig(), tmp_path)
+    assert loaded.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) == "opensearch-local"
+    loaded.set_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE, PROFILE_HEDGEHOG)
+    assert loaded.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) == "opensearch-remote"
+
+
+def test_hedgehog_keeps_remote_elasticsearch():
+    cfg = MalcolmConfig()
+    cfg.set_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE, PROFILE_HEDGEHOG)
+    cfg.set_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE, "elasticsearch-remote")
+    assert cfg.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) == "elasticsearch-remote"
+
+
+def test_password_values_are_masked_in_load_messages():
+    cfg = MalcolmConfig()
+    cfg.get_item(KEY_CONFIG_ITEM_OS_MEMORY).is_password = True  # no item is a password today; pretend
+    with mock.patch.object(InstallerLogger, "debug") as debug:
+        with cfg.bulk_load():
+            cfg.load_value(KEY_CONFIG_ITEM_OS_MEMORY, "hunter2", LoadSource.ENV_FILES)
+            cfg.load_value(KEY_CONFIG_ITEM_LS_MEMORY, "4g", LoadSource.ENV_FILES)
+    assert "hunter2" not in cfg.get_load_issues()[KEY_CONFIG_ITEM_OS_MEMORY].message
+    assert not any("hunter2" in str(call.args[0]) for call in debug.call_args_list)
+
+
+# ---------------------------------------------------------------------------------------------
+# OT/ICS analysis (#949 reported the ICS setting resetting; pin down that it round-trips)
+
+
+@pytest.mark.parametrize("profile", [PROFILE_MALCOLM, PROFILE_HEDGEHOG])
+@pytest.mark.parametrize("ics, best_guess", [(True, True), (True, False), (False, True), (False, False)])
+def test_ics_settings_survive_env_files_and_settings_file(tmp_path, profile, ics, best_guess):
+    cfg = MalcolmConfig()
+    cfg.set_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE, profile)
+    cfg.set_value(KEY_CONFIG_ITEM_MALCOLM_ICS, ics)
+    cfg.set_value(KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS, best_guess)
+
+    loaded = env_round_trip(cfg, tmp_path / "config")
+    assert loaded.get_value(KEY_CONFIG_ITEM_MALCOLM_ICS) is ics
+    assert loaded.get_value(KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS) is best_guess
+
+    export_settings(cfg, tmp_path / "settings.json")
+    imported = import_settings(tmp_path / "settings.json")
+    assert imported.get_value(KEY_CONFIG_ITEM_MALCOLM_ICS) is ics
+    assert imported.get_value(KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS) is best_guess
+
+
+def test_per_protocol_ics_switches_edited_by_hand_survive_a_save(tmp_path):
+    # the per-protocol ZEEK_DISABLE_ICS_* variables aren't installer settings, so a save leaves them be
+    MalcolmConfig().generate_env_files(str(tmp_path))
+    zeek_env = tmp_path / "zeek.env"
+    text = zeek_env.read_text()
+    assert "ZEEK_DISABLE_ICS_MODBUS=\n" in text and "ZEEK_DISABLE_ICS_GENISYS=true\n" in text
+    zeek_env.write_text(
+        text.replace("ZEEK_DISABLE_ICS_MODBUS=\n", "ZEEK_DISABLE_ICS_MODBUS=true\n").replace(
+            "ZEEK_DISABLE_ICS_GENISYS=true\n", "ZEEK_DISABLE_ICS_GENISYS=\n"
+        )
+    )
+
+    loaded = MalcolmConfig()
+    loaded.load_from_env_files(str(tmp_path))
+    loaded.set_value(KEY_CONFIG_ITEM_MALCOLM_ICS, False)
+    loaded.set_value(KEY_CONFIG_ITEM_MALCOLM_ICS, True)
+    write_configuration_files(loaded, str(tmp_path))
+
+    lines = zeek_env.read_text().splitlines()
+    assert "ZEEK_DISABLE_ICS_MODBUS=true" in lines
+    assert "ZEEK_DISABLE_ICS_GENISYS=" in lines

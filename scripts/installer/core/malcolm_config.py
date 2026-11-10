@@ -345,6 +345,11 @@ class MalcolmConfig(ObservableStoreMixin):
                 #   don't set off the normal observers (which would let cascades overwrite loaded values)
                 try:
                     self._dependency_manager.refresh_after_load()
+                    # A loaded value only counts as a choice if its setting applies to the loaded configuration.
+                    #   .env files hold every setting, including ones hidden because they don't apply (e.g., the
+                    #   capture engines when live capture is off); those were never chosen, so they go back to
+                    #   following their rules if the user later makes them apply.
+                    self._loaded_keys = {key for key in self._loaded_keys if self.is_item_visible(key)}
                     self._log_loaded_values()
                 finally:
                     self._load_depth = 0
@@ -392,11 +397,16 @@ class MalcolmConfig(ObservableStoreMixin):
         if value is USE_DEFAULT:
             value = None
         else:
-            value = apply_inbound(key, value)
-            valid, error = self._validate_for_item(item, value)
+            try:
+                value = apply_inbound(key, value)
+                valid, error = self._validate_for_item(item, value)
+            except Exception as e:
+                # a validator that can't handle the value's type (e.g., a list where a string belongs)
+                valid, error = False, f"{type(e).__name__}: {e}"
             if not valid:
+                shown = self.loggable_value(key, value)
                 self._record_load_issue(
-                    key, source, f'{self._describe_source(source, detail)}: "{value}" is not valid ({error})'
+                    key, source, f'{self._describe_source(source, detail)}: "{shown}" is not valid ({error})'
                 )
                 return False
 
@@ -449,6 +459,11 @@ class MalcolmConfig(ObservableStoreMixin):
         else:
             item.value = value
 
+    def loggable_value(self, key: str, value: Any) -> Any:
+        """The value as it may appear in a log or message (masked for password items)."""
+        item = self.get_item(key)
+        return "********" if (item and item.is_password and value) else value
+
     @staticmethod
     def _describe_source(source: LoadSource, detail: str = "") -> str:
         """e.g. 'env files (ARKIME_LIVE_CAPTURE)'"""
@@ -459,7 +474,8 @@ class MalcolmConfig(ObservableStoreMixin):
         for key in sorted(self._loaded_from):
             source, detail = self._loaded_from[key]
             InstallerLogger.debug(
-                f'Loaded {key} = "{self.get_value(key)}" from {self._describe_source(source, detail)}'
+                f'Loaded {key} = "{self.loggable_value(key, self.get_value(key))}" '
+                f'from {self._describe_source(source, detail)}'
             )
 
     def set_value(

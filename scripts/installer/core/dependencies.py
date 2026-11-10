@@ -480,16 +480,29 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=True,
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         ),
-        value=ValueRule(
-            kind=RuleKind.CASCADE,
-            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-            condition=True,
-            default_value=lambda profile: (
-                SearchEngineMode.OPENSEARCH_LOCAL.value
-                if (profile == PROFILE_MALCOLM)
-                else SearchEngineMode.OPENSEARCH_REMOTE.value
+        value=[
+            # Hedgehog doesn't run OpenSearch, so it can't use a local one (remote OpenSearch or
+            #   Elasticsearch are both fine)
+            ValueRule(
+                kind=RuleKind.INVARIANT,
+                depends_on=[
+                    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                ],
+                condition=lambda profile, mode: (
+                    (profile != PROFILE_MALCOLM) and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
+                ),
+                default_value=SearchEngineMode.OPENSEARCH_REMOTE.value,
+                only_if_unmodified=False,
             ),
-        ),
+            # the Malcolm profile starts out with its own OpenSearch (remote can be chosen instead)
+            ValueRule(
+                kind=RuleKind.CASCADE,
+                depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                condition=lambda profile: profile == PROFILE_MALCOLM,
+                default_value=SearchEngineMode.OPENSEARCH_LOCAL.value,
+            ),
+        ],
     ),
     KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE: DependencySpec(
         visibility=VisibilityRule(

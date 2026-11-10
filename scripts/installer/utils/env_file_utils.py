@@ -35,11 +35,13 @@ def staged_env_dir(output_dir: str) -> Iterator[str]:
     Yields a staging directory holding copies of the existing .env files in output_dir. When the
     block finishes without an exception, each staged .env file replaces its counterpart in
     output_dir (os.replace, so each file is swapped in whole). If the block raises, output_dir is
-    left exactly as it was. The staging directory sits beside output_dir (on the same filesystem,
-    and outside it so it is never mistaken for configuration) and is always removed.
+    left exactly as it was. The staging directory is a hidden subdirectory of output_dir, so it's
+    always writable and on the same filesystem (os.replace can't cross filesystems), and things that
+    read the configuration (which look for *.env, skipping hidden directories) never see it. It is
+    always removed.
     """
     output_dir = os.path.realpath(output_dir)
-    staging_dir = tempfile.mkdtemp(prefix=f".{os.path.basename(output_dir)}-staging-", dir=os.path.dirname(output_dir))
+    staging_dir = tempfile.mkdtemp(prefix=".staging-", dir=output_dir)
     try:
         for env_file in glob.glob(os.path.join(output_dir, "*.env")):
             shutil.copy2(env_file, staging_dir)  # copy2 keeps the file's permissions
