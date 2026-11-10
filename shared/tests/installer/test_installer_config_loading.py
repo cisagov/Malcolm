@@ -571,3 +571,41 @@ def test_per_protocol_ics_switches_edited_by_hand_survive_a_save(tmp_path):
     lines = zeek_env.read_text().splitlines()
     assert "ZEEK_DISABLE_ICS_MODBUS=true" in lines
     assert "ZEEK_DISABLE_ICS_GENISYS=" in lines
+
+
+# ---------------------------------------------------------------------------------------------
+# index pruning (the prune threshold is the only thing that turns it on)
+
+
+def _written_prune_limit(env_dir) -> str:
+    for line in (env_dir / "dashboards-helper.env").read_text().splitlines():
+        if line.startswith("OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT="):
+            return line.split("=", 1)[1]
+    raise AssertionError("OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT not written")
+
+
+def test_turning_off_index_cleanup_after_load_turns_off_pruning(tmp_path):
+    cfg = MalcolmConfig()
+    cfg.set_value(KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES, True)
+    cfg.set_value(KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD, "500g")
+    loaded = env_round_trip(cfg, tmp_path)
+    assert loaded.get_value(KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES) is True
+    assert _written_prune_limit(tmp_path) == "500g"
+
+    loaded.set_value(KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES, False)
+    loaded.generate_env_files(str(tmp_path))
+    assert _written_prune_limit(tmp_path) == "0"
+
+
+def test_imported_threshold_without_index_cleanup_does_not_prune(tmp_path):
+    export_settings(MalcolmConfig(), tmp_path / "settings.json")
+    settings = json.loads((tmp_path / "settings.json").read_text())
+    settings["configuration"][KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES] = False
+    settings["configuration"][KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD] = "500g"
+    (tmp_path / "settings.json").write_text(json.dumps(settings))
+
+    imported = import_settings(tmp_path / "settings.json")
+    env_dir = tmp_path / "config"
+    env_dir.mkdir()
+    imported.generate_env_files(str(env_dir))
+    assert _written_prune_limit(env_dir) == "0"

@@ -1480,6 +1480,15 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda cleanup: bool(cleanup),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
         ),
+        # The threshold is what turns index pruning on (OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT; "0" means off),
+        #   and "delete old indices" has no variable of its own, so turning cleanup off has to clear it.
+        value=ValueRule(
+            kind=RuleKind.INVARIANT,
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+            condition=lambda cleanup: not bool(cleanup),
+            default_value="",
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT: DependencySpec(
         visibility=VisibilityRule(
