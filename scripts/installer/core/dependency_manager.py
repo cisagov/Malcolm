@@ -5,7 +5,7 @@
 
 """Register and apply configuration dependency rules using observers."""
 
-from typing import Dict, Any, TYPE_CHECKING, Callable
+from typing import Dict, Any, TYPE_CHECKING, Callable, List, Tuple
 
 if TYPE_CHECKING:
     from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -14,9 +14,15 @@ from scripts.installer.core.dependencies import (
     DEPENDENCY_CONFIG,
     DEFAULT_VALUE_UNCHANGED,
     DependencySpec,
+    RuleKind,
     VisibilityRule,
     ValueRule,
 )
+
+# The refresh at the end of a load repeats until no rule changes anything. A handful of passes is
+#   plenty for the current rules (the longest chain of rules feeding each other is short); if this
+#   limit is ever hit, a set of rules is fighting over a value and the log says so.
+MAX_REFRESH_PASSES = 10
 
 # Keep wildcard import for keys per standards
 from scripts.installer.utils.logger_utils import InstallerLogger
@@ -39,6 +45,8 @@ class DependencyManager:
         self.config = malcolm_config
         self._registered_observers = []  # Track for debugging/cleanup
         self._visibility_observers: Dict[str, Callable[[Any], None]] = {}
+        # every (item key, value rule) pair, in registration order, for the end-of-load refresh
+        self._value_rules: List[Tuple[str, ValueRule]] = []
 
     def register_all_dependencies(self):
         """Register all dependency rules defined in the configuration."""
@@ -63,8 +71,8 @@ class DependencyManager:
         if dep_spec.visibility:
             self._register_visibility_rule(item_key, dep_spec.visibility)
 
-        if dep_spec.value:
-            self._register_value_rule(item_key, dep_spec.value)
+        for value_rule in dep_spec.value_rules:
+            self._register_value_rule(item_key, value_rule)
 
     def _register_visibility_rule(self, item_key: str, visibility_rule: VisibilityRule):
         """Register a visibility dependency rule.
@@ -154,63 +162,36 @@ class DependencyManager:
         Args:
             item_key: The target configuration item key
             value_rule: The value rule specification
+
+        Raises:
+            ValueError: If the rule doesn't say what kind of rule it is.
         """
         item = self.config.get_item(item_key)
         if not item:
             InstallerLogger.warning(f"Cannot register value rule for unknown item: {item_key}")
             return
 
-        # Create observer function
+        if not isinstance(value_rule.kind, RuleKind):
+            raise ValueError(f"Value rule for {item_key} must set kind to a RuleKind")
+
+        self._value_rules.append((item_key, value_rule))
+
         def value_observer(_):
-            """Observer function that updates item value when conditions are met."""
+            """Apply the rule after one of the settings it depends on changes."""
             try:
-                # Check if we should only apply to unmodified items
-                if value_rule.only_if_unmodified and item.is_modified:
-                    # InstallerLogger.debug(f"{item_key} is modified, leaving alone")
+                # while a load is in progress, rules wait for refresh_after_load()
+                if self.config.is_loading():
                     return
-
-                if isinstance(value_rule.depends_on, list):
-                    # Multi-dependency: get values for all dependencies
-                    dep_values = [self.config.get_value(dep_key) for dep_key in value_rule.depends_on]
-                else:
-                    # Single dependency
-                    dep_values = self.config.get_value(value_rule.depends_on)
-
-                if callable(value_rule.condition):
-                    if isinstance(dep_values, list):
-                        should_set = value_rule.condition(*dep_values)
-                    else:
-                        should_set = value_rule.condition(dep_values)
-                else:
-                    should_set = bool(value_rule.condition)
-
-                if should_set:
-                    new_val = DEFAULT_VALUE_UNCHANGED
-                    # Compute default value (callable defaults receive dependency values)
+                # a value the user set, in this session or via a load, is left alone unless the rule is forced
+                if value_rule.only_if_unmodified and self.config.is_user_set(item_key):
+                    return
+                new_val = self._compute_rule_value(item_key, value_rule)
+                if new_val is not DEFAULT_VALUE_UNCHANGED:
                     try:
-                        if callable(value_rule.default_value):
-                            if isinstance(dep_values, list):
-                                new_val = value_rule.default_value(*dep_values)
-                            else:
-                                new_val = value_rule.default_value(dep_values)
-                        else:
-                            new_val = value_rule.default_value
+                        self.config.apply_default(item_key, new_val)
                     except Exception as e:
-                        InstallerLogger.error(
-                            f"Default value function for {item_key} ({value_rule.default_value=}, {value_rule.depends_on=}, {new_val=}) raised: {e}"
-                        )
-                        return
-
-                    if new_val is not DEFAULT_VALUE_UNCHANGED:
-                        # InstallerLogger.debug(f"value_rule.condition({item_key}): {new_val}")
-
-                        # Apply via MalcolmConfig API to avoid touching internals
-                        try:
-                            self.config.apply_default(item_key, new_val)
-                        except Exception as e:
-                            # Do not break dependency processing; surface the error
-                            InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
-
+                        # Do not break dependency processing; surface the error
+                        InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
             except Exception as e:
                 InstallerLogger.error(f"Error in value observer for {item_key}: {e}")
 
@@ -225,6 +206,78 @@ class DependencyManager:
 
         # Trigger initial evaluation
         value_observer(None)
+
+    def _compute_rule_value(self, item_key: str, value_rule: ValueRule) -> Any:
+        """Return the value a rule would set right now, or DEFAULT_VALUE_UNCHANGED if it doesn't apply."""
+        if isinstance(value_rule.depends_on, list):
+            dep_values = [self.config.get_value(dep_key) for dep_key in value_rule.depends_on]
+        else:
+            dep_values = [self.config.get_value(value_rule.depends_on)]
+
+        if callable(value_rule.condition):
+            if not value_rule.condition(*dep_values):
+                return DEFAULT_VALUE_UNCHANGED
+        elif not value_rule.condition:
+            return DEFAULT_VALUE_UNCHANGED
+
+        if not callable(value_rule.default_value):
+            return value_rule.default_value
+        try:
+            return value_rule.default_value(*dep_values)
+        except Exception as e:
+            InstallerLogger.error(
+                f"Default value function for {item_key} "
+                f"({value_rule.default_value=}, {value_rule.depends_on=}) raised: {e}"
+            )
+            return DEFAULT_VALUE_UNCHANGED
+
+    def refresh_after_load(self) -> None:
+        """Bring every value rule up to date once a load has finished.
+
+        Rules are paused while values are loaded (see MalcolmConfig.bulk_load) so that one loaded
+        value can't rewrite another partway through. This runs them all afterward, by kind:
+
+        - DERIVED and INVARIANT rules run as they normally would.
+        - CASCADE rules only fill in settings that no source supplied. A loaded value was set on
+          purpose, so a cascade must not replace it just because its parent was loaded too.
+
+        Applying one rule can change the inputs of another, so this repeats until a full pass
+        changes nothing.
+        """
+        for _ in range(MAX_REFRESH_PASSES):
+            changed = False
+            for item_key, value_rule in self._value_rules:
+                protects_user_value = value_rule.only_if_unmodified or (value_rule.kind == RuleKind.CASCADE)
+                if protects_user_value and self.config.is_user_set(item_key):
+                    continue
+                new_val = self._compute_rule_value(item_key, value_rule)
+                if new_val is DEFAULT_VALUE_UNCHANGED:
+                    continue
+                old_val = self.config.get_value(item_key)
+                try:
+                    self.config.apply_default(item_key, new_val)
+                except Exception as e:
+                    InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
+                    continue
+                if self.config.get_value(item_key) != old_val:
+                    changed = True
+                    if self.config.is_loaded(item_key):
+                        # only an INVARIANT rule can get here for a loaded value
+                        InstallerLogger.warning(
+                            f'Loaded value "{self.config.loggable_value(item_key, old_val)}" for {item_key} '
+                            f'conflicts with other settings; '
+                            f'using "{self.config.loggable_value(item_key, self.config.get_value(item_key))}"'
+                        )
+            if not changed:
+                return
+        InstallerLogger.error(
+            f"Configuration rules did not settle after {MAX_REFRESH_PASSES} passes; please report this as a bug"
+        )
+
+    def has_derived_rule(self, item_key: str) -> bool:
+        """True if the item's value is computed from other settings by a DERIVED rule."""
+        spec = DEPENDENCY_CONFIG.get(item_key)
+        return bool(spec) and any(rule.kind == RuleKind.DERIVED for rule in spec.value_rules)
 
     def cleanup(self):
         """Clean up all registered observers."""
@@ -259,8 +312,10 @@ class DependencyManager:
                 info["visibility_depends_on"] = dep_spec.visibility.depends_on
                 info["ui_parent"] = dep_spec.visibility.ui_parent
                 info["is_top_level"] = dep_spec.visibility.is_top_level
-            if dep_spec.value:
+            if value_rules := dep_spec.value_rules:
                 info["has_value_rule"] = True
-                info["value_depends_on"] = dep_spec.value.depends_on
+                info["value_depends_on"] = (
+                    value_rules[0].depends_on if len(value_rules) == 1 else [r.depends_on for r in value_rules]
+                )
 
         return info

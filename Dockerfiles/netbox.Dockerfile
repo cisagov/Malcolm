@@ -29,7 +29,7 @@ ENV NETBOX_INITIALIZERS_VERSION="v4.6.2"
 ENV NETBOX_TOPOLOGY_VERSION="4.5.1"
 ENV NETBOX_HEALTHCHECK_VERSION="0.3.0"
 
-ENV YQ_VERSION="4.54.2"
+ENV YQ_VERSION="4.54.3"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV JQ_VERSION="1.8.2"
@@ -136,6 +136,13 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# make certifi use the system store (populated from /var/local/ca-trust on startup)
+RUN for PY in python3 "${NETBOX_PATH}/venv/bin/python"; do \
+      command -v "$PY" >/dev/null 2>&1 || continue; \
+      CERTIFI_PEM="$("$PY" -c 'import certifi; print(certifi.where())' 2>/dev/null)" || continue; \
+      [ -n "$CERTIFI_PEM" ] && ln -sf /etc/ssl/certs/ca-certificates.crt "$CERTIFI_PEM"; \
+    done
 
 COPY --from=ghcr.io/mmguero-dev/gostatic:latest@sha256:cba944f026b430ba5db45f563b32b0ad849703ae5996d3a30ce5deffd1ef9112 --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

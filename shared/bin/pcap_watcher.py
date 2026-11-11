@@ -34,25 +34,27 @@ from pcap_utils import (
     PCAP_TOPIC_PORT,
     tags_from_filename,
 )
-import malcolm_utils
 from malcolm_utils import (
-    str2bool,
+    AtomicInt,
+    DatabaseModeEnumToStr,
+    DatabaseModeStrToEnum,
+    get_verbosity_env_var_count,
     ParseCurlFile,
     remove_prefix,
     set_logging,
     sizeof_fmt,
-    get_verbosity_env_var_count,
-    touch,
+    str2bool,
 )
+
 from malcolm_constants import DatabaseMode
 import watch_common
 
-from collections import defaultdict
 from multiprocessing.pool import ThreadPool
 
 from urllib.parse import urlparse
 from urllib3.exceptions import NewConnectionError
 
+from watchdog.events import FileCreatedEvent
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.utils import WatchdogShutdownError
@@ -94,7 +96,7 @@ DatabaseClass, DatabaseInitArgs, SearchClass, ConnectionError, ConnectionTimeout
 #   error would escape the handler and cost us the capture.
 def database_mode_str(mode):
     try:
-        return malcolm_utils.DatabaseModeEnumToStr(mode) or str(mode)
+        return DatabaseModeEnumToStr(mode) or str(mode)
     except Exception:
         return str(mode)
 
@@ -127,7 +129,9 @@ class EventWatcher:
             while (not connected) and (not shuttingDown[0]):
                 try:
                     try:
-                        self.logger.info(f"{scriptName}:\tconnecting to {database_mode_str(args.opensearchMode)} {args.opensearchUrl}...")
+                        self.logger.info(
+                            f"{scriptName}:\tconnecting to {database_mode_str(args.opensearchMode)} {args.opensearchUrl}..."
+                        )
                         self.openSearchClient = DatabaseClass(
                             hosts=[args.opensearchUrl],
                             **DatabaseInitArgs,
@@ -152,7 +156,9 @@ class EventWatcher:
                         NewConnectionError,
                         AuthenticationException,
                     ) as connError:
-                        self.logger.critical(f"{scriptName}:\t{database_mode_str(args.opensearchMode)} connection error: {connError}")
+                        self.logger.critical(
+                            f"{scriptName}:\t{database_mode_str(args.opensearchMode)} connection error: {connError}"
+                        )
 
                 except Exception as genericError:
                     self.logger.critical(
@@ -169,7 +175,9 @@ class EventWatcher:
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
             while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown[0]):
                 try:
-                    self.logger.info(f"{scriptName}:\twaiting for {database_mode_str(args.opensearchMode)} to be healthy")
+                    self.logger.info(
+                        f"{scriptName}:\twaiting for {database_mode_str(args.opensearchMode)} to be healthy"
+                    )
                     self.openSearchClient.cluster.health(
                         index=ARKIME_FILES_INDEX,
                         wait_for_status='yellow',
@@ -184,7 +192,9 @@ class EventWatcher:
                     NewConnectionError,
                     AuthenticationException,
                 ) as connError:
-                    self.logger.debug(f"{scriptName}:\t{database_mode_str(args.opensearchMode)} health check: {connError}")
+                    self.logger.debug(
+                        f"{scriptName}:\t{database_mode_str(args.opensearchMode)} health check: {connError}"
+                    )
 
                 if not healthy:
                     time.sleep(1)
@@ -364,12 +374,12 @@ def main():
         '--opensearch-mode',
         dest='opensearchMode',
         help="Malcolm data store mode ('opensearch-local', 'opensearch-remote', 'elasticsearch-remote')",
-        type=malcolm_utils.DatabaseModeStrToEnum,
+        type=DatabaseModeStrToEnum,
         metavar='<STR>',
-        default=malcolm_utils.DatabaseModeStrToEnum(
+        default=DatabaseModeStrToEnum(
             os.getenv(
                 'OPENSEARCH_PRIMARY',
-                default=malcolm_utils.DatabaseModeEnumToStr(DatabaseMode.OpenSearchLocal),
+                default=DatabaseModeEnumToStr(DatabaseMode.OpenSearchLocal),
             )
         ),
         required=False,
@@ -558,20 +568,21 @@ def main():
     try:
         time.sleep(2)
 
-        # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
+        # if there are any previously included files (and not ignoreExisting), queue them in the
+        #   handler as if they'd just appeared, so they're processed the same way under inotify and polling
         if preexistingDir and (not args.ignoreExisting) and (not shuttingDown[0]):
-            filesTouched = 0
+            filesQueued = 0
             for watchDir in watchDirs:
                 for preexistingFile in [
-                    os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()
+                    os.path.join(watchDir, x.name) for x in pathlib.Path(watchDir).iterdir() if x.is_file()
                 ]:
-                    touch(preexistingFile)
-                    filesTouched += 1
-            if filesTouched > 0:
-                logging.info(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
+                    handler.on_any_event(FileCreatedEvent(preexistingFile))
+                    filesQueued += 1
+            if filesQueued > 0:
+                logging.info(f"{scriptName}:\tfound {filesQueued} preexisting files to check")
 
         # start the thread to actually handle the files as they're queued by the FileOperationEventHandler handler
-        workerThreadCount = malcolm_utils.AtomicInt(value=0)
+        workerThreadCount = AtomicInt(value=0)
         ThreadPool(
             1,
             watch_common.ProcessFileEventWorker(

@@ -362,7 +362,27 @@ def validate_required(malcolm_config) -> List[ValidationIssue]:
     except Exception as e:
         InstallerLogger.error(f"Error validating configuration (_validate_old_artifact_cleanup): {e}")
 
+    # 8) values from a loaded configuration that couldn't be used
+    try:
+        _validate_load_issues(malcolm_config, add_issue)
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_load_issues): {e}")
+
     return issues
+
+
+def _validate_load_issues(malcolm_config, add_issue) -> None:
+    """Report values from a loaded source (settings file, .env files, etc.) that were invalid.
+
+    The installer kept another value for these instead, so the user should look at them before
+    saving. Setting the value clears the issue. Settings that are hidden for the current
+    configuration aren't used by it and can't be reached in the menus, so those are only logged.
+    """
+    for key, issue in malcolm_config.get_load_issues().items():
+        if malcolm_config.is_item_visible(key):
+            add_issue(key, f"the loaded value couldn't be used ({issue.message}); set it to continue")
+        else:
+            InstallerLogger.warning(f"Ignoring unusable loaded value for hidden setting {key}: {issue.message}")
 
 
 def format_validation_summary(issues: List[ValidationIssue]) -> str:
@@ -370,7 +390,7 @@ def format_validation_summary(issues: List[ValidationIssue]) -> str:
     if not issues:
         return ""
     lines = [
-        "Some required settings are missing:",
+        "Some settings are missing or invalid:",
     ]
     for issue in issues:
         lines.append(f"- {issue.label}: {issue.message}")

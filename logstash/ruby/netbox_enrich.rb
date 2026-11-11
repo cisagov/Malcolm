@@ -13,6 +13,11 @@ require 'yaml'
 require 'uri'
 require 'stringex_lite'
 
+# shared TLS trust store (see malcolm_ca_trust.rb); it sits next to this script both in the
+#   image and in the source tree, with the image path as a fallback in case __dir__ is unset
+_malcolm_ca_trust_rb = [__dir__, '/usr/share/logstash/malcolm-ruby'].compact.map { |d| File.join(d, 'malcolm_ca_trust.rb') }.find { |f| File.file?(f) }
+require(_malcolm_ca_trust_rb || 'malcolm_ca_trust')
+
 ##############################################################################################
 # Despite the warning against global variables, we are using them here in order to make sure that
 #   we don't have duplicate caches for things across different clones of the filter,
@@ -110,8 +115,11 @@ class NetBoxConnLazy
     # Faraday leaves TLS verification on by default (its net_http adapter defers to Net::HTTP,
     #   which applies OpenSSL VERIFY_PEER). @sslVerify is based on NETBOX_SSL_CERTIFICATE_VERIFICATION,
     #   so pass the option through rather than relying on the default either way --
-    #   being explicit keeps the intent readable.
-    @object = Faraday.new(@url, :ssl => { :verify => @sslVerify }) do |conn|
+    #   being explicit keeps the intent readable. When verifying, hand Faraday a store that
+    #   includes the CAs from PUSER_CA_TRUST rather than relying on jruby-openssl's default paths.
+    sslOptions = { :verify => @sslVerify }
+    sslOptions[:cert_store] = MalcolmCaTrust.cert_store if @sslVerify
+    @object = Faraday.new(@url, :ssl => sslOptions) do |conn|
       conn.request :authorization, 'Token', @token
       conn.request :url_encoded
       conn.response :json, :parser_options => { :symbolize_names => true }

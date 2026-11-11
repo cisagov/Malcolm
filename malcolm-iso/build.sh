@@ -204,7 +204,7 @@ PYCODE
   cp ./.envrc.example "$MALCOLM_DEST_DIR/.envrc.example"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp -r ./scripts/installer/ "$MALCOLM_DEST_DIR/scripts/"
-  rm -rf "$MALCOLM_DEST_DIR/scripts/installer/tests" "$MALCOLM_DEST_DIR/scripts/installer/ui/gui"
+  rm -rf "$MALCOLM_DEST_DIR/shared/tests" "$MALCOLM_DEST_DIR/scripts/installer/ui/gui"
   cp ./scripts/tx-rx-secure.sh "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1

@@ -15,7 +15,7 @@ import unittest
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.actions.shared import update_compose_files
-from scripts.installer.tests.mock.test_framework import MockPlatform
+from installer_mocks import MockPlatform
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
@@ -24,8 +24,10 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
     KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
+    KEY_CONFIG_ITEM_OPEN_PORTS,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
 )
+from scripts.installer.configs.constants.enums import OpenPortsChoices
 from scripts.malcolm_constants import DatabaseMode, DATABASE_MODE_LABELS
 from scripts.malcolm_common import YAMLDynamic
 
@@ -66,6 +68,8 @@ class TestTraefikLabels(unittest.TestCase):
 
     def test_labels_enabled_with_required_fields(self):
         # arrange
+        # OpenSearch can only be exposed on its own with "Customize" (with the default "No", it isn't)
+        self.cfg.set_value(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE.value)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_HOST, "malcolm.example.org")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org")

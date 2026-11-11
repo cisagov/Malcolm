@@ -26,6 +26,15 @@ if type suricata-update >/dev/null 2>&1; then
     UPDATE_IGNORE='with same revision, keeping the first rule seen'
   fi
 
+  # offline mode rebuilds the ruleset from the cached sources in the data directory
+  # without touching the network (used to apply disable.conf etc. when updates are off)
+  if [[ "${SURICATA_UPDATE_OFFLINE:-"false"}" == "true" ]]; then
+    OFFLINE_FLAG="--offline"
+    SURICATA_UPDATE_SOURCES="false"
+  else
+    OFFLINE_FLAG=
+  fi
+
   [[ "${SURICATA_UPDATE_SOURCES:-"true"}" == "true" ]] && \
     suricata-update update-sources \
       $DEBUG_FLAG \
@@ -70,11 +79,12 @@ if type suricata-update >/dev/null 2>&1; then
 
   suricata-update update \
     $DEBUG_FLAG \
+    $OFFLINE_FLAG \
     --suricata /usr/bin/suricata-offline \
     --data-dir "${SURICATA_MANAGED_DIR:-/var/lib/suricata}" \
     --config "${SURICATA_UPDATE_CONFIG_FILE:-/etc/suricata/update.yaml}" \
     --suricata-conf "${SURICATA_CONFIG_FILE:-/etc/suricata/suricata.yaml}" \
-    --fail 2>&1 | grep $UPDATE_IGNORE_FLAG "$UPDATE_IGNORE"
+    --fail 2>&1 | { grep $UPDATE_IGNORE_FLAG "$UPDATE_IGNORE" || true; }
 
 
     SURICATA_RUN_DIR="${SURICATA_RUN_DIR:-}"

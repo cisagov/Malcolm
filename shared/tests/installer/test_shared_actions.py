@@ -11,10 +11,12 @@ import unittest
 from unittest.mock import patch
 
 # Add the project root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+_repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if _repo_root not in sys.path:
+    sys.path.append(_repo_root)
 
 from scripts.installer.configs.constants.enums import InstallerResult
-from scripts.installer.tests.mock.test_framework import BaseInstallerTest
+from installer_mocks import BaseInstallerTest
 
 
 class TestPlatformDockerInstall(BaseInstallerTest):

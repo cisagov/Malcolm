@@ -10,15 +10,24 @@ from malcolm_utils import AtomicInt, ContextLockedOrderedDict
 
 from watchdog.events import (
     EVENT_TYPE_OPENED,
-    FileSystemEventHandler,
-    FileMovedEvent,
-    FileModifiedEvent,
-    FileCreatedEvent,
     FileClosedEvent,
-    FileOpenedEvent,
-    FileDeletedEvent,
     FileClosedNoWriteEvent,
+    FileCreatedEvent,
+    FileDeletedEvent,
+    FileModifiedEvent,
+    FileMovedEvent,
+    FileOpenedEvent,
+    FileSystemEventHandler,
 )
+
+try:
+    from watchdog.events import DirAttribEvent, FileAttribEvent
+
+    ATTRIB_EVENT_TYPES = (FileAttribEvent, DirAttribEvent)
+except ImportError:
+    # watchdog < 7 (e.g., the filebeat image on Python 3.9) has no attrib events and reports
+    #   metadata-only changes as FileModifiedEvent, which the size comparison below handles
+    ATTRIB_EVENT_TYPES = ()
 
 from multiprocessing.pool import ThreadPool
 from threading import get_native_id
@@ -52,13 +61,13 @@ class FileOperationEventHandler(FileSystemEventHandler):
         # In self.deck itself, items at the first (idx=0) of this OrderedDict are the
         #   oldest, items at the last (idx=len-1) are the newest.
         self.deck = ContextLockedOrderedDict()
-        # because of the pain in the butt that is the fact that we get the modify events
-        #   on attributes-only changes (see below where I set fSize), if events show up
-        #   for files and we've ONLY seen open and/or attribute-only modify events (i.e.,
-        #   the size doesn't change) then we're just going to hold on to them here in
-        #   self.modDeck until we promote them to self.deck for processing.
-        #   Once gorakhargosh/watchdog#800 is pulled (resolving gorakhargosh/watchdog#260)
-        #   we can get rid of this complication and just ignore attribute-only events.
+        # Files we've only seen opened, or modified without a size change, wait in
+        #   self.modDeck until something shows they're being written, and are then
+        #   promoted to self.deck for processing. Under inotify, watchdog 7+ reports
+        #   metadata-only changes as attrib events (dropped in on_any_event), so a
+        #   modified event means a real write. The polling observer still reports a
+        #   utime as "modified" because the mtime changed, which is why the size
+        #   comparison below stays.
         self.modDeck = OrderedDict()
 
     def done(self):
@@ -94,6 +103,12 @@ class FileOperationEventHandler(FileSystemEventHandler):
 
     def on_any_event(self, event):
         fName = None
+        # watchdog 7+ reports metadata-only changes (chmod, chown, utime, xattr) as
+        # FileAttribEvent/DirAttribEvent; they can't change content, so ignore them.
+        # with watchdog 6, ATTRIB_EVENT_TYPES is empty so the size-comparison check
+        # handles it and ignores them instead.
+        if isinstance(event, ATTRIB_EVENT_TYPES):
+            return
         if isinstance(event, FileClosedNoWriteEvent):
             self.cancel_read_open(event)
             return
@@ -110,13 +125,10 @@ class FileOperationEventHandler(FileSystemEventHandler):
                 fNameOld = None
                 self.logger.debug(f"🗲\t{event.event_type: <10}\t{event.src_path}\t{self.workerPid}")
 
-            # This is a pain, but due to this watchdog issue (see
-            # https://github.com/gorakhargosh/watchdog/issues/260 and
-            # https://github.com/gorakhargosh/watchdog/pull/800)
-            # we get FileModifiedEvent triggered for metadata-only changes
-            # even if content has not changed (e.g., file access time).
-            # So for now, if we detect a file has been modified but the size
-            # hasn't changed, we will ignore that event.
+            # The polling observer reports any mtime change (touch, utime) as a
+            # FileModifiedEvent even when the content hasn't changed, so a modified
+            # event that leaves the size unchanged is ignored. Under inotify that
+            # only happens for a same-length rewrite in place, treated the same way.
             try:
                 fSize = os.path.getsize(fName)
             except Exception:
@@ -200,7 +212,11 @@ class FileOperationEventHandler(FileSystemEventHandler):
                             # first event was "opened" could never be promoted by a "modified" event.
                             deckInserted = self.modDeck
                             staged = self.modDeck[fName]
-                            if staged and (staged[-1].operation == event.event_type) and (not isinstance(event, FileOpenedEvent)):
+                            if (
+                                staged
+                                and (staged[-1].operation == event.event_type)
+                                and (not isinstance(event, FileOpenedEvent))
+                            ):
                                 staged[-1] = newOpLog
                             else:
                                 staged.append(newOpLog)

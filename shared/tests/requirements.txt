@@ -40,7 +40,13 @@ opensearch-py==3.2.0
 python-magic==0.4.27
 pyzmq==27.1.0
 requests==2.33.1
-watchdog==6.0.0
+watchdog==7.1.0
 
 # archive extraction (filebeat/requirements.txt)
 libarchive-c==5.3
+
+# installer (scripts/install.py and scripts/installer/; shared/tests/installer)
+colorama==0.4.6
+distro==1.9.0
+python-dotenv==1.2.4
+ruamel.yaml==0.19.1

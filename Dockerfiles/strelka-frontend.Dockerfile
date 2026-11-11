@@ -21,7 +21,7 @@ USER root
 
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.54.2"
+ENV YQ_VERSION="4.54.3"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV JQ_VERSION="1.8.2"

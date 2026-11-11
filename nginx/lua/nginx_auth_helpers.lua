@@ -74,11 +74,20 @@ local path_role_envs = {
         "ROLE_UPLOAD"
     }},
 
-    -- NetBox
-    { pattern = "^/netbox", roles = {
+    -- NetBox (UI and API under /netbox, and the API passthrough at /mapi/netbox,
+    --   which nginx proxies straight to NetBox without going through the Malcolm API)
+    { pattern = "^/(mapi/)?netbox", roles = {
         "ROLE_ADMIN",
         "ROLE_NETBOX_READ_ACCESS",
         "ROLE_NETBOX_READ_WRITE_ACCESS",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+
+    -- Logstash statistics passthrough (nginx proxies /mapi/logstash/ straight to the
+    --   Logstash monitoring API without going through the Malcolm API)
+    { pattern = "^/mapi/logstash", roles = {
+        "ROLE_ADMIN",
         "ROLE_READ_ACCESS",
         "ROLE_READ_WRITE_ACCESS"
     }},
@@ -157,7 +166,7 @@ local uri_role_mappings = {
         { from = "ROLE_READ_ACCESS", to = "ROLE_EXTRACTED_FILES" },
         { from = "ROLE_READ_WRITE_ACCESS", to = "ROLE_EXTRACTED_FILES" }
     },
-    ["^/netbox"] = {
+    ["^/(mapi/)?netbox"] = {
         { from = "ROLE_READ_ACCESS", to = "ROLE_NETBOX_READ_ACCESS" },
         { from = "ROLE_READ_WRITE_ACCESS", to = "ROLE_NETBOX_READ_WRITE_ACCESS" }
     }
