@@ -660,3 +660,77 @@ def test_blank_in_settings_file_for_a_setting_that_cannot_be_blank_keeps_the_def
     for key in (KEY_CONFIG_ITEM_LS_MEMORY, KEY_CONFIG_ITEM_OS_MEMORY, KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION):
         assert imported.get_value(key) == defaults.get_value(key), key
     assert imported.get_value(KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION) == ""
+
+
+# ---------------------------------------------------------------------------------------------
+# turning live capture off turns every capture method off
+
+
+def _written_env(env_dir) -> dict:
+    values = {}
+    for env_file in env_dir.glob("*.env"):
+        for line in env_file.read_text().splitlines():
+            if line and not line.startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                values[key] = value
+    return values
+
+
+def _capturing(profile_settings) -> MalcolmConfig:
+    cfg = MalcolmConfig()
+    for key, value in profile_settings:
+        cfg.set_value(key, value)
+    for key, value in (
+        (KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True),
+        (KEY_CONFIG_ITEM_PCAP_IFACE, ["eth0"]),
+        (KEY_CONFIG_ITEM_LIVE_ZEEK, True),
+        (KEY_CONFIG_ITEM_LIVE_SURICATA, True),
+    ):
+        cfg.set_value(key, value)
+    return cfg
+
+
+CAPTURE_PROFILES = {
+    "malcolm-netsniff": [(KEY_CONFIG_ITEM_PCAP_NETSNIFF, True)],
+    "hedgehog-arkime": [
+        (KEY_CONFIG_ITEM_MALCOLM_PROFILE, PROFILE_HEDGEHOG),
+        (KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST, "10.0.0.9"),
+        (KEY_CONFIG_ITEM_LIVE_ARKIME, True),
+    ],
+}
+
+
+@pytest.mark.parametrize("profile", sorted(CAPTURE_PROFILES))
+def test_turning_off_live_capture_after_load_turns_off_every_capture_method(tmp_path, profile):
+    loaded = env_round_trip(_capturing(CAPTURE_PROFILES[profile]), tmp_path / "loaded")
+    loaded.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, False)
+    out_dir = tmp_path / "saved"
+    out_dir.mkdir()
+    loaded.generate_env_files(str(out_dir))
+
+    written = _written_env(out_dir)
+    for variable in (
+        "PCAP_ENABLE_NETSNIFF",
+        "PCAP_ENABLE_TCPDUMP",
+        "ARKIME_LIVE_CAPTURE",
+        "ZEEK_LIVE_CAPTURE",
+        "SURICATA_LIVE_CAPTURE",
+    ):
+        assert written[variable] == "false", variable
+
+
+DEFAULT_ENGINE = {"malcolm-netsniff": KEY_CONFIG_ITEM_PCAP_NETSNIFF, "hedgehog-arkime": KEY_CONFIG_ITEM_LIVE_ARKIME}
+
+
+@pytest.mark.parametrize("profile", sorted(CAPTURE_PROFILES))
+@pytest.mark.parametrize("loaded", [True, False])
+def test_live_capture_off_then_on_brings_back_the_default_engine(tmp_path, profile, loaded):
+    # whether the engine was loaded or chosen in this session, turning capture off replaces that
+    #   choice, so turning capture back on picks the default engine again
+    cfg = _capturing(CAPTURE_PROFILES[profile])
+    if loaded:
+        cfg = env_round_trip(cfg, tmp_path)
+    cfg.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, False)
+    cfg.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True)
+    for key in (KEY_CONFIG_ITEM_PCAP_NETSNIFF, KEY_CONFIG_ITEM_PCAP_TCPDUMP, KEY_CONFIG_ITEM_LIVE_ARKIME):
+        assert cfg.get_value(key) is (key == DEFAULT_ENGINE[profile]), key

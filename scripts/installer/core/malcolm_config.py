@@ -321,6 +321,19 @@ class MalcolmConfig(ObservableStoreMixin):
         item = self.get_item(key)
         return bool(item and item.is_modified) or (key in self._loaded_keys)
 
+    def release_to_rules(self, key: str) -> None:
+        """Let a setting follow its value rules again after a forced rule replaced its value.
+
+        The value the user chose, in this session or through a load, is gone, and nobody chose the
+        new one. For example, turning live capture off turns netsniff-ng off; turning capture back
+        on should then pick the default engine again, as it would for a setting nobody had touched.
+        """
+        self._loaded_keys.discard(key)
+        if (item := self.get_item(key)) and item.is_modified:
+            item.is_modified = False
+            if key in self._modified_keys:
+                self._modified_keys.remove(key)
+
     def get_load_issues(self) -> Dict[str, LoadIssue]:
         """Values from a load that couldn't be used, by item key."""
         return dict(self._load_issues)
