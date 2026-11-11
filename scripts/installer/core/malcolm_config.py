@@ -391,6 +391,11 @@ class MalcolmConfig(ObservableStoreMixin):
             InstallerLogger.warning(f'Ignoring unknown configuration item "{key}" from {source.label}')
             return False
 
+        if (value == "") and not item.accept_blank:
+            # a blank for a setting that can't be blank means the source has no value for it (the same
+            #   as a variable left empty in a .env file), so the installer's default or another source applies
+            return False
+
         if (previous := self._loaded_from.get(key)) and (previous[0] < source):
             # already loaded from a source that takes precedence
             return False

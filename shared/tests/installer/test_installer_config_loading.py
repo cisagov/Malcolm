@@ -638,3 +638,25 @@ def test_load_log_says_when_rules_changed_a_loaded_value(tmp_path):
     assert lines[KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP] == (
         f'Loaded {KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP} = "True" from settings file (settings.json)'
     )
+
+
+# ---------------------------------------------------------------------------------------------
+# blanks in a settings file (e.g., from a script filling in a template)
+
+
+def test_blank_in_settings_file_for_a_setting_that_cannot_be_blank_keeps_the_default(tmp_path):
+    export_settings(MalcolmConfig(), tmp_path / "settings.json")
+    settings = json.loads((tmp_path / "settings.json").read_text())
+    defaults = MalcolmConfig()
+    for key in (KEY_CONFIG_ITEM_LS_MEMORY, KEY_CONFIG_ITEM_OS_MEMORY, KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION):
+        assert not defaults.get_item(key).accept_blank
+        settings["configuration"][key] = ""
+    settings["configuration"][KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION] = ""  # this one accepts a blank
+    (tmp_path / "settings.json").write_text(json.dumps(settings))
+
+    imported = import_settings(tmp_path / "settings.json")
+    assert imported.get_load_issues() == {}
+    assert validate_required(imported) == []
+    for key in (KEY_CONFIG_ITEM_LS_MEMORY, KEY_CONFIG_ITEM_OS_MEMORY, KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION):
+        assert imported.get_value(key) == defaults.get_value(key), key
+    assert imported.get_value(KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION) == ""
