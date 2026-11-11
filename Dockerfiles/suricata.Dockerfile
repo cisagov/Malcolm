@@ -127,6 +127,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
     yq -i '.sources = []' "$SURICATA_UPDATE_CONFIG_FILE" && \
     suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
     suricata-update update --fail --verbose --etopen --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
+    cp -a "$SURICATA_MANAGED_DIR"/update/cache /opt/suricata/update-cache && \
     cp /usr/bin/suricata /usr/bin/suricata-offline && \
     chown root:${PGROUP} /usr/bin/suricata && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata && \
