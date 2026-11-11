@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - configure-gui
       - staging
     paths:
       - 'filebeat/**'
