@@ -187,11 +187,16 @@ class DependencyManager:
                     return
                 new_val = self._compute_rule_value(item_key, value_rule)
                 if new_val is not DEFAULT_VALUE_UNCHANGED:
+                    old_val = self.config.get_value(item_key)
                     try:
                         self.config.apply_default(item_key, new_val)
                     except Exception as e:
                         # Do not break dependency processing; surface the error
                         InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
+                    else:
+                        if self.config.get_value(item_key) != old_val:
+                            # a forced rule replaced the value, so nobody chose the new one
+                            self.config.release_to_rules(item_key)
             except Exception as e:
                 InstallerLogger.error(f"Error in value observer for {item_key}: {e}")
 

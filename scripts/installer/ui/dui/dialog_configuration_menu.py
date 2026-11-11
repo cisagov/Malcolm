@@ -5,13 +5,13 @@
 
 """Dialog-based configuration menu using python3-dialog."""
 
-import re
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from scripts.malcolm_common import (
     InstallerAskForString,
     InstallerChooseOne,
     InstallerDisplayMessage,
+    InstallerYesOrNo,
     UserInterfaceMode,
     DialogBackException,
     DialogCanceledException,
@@ -20,7 +20,12 @@ from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
 from scripts.installer.ui.shared.menu_builder import ValueFormatter
 from scripts.installer.ui.shared.store_view_model import build_rows_from_items, build_child_map
-from scripts.installer.ui.shared.search_utils import format_search_results_text
+from scripts.installer.ui.shared.search_utils import (
+    find_gating_ancestor,
+    format_menu_path,
+    group_nav_label,
+    strip_group_label,
+)
 from scripts.installer.ui.shared.prompt_utils import prompt_config_item_value
 from scripts.installer.utils.exceptions import (
     ConfigValueValidationError,
@@ -95,7 +100,7 @@ class DialogConfigurationMenu:
             visible_children = [c for c in self.child_map.get(key, []) if self.mc.is_item_visible(c)]
             if visible_children:
                 # visually indent group navigation entries to indicate dependency
-                nav_tag = " ↳ " + re.sub(r'^(?:Enable |Use )| Mode$', '', item.label) + " Settings"
+                nav_tag = " ↳ " + group_nav_label(item.label)
                 tag_map[nav_tag] = f"GROUP:{key}"
                 choices.append((nav_tag, "", False))
 
@@ -130,7 +135,7 @@ class DialogConfigurationMenu:
 
             try:
                 label = "Malcolm Configuration" if parent_key is None else self.mc.get_item(parent_key).label
-                prompt = re.sub(r'^(?:Enable |Use )| Mode$', '', label) + ": select an item to configure"
+                prompt = strip_group_label(label) + ": select an item to configure"
                 result = InstallerChooseOne(
                     prompt,
                     choices=choices,
@@ -199,26 +204,107 @@ class DialogConfigurationMenu:
 
             return
 
-    def _flatten_visible_keys(self) -> List[str]:
-        """Flatten visible items using the view model for consistent order."""
-        rows = build_rows_from_items(self.mc.get_all_config_items().items(), self.mc, roots=self.main_menu_keys)
-        return [r.key for r in rows if r.visible]
-
     def _handle_search(self) -> None:
+        """Search for settings and let the user jump straight to one.
+
+        Results are offered as a menu. Each entry shows the path of submenus
+        that leads to the item, so the user can also find it by hand. Picking a
+        visible item opens its editor; picking a hidden one offers to edit the
+        setting that is hiding it first.
+        """
         try:
             term = InstallerAskForString("Enter search term:", default="", uiMode=self.ui_mode)
         except (DialogBackException, DialogCanceledException):
             return
+        term = (term or "").strip()
         if not term:
             return
 
-        displayed_keys = self._flatten_visible_keys()
-        text = format_search_results_text(
-            self.mc,
-            term,
-            displayed_keys,
-            debug_mode=self.debug_mode,
-            include_numbers=False,
-            colorize=False,
-        )
-        InstallerDisplayMessage(text, uiMode=self.ui_mode)
+        while True:
+            # re-run every pass: editing a result can change what is visible
+            results = self.mc.search_items(term)
+            if not results:
+                InstallerDisplayMessage(f"No configuration items found matching '{term}'", uiMode=self.ui_mode)
+                return
+
+            choices, tag_map = self._make_search_choice_list(results)
+            hidden_count = sum(1 for r in results if not r["visible"])
+            prompt = f"Settings matching '{term}'. Select one to go to it."
+            if hidden_count:
+                prompt += f"\n{hidden_count} hidden until a setting above them is changed."
+            try:
+                selected = InstallerChooseOne(
+                    prompt,
+                    choices=choices,
+                    uiMode=self.ui_mode,
+                    extraLabel=BACK_LABEL,
+                )
+            except (DialogBackException, DialogCanceledException):
+                return
+
+            key = tag_map.get(selected)
+            if key:
+                self._go_to_search_result(key)
+
+    def _make_search_choice_list(self, results: List[dict]) -> Tuple[List[Tuple[str, str, bool]], Dict[str, str]]:
+        """Build radiolist choices for search results, grouped by menu location."""
+        entries = []
+        for result in results:
+            key = result["key"]
+            entries.append((not result["visible"], format_menu_path(self.mc, key), result["label"] or key, key))
+        # visible first, then cluster by location so siblings sit together
+        entries.sort(key=lambda e: (e[0], e[1].lower(), e[2].lower()))
+
+        choices: List[Tuple[str, str, bool]] = []
+        tag_map: Dict[str, str] = {}
+        for hidden, path, label, key in entries:
+            tag = label
+            suffix = 2
+            while tag in tag_map:
+                tag = f"{label} ({suffix})"
+                suffix += 1
+            tag_map[tag] = key
+            choices.append((tag, f"(hidden) {path}" if hidden else path, False))
+        return choices, tag_map
+
+    def _go_to_search_result(self, key: str) -> None:
+        """Open a search result, revealing it first if it is hidden."""
+        target = self.mc.get_item(key)
+        if not target:
+            return
+        target_label = target.label or key
+
+        while not self.mc.is_item_visible(key):
+            gate_key = find_gating_ancestor(self.mc, key)
+            gate = self.mc.get_item(gate_key) if gate_key else None
+            if not gate:
+                InstallerDisplayMessage(
+                    f"{target_label} can't be shown with the current settings.\n\n"
+                    f"Location: {format_menu_path(self.mc, key)}",
+                    uiMode=self.ui_mode,
+                )
+                return
+
+            gate_label = gate.label or gate_key
+            gate_value = ValueFormatter.format_config_value(gate_label, gate.get_value())
+            try:
+                proceed = InstallerYesOrNo(
+                    f"{target_label} only appears after {gate_label} is changed "
+                    f"(it's set to {gate_value} now).\n\n"
+                    f"Location: {format_menu_path(self.mc, key)}\n\n"
+                    f"Edit {gate_label} now?",
+                    default=True,
+                    uiMode=self.ui_mode,
+                )
+            except (DialogBackException, DialogCanceledException):
+                return
+            if not proceed:
+                return
+
+            before = gate.get_value()
+            self._prompt_for_item_value(gate_key)
+            if gate.get_value() == before:
+                # user backed out or kept the old value; don't nag in a loop
+                return
+
+        self._prompt_for_item_value(key)

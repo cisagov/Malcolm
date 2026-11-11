@@ -738,28 +738,35 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ),
-        value=ValueRule(
-            kind=RuleKind.CASCADE,
-            depends_on=[
-                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
-                KEY_CONFIG_ITEM_LIVE_ARKIME,
-            ],
-            # Compute the default based on current dependencies. This makes
-            # netsniff the default capture engine for Malcolm profile when
-            # using local OpenSearch and live capture is enabled, unless the
-            # user has explicitly enabled tcpdump or Arkime.
-            condition=True,
-            default_value=lambda live_traffic, profile, mode, tcpdump, arkime: (
-                bool(live_traffic)
-                and (profile == PROFILE_MALCOLM)
-                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
-                and (not bool(tcpdump))
-                and (not bool(arkime))
+        value=[
+            # no netsniff-ng capture without live capture
+            ValueRule(
+                kind=RuleKind.INVARIANT,
+                depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                condition=lambda live_traffic: not bool(live_traffic),
+                default_value=False,
+                only_if_unmodified=False,
             ),
-        ),
+            # with live capture on, netsniff-ng is the default capture engine for the Malcolm profile with
+            #   local OpenSearch, unless tcpdump or Arkime has been chosen
+            ValueRule(
+                kind=RuleKind.CASCADE,
+                depends_on=[
+                    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+                    KEY_CONFIG_ITEM_LIVE_ARKIME,
+                ],
+                condition=lambda live_traffic, *_: bool(live_traffic),
+                default_value=lambda live_traffic, profile, mode, tcpdump, arkime: (
+                    (profile == PROFILE_MALCOLM)
+                    and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
+                    and (not bool(tcpdump))
+                    and (not bool(arkime))
+                ),
+            ),
+        ],
     ),
     KEY_CONFIG_ITEM_PCAP_TCPDUMP: DependencySpec(
         visibility=VisibilityRule(
@@ -767,24 +774,35 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ),
-        value=ValueRule(
-            kind=RuleKind.CASCADE,
-            depends_on=[
-                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-                KEY_CONFIG_ITEM_LIVE_ARKIME,
-            ],
-            condition=True,
-            default_value=lambda live_traffic, profile, mode, netsniff, arkime: (
-                bool(live_traffic)
-                and (profile == PROFILE_MALCOLM)
-                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
-                and (not bool(netsniff))
-                and (not bool(arkime))
+        value=[
+            # no tcpdump capture without live capture
+            ValueRule(
+                kind=RuleKind.INVARIANT,
+                depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                condition=lambda live_traffic: not bool(live_traffic),
+                default_value=False,
+                only_if_unmodified=False,
             ),
-        ),
+            # with live capture on, tcpdump is the fallback for the Malcolm profile with local OpenSearch when
+            #   neither netsniff-ng nor Arkime has been chosen
+            ValueRule(
+                kind=RuleKind.CASCADE,
+                depends_on=[
+                    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                    KEY_CONFIG_ITEM_LIVE_ARKIME,
+                ],
+                condition=lambda live_traffic, *_: bool(live_traffic),
+                default_value=lambda live_traffic, profile, mode, netsniff, arkime: (
+                    (profile == PROFILE_MALCOLM)
+                    and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
+                    and (not bool(netsniff))
+                    and (not bool(arkime))
+                ),
+            ),
+        ],
     ),
     KEY_CONFIG_ITEM_LIVE_ARKIME: DependencySpec(
         visibility=VisibilityRule(
@@ -801,25 +819,34 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ),
-        value=ValueRule(
-            kind=RuleKind.CASCADE,
-            depends_on=[
-                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
-            ],
-            # Always compute the default from current dependency values, but
-            # only apply it if the user hasn't modified the item yet.
-            condition=True,
-            default_value=lambda live_traffic, profile, mode, netsniff, tcpdump: (
-                bool(live_traffic)
-                and ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value))
-                and (not bool(netsniff))
-                and (not bool(tcpdump))
+        value=[
+            # no Arkime live capture without live capture
+            ValueRule(
+                kind=RuleKind.INVARIANT,
+                depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                condition=lambda live_traffic: not bool(live_traffic),
+                default_value=False,
+                only_if_unmodified=False,
             ),
-        ),
+            # with live capture on, Arkime is the default capture engine for Hedgehog or remote OpenSearch,
+            #   unless netsniff-ng or tcpdump has been chosen
+            ValueRule(
+                kind=RuleKind.CASCADE,
+                depends_on=[
+                    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+                ],
+                condition=lambda live_traffic, *_: bool(live_traffic),
+                default_value=lambda live_traffic, profile, mode, netsniff, tcpdump: (
+                    ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value))
+                    and (not bool(netsniff))
+                    and (not bool(tcpdump))
+                ),
+            ),
+        ],
     ),
     KEY_CONFIG_ITEM_LIVE_ZEEK: DependencySpec(
         visibility=VisibilityRule(
