@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - configure-gui
     paths:
       - 'docs/**'
       - 'README.md'
