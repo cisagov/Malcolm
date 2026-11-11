@@ -39,6 +39,12 @@ fi
     for CONF in enable modify drop; do
         [[ -e /etc/suricata/${CONF}.conf ]] || touch /etc/suricata/${CONF}.conf 2>/dev/null || true
     done
+    SEED_CACHE=/opt/suricata/update-cache
+    LIVE_CACHE="${SURICATA_MANAGED_DIR:-/var/lib/suricata}/update/cache"
+    if [[ -d "$SEED_CACHE" ]]; then
+        mkdir -p "$LIVE_CACHE" 2>/dev/null || true
+        cp -p -u "$SEED_CACHE"/* "$LIVE_CACHE"/ 2>/dev/null || true
+    fi
     if [[ -n "${SURICATA_DISABLE_SIDS}" ]]; then
         tr ',' '\n' <<<"${SURICATA_DISABLE_SIDS}" | awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if (length) print }' | \
             while IFS= read -r line; do
