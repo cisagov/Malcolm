@@ -11,6 +11,12 @@ set -uo pipefail
 ZEEK_DIR="${ZEEK_DIR:-/usr/local/zeek}"
 ZEEK_BIN="${ZEEK_BIN:-$ZEEK_DIR/bin/zeek-offline}"
 PCAP="${ZEEK_SANITY_PCAP:-/tmp/pcaps/udp.pcap}"
+ZEEK_ZAM_ARGS=()
+# Zeek treats any ZEEK_ZAM value as enabled; translate Malcolm's boolean to arguments.
+if [[ "${ZEEK_ZAM:-false}" == "true" ]]; then
+  ZEEK_ZAM_ARGS=("-O" "ZAM")
+fi
+unset ZEEK_ZAM
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 cd "$WORKDIR" || exit 1
@@ -30,10 +36,10 @@ explode() {
 run_zeek() {
   local label="$1" out="$2" err="$3"
   shift 3
-  "$ZEEK_BIN" "$@" >"$out" 2>"$err"
+  "$ZEEK_BIN" "${ZEEK_ZAM_ARGS[@]}" "$@" >"$out" 2>"$err"
   local rc=$?
   if (( rc != 0 )); then
-    echo "!! '$ZEEK_BIN $*' exited with code $rc ($label)"
+    echo "!! '$ZEEK_BIN ${ZEEK_ZAM_ARGS[*]} $*' exited with code $rc ($label)"
     echo "---- stderr ----"
     cat "$err"
     echo "----------------"

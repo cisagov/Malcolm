@@ -326,8 +326,10 @@ def zeekFileWorker(zeekWorkerArgs):
                                 # use Zeek to process the pcap
                                 zeekCmd = [zeekBin, "-r", fileInfo[FILE_INFO_DICT_NAME], ZEEK_LOCAL_SCRIPT]
 
-                                # enable ZAM script optimization if requested
-                                if str2bool(os.getenv("ZEEK_ZAM", "false")):
+                                # Zeek enables ZAM whenever ZEEK_ZAM is present, even if its value is false.
+                                # Consume Malcolm's setting here and control Zeek through its arguments only.
+                                zeekEnv = os.environ.copy()
+                                if str2bool(zeekEnv.pop("ZEEK_ZAM", "false")):
                                     zeekCmd.extend(["-O", "ZAM"])
 
                                 # set file extraction parameters if required
@@ -338,7 +340,6 @@ def zeekFileWorker(zeekWorkerArgs):
                                         extractFileMode = ZEEK_EXTRACTOR_MODE_MAPPED
 
                                 # execute zeek with the cwd of tmpLogDir so that's where the logs go, and with the updated file carving environment variable
-                                zeekEnv = os.environ.copy()
                                 zeekEnv[ZEEK_EXTRACTOR_MODE_ENV_VAR] = extractFileMode
                                 retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, logger=logger)
                                 if retcode == 0:

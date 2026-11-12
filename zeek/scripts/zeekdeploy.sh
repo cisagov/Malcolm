@@ -244,6 +244,10 @@ else
   fi
 fi
 
+# Zeek treats any ZEEK_ZAM value as enabled. ZeekArgs above controls the setting,
+# so do not let zeekctl or its Zeek children inherit the environment variable.
+unset ZEEK_ZAM
+
 # completely rewrite node.cfg for one worker per interface
 # see idaholab/Malcolm#36 for details on fine-tuning
 
