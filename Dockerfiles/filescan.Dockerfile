@@ -90,7 +90,7 @@ ADD --chmod=644 docs/images/icon/favicon.ico "${FILESCAN_HTTP_SERVER_ASSETS_DIR}
 ADD --chmod=755 filescan/scripts/web-ui-asset-download.sh /usr/local/bin/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
         useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistent ${PUSER} ; \

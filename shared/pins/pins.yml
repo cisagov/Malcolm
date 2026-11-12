@@ -1,0 +1,336 @@
+# Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
+#
+# Upstream metadata for the third-party dependencies Malcolm pins, read by scripts/update_pins.py.
+#
+# The pins themselves stay where the build uses them (Dockerfiles, requirements files, workflows,
+# shared/pins/binaries.sha256, zeek/zeek-packages.lock). This file says where each one comes
+# from and how to check it. Pins that describe themselves (container image references, GitHub
+# Actions, PyPI requirements, npm packages) are found automatically and only need an entry here
+# to override the defaults.
+#
+# Keys every entry accepts:
+#   hold: <reason>     listed in the report, never applied unless --include-held
+#   group: <name>      pins that should move together; shown next to each other
+#   report_only: true  listed in the report, never applied
+#   note: <text>       printed in the report, and as a follow-up after the pin is applied
+#
+# Templates use {version} for the bare version number. Binaries also get {arch} (amd64 or
+# arm64), {aname} (the arch as the project names it, from arch_names) and {var} (the version as
+# the variable holds it, from var_format).
+
+settings:
+  binaries_manifest: shared/pins/binaries.sha256
+  # directories (by name or path) and files (glob patterns) the scan skips
+  exclude_dirs: [.git, node_modules, _site, .venv, venv, __pycache__, .pytest_cache, docs]
+  exclude_paths: [shared/tests/test_update_pins.py]
+
+###################################################################################################
+# Container images: keyed by the image name as written, without tag or digest.
+#   track: exact | floating | digest | exact+digest   (default: inferred from the reference)
+#     exact         X.Y.Z tags; newer tags of the same shape are offered
+#     floating      X or X.Y tags (debian:13-slim); only a new release line is offered
+#     digest        tag@sha256 pins; the digest is refreshed when the tag moves
+#     exact+digest  both
+#   ignore: <reason>   not checked at all
+#   release_notes: URL template with {tag} and {version}
+docker_images:
+  redhat/ubi9:
+    ignore: intermediate build stage that only produces a root filesystem; stays on :latest
+  redhat/ubi9-minimal:
+    ignore: intermediate build stage that only produces a root filesystem; stays on :latest
+  redhat/ubi10-minimal:
+    ignore: intermediate build stage (Logstash manuf data); stays on :latest
+  opensearchproject/opensearch:
+    group: opensearch
+    release_notes: https://github.com/opensearch-project/OpenSearch/releases/tag/{version}
+  opensearchproject/opensearch-dashboards:
+    group: opensearch
+    release_notes: https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/{version}
+  docker.elastic.co/beats/filebeat-oss:
+    group: elastic
+    release_notes: https://www.elastic.co/docs/release-notes/beats
+  docker.elastic.co/logstash/logstash-oss:
+    group: elastic
+    release_notes: https://www.elastic.co/docs/release-notes/logstash
+  zeek/zeek:
+    release_notes: https://github.com/zeek/zeek/releases/tag/v{version}
+  netboxcommunity/netbox:
+    group: netbox
+    release_notes: https://github.com/netbox-community/netbox/releases/tag/{tag}
+  quay.io/keycloak/keycloak:
+    release_notes: https://github.com/keycloak/keycloak/releases
+  moby/buildkit:
+    release_notes: https://github.com/moby/buildkit/releases/tag/{tag}
+
+###################################################################################################
+# GitHub Actions: keyed by owner/repo. Discovered automatically; add entries only to hold or group.
+github_actions: {}
+
+###################################################################################################
+# Release binaries installed through shared/bin/install-verified-binary.sh.
+#   version_var   variable holding the version, updated everywhere it's assigned
+#   var_format    how the variable holds it (default "{version}")
+#   source        github (default) or pypi
+#   repo          GitHub owner/repo whose releases are checked
+#   tag           release tag template (default "v{version}")
+#   archs         default [amd64, arm64]; [] for arch-independent assets
+#   arch_names    {amd64: ..., arm64: ...} for {aname}
+#   artifacts     list of {key, asset} or {key, url}; key is the binaries.sha256 entry, asset the
+#                 release asset name, url a download URL for assets hosted elsewhere
+# Digests come from GitHub's published asset digest when there is one, otherwise the asset is
+# downloaded and hashed.
+binaries:
+  arkime:
+    version_var: ARKIME_VERSION
+    repo: arkime/arkime
+    artifacts:
+      - key: arkime_{version}-1.debian13_{arch}.deb
+        asset: arkime_{version}-1.debian13_{arch}.deb
+      - key: ja4plus_{version}_linux_{arch}.so
+        asset: ja4plus.{arch}.so
+  croc:
+    version_var: CROC_VERSION
+    repo: schollz/croc
+    arch_names: {amd64: 64bit, arm64: ARM64}
+    key: croc_{version}_linux_{arch}.tar.gz
+    asset: croc_v{version}_Linux-{aname}.tar.gz
+  evtx:
+    version_var: EVTX_VERSION
+    repo: omerbenamram/evtx
+    arch_names: {amd64: x86_64, arm64: aarch64}
+    key: evtx_dump_{version}_linux_{arch}
+    asset: evtx_dump-v{version}-{aname}-unknown-linux-gnu
+  eza:
+    version_var: EZA_VERSION
+    repo: eza-community/eza
+    arch_names: {amd64: x86_64-unknown-linux-musl, arm64: aarch64-unknown-linux-gnu_no_libgit}
+    key: eza_{version}_linux_{arch}.tar.gz
+    asset: eza_{aname}.tar.gz
+  jq:
+    version_var: JQ_VERSION
+    repo: jqlang/jq
+    tag: jq-{version}
+    key: jq_{version}_linux_{arch}
+    asset: jq-linux-{arch}
+  just:
+    version_var: JUST_VERSION
+    repo: casey/just
+    tag: '{version}'
+    arch_names: {amd64: x86_64, arm64: aarch64}
+    key: just_{version}_linux_{arch}.tar.gz
+    asset: just-{version}-{aname}-unknown-linux-musl.tar.gz
+  kubectl:
+    version_var: KUBECTL_VERSION
+    repo: kubernetes/kubernetes
+    key: kubectl_{version}_linux_{arch}
+    url: https://dl.k8s.io/release/v{version}/bin/linux/{arch}/kubectl
+  nerd-fonts-hack:
+    version_var: NERD_FONTS_VERSION
+    repo: ryanoasis/nerd-fonts
+    archs: []
+    key: nerd-fonts-hack_{version}.tar.xz
+    asset: Hack.tar.xz
+  netbox-pip:
+    version_var: NETBOX_PIP_VERSION
+    source: pypi
+    package: pip
+    archs: []
+    key: pip-{version}-py3-none-any.whl
+    asset: pip-{version}-py3-none-any.whl
+  stern:
+    version_var: STERN_VERSION
+    repo: stern/stern
+    key: stern_{version}_linux_{arch}.tar.gz
+    asset: stern_{version}_linux_{arch}.tar.gz
+  supercronic:
+    version_var: SUPERCRONIC_VERSION
+    repo: aptible/supercronic
+    key: supercronic_{version}_linux_{arch}
+    asset: supercronic-linux-{arch}
+  tini:
+    version_var: TINI_VERSION
+    var_format: v{version}
+    repo: krallin/tini
+    key: tini_v{version}_linux_{arch}
+    asset: tini-{arch}
+  yq:
+    version_var: YQ_VERSION
+    repo: mikefarah/yq
+    key: yq_{version}_linux_{arch}
+    asset: yq_linux_{arch}
+
+###################################################################################################
+# Source consumed by commit or release tag.
+#   repo          GitHub owner/repo (or git_url for another host)
+#   track         tag (default) or branch
+#   tag           tag template for track: tag (default "v{version}")
+#   ref           the tag currently pinned (track: tag; updated on apply), or the branch to
+#                 follow (track: branch; default HEAD, the default branch)
+#   commit_var    variable holding the commit
+#   version_var   variable holding the version (with var_format)
+#   sha256_var    variable holding the archive's SHA-256
+#   add_checksum  true when the digest is in an ADD --checksum line that references the
+#                 commit_var (or version_var)
+#   archive       URL whose SHA-256 is pinned, with {repo} {commit} {tag} {version}
+#                 (default https://codeload.github.com/{repo}/tar.gz/{commit})
+# When a tag-tracked pin moves, "owner/repo <old tag>" comments in the same file move with it.
+source_pins:
+  ecs:
+    repo: elastic/ecs
+    ref: v9.5.0
+    commit_var: ECS_COMMIT
+    version_var: ECS_VERSION
+    sha256_var: ECS_SHA256
+  filepond-server-php:
+    repo: pqina/filepond-server-php
+    track: branch
+    commit_var: FILEPOND_SERVER_BRANCH
+    sha256_var: FILEPOND_SERVER_SHA256
+    archive: https://github.com/{repo}/archive/{commit}.tar.gz
+    note: re-check the FilePond.class.php sanitize_filename_part patch in file-upload.Dockerfile
+  freq:
+    repo: markbaggett/freq
+    track: branch
+    commit_var: FREQ_SOURCE_COMMIT
+    sha256_var: FREQ_SOURCE_SHA256
+  harbian-audit:
+    repo: hardenedlinux/harbian-audit
+    track: branch
+    commit_var: HARBIAN_AUDIT_COMMIT
+  htadmin:
+    repo: mmguero-dev/htadmin
+    track: branch
+    commit_var: HTADMIN_COMMIT
+    sha256_var: HTADMIN_SHA256
+    note: regenerate shared/pins/htadmin-assets.sha256 for the new commit
+  htpdate:
+    repo: twekkel/htpdate
+    ref: v2.0.2
+    version_var: HTPDATE_VERSION
+    sha256_var: HTPDATE_SHA256
+    archive: https://codeload.github.com/{repo}/tar.gz/refs/tags/{tag}
+  netbox-devicetype-library:
+    repo: netbox-community/devicetype-library
+    track: branch
+    commit_var: NETBOX_DEVICETYPE_LIBRARY_COMMIT
+    sha256_var: NETBOX_DEVICETYPE_LIBRARY_SHA256
+  netbox-devicetype-library-import:
+    repo: mmguero-dev/Device-Type-Library-Import
+    track: branch
+    commit_var: NETBOX_DEVICETYPE_LIBRARY_IMPORT_COMMIT
+    sha256_var: NETBOX_DEVICETYPE_LIBRARY_IMPORT_SHA256
+  nginx-auth-ldap:
+    repo: mmguero-dev/nginx-auth-ldap
+    track: branch
+    commit_var: NGINX_AUTH_LDAP_REVISION
+    add_checksum: true
+  openresty:
+    repo: openresty/openresty
+    ref: v1.31.8.1
+    version_var: OPENRESTY_VERSION
+    sha256_var: OPENRESTY_SHA256
+    archive: https://openresty.org/download/openresty-{version}.tar.gz
+  lua-resty-openidc:
+    repo: zmartzone/lua-resty-openidc
+    group: openidc
+    ref: v1.9.3
+    commit_var: LUA_RESTY_OPENIDC_REVISION
+    add_checksum: true
+    note: re-read the rockspecs of every openidc dependency (see the nginx.Dockerfile comments)
+  lua-resty-session:
+    repo: bungle/lua-resty-session
+    group: openidc
+    ref: v4.2.0
+    commit_var: LUA_RESTY_SESSION_REVISION
+    add_checksum: true
+    hold: lua-resty-openidc requires this exact version; it moves only when openidc does
+  lua-resty-http:
+    repo: ledgetech/lua-resty-http
+    group: openidc
+    ref: v0.17.1
+    commit_var: LUA_RESTY_HTTP_REVISION
+    add_checksum: true
+    hold: Malcolm calls it directly; bump on its own commit and re-test NGINX_KEYCLOAK_BASIC_AUTH
+  lua-resty-openssl:
+    repo: fffonion/lua-resty-openssl
+    group: openidc
+    tag: '{version}'
+    ref: 1.8.0
+    commit_var: LUA_RESTY_OPENSSL_REVISION
+    add_checksum: true
+  lua-ffi-zlib:
+    repo: hamishforbes/lua-ffi-zlib
+    group: openidc
+    ref: v0.6
+    commit_var: LUA_FFI_ZLIB_REVISION
+    add_checksum: true
+  lua-resty-jwt:
+    repo: cdbattags/lua-resty-jwt
+    group: openidc
+    ref: v0.3.2
+    commit_var: LUA_RESTY_JWT_REVISION
+    add_checksum: true
+  lua-resty-hmac:
+    repo: jkeys089/lua-resty-hmac
+    group: openidc
+    track: branch
+    commit_var: LUA_RESTY_HMAC_REVISION
+    add_checksum: true
+    hold: only installed source of resty.hmac; check lib/resty/jwt.lua still requires it first
+
+###################################################################################################
+# Python: keyed by package name (or owner/repo for git+ requirements). Discovered automatically.
+#   paths: [...]   limit the entry to these requirements files
+#   branch: name   for git+ commit pins, the branch to follow (default HEAD)
+python:
+  netbox-healthcheck-plugin: {group: netbox}
+  netbox-topology-views: {group: netbox}
+  netbox-initializers: {group: netbox}
+  watchdog:
+    hold: the filebeat image's Python (UBI 9) is older than watchdog 7 supports
+    paths: [filebeat/requirements.txt]
+
+###################################################################################################
+zeek_packages:
+  list: zeek/zeek-packages.list
+  lock: zeek/zeek-packages.lock
+  # packages:  hold/group entries keyed by URL or owner/repo
+  #   https://github.com/FoxIO-LLC/ja4: {hold: "..."}
+
+###################################################################################################
+# Everything else.
+#   type: version-var   version_var (+ var_format) checked against source: rubygems, npm,
+#                       pypi (package:), github-release or git-tags (repo:, tag:)
+#   type: git-ref       a literal tag or branch name (ref:) in files:, compared with the refs
+#                       (refs: tags | heads) of url: that match pattern:
+#   type: apt-glob      an apt version pattern ([epoch:]X.Y.*) in version_var, compared with
+#                       Debian's madison for package: in suite:
+#   npm: {name: {hold: ...}}  overrides for the npm pins found in Dockerfiles
+other:
+  logstash-output-opensearch:
+    type: version-var
+    source: rubygems
+    package: logstash-output-opensearch
+    version_var: LOGSTASH_OPENSEARCH_OUTPUT_PLUGIN_VERSION
+  suricata:
+    type: apt-glob
+    package: suricata
+    suite: trixie-backports
+    version_var: SURICATA_VERSION_PATTERN
+  live-build:
+    type: git-ref
+    url: https://salsa.debian.org/live-team/live-build.git
+    refs: tags
+    pattern: debian/1%{version}
+    ref: debian/1%20230131
+    files: [.github/workflows/iso-build-push.yml]
+    page: https://salsa.debian.org/live-team/live-build/-/tags
+  rpi-kernel:
+    type: git-ref
+    url: https://github.com/raspberrypi/linux.git
+    refs: heads
+    pattern: rpi-{version}.y
+    ref: rpi-6.18.y
+    files: [hedgehog-raspi/Makefile, hedgehog-raspi/build-rpi-kernel.sh]
+    page: https://github.com/raspberrypi/linux/tree/{ref}
+    note: the Pi 5 kernel still builds from the branch head; nothing pins the commit

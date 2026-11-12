@@ -57,7 +57,7 @@ ENV PATH="$PATH:$OPENSEARCH_DASHBOARDS_HOME/bin"
 USER root
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     microdnf install -y \
         bash \
         curl-minimal \

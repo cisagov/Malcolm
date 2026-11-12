@@ -212,7 +212,7 @@ install_files() {
     cp -r "$MALCOLM_SRC/malcolm-iso/config/requirements.txt" "/opt/requirements.txt"
     cp -r "$MALCOLM_SRC/shared/bin/"* "/usr/local/bin"
     mkdir -p /usr/local/share
-    cp "$MALCOLM_SRC/shared/checksums/binaries.sha256" /usr/local/share/
+    cp "$MALCOLM_SRC/shared/pins/binaries.sha256" /usr/local/share/
     cp "$MALCOLM_SRC/scripts/malcolm_utils.py" "/usr/local/bin/"
     cp "$MALCOLM_SRC/scripts/malcolm_constants.py" "/usr/local/bin/"
     cp "$MALCOLM_SRC/malcolm-iso/config/archives/fluentbit.list.chroot" "/etc/apt/sources.list.d/fluentbit.list"
