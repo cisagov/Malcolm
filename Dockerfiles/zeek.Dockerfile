@@ -60,7 +60,7 @@ ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-l
 
 # build and install system packages, zeek, spicy and plugins
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       bc \

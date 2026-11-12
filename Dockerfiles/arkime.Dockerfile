@@ -102,7 +102,7 @@ ENV PCAP_PROCESSED_DIRECTORY=$PCAP_PROCESSED_DIRECTORY
 ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \

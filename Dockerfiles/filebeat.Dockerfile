@@ -93,7 +93,7 @@ USER root
 ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     --mount=type=bind,source=shared/keys/RPM-GPG-KEY-EPEL-9,target=/usr/local/share/RPM-GPG-KEY-EPEL-9,ro \
     export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     microdnf -y install curl-minimal && \

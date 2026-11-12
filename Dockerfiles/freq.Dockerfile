@@ -41,7 +41,7 @@ ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-l
 ADD --chmod=644 freq-server/requirements.txt /usr/local/src/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y --no-install-recommends install \
       curl \

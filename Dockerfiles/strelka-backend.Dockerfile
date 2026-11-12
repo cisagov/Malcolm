@@ -58,7 +58,7 @@ ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD strelka/config/backend /etc/strelka/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y --no-install-recommends install \
       bc \

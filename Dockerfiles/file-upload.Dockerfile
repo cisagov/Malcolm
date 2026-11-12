@@ -73,7 +73,7 @@ COPY --from=npmget /usr/local/lib/node_modules/@jcubic /var/www/upload/@jcubic
 ADD --chmod=644 file-upload/requirements.txt /usr/local/src/requirements.txt
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       ca-certificates \

@@ -45,6 +45,10 @@ watchdog==7.1.0
 # archive extraction (filebeat/requirements.txt)
 libarchive-c==5.3
 
+# pin updates (scripts/update_pins.py; shared/tests/test_update_pins.py)
+packaging==25.0
+PyYAML==6.0.3
+
 # installer (scripts/install.py and scripts/installer/; shared/tests/installer)
 colorama==0.4.6
 distro==1.9.0

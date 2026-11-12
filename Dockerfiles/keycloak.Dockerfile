@@ -66,7 +66,7 @@ COPY --from=builder /opt/keycloak/ /opt/keycloak/
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-  --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+  --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
   mkdir -p /var/local/ca-trust && \
     chown -R $PUSER:$PGROUP /var/local/ca-trust && \
   sh /usr/local/share/install-verified-binary.sh /usr/local/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
