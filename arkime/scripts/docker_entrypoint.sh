@@ -226,6 +226,9 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       echo "arkimeUser=true" >> "${RBAC_FILE}"
       [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
         echo "arkimeAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
+      # the OpenSearch admin pages need dbAdmin, arkimeAdmin doesn't include it
+      [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
+        echo "dbAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
       # [[ -n "$ROLE_ARKIME_READ_ACCESS" ]]  && \
       #   echo "role:read_access=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_READ_ACCESS')" >> "${RBAC_FILE}"
       # [[ -n "$ROLE_ARKIME_READ_WRITE_ACCESS" ]]  && \
