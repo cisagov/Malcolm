@@ -287,7 +287,7 @@ A report in this area is more likely to describe a vulnerability if it identifie
 
 `arkime/etc/config.ini` is the clearest example: `passwordSecret` in the repository is replaced from `ARKIME_PASSWORD_SECRET` by `docker_entrypoint.sh` at container start. A report treating the repository value as live will not reproduce.
 
-Entrypoint scripts also change behavior by deployment mode. In the Hedgehog live-capture profile, `docker_entrypoint.sh` comments out `userNameHeader`, `userAuthIps`, and `userAutoCreateTmpl` entirely, so the header-trust and auto-provisioning logic visible in the file is not active on a sensor.
+Entrypoint scripts also change behavior by deployment mode. In the Hedgehog live-capture profile, `docker_entrypoint.sh` comments out `userNameHeader` and `userAuthIps` and removes the `[user-auto-create]` section entirely, so the header-trust and auto-provisioning logic visible in the file is not active on a sensor.
 
 Reading the rendered configuration from a running container, rather than the file in the Malcolm source code repository, is the reliable way to check claims in this area.
 
