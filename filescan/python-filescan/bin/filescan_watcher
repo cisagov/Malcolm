@@ -295,7 +295,12 @@ async def watch_list(
     list_keys = list(keys.keys())
     try:
         while True:
-            key, data = await cast(Awaitable, conn.blpop(list_keys))
+            # redis-py >= 8 defaults socket_timeout to 5s, which kills an
+            # indefinite BLPOP; block for less than that on the server side
+            # and loop on an empty result instead
+            if (result := await cast(Awaitable, conn.blpop(list_keys, timeout=2))) is None:
+                continue
+            key, data = result
             await handle_zeek_event(
                 config,
                 output,
@@ -327,7 +332,10 @@ async def watch_pubsub(
         pubsub = conn.pubsub()
         await pubsub.subscribe(*keys.keys())
         while True:
-            msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=None)
+            # redis-py >= 8 defaults socket_timeout to 5s, so a read with no timeout
+            # raises TimeoutError after 5s of silence; poll with a shorter timeout and
+            # let the loop handle the empty result instead
+            msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=2.0)
             if (
                 not msg
                 or msg.get('type') != 'message'

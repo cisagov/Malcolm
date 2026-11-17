@@ -242,7 +242,8 @@ Although the configuration script automates many of the following configuration 
 * **`zeek.env`**, **`zeek-live.env`** and **`zeek-offline.env`** - settings for [Zeek](https://zeek.org/) and for scanning [extracted files](file-scanning.md#ZeekFileExtraction) Zeek observes in network traffic
     - `ZEEK_AUTO_ANALYZE_PCAP_FILES` - if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
     - `ZEEK_AUTO_ANALYZE_PCAP_THREADS` - the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
-    - `ZEEK_ZAM` - if set to `true`, enables Zeek's [ZAM script optimizer](https://docs.zeek.org/en/master/advanced/scripting/optimization.html) (`-O ZAM`)
+    - `ZEEK_ZAM_ENABLED` - if set to `true`, enables Zeek's [ZAM script optimizer](https://docs.zeek.org/en/master/advanced/scripting/optimization.html) (`-O ZAM`) (default `false`)
+        + ⚠️ ZAM compiles every loaded script each time Zeek starts. With the number of scripts and packages Malcolm loads, startup can take much longer than usual. A live capture process starts once and runs for a long time, so it can make up for that cost through faster script execution. Offline processing starts a new Zeek process for every PCAP and pays the full compile time each time, which usually makes it slower overall. If you enable ZAM, set it in `zeek-live.env`, and leave it off in `zeek-offline.env`.
     - `ZEEK_JSON` - whether Zeek should generate [JSON format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-json-format-logs) (`true`) or [TSV format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-tsv-format-logs) (`false`)
     - `ZEEK_…_DETAILED` - some network analyzers produce can produce more detailed records in addition to "summary" records; set these variables to `true` to turn on the more verbose version
     - `ZEEK_DISABLE_…` - if set to `true`, each of these variables can be used to disable a certain Zeek function or network analyzer when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
@@ -254,6 +255,7 @@ Although the configuration script automates many of the following configuration 
         + `ZEEK_PORTS_GE_SRTP` - Specify the ports for the [ICSNPP-GE-SRTP analyzer](https://github.com/cisagov/icsnpp-ge-srtp). GE-SRTP only supports TCP ports.
         + `ZEEK_PORTS_GENISYS` - Specify the ports for the [ICSNPP-Genysis analyzer](https://github.com/cisagov/icsnpp-genisys/). Genysis only supports TCP ports.
         + `ZEEK_PORTS_HART_IP` - Specify the ports for the [ICSNPP-HART-IP analyzer](https://github.com/cisagov/icsnpp-hart-ip). HART-IP supports both UDP and TCP ports.
+        + `ZEEK_PORTS_ICCP` - Specify the ports for the [ICSNPP-ICCP analyzer](https://github.com/idaholab/icsnpp-iccp). ICCP only supports TCP ports.
         + `ZEEK_PORTS_MODBUS` - Specify the ports for the [ICSNPP-Modbus analyzer](https://github.com/cisagov/icsnpp-modbus). Modbus only supports TCP ports.
         + `ZEEK_PORTS_OMRON_FINS` - Specify the ports for the [ICSNPP-Omron-FINS analyzer](https://github.com/cisagov/icsnpp-omron-fins). Omron FINS supports but UDP and TCP ports.
         + `ZEEK_PORTS_OPCUA_BINARY` - Specify the ports for the [ICSNPP-OPCUA-Binary analyzer](https://github.com/cisagov/icsnpp-opcua-binary). OPCUA Binary only supports TCP ports.

@@ -252,7 +252,7 @@ EOF
     chmod 755 /usr/local/bin/yq
     chown root:root /usr/local/bin/yq
 
-    STERN_VERSION=1.33.1
+    STERN_VERSION=1.35.0
     STERN_URL="https://github.com/stern/stern/releases/download/v${STERN_VERSION}/stern_${STERN_VERSION}_linux_${LINUX_CPU}.tar.gz"
     cd /tmp
     mkdir -p ./stern

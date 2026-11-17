@@ -11,6 +11,7 @@ import sys
 import malcolm_utils
 from tempfile import TemporaryDirectory
 
+from packaging.utils import canonicalize_name
 from packaging.version import Version
 from distutils import dir_util
 
@@ -21,17 +22,41 @@ orig_path = os.getcwd()
 
 
 ###################################################################################################
+PIP_BASE_ARGS = [
+    "--no-color",
+    "--no-input",
+    "--disable-pip-version-check",
+]
+
+
+###################################################################################################
+def pip_offline_args():
+    # Plugins are built and installed without build isolation so pip uses the setuptools/wheel
+    #   already in NetBox's venv instead of downloading a build backend from an index. Plugins
+    #   that use another build backend (hatchling, poetry-core, etc.) need that backend provided
+    #   under the "requirements" subdirectory.
+    # --no-index is added by default so startup never depends on reaching PyPI. If the user has
+    #   set any PIP_NO_INDEX, PIP_INDEX_URL or PIP_EXTRA_INDEX_URL environment variable, pip's own
+    #   handling of those is left alone.
+    args = ["--no-build-isolation"]
+    if not any(os.getenv(var) is not None for var in ("PIP_NO_INDEX", "PIP_INDEX_URL", "PIP_EXTRA_INDEX_URL")):
+        args.append("--no-index")
+    return args
+
+
+###################################################################################################
 def get_installed_packages(venvPy):
     packagesInstalled = {}
+    # --local is intentionally omitted: it restricts the listing to packages under sys.prefix,
+    #   which hides everything installed with --target into NETBOX_CUSTOM_VENV_PACKAGES_PATH and
+    #   causes every plugin to be reinstalled on every startup. NetBox's venv does not include
+    #   system site-packages, so nothing extra shows up without it.
     cmd = [
         venvPy,
         "-m",
         "pip",
-        "--no-color",
-        "--no-input",
-        "--disable-pip-version-check",
+        *PIP_BASE_ARGS,
         "list",
-        "--local",
         "--format",
         "json",
         "--verbose",
@@ -40,7 +65,9 @@ def get_installed_packages(venvPy):
     err, results = malcolm_utils.run_process(cmd, stderr=False, logger=logging)
     if (err == 0) and results and (len(results) > 0):
         try:
-            packagesInstalled = {item['name']: item for item in malcolm_utils.LoadStrIfJson(results[0])}
+            packagesInstalled = {
+                canonicalize_name(item['name']): item for item in malcolm_utils.LoadStrIfJson(results[0])
+            }
             logging.debug(f"found {len(packagesInstalled)} installed package(s)")
         except Exception as e:
             logging.error(f"{type(e).__name__} getting list of installed Python packages: {e}")
@@ -48,6 +75,22 @@ def get_installed_packages(venvPy):
         logging.warning(f"pip list returned err={err}, unable to determine installed packages")
 
     return packagesInstalled
+
+
+###################################################################################################
+def check_installed_dependencies(venvPy):
+    # Plugins and requirements are installed with --no-deps (see install_package_dir_if_needed),
+    #   so report any unsatisfied dependencies here rather than letting them surface later as an
+    #   import error when NetBox loads the plugin.
+    cmd = [venvPy, "-m", "pip", *PIP_BASE_ARGS, "check"]
+    logging.debug(f"dependency check command: {cmd}")
+    err, results = malcolm_utils.run_process(cmd, logger=logging)
+    if err == 0:
+        logging.debug("pip check found no dependency problems")
+    else:
+        for line in [line for line in (results or []) if line.strip()]:
+            logging.warning(f"pip check: {line}")
+    return err == 0
 
 
 ###################################################################################################
@@ -59,84 +102,90 @@ def install_package_dir_if_needed(
     installResult = False
     targetDir = os.getenv('NETBOX_CUSTOM_VENV_PACKAGES_PATH', '')
 
-    # First do a "dry run" install to determine what would happen. The report from this will
-    #   help us determine if the package actually needs installed or not, as pip always treats
-    #   installations from local directories as "new installs" and would uninstall/reinstall
-    #   no matter what, which we want to avoid if we don't need it.
-    pluginNeedsInstall = False
-    logging.debug(f"evaluating whether {packageDir} needs (re)install")
-    with malcolm_utils.temporary_filename(suffix='.json') as dryRunInstallReportFileName:
-        cmd = [
-            venvPy,
-            "-m",
-            "pip",
-            "--no-color",
-            "--no-input",
-            "--disable-pip-version-check",
-            "install",
-            "--upgrade",
-            "--dry-run",
-            "--progress-bar",
-            "off",
-            "--report",
-            dryRunInstallReportFileName,
-        ]
-        if os.path.isdir(targetDir):
-            cmd.extend(['--target', targetDir])
-        cmd.append(packageDir)
-        logging.debug(f"dry-run install command: {cmd}")
-        err, results = malcolm_utils.run_process(cmd, logger=logging)
-        if (err == 0) and os.path.isfile(dryRunInstallReportFileName):
-            with open(dryRunInstallReportFileName, 'r') as f:
-                dryRunReport = malcolm_utils.LoadFileIfJson(f)
-                wouldInstallInfo = {
-                    malcolm_utils.deep_get(installItem, ['metadata', 'name']): malcolm_utils.deep_get(
-                        installItem, ['metadata', 'version']
-                    )
-                    for installItem in dryRunReport.get('install', [])
-                }
-            logging.debug(f"dry-run would install/upgrade: {wouldInstallInfo}")
-            pluginNeedsInstall = any(
-                [
-                    package_name
-                    for package_name, new_version in wouldInstallInfo.items()
-                    if (package_name not in preinstalledPackagesDict)
-                    or (Version(new_version) > Version(preinstalledPackagesDict[package_name]['version']))
-                ]
-            )
-        else:
-            logging.debug(f"dry-run install failed or produced no report (err={err}), assuming install is needed")
-            pluginNeedsInstall = True
+    # --target makes pip ignore everything already installed, so letting it resolve dependencies
+    #   would re-fetch packages NetBox's venv already has (and fail outright with --no-index).
+    #   Dependencies are expected to come from the venv itself or from the "requirements"
+    #   subdirectory, and check_installed_dependencies reports anything missing.
+    installArgs = [
+        "install",
+        "--upgrade",
+        "--no-deps",
+        *pip_offline_args(),
+        "--progress-bar",
+        "off",
+    ]
+    if os.path.isdir(targetDir):
+        installArgs.extend(['--target', targetDir])
 
-    if pluginNeedsInstall:
-        logging.info(f"installing/upgrading {packageDir}")
-        with TemporaryDirectory() as tmpPackageDir:
-            dir_util.copy_tree(packageDir, tmpPackageDir, preserve_symlinks=True)
+    # The custom plugins directory is mounted read-only and some build backends write into the
+    #   source tree (e.g., *.egg-info), so both the dry run and the install work from a copy.
+    with TemporaryDirectory() as tmpPackageDir:
+        dir_util.copy_tree(packageDir, tmpPackageDir, preserve_symlinks=True)
+
+        # First do a "dry run" install to determine what would happen. The report from this will
+        #   help us determine if the package actually needs installed or not, as pip always treats
+        #   installations from local directories as "new installs" and would uninstall/reinstall
+        #   no matter what, which we want to avoid if we don't need it.
+        pluginNeedsInstall = False
+        logging.debug(f"evaluating whether {packageDir} needs (re)install")
+        with malcolm_utils.temporary_filename(suffix='.json') as dryRunInstallReportFileName:
+            cmd = [
+                venvPy,
+                "-m",
+                "pip",
+                *PIP_BASE_ARGS,
+                *installArgs,
+                "--dry-run",
+                "--report",
+                dryRunInstallReportFileName,
+                tmpPackageDir,
+            ]
+            logging.debug(f"dry-run install command: {cmd}")
+            err, results = malcolm_utils.run_process(cmd, logger=logging)
+            if (err == 0) and os.path.isfile(dryRunInstallReportFileName):
+                with open(dryRunInstallReportFileName, 'r') as f:
+                    dryRunReport = malcolm_utils.LoadFileIfJson(f)
+                    wouldInstallInfo = {
+                        canonicalize_name(
+                            malcolm_utils.deep_get(installItem, ['metadata', 'name'])
+                        ): malcolm_utils.deep_get(installItem, ['metadata', 'version'])
+                        for installItem in dryRunReport.get('install', [])
+                    }
+                logging.debug(f"dry-run would install/upgrade: {wouldInstallInfo}")
+                pluginNeedsInstall = any(
+                    [
+                        package_name
+                        for package_name, new_version in wouldInstallInfo.items()
+                        if (package_name not in preinstalledPackagesDict)
+                        or (Version(new_version) > Version(preinstalledPackagesDict[package_name]['version']))
+                    ]
+                )
+            else:
+                logging.debug(
+                    f"dry-run install failed or produced no report (err={err}), assuming install is needed: {results}"
+                )
+                pluginNeedsInstall = True
+
+        if pluginNeedsInstall:
+            logging.info(f"installing/upgrading {packageDir}")
             with malcolm_utils.temporary_filename(suffix='.json') as installReportFileName:
                 cmd = [
                     venvPy,
                     "-m",
                     "pip",
-                    "--no-color",
-                    "--no-input",
-                    "--disable-pip-version-check",
-                    "install",
-                    "--upgrade",
-                    "--progress-bar",
-                    "off",
+                    *PIP_BASE_ARGS,
+                    *installArgs,
                     "--report",
                     installReportFileName,
+                    tmpPackageDir,
                 ]
-                if os.path.isdir(targetDir):
-                    cmd.extend(['--target', targetDir])
-                cmd.append(tmpPackageDir)
                 logging.debug(f"install command: {cmd}")
                 err, results = malcolm_utils.run_process(cmd, logger=logging)
                 installResult = err == 0
                 if not installResult:
                     logging.warning(f"install of {packageDir} failed with err={err}: {results}")
-    else:
-        logging.debug(f"{packageDir} is already up to date, skipping install")
+        else:
+            logging.debug(f"{packageDir} is already up to date, skipping install")
 
     return installResult
 
@@ -477,6 +526,7 @@ def install_plugins(args):
         # get updated list of installed packages
         logging.debug("refreshing installed package list after install/update")
         packagesInstalled = get_installed_packages(netboxVenvPy)
+        check_installed_dependencies(netboxVenvPy)
 
     # Keep discovery independent of pip list so --target installs are included.
     search_locations = _plugin_search_locations(packagesInstalled)

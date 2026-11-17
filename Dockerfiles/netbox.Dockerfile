@@ -27,7 +27,7 @@ USER root
 
 ENV NETBOX_INITIALIZERS_VERSION="v4.6.2"
 ENV NETBOX_TOPOLOGY_VERSION="4.5.1"
-ENV NETBOX_HEALTHCHECK_VERSION="0.3.0"
+ENV NETBOX_HEALTHCHECK_VERSION="0.4.0"
 
 ENV YQ_VERSION="4.54.3"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
@@ -45,7 +45,7 @@ ENV NETBOX_DEVICETYPE_LIBRARY_SHA256="78ffb15620154df8362ff70482aa9b502018584844
 ENV NETBOX_DEVICETYPE_LIBRARY_URL="https://codeload.github.com/netbox-community/devicetype-library/tar.gz/${NETBOX_DEVICETYPE_LIBRARY_COMMIT}"
 
 # pip for NetBox's venv, installed from its PyPI wheel (verified against binaries.sha256)
-ENV NETBOX_PIP_VERSION="25.2"
+ENV NETBOX_PIP_VERSION="26.3"
 ENV NETBOX_PIP_URL="https://files.pythonhosted.org/packages/py3/p/pip/pip-${NETBOX_PIP_VERSION}-py3-none-any.whl"
 
 ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"

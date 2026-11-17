@@ -110,12 +110,12 @@ EOF
 #   (copied into the build environment as /usr/local/share/binaries.sha256).
 #   When bumping a version here, update the matching manifest entries too.
 YQ_VERSION="4.54.3"
-CROC_VERSION="11.5.4"
+CROC_VERSION="11.6.5"
 JUST_VERSION="1.59.0"
 EZA_VERSION="0.23.5"
 NERD_FONTS_VERSION="3.5.1"
-STERN_VERSION="1.34.0"
-KUBECTL_VERSION="1.37.1"
+STERN_VERSION="1.35.0"
+KUBECTL_VERSION="1.37.2"
 
 # install-verified-binary.sh <destination> <url> <artifact-key>, aborting this hook on any failure
 function verified_download {

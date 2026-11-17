@@ -1,32 +1,32 @@
 # test dependencies for shared/tests
 # pip install -r shared/tests/requirements.txt
 
-pytest==9.1.1
-trio==0.34.0
+pytest==9.2.0
+trio==0.35.0
 
 # api (api/requirements.txt)
-psutil==7.1.3
-redis==7.1.0
-regex==2025.11.3
+psutil==7.2.2
+redis==8.1.0
+regex==2026.11.9
 
 # filescan (filescan/python-filescan/requirements.txt)
-anyio==4.14.2
+anyio==4.16.0
 Flask==3.1.3
 human-id==0.2.0
 inflection==0.5.1
-pydantic==2.11.7; python_version < "3.14"
+pydantic==2.14.3; python_version < "3.14"
 pydantic>=2.12; python_version >= "3.14"
 supervisor==4.3.0
-setuptools==84.1.0
+setuptools==84.2.1
 # filescan Strelka bindings (make -C filescan/python-filescan)
-grpcio-tools==1.84.0
+grpcio-tools==1.85.1
 
 # threat feeds (zeek/requirements.txt)
-git+https://github.com/mmguero-dev/mandiant-ti-client@67d084e8a31801b522e859fafac0dbd9ff8c4cf3
-beautifulsoup4==4.14.2
-dateparser==1.2.2
-pymisp==2.5.17.2
-stix2==3.0.1
+git+https://github.com/mmguero-dev/mandiant-ti-client@88b03a9bcd05ad74f1f763433e07c7cb71480c11
+beautifulsoup4==4.15.0
+dateparser==1.5.0
+pymisp==3.0.0
+stix2==3.0.2
 taxii2-client==2.3.0
 vt-py==0.22.0
 
@@ -38,15 +38,15 @@ elasticsearch==8.19.2
 elasticsearch-dsl==8.18.0
 opensearch-py==3.2.0
 python-magic==0.4.27
-pyzmq==27.1.0
-requests==2.33.1
+pyzmq==27.3.0
+requests==2.34.2
 watchdog==7.1.0
 
 # archive extraction (filebeat/requirements.txt)
 libarchive-c==5.3
 
 # pin updates (scripts/update_pins.py; shared/tests/test_update_pins.py)
-packaging==25.0
+packaging==26.3
 PyYAML==6.0.3
 
 # installer (scripts/install.py and scripts/installer/; shared/tests/installer)

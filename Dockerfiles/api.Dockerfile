@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 RUN    apt-get update -q \
     && apt-get install -y gcc \
     && python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
-    && python3 -m pip install --break-system-packages --no-cache-dir flake8==7.2.0
+    && python3 -m pip install --break-system-packages --no-cache-dir flake8==7.5.0
 
 ADD ./api /usr/src/app/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/src/app/
