@@ -254,6 +254,7 @@ Although the configuration script automates many of the following configuration 
         + `ZEEK_PORTS_GE_SRTP` - Specify the ports for the [ICSNPP-GE-SRTP analyzer](https://github.com/cisagov/icsnpp-ge-srtp). GE-SRTP only supports TCP ports.
         + `ZEEK_PORTS_GENISYS` - Specify the ports for the [ICSNPP-Genysis analyzer](https://github.com/cisagov/icsnpp-genisys/). Genysis only supports TCP ports.
         + `ZEEK_PORTS_HART_IP` - Specify the ports for the [ICSNPP-HART-IP analyzer](https://github.com/cisagov/icsnpp-hart-ip). HART-IP supports both UDP and TCP ports.
+        + `ZEEK_PORTS_ICCP` - Specify the ports for the [ICSNPP-ICCP analyzer](https://github.com/idaholab/icsnpp-iccp). ICCP only supports TCP ports.
         + `ZEEK_PORTS_MODBUS` - Specify the ports for the [ICSNPP-Modbus analyzer](https://github.com/cisagov/icsnpp-modbus). Modbus only supports TCP ports.
         + `ZEEK_PORTS_OMRON_FINS` - Specify the ports for the [ICSNPP-Omron-FINS analyzer](https://github.com/cisagov/icsnpp-omron-fins). Omron FINS supports but UDP and TCP ports.
         + `ZEEK_PORTS_OPCUA_BINARY` - Specify the ports for the [ICSNPP-OPCUA-Binary analyzer](https://github.com/cisagov/icsnpp-opcua-binary). OPCUA Binary only supports TCP ports.

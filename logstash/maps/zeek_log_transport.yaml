@@ -35,6 +35,11 @@ websocket: tcp
 
 # ICS/OT
 cotp: tcp
+iccp: tcp
+iccp_controls: tcp
+iccp_errors: tcp
+iccp_objects: tcp
+iccp_transfers: tcp
 iec104_ctrl: tcp
 iec104_file: tcp
 iec104_param: tcp

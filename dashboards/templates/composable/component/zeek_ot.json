@@ -6029,6 +6029,524 @@
                 }
               }
             },
+            "iccp_controls": {
+              "properties": {
+                "classification": {
+                  "type": "keyword"
+                },
+                "data_count": {
+                  "type": "long"
+                },
+                "data_node_count": {
+                  "type": "long"
+                },
+                "tag_state": {
+                  "type": "keyword"
+                },
+                "tag_reason": {
+                  "type": "keyword"
+                },
+                "success_count": {
+                  "type": "long"
+                },
+                "event_enrollment_scope": {
+                  "type": "keyword"
+                },
+                "event_enrollment_domain": {
+                  "type": "keyword"
+                },
+                "event_enrollment_name": {
+                  "type": "keyword"
+                },
+                "event_condition_scope": {
+                  "type": "keyword"
+                },
+                "event_condition_domain": {
+                  "type": "keyword"
+                },
+                "severity": {
+                  "type": "integer"
+                },
+                "current_state": {
+                  "type": "keyword"
+                },
+                "transition_time_kind": {
+                  "type": "keyword"
+                },
+                "transition_time_value": {
+                  "type": "integer"
+                },
+                "transition_time_raw": {
+                  "type": "keyword"
+                },
+                "notification_lost": {
+                  "type": "keyword"
+                },
+                "action_result_present": {
+                  "type": "keyword"
+                },
+                "access_choice": {
+                  "type": "long"
+                },
+                "target_count_known": {
+                  "type": "keyword"
+                },
+                "target_count": {
+                  "type": "long"
+                },
+                "value_count": {
+                  "type": "long"
+                },
+                "logged_item_count": {
+                  "type": "long"
+                },
+                "omitted_item_count": {
+                  "type": "long"
+                },
+                "item_index": {
+                  "type": "long"
+                },
+                "value_raw": {
+                  "type": "keyword"
+                },
+                "value_raw_truncated": {
+                  "type": "keyword"
+                },
+                "result_success": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iccp_errors": {
+              "properties": {
+                "modifier_position": {
+                  "type": "integer"
+                },
+                "additional_code": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iccp": {
+              "properties": {
+                "layer": {
+                  "type": "keyword"
+                },
+                "message_type": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "context_id": {
+                  "type": "long"
+                },
+                "abstract_syntax": {
+                  "type": "keyword"
+                },
+                "transfer_syntax": {
+                  "type": "keyword"
+                },
+                "application_context": {
+                  "type": "keyword"
+                },
+                "association_result": {
+                  "type": "integer"
+                },
+                "reason": {
+                  "type": "integer"
+                },
+                "diagnostic_code": {
+                  "type": "integer"
+                },
+                "payload_length": {
+                  "type": "long"
+                },
+                "authentication_present": {
+                  "type": "keyword"
+                },
+                "authentication_length": {
+                  "type": "long"
+                },
+                "is_opaque": {
+                  "type": "keyword"
+                },
+                "association_kind": {
+                  "type": "keyword"
+                },
+                "association_phase": {
+                  "type": "keyword"
+                },
+                "endpoint_role": {
+                  "type": "keyword"
+                },
+                "operation": {
+                  "type": "keyword"
+                },
+                "transfer_kind": {
+                  "type": "keyword"
+                },
+                "invoke_id": {
+                  "type": "integer"
+                },
+                "service_tag": {
+                  "type": "long"
+                },
+                "identify_outcome": {
+                  "type": "keyword"
+                },
+                "vendor_name": {
+                  "type": "keyword"
+                },
+                "model_name": {
+                  "type": "keyword"
+                },
+                "revision": {
+                  "type": "keyword"
+                },
+                "abstract_syntax_count": {
+                  "type": "long"
+                },
+                "first_abstract_syntax": {
+                  "type": "keyword"
+                },
+                "object_scope": {
+                  "type": "keyword"
+                },
+                "object_domain": {
+                  "type": "keyword"
+                },
+                "object_name": {
+                  "type": "keyword"
+                },
+                "object_category": {
+                  "type": "keyword"
+                },
+                "name_model": {
+                  "type": "keyword"
+                },
+                "domain_kind": {
+                  "type": "keyword"
+                },
+                "bilateral_domain": {
+                  "type": "keyword"
+                },
+                "value_type": {
+                  "type": "long"
+                },
+                "standardized_value": {
+                  "type": "keyword"
+                },
+                "conformance_blocks": {
+                  "type": "keyword"
+                },
+                "conditions": {
+                  "type": "keyword"
+                },
+                "condition_mask": {
+                  "type": "long"
+                },
+                "point_type": {
+                  "type": "keyword"
+                },
+                "state_value": {
+                  "type": "long"
+                },
+                "tag_value": {
+                  "type": "long"
+                },
+                "expected_state_value": {
+                  "type": "long"
+                },
+                "supplemental_reserved": {
+                  "type": "long"
+                },
+                "integer_value": {
+                  "type": "integer"
+                },
+                "floating_value": {
+                  "type": "float"
+                },
+                "validity": {
+                  "type": "keyword"
+                },
+                "value_source": {
+                  "type": "keyword"
+                },
+                "normal_value": {
+                  "type": "keyword"
+                },
+                "timestamp_quality": {
+                  "type": "keyword"
+                },
+                "timestamp_value": {
+                  "type": "date"
+                },
+                "cov_value": {
+                  "type": "long"
+                },
+                "result_count": {
+                  "type": "long"
+                },
+                "failure_count": {
+                  "type": "long"
+                },
+                "logged_result_count": {
+                  "type": "long"
+                },
+                "omitted_result_count": {
+                  "type": "long"
+                },
+                "result_index": {
+                  "type": "long"
+                },
+                "result_type": {
+                  "type": "long"
+                },
+                "result_error": {
+                  "type": "integer"
+                },
+                "result_raw": {
+                  "type": "keyword"
+                },
+                "result_raw_truncated": {
+                  "type": "keyword"
+                },
+                "boolean_value": {
+                  "type": "keyword"
+                },
+                "string_value": {
+                  "type": "keyword"
+                },
+                "object_identifier_value": {
+                  "type": "keyword"
+                },
+                "detail": {
+                  "type": "keyword"
+                },
+                "provenance": {
+                  "type": "keyword"
+                },
+                "stream_completeness": {
+                  "type": "keyword"
+                },
+                "outcome": {
+                  "type": "keyword"
+                },
+                "named_type": {
+                  "type": "keyword"
+                },
+                "variable_count": {
+                  "type": "long"
+                },
+                "pairing_status": {
+                  "type": "keyword"
+                },
+                "error_class": {
+                  "type": "keyword"
+                },
+                "error_class_code": {
+                  "type": "long"
+                },
+                "error_code": {
+                  "type": "integer"
+                }
+              }
+            },
+            "iccp_objects": {
+              "properties": {
+                "observation_kind": {
+                  "type": "keyword"
+                },
+                "object_class_choice": {
+                  "type": "long"
+                },
+                "object_class": {
+                  "type": "integer"
+                },
+                "continue_after": {
+                  "type": "keyword"
+                },
+                "more_follows": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "iccp_transfers": {
+              "properties": {
+                "action": {
+                  "type": "keyword"
+                },
+                "list_scope": {
+                  "type": "keyword"
+                },
+                "list_domain": {
+                  "type": "keyword"
+                },
+                "list_name": {
+                  "type": "keyword"
+                },
+                "first_variable_scope": {
+                  "type": "keyword"
+                },
+                "first_variable_domain": {
+                  "type": "keyword"
+                },
+                "first_variable_name": {
+                  "type": "keyword"
+                },
+                "deletable": {
+                  "type": "keyword"
+                },
+                "delete_scope": {
+                  "type": "integer"
+                },
+                "number_matched": {
+                  "type": "integer"
+                },
+                "number_deleted": {
+                  "type": "integer"
+                },
+                "known_list": {
+                  "type": "keyword"
+                },
+                "report_timestamp": {
+                  "type": "date"
+                },
+                "info_reference": {
+                  "type": "integer"
+                },
+                "local_reference": {
+                  "type": "integer"
+                },
+                "message_id": {
+                  "type": "integer"
+                },
+                "message_size": {
+                  "type": "long"
+                },
+                "buffer_capacity": {
+                  "type": "long"
+                },
+                "buffer_length": {
+                  "type": "long"
+                },
+                "data_set_scope": {
+                  "type": "keyword"
+                },
+                "data_set_domain": {
+                  "type": "keyword"
+                },
+                "data_set_name": {
+                  "type": "keyword"
+                },
+                "start_time": {
+                  "type": "date"
+                },
+                "transfer_interval": {
+                  "type": "integer"
+                },
+                "tle": {
+                  "type": "integer"
+                },
+                "buffer_time": {
+                  "type": "integer"
+                },
+                "integrity_check": {
+                  "type": "integer"
+                },
+                "block_data": {
+                  "type": "keyword"
+                },
+                "critical": {
+                  "type": "keyword"
+                },
+                "report_by_exception": {
+                  "type": "keyword"
+                },
+                "all_changes_reported": {
+                  "type": "keyword"
+                },
+                "enabled": {
+                  "type": "keyword"
+                },
+                "event_code_requested": {
+                  "type": "integer"
+                },
+                "event_code_detected": {
+                  "type": "integer"
+                },
+                "conformance": {
+                  "type": "keyword"
+                },
+                "conformance_reasons": {
+                  "type": "keyword"
+                },
+                "transfer_set_scope": {
+                  "type": "keyword"
+                },
+                "transfer_set_domain": {
+                  "type": "keyword"
+                },
+                "transfer_set_name": {
+                  "type": "keyword"
+                },
+                "transfer_state": {
+                  "type": "keyword"
+                },
+                "report_access": {
+                  "type": "keyword"
+                },
+                "report_correlation": {
+                  "type": "keyword"
+                },
+                "ack_required": {
+                  "type": "keyword"
+                },
+                "type_choice": {
+                  "type": "long"
+                },
+                "type_constructed": {
+                  "type": "keyword"
+                },
+                "type_signed_value": {
+                  "type": "integer"
+                },
+                "type_boolean_value": {
+                  "type": "keyword"
+                },
+                "type_format_width": {
+                  "type": "integer"
+                },
+                "type_exponent_width": {
+                  "type": "integer"
+                },
+                "type_raw": {
+                  "type": "keyword"
+                },
+                "type_raw_truncated": {
+                  "type": "keyword"
+                },
+                "type_packed": {
+                  "type": "keyword"
+                },
+                "type_number_of_elements": {
+                  "type": "integer"
+                },
+                "type_component_count": {
+                  "type": "long"
+                },
+                "type_node_count": {
+                  "type": "long"
+                },
+                "type_maximum_depth": {
+                  "type": "long"
+                }
+              }
+            },
             "iec104_ctrl": {
               "properties": {
                 "action": {

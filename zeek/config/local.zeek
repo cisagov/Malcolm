@@ -28,6 +28,7 @@ global enip_ports_str = getenv("ZEEK_PORTS_ENIP");
 global ge_srtp_ports_str = getenv("ZEEK_PORTS_GE_SRTP");
 global genisys_ports_str = getenv("ZEEK_PORTS_GENISYS");
 global hart_ip_ports_str = getenv("ZEEK_PORTS_HART_IP");
+global iccp_ports_str = getenv("ZEEK_PORTS_ICCP");
 global modbus_ports_str = getenv("ZEEK_PORTS_MODBUS");
 global omron_fins_ports_str = getenv("ZEEK_PORTS_OMRON_FINS");
 global opcua_binary_ports_str = getenv("ZEEK_PORTS_OPCUA_BINARY");
@@ -62,6 +63,7 @@ global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == true_regex
 global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == true_regex) ? T : F;
 global disable_ics_ge_srtp = (getenv("ZEEK_DISABLE_ICS_GE_SRTP") == true_regex) ? T : F;
 global disable_ics_hart_ip = (getenv("ZEEK_DISABLE_ICS_HART_IP") == true_regex) ? T : F;
+global disable_ics_iccp = (getenv("ZEEK_DISABLE_ICS_ICCP") == true_regex) ? T : F;
 global disable_ics_omron_fins = (getenv("ZEEK_DISABLE_ICS_OMRON_FINS") == true_regex) ? T : F;
 global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
@@ -306,6 +308,9 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP_TCP);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP_UDP);
   }
+  if (disable_ics_all || disable_ics_iccp) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_ICCP_TCP);
+  }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
   }
@@ -461,6 +466,13 @@ redef LongConnection::do_notice=long_conn_do_notice;
   @endif
   @if (|split_hart_ip_ports$udp| > 0)
     redef HART_IP::udp_ports = split_hart_ip_ports$udp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_iccp) && (iccp_ports_str != ""))
+  global split_iccp_ports = split_ports_by_protocol(iccp_ports_str);
+  @if (|split_iccp_ports$tcp| > 0)
+    redef ICCP::iccp_ports = split_iccp_ports$tcp;
   @endif
 @endif
 

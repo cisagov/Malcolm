@@ -62,6 +62,7 @@ https://github.com/corelight/zeek-xor-exe-plugin|412725a8a2a77c4b09618c460899c0e
 https://github.com/corelight/zerologon|09ac84b2abd2c3895ac0a1c51caac0e638dd7b18|HEAD||
 https://github.com/cybera/zeek-sniffpass|1174473086ee57b93f5299d7e183b7496b48bb03|HEAD||
 https://github.com/FoxIO-LLC/ja4|8eda4ce45426b639774158f7ab8bc873af69237f|main||
+https://github.com/idaholab/icsnpp-iccp|ec2eb5e53c986a992aeac721c0e1ceada1365bd3|main||
 https://github.com/J-Gras/zeek-fuzzy-hashing|58a3cdf2a50ae1e2aceaf1e32371969b31ae1f6b|topic/jgras/hash-all-files||
 https://github.com/mmguero-dev/bzar|2b6bb1dc95d4ab1c3d6c9dd70f59628c359797e2|HEAD||
 https://github.com/corelight/json-streaming-logs|af109f07fa563496acd77a71e34ceb572de3b378|master||
