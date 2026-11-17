@@ -82,7 +82,7 @@ EOF
     ln -s -f -r /usr/share/images/desktop-base/hedgehog-wallpaper.png /usr/share/images/desktop-base/default
   fi
 
-  # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
+  # we're going to let Network Manager manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
   InitializeAggregatorNetworking
 
   # disable automatic running of some services
