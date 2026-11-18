@@ -67,6 +67,7 @@ global disable_ics_iccp = (getenv("ZEEK_DISABLE_ICS_ICCP") == true_regex) ? T : 
 global disable_ics_omron_fins = (getenv("ZEEK_DISABLE_ICS_OMRON_FINS") == true_regex) ? T : F;
 global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
+global disable_ics_mpls = (getenv("ZEEK_DISABLE_ICS_MPLS") == true_regex) ? T : F;
 global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_roc_plus = (getenv("ZEEK_DISABLE_ICS_ROC_PLUS") == true_regex) ? T : F;
@@ -316,6 +317,9 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_modbus) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_MODBUS);
+  }
+  if (disable_ics_all || disable_ics_mpls) {
+    PacketAnalyzer::__disable_analyzer(PacketAnalyzer::ANALYZER_MPLSLOGGER);
   }
   if (disable_ics_all || disable_ics_omron_fins) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_OMRON_FINS_TCP);

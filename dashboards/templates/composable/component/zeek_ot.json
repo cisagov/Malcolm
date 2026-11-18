@@ -3013,6 +3013,22 @@
                 }
               }
             },
+            "mpls": {
+              "properties": {
+                "labels": {
+                  "type": "keyword"
+                },
+                "experimentals": {
+                  "type": "keyword"
+                },
+                "bottom_of_stack": {
+                  "type": "keyword"
+                },
+                "time_to_live": {
+                  "type": "keyword"
+                }
+              }
+            },
             "omron_fins": {
               "properties": {
                 "client_node_address": {
