@@ -22,6 +22,15 @@ export DASHID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx && \
 
 3. Include the new dashboard either by using a [bind mount](contributing-local-modifications.md#Bind) for the `./dashboards/dashboards/` directory or by [rebuilding](development.md#Build) the `dashboards-helper` image. Dashboards are imported the first time Malcolm starts up.
 
+### <a name="DashboardsNavigation"></a>The navigation pane
+
+Malcolm's dashboards share one navigation pane, defined in [`dashboards/dashboards/navigation.md`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/dashboards/dashboards/navigation.md). When dashboards are imported, the `MALCOLM_NAVIGATION_MARKDOWN_REPLACER` placeholder in each dashboard's navigation markdown is replaced with the contents of that file. So:
+
+* to add the new dashboard to the navigation pane, add a link to it in `navigation.md`, under the appropriate heading. Protocol dashboards go on the **Common Protocols** or **ICS/IoT Protocols** line in alphabetical order, separated by `   ●   `, e.g., `[Foo](#/dashboard/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)`.
+* to give the new dashboard the navigation pane, start from an existing dashboard's navigation panel, and check that the exported JSON contains the `MALCOLM_NAVIGATION_MARKDOWN_REPLACER` placeholder in that panel rather than the expanded navigation text.
+
+For a dashboard that goes with a new Zeek parser, see [Adding a new Zeek parser](contributing-zeek-parser.md#ZeekParserDashboards).
+
 ## <a name="DashboardsPlugins"></a>OpenSearch Dashboards plugins
 
 The [dashboards.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/dashboards.Dockerfile) installs the OpenSearch Dashboards plugins used by Malcolm (search for `opensearch-dashboards-plugin install` in that file). Additional Dashboards plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `dashboards` image.
