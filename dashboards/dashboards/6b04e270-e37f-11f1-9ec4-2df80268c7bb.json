@@ -1,0 +1,338 @@
+{
+  "objects": [
+    {
+      "attributes": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"2d2a1765-2902-40e9-8844-6238e94b4b39\"},\"panelIndex\":\"2d2a1765-2902-40e9-8844-6238e94b4b39\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":48,\"h\":16,\"i\":\"6667ea3e-fe8f-450f-86d5-afb2bf906008\"},\"panelIndex\":\"6667ea3e-fe8f-450f-86d5-afb2bf906008\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":51,\"w\":48,\"h\":16,\"i\":\"b7def884-1f04-43c3-8cd1-8c298b5cc38d\"},\"panelIndex\":\"b7def884-1f04-43c3-8cd1-8c298b5cc38d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":67,\"w\":48,\"h\":17,\"i\":\"e9cc1805-98e6-4c6d-b6a5-6e44f0ae5146\"},\"panelIndex\":\"e9cc1805-98e6-4c6d-b6a5-6e44f0ae5146\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":84,\"w\":48,\"h\":16,\"i\":\"a60913de-8c1f-4f26-9693-6654abc59fb5\"},\"panelIndex\":\"a60913de-8c1f-4f26-9693-6654abc59fb5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":100,\"w\":48,\"h\":17,\"i\":\"7f7a5dd9-b31d-4f79-932a-1706cb58aac3\"},\"panelIndex\":\"7f7a5dd9-b31d-4f79-932a-1706cb58aac3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"3.10.0\",\"gridData\":{\"x\":0,\"y\":117,\"w\":48,\"h\":16,\"i\":\"aa419326-da89-42d1-901e-510883a4d2cc\"},\"panelIndex\":\"aa419326-da89-42d1-901e-510883a4d2cc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"}]",
+        "timeRestore": false,
+        "title": "ICCP",
+        "version": 1
+      },
+      "id": "6b04e270-e37f-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "89bdf1e0-e37d-11f1-9ec4-2df80268c7bb",
+          "name": "panel_1",
+          "type": "search"
+        },
+        {
+          "id": "d62d5bb0-e37d-11f1-9ec4-2df80268c7bb",
+          "name": "panel_2",
+          "type": "search"
+        },
+        {
+          "id": "10e00fa0-e37e-11f1-9ec4-2df80268c7bb",
+          "name": "panel_3",
+          "type": "search"
+        },
+        {
+          "id": "82bb6660-e37e-11f1-9ec4-2df80268c7bb",
+          "name": "panel_4",
+          "type": "search"
+        },
+        {
+          "id": "d83a7450-e37e-11f1-9ec4-2df80268c7bb",
+          "name": "panel_5",
+          "type": "search"
+        },
+        {
+          "id": "1a3b9460-e37f-11f1-9ec4-2df80268c7bb",
+          "name": "panel_6",
+          "type": "search"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2026-11-18T18:42:41.333Z",
+      "version": "WzE0NDMsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "Navigation",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}"
+      },
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2026-11-18T18:17:04.055Z",
+      "version": "WzEzNDEsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "event.dataset",
+          "network.protocol",
+          "event.action",
+          "event.result",
+          "zeek.iccp.invoke_id",
+          "zeek.iccp.object_domain",
+          "zeek.iccp.object_name",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:iccp*\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "ICCP - Logs",
+        "version": 1
+      },
+      "id": "89bdf1e0-e37d-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-18T18:26:14.654Z",
+      "version": "WzEzNzgsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "network.protocol",
+          "zeek.iccp.layer",
+          "zeek.iccp.association_kind",
+          "zeek.iccp.association_phase",
+          "event.action",
+          "event.result",
+          "zeek.iccp.invoke_id",
+          "zeek.iccp.object_name",
+          "zeek.iccp.status"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:iccp\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "ICCP - Association and MMS",
+        "version": 1
+      },
+      "id": "d62d5bb0-e37d-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-18T18:28:22.890Z",
+      "version": "WzEzODksMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "event.action",
+          "event.result",
+          "zeek.iccp_objects.observation_kind",
+          "zeek.iccp.object_domain",
+          "zeek.iccp.object_name",
+          "zeek.iccp.object_category",
+          "zeek.iccp.point_type",
+          "zeek.iccp.standardized_value",
+          "zeek.iccp.validity",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:iccp_objects\",\"language\":\"lucene\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "ICCP - Objects",
+        "version": 1
+      },
+      "id": "10e00fa0-e37e-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-18T18:38:57.522Z",
+      "version": "WzE0NDEsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "event.action",
+          "event.result",
+          "zeek.iccp_transfers.data_set_name",
+          "zeek.iccp_transfers.transfer_set_name",
+          "zeek.iccp_transfers.transfer_state",
+          "zeek.iccp_transfers.list_domain",
+          "zeek.iccp_transfers.list_scope",
+          "zeek.iccp_transfers.list_name",
+          "zeek.iccp_transfers.conformance",
+          "zeek.iccp_transfers.conformance_reasons",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:iccp_transfers\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "ICCP - Transfers",
+        "version": 1
+      },
+      "id": "82bb6660-e37e-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-18T18:33:12.390Z",
+      "version": "WzE0MTQsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "event.action",
+          "event.result",
+          "zeek.iccp_controls.classification",
+          "zeek.iccp.object_domain",
+          "zeek.iccp.object_name",
+          "zeek.iccp_controls.tag_state",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:iccp_controls\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "ICCP - Controls",
+        "version": 1
+      },
+      "id": "d83a7450-e37e-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-18T18:35:35.828Z",
+      "version": "WzE0MjksMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "event.action",
+          "event.result",
+          "zeek.iccp.error_code",
+          "zeek.iccp_errors.description",
+          "zeek.iccp.invoke_id",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:iccp_errors\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "ICCP - Errors",
+        "version": 1
+      },
+      "id": "1a3b9460-e37f-11f1-9ec4-2df80268c7bb",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-18T18:37:26.566Z",
+      "version": "WzE0MzgsMV0="
+    }
+  ],
+  "version": "3.10.0"
+}
