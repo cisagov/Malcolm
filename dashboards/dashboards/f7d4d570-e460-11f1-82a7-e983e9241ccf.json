@@ -1,0 +1,482 @@
+{
+  "objects": [
+    {
+      "attributes": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"useSharedCrosshair\":false}",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":30,\"i\":\"f11351c5-b9b1-43f5-85f1-90d47f91f9f6\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"f11351c5-b9b1-43f5-85f1-90d47f91f9f6\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"ba7728f9-9ead-4f4b-af1c-c638c1b0345a\",\"w\":7,\"x\":8,\"y\":0},\"panelIndex\":\"ba7728f9-9ead-4f4b-af1c-c638c1b0345a\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"2b983897-cfee-4ce0-9d3c-7c7959cdc6cc\",\"w\":11,\"x\":15,\"y\":0},\"panelIndex\":\"2b983897-cfee-4ce0-9d3c-7c7959cdc6cc\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"0b855ec3-b5ab-4b64-8463-1f8c79e789e0\",\"w\":22,\"x\":26,\"y\":0},\"panelIndex\":\"0b855ec3-b5ab-4b64-8463-1f8c79e789e0\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"8eb7ffbb-4879-42af-97b5-5f564340ed4a\",\"w\":6,\"x\":8,\"y\":11},\"panelIndex\":\"8eb7ffbb-4879-42af-97b5-5f564340ed4a\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"f80d84be-6562-4bf2-9b94-c8b25547d370\",\"w\":19,\"x\":14,\"y\":11},\"panelIndex\":\"f80d84be-6562-4bf2-9b94-c8b25547d370\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"c3079b56-5c0e-4b8c-a539-573afcbc1186\",\"w\":9,\"x\":33,\"y\":11},\"panelIndex\":\"c3079b56-5c0e-4b8c-a539-573afcbc1186\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"e1d1b89f-dfb0-46ec-947f-aa9ca7de379b\",\"w\":6,\"x\":42,\"y\":11},\"panelIndex\":\"e1d1b89f-dfb0-46ec-947f-aa9ca7de379b\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"cff2c1db-17ea-4f0c-8d1e-d69714dc7cc6\",\"w\":11,\"x\":0,\"y\":30},\"panelIndex\":\"cff2c1db-17ea-4f0c-8d1e-d69714dc7cc6\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"30492f85-5945-4022-9ff9-df28a3874950\",\"w\":37,\"x\":11,\"y\":30},\"panelIndex\":\"30492f85-5945-4022-9ff9-df28a3874950\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":21,\"i\":\"e36d30a2-1397-4c08-bf67-4195403d7fed\",\"w\":48,\"x\":0,\"y\":48},\"panelIndex\":\"e36d30a2-1397-4c08-bf67-4195403d7fed\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"0061f082-b103-4d6f-b757-11238cb78918\",\"w\":48,\"x\":0,\"y\":69},\"panelIndex\":\"0061f082-b103-4d6f-b757-11238cb78918\",\"version\":\"3.10.0\",\"panelRefName\":\"panel_11\"}]",
+        "timeRestore": false,
+        "title": "MPLS",
+        "version": 1
+      },
+      "id": "f7d4d570-e460-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "8ecf2e70-e45d-11f1-82a7-e983e9241ccf",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "3bec0ba0-e45e-11f1-82a7-e983e9241ccf",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "edcfb520-e45d-11f1-82a7-e983e9241ccf",
+          "name": "panel_3",
+          "type": "visualization"
+        },
+        {
+          "id": "a50f85c0-e45f-11f1-82a7-e983e9241ccf",
+          "name": "panel_4",
+          "type": "visualization"
+        },
+        {
+          "id": "039f17a0-e45f-11f1-82a7-e983e9241ccf",
+          "name": "panel_5",
+          "type": "visualization"
+        },
+        {
+          "id": "520d37a0-e45f-11f1-82a7-e983e9241ccf",
+          "name": "panel_6",
+          "type": "visualization"
+        },
+        {
+          "id": "21aceb90-e460-11f1-82a7-e983e9241ccf",
+          "name": "panel_7",
+          "type": "visualization"
+        },
+        {
+          "id": "6c85fdf0-e460-11f1-82a7-e983e9241ccf",
+          "name": "panel_8",
+          "type": "visualization"
+        },
+        {
+          "id": "52c9bef0-e461-11f1-82a7-e983e9241ccf",
+          "name": "panel_9",
+          "type": "search"
+        },
+        {
+          "id": "7ef8c7f0-e461-11f1-82a7-e983e9241ccf",
+          "name": "panel_10",
+          "type": "search"
+        },
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "panel_11",
+          "type": "search"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2026-11-19T21:47:03.657Z",
+      "version": "WzE0MTksMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "Navigation",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"MALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}"
+      },
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2026-11-19T20:44:57.977Z",
+      "version": "WzEzNTksMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Count",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"MPLS Packets\"},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"zeek.mpls.labels\",\"customLabel\":\"Unique Labels\"},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"source.mac\",\"customLabel\":\"Unique Senders\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Log Count\"},\"schema\":\"metric\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":32}}}}"
+      },
+      "id": "8ecf2e70-e45d-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:17:07.907Z",
+      "version": "WzEzOTcsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Payload Type",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Payload Type\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"MPLS Packets\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.mpls.payload\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
+      },
+      "id": "3bec0ba0-e45e-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:20:50.550Z",
+      "version": "WzEzOTksMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Packets Over Time",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Packets Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"MPLS Packets\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"timeRange\":{\"from\":\"now-24y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.mpls.payload\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Payload Type\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"MPLS Packets\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"MPLS Packets\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}"
+      },
+      "id": "edcfb520-e45d-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:12:29.810Z",
+      "version": "WzEzOTUsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Traffic Class",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Traffic Class\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"Packets\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.mpls.traffic_class\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Traffic Class\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Packets\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Packets\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}"
+      },
+      "id": "a50f85c0-e45f-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:24:46.748Z",
+      "version": "WzE0MDEsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Router Adjacencies",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Router Adjacencies\",\"type\":\"table\",\"aggs\":[{\"id\":\"6\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"Packets\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Log Count\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.mac\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source MAC\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source OUI\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.mac\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination MAC\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination OUI\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "039f17a0-e45f-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:20:15.898Z",
+      "version": "WzEzOTgsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Labels",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Labels\",\"type\":\"table\",\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"Packets\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Log Count\"},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.mpls.labels\",\"orderBy\":\"2\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Label\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "520d37a0-e45f-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:22:27.481Z",
+      "version": "WzE0MDAsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - VLANs",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - VLANs\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"Packets\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.vlan.id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"VLAN\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "21aceb90-e460-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:28:15.817Z",
+      "version": "WzE0MDIsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "MPLS - Carried Connections",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"MPLS - Carried Connections\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"zeek.mpls.packets\",\"customLabel\":\"Packets\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "6c85fdf0-e460-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2026-11-19T21:30:21.391Z",
+      "version": "WzE0MDMsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.mac",
+          "destination.mac",
+          "zeek.mpls.time_to_live",
+          "zeek.mpls.labels",
+          "zeek.mpls.payload",
+          "source.ip",
+          "destination.ip",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"event.dataset:mpls and (zeek.mpls.time_to_live <= 2 or destination.port:3503)\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
+            "asc"
+          ]
+        ],
+        "title": "MPLS - LSP Ping, Traceroute and OAM",
+        "version": 1
+      },
+      "id": "52c9bef0-e461-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-19T21:46:42.147Z",
+      "version": "WzE0MTgsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.mac",
+          "destination.mac",
+          "network.vlan.id",
+          "zeek.mpls.labels",
+          "zeek.mpls.traffic_class",
+          "zeek.mpls.time_to_live",
+          "zeek.mpls.payload",
+          "zeek.mpls.packets",
+          "source.ip",
+          "destination.ip",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"event.dataset:mpls and zeek.mpls.payload:(ethernet* or ach*)\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "MPLS - Pseudowire and OAM Details",
+        "version": 1
+      },
+      "id": "7ef8c7f0-e461-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-19T21:43:40.866Z",
+      "version": "WzE0MTcsMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "source.mac",
+          "destination.mac",
+          "network.vlan.id",
+          "zeek.mpls.labels",
+          "zeek.mpls.traffic_class",
+          "zeek.mpls.time_to_live",
+          "zeek.mpls.payload",
+          "zeek.mpls.packets",
+          "source.ip",
+          "destination.ip",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:mpls\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [],
+        "title": "MPLS - Logs",
+        "version": 1
+      },
+      "id": "d21f5930-e45c-11f1-82a7-e983e9241ccf",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2026-11-19T21:04:33.859Z",
+      "version": "WzEzOTEsMV0="
+    }
+  ],
+  "version": "3.10.0"
+}
