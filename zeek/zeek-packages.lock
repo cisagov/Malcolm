@@ -61,8 +61,9 @@ https://github.com/corelight/zeek-strrat-detector|0ed4ce0e42df1dc64edc2e93e3f269
 https://github.com/corelight/zeek-xor-exe-plugin|412725a8a2a77c4b09618c460899c0ee38caf3d5|master||
 https://github.com/corelight/zerologon|09ac84b2abd2c3895ac0a1c51caac0e638dd7b18|HEAD||
 https://github.com/cybera/zeek-sniffpass|1174473086ee57b93f5299d7e183b7496b48bb03|HEAD||
-https://github.com/FoxIO-LLC/ja4|8eda4ce45426b639774158f7ab8bc873af69237f|main||
-https://github.com/idaholab/icsnpp-iccp|620f8fb4cad2f5efcc7fc6dd92cc5d6b98820255|main||
+https://github.com/FoxIO-LLC/ja4|7388fa0dd43f43ba63eabf36b0867b4920f2ca52|main||
+https://github.com/idaholab/icsnpp-iccp|99f00d45955435cca62f095c1155b50714643128|main||
+https://github.com/mmguero-dev/icsnpp-mpls|142f0d6c8cbdc9595bd3c1c7b41c1c3e9ce25769|main||
 https://github.com/J-Gras/zeek-fuzzy-hashing|58a3cdf2a50ae1e2aceaf1e32371969b31ae1f6b|topic/jgras/hash-all-files||
 https://github.com/mmguero-dev/bzar|2b6bb1dc95d4ab1c3d6c9dd70f59628c359797e2|HEAD||
 https://github.com/corelight/json-streaming-logs|af109f07fa563496acd77a71e34ceb572de3b378|master||

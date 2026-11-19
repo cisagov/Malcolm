@@ -82,6 +82,7 @@
 "modbus_mask_write_register": ["ot", "network"]
 "modbus_read_device_identification": ["ot", "network"]
 "modbus_read_write_multiple_registers": ["ot", "network"]
+"mpls": ["network"]
 "mqtt_connect": ["network"]
 "mqtt_publish": ["network"]
 "mqtt_subscribe": ["network"]

@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:3.9.0 AS permissions
+FROM opensearchproject/opensearch-dashboards:3.10.0 AS permissions
 
 ENV PUSER="opensearch-dashboards"
 ENV PGROUP="opensearch-dashboards"

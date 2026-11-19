@@ -3013,6 +3013,34 @@
                 }
               }
             },
+            "mpls": {
+              "properties": {
+                "inner_vlan": {
+                  "type": "keyword"
+                },
+                "labels": {
+                  "type": "integer"
+                },
+                "last_ts": {
+                  "type": "date"
+                },
+                "packets": {
+                  "type": "integer"
+                },
+                "payload": {
+                  "type": "keyword"
+                },
+                "time_to_live": {
+                  "type": "integer"
+                },
+                "traffic_class": {
+                  "type": "integer"
+                },
+                "vlan": {
+                  "type": "keyword"
+                }
+              }
+            },
             "omron_fins": {
               "properties": {
                 "client_node_address": {

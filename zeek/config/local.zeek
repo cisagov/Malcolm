@@ -67,6 +67,7 @@ global disable_ics_iccp = (getenv("ZEEK_DISABLE_ICS_ICCP") == true_regex) ? T : 
 global disable_ics_omron_fins = (getenv("ZEEK_DISABLE_ICS_OMRON_FINS") == true_regex) ? T : F;
 global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
+global disable_ics_mpls = (getenv("ZEEK_DISABLE_ICS_MPLS") == true_regex) ? T : F;
 global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_roc_plus = (getenv("ZEEK_DISABLE_ICS_ROC_PLUS") == true_regex) ? T : F;
@@ -317,6 +318,11 @@ event zeek_init() &priority=-5 {
   if (disable_ics_all || disable_ics_modbus) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_MODBUS);
   }
+  if (disable_ics_all || disable_ics_mpls) {
+    # icsnpp-mpls takes over Zeek's MPLS packet analyzer (MPLS dispatches to MPLSLOGGER), so disabling
+    #   MPLSLOGGER would also stop analysis of everything carried over MPLS. Turn off its log instead.
+    Log::disable_stream(MPLSLogger::LOG_HEADER);
+  }
   if (disable_ics_all || disable_ics_omron_fins) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_OMRON_FINS_TCP);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_OMRON_FINS_UDP);
@@ -481,6 +487,11 @@ redef LongConnection::do_notice=long_conn_do_notice;
   @if (|split_modbus_ports$tcp| > 0)
     redef Modbus_Extended::additional_tcp_ports = split_modbus_ports$tcp;
   @endif
+@endif
+
+@if (disable_ics_all || disable_ics_mpls)
+  # mpls_header.log is disabled in zeek_init (above), so don't build per-interval summaries that won't be written
+  redef MPLSLogger::log_every_packet = T;
 @endif
 
 @if ((!disable_ics_all) && (!disable_ics_omron_fins) && (omron_fins_ports_str != ""))
