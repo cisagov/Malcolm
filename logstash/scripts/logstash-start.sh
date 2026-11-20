@@ -57,14 +57,8 @@ export OPENSEARCH_SECONDARY_URL
 
 ####################################################################################################################
 
-# copy over pipeline filters from host-mapped volumes (if any) into their final resting places
-find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
-  xargs -0 -I '{}' bash -c '
-  PIPELINE_NAME="$(basename "{}")"
-  PIPELINES_DEST_DIR="$PIPELINES_DIR"/"$PIPELINE_NAME"
-  mkdir -p "$PIPELINES_DEST_DIR"
-  cp -f "{}"/* "$PIPELINES_DEST_DIR"/
-'
+# Stage custom filters and nested assets without modifying the read-only bind mount.
+bash "$(dirname "${BASH_SOURCE[0]}")/logstash-stage-pipelines.sh" "$HOST_PIPELINES_DIR" "$PIPELINES_DIR"
 
 # dynamically generate final pipelines.yml configuration file from all of the pipeline directories
 > "$PIPELINES_CFG"
@@ -74,7 +68,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
   PIPELINE_ADDRESS_NAME="$(cat "{}"/*.conf | sed -e "s/:[\}]*.*\(}\)/\1/" | envsubst | grep -P "\baddress\s*=>" | awk "{print \$3}" | sed "s/[\"'']//g" | head -n 1)"
   if [[ -n "$OPENSEARCH_SECONDARY_URL" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
     echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
-    echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
+    echo "  path.config: {}/*.conf"                  >> "$PIPELINES_CFG"
     echo "  pipeline.ecs_compatibility: disabled"      >> "$PIPELINES_CFG"
     cat "{}"/"$PIPELINE_EXTRA_CONF_FILE" 2>/dev/null   >> "$PIPELINES_CFG"
     rm -f "{}"/"$PIPELINE_EXTRA_CONF_FILE"
