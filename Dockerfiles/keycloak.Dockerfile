@@ -77,6 +77,8 @@ ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/keycloak.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 keycloak/scripts/*.sh /usr/local/bin/
+COPY --chown=keycloak:keycloak keycloak/themes/ /opt/keycloak/themes/
+COPY --chown=keycloak:keycloak docs/images/logo/malcolm_logo.svg /opt/keycloak/themes/malcolm/login/resources/img/malcolm.svg
 
 # see PUSER_CHOWN comment above
 VOLUME ["/var/local/ca-trust"]
