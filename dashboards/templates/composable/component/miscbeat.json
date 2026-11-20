@@ -231,6 +231,9 @@
                 },
                 "interface": {
                   "type": "keyword"
+                },
+                "scope": {
+                  "type": "keyword"
                 }
               }
             },
