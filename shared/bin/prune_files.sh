@@ -6,14 +6,14 @@ function UsagePercentagePwd {
   df -k . 2>/dev/null | awk '{gsub("%",""); capacity=$5}; END {print capacity}'
 }
 
-function UsageGigabytesPwd {
-  du -sb . 2>/dev/null | awk '{printf "%.0f\n", $1/1000/1000/1000}'
+function UsageBytesPwd {
+  du -sb . 2>/dev/null | awk '{print $1}'
 }
 
 # recursion depth (1 = not recursive)
 DEPTH=1
 
-# THRESHOLD_PCT and MAXSIZE_GB define pruning triggers; either or both may trigger pruning.
+# THRESHOLD_PCT and MAXSIZE_BYTES define pruning triggers; either or both may trigger pruning.
 #   A value of 0 means that trigger is unused
 #   If either trigger condition matches, the script will prune until disk usage drops **below** the thresholds
 
@@ -22,6 +22,7 @@ THRESHOLD_PCT=0
 # MAXSIZE_GB is an integer representing gigabytes ("prune when path contents >= MAXSIZE_GB"), although
 #   it can be specified as a human-readable data size (e.g., 10G) if humanfriendly is available
 MAXSIZE_GB=0
+MAXSIZE_BYTES=0
 
 # if specified, this script will check and prune every $INTERVAL seconds
 INTERVAL=0 # defaults to "run once then exit"
@@ -50,33 +51,47 @@ if [[ ! "$INTERVAL" =~ $INT_RE ]] || ! (( "$INTERVAL" >= 0 && "$INTERVAL" <= 864
   exit 1
 fi
 
-if [[ ! "$MAXSIZE_GB" =~ $INT_RE ]] && command -v humanfriendly >/dev/null 2>&1; then
-  # convert max-size from a string (e.g., 1TB) to the number of gigabytes (1000)
+# Integer -m values are decimal gigabytes. Human-readable values are parsed
+# directly to bytes, without rounding either the limit or current usage.
+if [[ "$MAXSIZE_GB" =~ $INT_RE ]]; then
+  MAXSIZE_BYTES="${MAXSIZE_GB}000000000"
+elif command -v humanfriendly >/dev/null 2>&1; then
   MAXSIZE_BYTES="$(humanfriendly --parse-size "$MAXSIZE_GB" 2>/dev/null)"
-  if [[ -n "$MAXSIZE_BYTES" ]] && [[ "$MAXSIZE_BYTES" =~ $INT_RE ]]; then
-    MAXSIZE_GB="$(echo "$MAXSIZE_BYTES" | awk '{printf "%.0f\n", $1/1000/1000/1000}')"
+fi
+if [[ "$MAXSIZE_BYTES" =~ ^0*([1-9][0-9]*|0)$ ]]; then
+  # Normalize leading zeroes and reject overflow before Bash arithmetic can
+  # turn an oversized limit into a smaller, destructive pruning threshold.
+  MAXSIZE_BYTES="${BASH_REMATCH[1]}"
+  # Equal-length decimal strings must be compared without converting to integers.
+  # shellcheck disable=SC2071
+  if (( ${#MAXSIZE_BYTES} > 19 )) ||
+     { (( ${#MAXSIZE_BYTES} == 19 )) && [[ "$MAXSIZE_BYTES" > "9223372036854775807" ]]; }; then
+    echo "Maxsize exceeds the supported byte range" >&2
+    exit 1
   fi
+else
+  MAXSIZE_BYTES=0
 fi
 
 if ( [[ -z "$THRESHOLD_PCT" ]] || [[ ! "$THRESHOLD_PCT" =~ $INT_RE ]] || ! (( "$THRESHOLD_PCT" >= 1 && "$THRESHOLD_PCT" <= 100)) ) &&
-   ( [[ -z "$MAXSIZE_GB" ]] || [[ ! "$MAXSIZE_GB" =~ $INT_RE ]] || ! (( "$MAXSIZE_GB" >= 1 )) ); then
+   ( [[ -z "$MAXSIZE_BYTES" ]] || ! (( "$MAXSIZE_BYTES" >= 1 )) ); then
   echo "No prune trigger specified (threshold -t or maxsize -m); running in no-op mode." >&2
   THRESHOLD_PCT=0
-  MAXSIZE_GB=0
+  MAXSIZE_BYTES=0
 fi
 
 while true ; do
 
-  if (( THRESHOLD_PCT > 0 )) || (( MAXSIZE_GB > 0 )) || [[ "$VERBOSE" == "1" ]]; then
+  if (( THRESHOLD_PCT > 0 )) || (( MAXSIZE_BYTES > 0 )) || [[ "$VERBOSE" == "1" ]]; then
     # check initial disk capacity
     USAGE_PCT=$(UsagePercentagePwd)
-    USAGE_GB=$(UsageGigabytesPwd)
+    USAGE_BYTES=$(UsageBytesPwd)
   fi
 
-  if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT >= $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB >= $MAXSIZE_GB )) ); then
+  if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT >= $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_BYTES > 0 )) && (( $USAGE_BYTES >= $MAXSIZE_BYTES )) ); then
 
     # we have exceeded the threshold, see if there is something to prune
-    [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
+    [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_BYTES bytes), pruning..." >&2
 
     # read files by modification time, oldest first, deleting until we've dropped below the threshold
     DELETED_FILES=0
@@ -100,20 +115,20 @@ while true ; do
             [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity, pruning..." >&2
             exceeds_pct=true
           else
-            # we're below the percent limit, now check usage gigabyte limit.
+            # we're below the percent limit, now check the byte limit.
             [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity" >&2
             exceeds_pct=false
           fi
 
           if ! $exceeds_pct; then
               # Perform this expensive check only if needed.
-              USAGE_GB=$(UsageGigabytesPwd)
-              if ( (( MAXSIZE_GB > 0 )) && (( USAGE_GB >= MAXSIZE_GB )) ); then
+              USAGE_BYTES=$(UsageBytesPwd)
+              if ( (( MAXSIZE_BYTES > 0 )) && (( USAGE_BYTES >= MAXSIZE_BYTES )) ); then
                 # we still exceed the threshold, continue to loop
-                [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
+                [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_BYTES bytes), pruning..." >&2
               else
-                # we're below the gigabyte limit as well, break
-                [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB)" >&2
+                # we're below the byte limit as well, break
+                [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_BYTES bytes)" >&2
                 break
               fi
           fi
@@ -130,7 +145,7 @@ while true ; do
     fi
 
   else
-    [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB)" >&2
+    [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_BYTES bytes)" >&2
   fi
 
   if (( $INTERVAL > 0 )) ; then
