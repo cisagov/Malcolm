@@ -7,7 +7,7 @@
         + [Instance creation](#AWSEC2Instance)
         + [Malcolm setup](#AWSEC2Install)
         + [Running Malcolm](#AWSEC2Run)
-    - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS) in Auto Mode](#AWSEKSAuto)
+    - [Legacy manifest deployment on Amazon Elastic Kubernetes Service (EKS) in Auto Mode](#AWSEKSAuto)
         + [Infrastructure Setup](#AWSEKSAutoInfrastructure)
         + [Malcolm Setup](#AWSEKSAutoMalcolmSetup)
         + [Run and Access Malcolm](#AWSEKSAutoMalcolmAccess)
@@ -359,9 +359,11 @@ malcolm-pipeline-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.mal
     - Log in with the credentials specified when setting up authentication
     - See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
 
-## <a name="AWSEKSAuto"></a>Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS) in Auto Mode
+## <a name="AWSEKSAuto"></a>Legacy manifest deployment on Amazon Elastic Kubernetes Service (EKS) in Auto Mode
 
-This section outlines the process of setting up a Malcolm cluster on [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/) using [Amazon Web Services (AWS)](https://aws.amazon.com/) with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/).
+For new Kubernetes installations, use [Malcolm-Helm](kubernetes.md#HelmDeployment). Review the chart's cluster, storage and ingress requirements for your EKS environment. The chart's [cloud deployment documentation](https://github.com/idaholab/Malcolm-Helm/blob/main/README.md#CloudDeployment) currently provides an Azure example; the EKS instructions below describe Malcolm's legacy manifest workflow and have not been converted into a Helm walkthrough.
+
+This section remains available for existing deployments on [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/) using [Amazon Web Services (AWS)](https://aws.amazon.com/) with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/). See the [migration guidance](kubernetes.md#Migration) before replacing a deployment managed by Malcolm's control scripts. [Issue #1278](https://github.com/cisagov/Malcolm/issues/1278) tracks the remaining feature comparison and removal of that workflow.
 
 These instructions assume good working knowledge of AWS and EKS. Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
