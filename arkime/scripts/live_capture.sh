@@ -10,6 +10,10 @@ function urlencodeall() {
     done
 }
 
+# shellcheck source=capture-fallback.sh
+source "$(dirname "${BASH_SOURCE[0]}")/capture-fallback.sh"
+capture_fallback_init
+
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 CERT_FILE="${ARKIME_DIR}"/etc/viewer.crt
@@ -68,14 +72,14 @@ if [[ -n "${EXTRA_TAGS}" ]]; then
   done < <(echo "${EXTRA_TAGS}" | tr ',' '\n') # loop over ',' separated EXTRA_TAGS values
 fi
 
-# wait patiently for the non-live Arkime to initialize the database
-echo "Giving $OPENSEARCH_PRIMARY time to start..."
-/usr/local/bin/opensearch_status.sh -t malcolm_template 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
-echo "Giving Arkime time to initialize..."
-sleep 5
-until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) >= 1 )); do
-    sleep 1
-done
+# Wait for database health, the Malcolm template and Arkime's user index.
+echo "Waiting for $OPENSEARCH_PRIMARY and Arkime initialization..."
+if ! wait_for_arkime_backend; then
+    echo "Arkime backend did not become ready within ${ARKIME_LIVE_CAPTURE_FALLBACK_SECONDS} seconds" >&2
+    tcpdump_fallback /data/pcap/upload
+    exit $?
+fi
+echo "$OPENSEARCH_PRIMARY and Arkime are ready!"
 
 # set (or remove) wiseURL and wise.so in config file
 if [ -z "${ARKIME_WISE_SERVICE_URL+x}" ]; then
@@ -157,7 +161,7 @@ touch /var/run/arkime/initialized
 echo "Arkime is initialized!"
 echo
 
-"${ARKIME_DIR}"/bin/capture --insecure "${TAGS_ARGS[@]}" "${NODE_ARGS[@]}" \
+run_arkime_capture /data/pcap/upload "${ARKIME_DIR}"/bin/capture --insecure "${TAGS_ARGS[@]}" "${NODE_ARGS[@]}" \
   -c "${ARKIME_DIR}"/etc/config.ini \
   -o pcapDir=/data/pcap/arkime-live \
   -o dropUser=${PUSER} \

@@ -141,6 +141,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       python3-setuptools \
       python3-wheel \
       rsync \
+      tcpdump \
       tini \
       wget \
       zlib1g && \
