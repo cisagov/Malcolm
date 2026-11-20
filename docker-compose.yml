@@ -209,6 +209,8 @@ services:
     - 127.0.0.1:5044:5044
     volumes:
     - logstash-persistent-queue:/logstash-persistent-queue
+    # Optional shared MaxMind databases; read-only for the Logstash consumer.
+    - geoip-shared:/var/local/geoip:ro
     - type: bind
       bind:
         create_host_path: false
@@ -372,6 +374,8 @@ services:
     - ./config/arkime-offline.env
     - ./config/arkime-secret.env
     volumes:
+    # Populated by arkime_update_geo.sh; shared read-only with Logstash.
+    - geoip-shared:/var/local/geoip
     - type: bind
       bind:
         create_host_path: false
@@ -446,6 +450,8 @@ services:
     - ./config/arkime-live.env
     - ./config/arkime-secret.env
     volumes:
+    # Populated by arkime_update_geo.sh; shared read-only with Logstash.
+    - geoip-shared:/var/local/geoip
     - type: bind
       bind:
         create_host_path: false
@@ -1509,6 +1515,7 @@ volumes:
   filebeat-syslog-udp-registry:
   filebeat-tcp-registry:
   filebeat-zeek-files-logs-registry:
+  geoip-shared:
   filescan-data:
   logstash-persistent-queue:
   nginx-log-path:
