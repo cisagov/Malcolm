@@ -1,0 +1,106 @@
+# Dynamic AKS PVCs for Malcolm. Copy to 01-volumes.yml before starting.
+# Apply 00-storageclass-aks.yml.example first. Review Azure costs.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcap-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zeek-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 250Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suricata-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filescan-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: runtime-logs-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azuredisk
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-backup-claim
+  namespace: malcolm
+spec:
+  storageClassName: malcolm-azurefile-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
