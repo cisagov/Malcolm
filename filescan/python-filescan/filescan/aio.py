@@ -8,7 +8,8 @@ import human_id
 import logging
 import signal
 import types
-from anyio.abc import CancelScope, TaskGroup
+from anyio import CancelScope
+from anyio.abc import TaskGroup
 from itertools import count
 from typing import (
     Any,
@@ -24,7 +25,6 @@ from typing import (
     Generator,
     AsyncIterable,
 )
-
 
 log = logging.Logger(__name__)
 
