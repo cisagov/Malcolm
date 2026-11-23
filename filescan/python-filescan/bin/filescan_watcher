@@ -31,9 +31,11 @@ from filescan.click import click
 from filescan.config import BaseConfig, AnyWatch, DirectoryWatch, RedisWatch, RedisOptions
 from filescan.model import FileEvent, ScanRequest
 from filescan.watch import (
+    INOTIFY_LIMIT_SYSCTLS,
     AsyncFileSystemEventHandler,
     CreatedEvent,
     DeletedEvent,
+    EventsLostEvent,
     FileClosedEvent,
     FileCreatedEvent,
     FileDeletedEvent,
@@ -59,6 +61,18 @@ class WatcherOptions(BaseModel, frozen=True):
 
 class WatcherConfig(BaseConfig, frozen=True):
     watcher: WatcherOptions = WatcherOptions()
+
+
+# event types each directory watch is scheduled for; EventsLostEvent (watchdog 7.1.1+) is only
+# delivered to watches whose event_filter lists it
+DIRECTORY_WATCH_EVENTS: Final = (
+    EventsLostEvent,
+    FileCreatedEvent,
+    FileClosedEvent,
+    FileDeletedEvent,
+    FileModifiedEvent,
+    FileMovedEvent,
+)
 
 
 ################################################################################
@@ -111,8 +125,9 @@ class FileEventHandler(AsyncFileSystemEventHandler):
 
     @override
     async def dispatch(self, event: FileSystemEvent) -> None:
-        # drop any directory events, since we don't care about them
-        if event.is_directory:
+        # drop any directory events, since we don't care about them. EventsLostEvent is the
+        # exception: for a directory watch it carries is_directory=True and names the watch itself.
+        if event.is_directory and not isinstance(event, EventsLostEvent):
             return
         await super().dispatch(event)
 
@@ -169,6 +184,17 @@ class FileEventHandler(AsyncFileSystemEventHandler):
 
     async def on_moved(self, event: MovedEvent) -> None:
         await self.__send_event(event.dest_path)
+
+    async def on_events_lost(self, event: EventsLostEvent) -> None:
+        # the kernel's inotify queue overflowed, so some events for this watch were dropped.
+        # Files already pending still get published by handle_polling_watches once they go
+        # quiet; a file whose events were all dropped won't be scanned. This only reports it.
+        log.warning(
+            'file system events were lost for watch %s (inotify queue overflow); files written '
+            'or moved in during the overflow may not be scanned. Raising fs.inotify.max_queued_events '
+            'on the host makes this less likely',
+            event.src_path,
+        )
 
 
 KNOWN_FS_TYPES: Final = {
@@ -274,6 +300,65 @@ def deduplicate_dir_watches(
 ################################################################################
 ## REDIS WATCH SUPPORT #########################################################
 ################################################################################
+
+
+def schedule_dir_watches(
+    observer: Any,
+    handler: FileEventHandler,
+    watches: Iterable[DirectoryWatch],
+) -> None:
+    for watch in watches:
+        observer.schedule(
+            handler,
+            str(watch.path),
+            recursive=watch.recursive,
+            event_filter=list(DIRECTORY_WATCH_EVENTS),
+        )
+
+
+def start_dir_observers(
+    handler: FileEventHandler,
+    watches: Iterable[DirectoryWatch],
+    dir_observers: dict[str, Any],
+) -> None:
+    # Schedule each watch on the observer for its strategy and start the observers that got
+    # watches, adding each one to dir_observers once it's running. If an inotify resource limit
+    # stops the inotify observer from scheduling (EMFILE, instance limit) or starting (ENOSPC,
+    # watch limit), its watches move to the polling observer instead. FileEventHandler already
+    # publishes quiet files from handle_polling_watches, so it needs no change for that.
+    by_strategy = defaultdict(list)
+    for watch in watches:
+        by_strategy[watch.strategy].append(watch)
+    if by_strategy:
+        log.info('starting directory watches...')
+
+    if inotify_watches := by_strategy.get('inotify'):
+        observer = None
+        try:
+            observer = Observer()
+            schedule_dir_watches(observer, handler, inotify_watches)
+            observer.start()
+        except OSError as e:
+            if observer is not None:
+                # never started, so this only stops its emitters and releases its inotify instance
+                observer.stop()
+            if e.errno not in INOTIFY_LIMIT_SYSCTLS:
+                raise
+            log.critical(
+                'inotify limit reached (%s), falling back to polling for %s; raise %s on the host to use inotify',
+                e,
+                ', '.join(str(w.path) for w in inotify_watches),
+                INOTIFY_LIMIT_SYSCTLS[e.errno],
+            )
+            by_strategy['polling'].extend(inotify_watches)
+        else:
+            dir_observers['inotify'] = observer
+
+    if polling_watches := by_strategy.get('polling'):
+        observer = PollingObserver()
+        schedule_dir_watches(observer, handler, polling_watches)
+        observer.start()
+        dir_observers['polling'] = observer
 
 
 async def watch_list(
@@ -561,13 +646,6 @@ async def main(
 
         # consolidate our set of directory watches
         dir_watches = deduplicate_dir_watches(dir_watch_paths.values())
-        # build our base set of observers (which will be pruned later)
-        dir_observers.update(
-            {
-                'polling': PollingObserver(),
-                'inotify': Observer(),
-            }
-        )
 
         async with (
             anyio.create_task_group() as group,
@@ -596,32 +674,8 @@ async def main(
             )
             # start its polling handler task in the background
             group.start_soon(dir_event_handler.handle_polling_watches)
-            # for each of our watches, schedule with the appropriate observer
-            for watch in dir_watches:
-                dir_observers[watch.strategy].schedule(
-                    dir_event_handler,
-                    str(watch.path),
-                    recursive=watch.recursive,
-                    event_filter=[
-                        FileCreatedEvent,
-                        FileClosedEvent,
-                        FileDeletedEvent,
-                        FileModifiedEvent,
-                        FileMovedEvent,
-                    ],
-                )
-
-            # start any observers that have watches scheduled
-            for strat, observer in list(dir_observers.items()):
-                # if this observer had nothing added to it, remove it from our
-                # set of known observers, since we don't need to run it at all
-                if not observer.emitters:
-                    dir_observers.pop(strat)
-            if dir_observers:
-                log.info('starting directory watches...')
-                for observer in dir_observers.values():
-                    # otherwise, it's necessary, so go ahead and kick it off
-                    observer.start()
+            # schedule each watch with the observer for its strategy and start them
+            start_dir_observers(dir_event_handler, dir_watches, dir_observers)
 
             log.info('starting redis watches...')
             for cfg, keys in redis_watch_keys.items():

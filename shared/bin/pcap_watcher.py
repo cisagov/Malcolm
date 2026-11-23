@@ -55,8 +55,6 @@ from urllib.parse import urlparse
 from urllib3.exceptions import NewConnectionError
 
 from watchdog.events import FileCreatedEvent
-from watchdog.observers import Observer
-from watchdog.observers.polling import PollingObserver
 from watchdog.utils import WatchdogShutdownError
 
 ###################################################################################################
@@ -552,16 +550,14 @@ def main():
     # begin threaded watch of path(s)
     time.sleep(1)
 
-    observer = PollingObserver() if args.polling else Observer()
+    # processed captures stay in the watched directory, so an overflow rescan only queues files
+    #   changed since the last event before it (the Arkime files index check catches the rest)
     handler = watch_common.FileOperationEventHandler(
         logger=None,
         polling=args.polling,
+        rescan_changed_only=True,
     )
-    for watchDir in watchDirs:
-        logging.debug(f"{scriptName}:\tScheduling {watchDir}")
-        observer.schedule(handler, watchDir, recursive=False)
-
-    observer.start()
+    observer = watch_common.StartObserver(handler, watchDirs, args.polling, False, logging)
 
     logging.info(f"{scriptName}:\tmonitoring {watchDirs}")
 

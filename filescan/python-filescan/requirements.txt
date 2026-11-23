@@ -17,6 +17,6 @@ ruamel.yaml==0.19.1
 setuptools==84.2.1
 stream-zip==0.0.84
 supervisor==4.3.0
-watchdog==7.1.0
+watchdog==7.1.1
 Cython==3.3.1
 ./python-statfs
