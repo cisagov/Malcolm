@@ -1679,6 +1679,29 @@ def start():
 
 
 ###################################################################################################
+def prepareStandaloneHedgehog(configDir, filebeatPath):
+    """Create the startup placeholders for a Hedgehog configured without forwarding."""
+    configPath = Path(configDir)
+    certPath = Path(filebeatPath)
+    certPath.mkdir(parents=True, exist_ok=True)
+    for filename in ('ca.crt', 'client.crt', 'client.key'):
+        path = certPath / filename
+        try:
+            path.touch(mode=0o600, exist_ok=False)
+        except FileExistsError:
+            if not path.is_file():
+                raise
+
+    if not UpdateEnvFiles(
+        [
+            EnvValue(True, str(configPath / 'filebeat.env'), 'FILEBEAT_MAIN_LOGS', 'false'),
+            EnvValue(True, str(configPath / 'opensearch.env'), 'OPENSEARCH_URL', ''),
+        ]
+    ):
+        raise RuntimeError('Unable to update standalone Hedgehog configuration')
+
+
+###################################################################################################
 def authSetup():
     global args
     global opensslBin
@@ -1899,6 +1922,17 @@ def authSetup():
                 False,
                 [],
             ),
+            (
+                (
+                    'standalone'
+                    if (args.composeProfile == PROFILE_HEDGEHOG and not args.cmdAuthSetupNonInteractive)
+                    else None
+                ),
+                "Prepare startup files for standalone Hedgehog (disable main Filebeat logs and clear OpenSearch URL)",
+                False,
+                False,
+                [],
+            ),
         ]
         if x[0]
     ]
@@ -1920,9 +1954,12 @@ def authSetup():
         UserInputDefaultsBehavior.DefaultsPrompt if not args.cmdAuthSetupNonInteractive else noninteractiveBehavior
     )
     authMethodChanged = False
+    receiveClientCerts = False
 
     try:
         for authItem in authConfigChoices[1:]:
+            if authItem[0] == 'standalone' and receiveClientCerts:
+                continue
             if (
                 (authConfigChoice == 'all')
                 and YesOrNo(
@@ -2941,6 +2978,9 @@ def authSetup():
                             stat.S_IRUSR | stat.S_IWUSR,
                         )
 
+                elif authItem[0] == 'standalone':
+                    prepareStandaloneHedgehog(args.configDir, filebeatPath)
+
                 elif authItem[0].endswith('xfwcerts'):
                     if args.composeProfile == PROFILE_MALCOLM:
                         DisplayMessage(
@@ -3002,6 +3042,7 @@ def authSetup():
 
                                     p.poll()
                     else:
+                        receiveClientCerts = True
                         # use tx-rx-secure.sh (via croc) to get certs from Malcolm
                         DisplayMessage(
                             'Run auth_setup on Malcolm and select "Transfer self-signed client certificates..."',
