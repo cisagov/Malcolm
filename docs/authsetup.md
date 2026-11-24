@@ -183,6 +183,10 @@ With the remote Keycloak configuration complete, [start Malcolm](running.md#Star
 
 ### <a name="AuthKeycloakEmbedded"></a>Using the embedded Keycloak instance
 
+Malcolm's embedded Keycloak image includes the `malcolm` login theme, extending Keycloak's built-in `keycloak.v2` forms. During bootstrap, it is selected only when the realm has no explicit login theme. Existing realm or client selections are preserved, and remote Keycloak instances are not modified. Set `KEYCLOAK_LOGIN_THEME` in `config/keycloak.env` to another installed theme, or leave it blank to skip automatic theme selection. This setting affects bootstrap only; it does not override subsequent choices in the admin console.
+
+For an existing installation whose temporary bootstrap account has already been removed, select **Realm settings > Themes > Login theme > malcolm** in the Keycloak admin console and save. Select `keycloak.v2` to restore the upstream appearance. The account console, admin console, email templates and authentication flows remain inherited or unchanged. Theme assets are served locally, including Malcolm's existing SVG wordmark; no external fonts or scripts are added.
+
 This section outlines how to configure an embedded Keycloak instance managed by Malcolm. See [**Using a remote Keycloak instance**](#AuthKeycloakRemote) for how to configure Malcolm to use a remote Keycloak instance already extant in the network infrastructure. In addition to the `NGINX_AUTH_MODE` variable in `auth-common.env` described above, Malcolm uses [environment variables](malcolm-config.md#MalcolmConfigEnvVars) in `keycloak.env` to configure its use of Keycloak.
 
 As Keycloak is a much more full-featured authentication provider than the local basic authentication method, **configuring Malcolm's embedded Keycloak instance** is a bit more involved. The following steps outline how this is done.
