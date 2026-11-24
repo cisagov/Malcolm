@@ -8,6 +8,8 @@
 /arkime/etc/ipv4-address-space.csv*
 /README.css
 
+# never commit TLS session keys; they can decrypt captured traffic
+/zeek/tls-secrets/
 # auth-related
 /.ldap_config_defaults
 /config/*.env
