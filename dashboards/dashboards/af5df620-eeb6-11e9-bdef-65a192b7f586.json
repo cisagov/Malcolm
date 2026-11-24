@@ -118,6 +118,7 @@
           "event.result",
           "source.ip",
           "destination.ip",
+          "zeek.ntp.ja4n",
           "zeek.ntp.version",
           "zeek.ntp.stratum",
           "zeek.ntp.mode_str",

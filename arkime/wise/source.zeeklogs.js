@@ -2340,6 +2340,7 @@ class MalcolmSource extends WISESource {
       "zeek.ntlm.server_tree",
       "zeek.ntlm.status",
       "zeek.ntlm.success",
+      "zeek.ntp.ja4n",
       "zeek.ntp.mode",
       "zeek.ntp.mode_str",
       "zeek.ntp.num_exts",

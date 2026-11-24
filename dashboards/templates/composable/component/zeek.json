@@ -1115,6 +1115,9 @@
             },
             "ntp": {
               "properties": {
+                "ja4n": {
+                  "type": "keyword"
+                },
                 "mode": {
                   "type": "keyword"
                 },
