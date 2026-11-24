@@ -19,6 +19,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH,
     KEY_CONFIG_ITEM_NETBOX_MODE,
     KEY_CONFIG_ITEM_NETBOX_SITE_NAME,
+    KEY_CONFIG_ITEM_NETBOX_SSL_VERIFY,
     KEY_CONFIG_ITEM_NETBOX_URL,
     KEY_CONFIG_ITEM_LOGSTASH_NETBOX_ENRICHED_LOG_TYPES,
 )
@@ -42,6 +43,15 @@ CONFIG_ITEM_NETBOX_URL = ConfigItem(
     validator=lambda x: isinstance(x, str),
     question='Remote NetBox URL',
     widget_type=WidgetType.TEXT,
+)
+
+CONFIG_ITEM_NETBOX_SSL_VERIFY = ConfigItem(
+    key=KEY_CONFIG_ITEM_NETBOX_SSL_VERIFY,
+    label="Verify SSL for Remote NetBox",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Require SSL certificate validation for communication with remote NetBox instance?",
+    widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH = ConfigItem(

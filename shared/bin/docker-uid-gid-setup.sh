@@ -169,7 +169,7 @@ if [[ -n ${PUSER_CA_TRUST} ]] && command -v openssl >/dev/null 2>&1; then
       elif [[ -d /usr/share/ca-certificates ]]; then
         DEST_FILE=/usr/share/ca-certificates/"$CA_NAME_CRT"
       elif [[ -d /etc/ssl/certs ]]; then
-        DEST_FILE==/etc/ssl/certs/"$HASH_FILE"
+        DEST_FILE=/etc/ssl/certs/"$HASH_FILE"
       fi
     elif command -v update-ca-trust >/dev/null 2>&1; then
       if [[ -d /usr/share/pki/ca-trust-source/anchors ]]; then

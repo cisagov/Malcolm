@@ -189,6 +189,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Adding a new service (image)](contributing-new-image.md#NewImage)
     - [Adding new log fields](contributing-new-log-fields.md#NewFields)
     - [Zeek](contributing-zeek.md#Zeek)
+    - [Adding a new Zeek parser](contributing-zeek-parser.md#ZeekParser)
     - [PCAP processors](contributing-pcap.md#PCAP)
     - [Logstash](contributing-logstash.md#Logstash)
     - [OpenSearch Dashboards](contributing-dashboards.md#dashboards)

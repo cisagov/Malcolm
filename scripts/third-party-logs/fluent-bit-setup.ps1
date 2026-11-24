@@ -8,8 +8,8 @@
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 ###############################################################################
 
-$fluent_bit_version = '5.1'
-$fluent_bit_full_version = '5.1.5'
+$fluent_bit_version = '5.2'
+$fluent_bit_full_version = '5.2.0'
 
 ###############################################################################
 # select an item from a menu provided in an array

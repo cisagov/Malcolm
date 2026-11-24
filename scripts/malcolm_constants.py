@@ -7,7 +7,6 @@ import enum
 from collections import defaultdict
 from enum import Enum, Flag, auto
 
-
 ###################################################################################################
 PROFILE_KEY = "MALCOLM_PROFILE"
 PROFILE_MALCOLM = "malcolm"
@@ -182,6 +181,18 @@ MALCOLM_ENRICHABLE_LOG_TYPES = [
     "zeek.hart_ip_session_record",
     "zeek.hart_ip_universal_commands",
     "zeek.http",
+    "zeek.iccp",
+    "zeek.iccp_controls",
+    "zeek.iccp_errors",
+    "zeek.iccp_objects",
+    "zeek.iccp_transfers",
+    "zeek.iec104_ctrl",
+    "zeek.iec104_file",
+    "zeek.iec104_param",
+    "zeek.iec104_query",
+    "zeek.iec104_read",
+    "zeek.iec104_telemetry",
+    "zeek.iec104_write",
     "zeek.intel",
     "zeek.ipsec",
     "zeek.irc",
@@ -201,6 +212,7 @@ MALCOLM_ENRICHABLE_LOG_TYPES = [
     "zeek.modbus_mask_write_register",
     "zeek.modbus_read_device_identification",
     "zeek.modbus_read_write_multiple_registers",
+    "zeek.mpls",
     "zeek.mqtt_connect",
     "zeek.mqtt_publish",
     "zeek.mqtt_subscribe",
@@ -295,6 +307,7 @@ MALCOLM_ENRICHABLE_LOG_TYPES = [
     "zeek.s7comm_upload_download",
     "zeek.signatures",
     "zeek.sip",
+    "zeek.slmp",
     "zeek.smb_cmd",
     "zeek.smb_files",
     "zeek.smb_mapping",
