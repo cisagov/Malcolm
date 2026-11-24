@@ -1,0 +1,17 @@
+# Optional in-cluster NetFlow listener. Copy to 99-netflow.yml.
+# UDP provides neither authentication nor encryption. Keep this private.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netflow-input
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - name: netflow
+      port: 2055
+      targetPort: 2055
+      protocol: UDP
+  selector:
+    app: logstash
