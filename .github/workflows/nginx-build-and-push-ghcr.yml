@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - configure-gui
       - staging
     paths:
       - 'nginx/**'
@@ -24,13 +25,17 @@ jobs:
   test-lua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Lua
         run: sudo apt-get install -y --no-install-recommends lua5.4 lua-rex-pcre2
       - name: Run normalize_uri_for_rbac regression tests
         run: lua5.4 nginx/lua/test_normalize_uri.lua
       - name: Run OpenSearch RBAC regression tests
         run: lua5.4 nginx/lua/test_opensearch_rbac.lua
+      - name: Run extracted file location regression tests
+        run: lua5.4 nginx/lua/test_extracted_files_location.lua
+      - name: Run mapi passthrough RBAC tests
+        run: lua5.4 nginx/lua/test_mapi_passthrough_rbac.lua
 
   docker:
     needs: test-lua

@@ -28,12 +28,14 @@ global enip_ports_str = getenv("ZEEK_PORTS_ENIP");
 global ge_srtp_ports_str = getenv("ZEEK_PORTS_GE_SRTP");
 global genisys_ports_str = getenv("ZEEK_PORTS_GENISYS");
 global hart_ip_ports_str = getenv("ZEEK_PORTS_HART_IP");
+global iccp_ports_str = getenv("ZEEK_PORTS_ICCP");
 global modbus_ports_str = getenv("ZEEK_PORTS_MODBUS");
 global omron_fins_ports_str = getenv("ZEEK_PORTS_OMRON_FINS");
 global opcua_binary_ports_str = getenv("ZEEK_PORTS_OPCUA_BINARY");
 global profinet_io_cm_ports_str = getenv("ZEEK_PORTS_PROFINET_IO_CM");
 global roc_plus_ports_str = getenv("ZEEK_PORTS_ROC_PLUS");
 global s7comm_ports_str = getenv("ZEEK_PORTS_S7COMM");
+global slmp_ports_str = getenv("ZEEK_PORTS_SLMP");
 global synchrophasor_ports_str = getenv("ZEEK_PORTS_SYNCHROPHASOR");
 global ja4_ssh_packet_count = (getenv("ZEEK_JA4SSH_PACKET_COUNT") == "") ? 200 : to_count(getenv("ZEEK_JA4SSH_PACKET_COUNT"));
 global local_nets_str = getenv("ZEEK_LOCAL_NETS");
@@ -62,13 +64,16 @@ global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == true_regex
 global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == true_regex) ? T : F;
 global disable_ics_ge_srtp = (getenv("ZEEK_DISABLE_ICS_GE_SRTP") == true_regex) ? T : F;
 global disable_ics_hart_ip = (getenv("ZEEK_DISABLE_ICS_HART_IP") == true_regex) ? T : F;
+global disable_ics_iccp = (getenv("ZEEK_DISABLE_ICS_ICCP") == true_regex) ? T : F;
 global disable_ics_omron_fins = (getenv("ZEEK_DISABLE_ICS_OMRON_FINS") == true_regex) ? T : F;
 global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
+global disable_ics_mpls = (getenv("ZEEK_DISABLE_ICS_MPLS") == true_regex) ? T : F;
 global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_roc_plus = (getenv("ZEEK_DISABLE_ICS_ROC_PLUS") == true_regex) ? T : F;
 global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
+global disable_ics_slmp = (getenv("ZEEK_DISABLE_ICS_SLMP") == true_regex) ? T : F;
 global disable_ics_iec104 = (getenv("ZEEK_DISABLE_ICS_IEC104") == true_regex) ? T : F;
 global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
 
@@ -306,11 +311,19 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP_TCP);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP_UDP);
   }
+  if (disable_ics_all || disable_ics_iccp) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_ICCP_TCP);
+  }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
   }
   if (disable_ics_all || disable_ics_modbus) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_MODBUS);
+  }
+  if (disable_ics_all || disable_ics_mpls) {
+    # icsnpp-mpls takes over Zeek's MPLS packet analyzer (MPLS dispatches to MPLSLOGGER), so disabling
+    #   MPLSLOGGER would also stop analysis of everything carried over MPLS. Turn off its log instead.
+    Log::disable_stream(MPLSLogger::LOG_HEADER);
   }
   if (disable_ics_all || disable_ics_omron_fins) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_OMRON_FINS_TCP);
@@ -328,6 +341,10 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_s7comm) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
+  }
+  if (disable_ics_all || disable_ics_slmp) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SLMP_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SLMP_UDP);
   }
   if (disable_ics_all || disable_ics_iec104) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_SPICY_IEC104);
@@ -464,11 +481,23 @@ redef LongConnection::do_notice=long_conn_do_notice;
   @endif
 @endif
 
+@if ((!disable_ics_all) && (!disable_ics_iccp) && (iccp_ports_str != ""))
+  global split_iccp_ports = split_ports_by_protocol(iccp_ports_str);
+  @if (|split_iccp_ports$tcp| > 0)
+    redef ICCP::iccp_ports = split_iccp_ports$tcp;
+  @endif
+@endif
+
 @if ((!disable_ics_all) && (!disable_ics_modbus) && (modbus_ports_str != ""))
   global split_modbus_ports = split_ports_by_protocol(modbus_ports_str);
   @if (|split_modbus_ports$tcp| > 0)
     redef Modbus_Extended::additional_tcp_ports = split_modbus_ports$tcp;
   @endif
+@endif
+
+@if (disable_ics_all || disable_ics_mpls)
+  # mpls_header.log is disabled in zeek_init (above), so don't build per-interval summaries that won't be written
+  redef MPLSLogger::log_every_packet = T;
 @endif
 
 @if ((!disable_ics_all) && (!disable_ics_omron_fins) && (omron_fins_ports_str != ""))
@@ -509,6 +538,16 @@ redef LongConnection::do_notice=long_conn_do_notice;
   global split_s7comm_ports = split_ports_by_protocol(s7comm_ports_str);
   @if (|split_s7comm_ports$tcp| > 0)
     redef S7COMM::ports = split_s7comm_ports$tcp;
+  @endif
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_slmp) && (slmp_ports_str != ""))
+  global split_slmp_ports = split_ports_by_protocol(slmp_ports_str);
+  @if (|split_slmp_ports$tcp| > 0)
+    redef SLMP::ports_tcp = split_slmp_ports$tcp;
+  @endif
+  @if (|split_slmp_ports$udp| > 0)
+    redef SLMP::ports_udp = split_slmp_ports$udp;
   @endif
 @endif
 

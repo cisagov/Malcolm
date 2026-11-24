@@ -144,6 +144,7 @@ Although the configuration script automates many of the following configuration 
     - The following variables should only be set if `NETBOX_MODE` is set to `remote`; otherwise, they should be blank:
         + `NETBOX_URL` - the URL of the remote NetBox instance (e.g., `https://netbox.example.org` or `https://example.com/netbox`)
         + `NETBOX_TOKEN` - the [API token](https://netboxlabs.com/docs/netbox/en/stable/integrations/rest-api/#tokens) for the remote NetBox instance (40 hexadecimal characters)
+        + `NETBOX_SSL_CERTIFICATE_VERIFICATION` - whether or not to require TLS certificate validation when communicating with the remote NetBox instance (`true` or `false`; only applies when `NETBOX_URL` begins with `https://`)
 * **`nginx.env`** - settings specific to Malcolm's nginx reverse proxy
     - `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](quickstart.md#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
     - `NGINX_ERROR_LOG_LEVEL` - sets the logging level for nginx's [error log](https://nginx.org/en/docs/ngx_core_module.html#error_log) (e.g., `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`; default `error`)
@@ -246,7 +247,8 @@ Although the configuration script automates many of the following configuration 
 * **`zeek.env`**, **`zeek-live.env`** and **`zeek-offline.env`** - settings for [Zeek](https://zeek.org/) and for scanning [extracted files](file-scanning.md#ZeekFileExtraction) Zeek observes in network traffic
     - `ZEEK_AUTO_ANALYZE_PCAP_FILES` - if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
     - `ZEEK_AUTO_ANALYZE_PCAP_THREADS` - the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
-    - `ZEEK_ZAM` - if set to `true`, enables Zeek's [ZAM script optimizer](https://docs.zeek.org/en/master/advanced/scripting/optimization.html) (`-O ZAM`)
+    - `ZEEK_ZAM_ENABLED` - if set to `true`, enables Zeek's [ZAM script optimizer](https://docs.zeek.org/en/master/advanced/scripting/optimization.html) (`-O ZAM`) (default `false`)
+        + ⚠️ ZAM compiles every loaded script each time Zeek starts. With the number of scripts and packages Malcolm loads, startup can take much longer than usual. A live capture process starts once and runs for a long time, so it can make up for that cost through faster script execution. Offline processing starts a new Zeek process for every PCAP and pays the full compile time each time, which usually makes it slower overall. If you enable ZAM, set it in `zeek-live.env`, and leave it off in `zeek-offline.env`.
     - `ZEEK_JSON` - whether Zeek should generate [JSON format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-json-format-logs) (`true`) or [TSV format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-tsv-format-logs) (`false`)
     - `ZEEK_…_DETAILED` - some network analyzers produce can produce more detailed records in addition to "summary" records; set these variables to `true` to turn on the more verbose version
     - `ZEEK_DISABLE_…` - if set to `true`, each of these variables can be used to disable a certain Zeek function or network analyzer when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
@@ -256,15 +258,17 @@ Although the configuration script automates many of the following configuration 
         + `ZEEK_PORTS_C1222` - Specify the ports for the [ICSNPP-C1222 analyzer](https://github.com/cisagov/icsnpp-c1222). C1222 supports both TCP and UDP ports.
         + `ZEEK_PORTS_ENIP` - Specify the ports for the [ICSNPP-ENIP analyzer](https://github.com/cisagov/icsnpp-enip/). ENIP supports both TCP and UDP ports.
         + `ZEEK_PORTS_GE_SRTP` - Specify the ports for the [ICSNPP-GE-SRTP analyzer](https://github.com/cisagov/icsnpp-ge-srtp). GE-SRTP only supports TCP ports.
-        + `ZEEK_PORTS_GENISYS` - Specify the ports for the [ICSNPP-Genysis analyzer](https://github.com/cisagov/icsnpp-genisys/). Genysis only supports TCP ports.
+        + `ZEEK_PORTS_GENISYS` - Specify the ports for the [ICSNPP-Genisys analyzer](https://github.com/cisagov/icsnpp-genisys/). Genisys only supports TCP ports.
         + `ZEEK_PORTS_HART_IP` - Specify the ports for the [ICSNPP-HART-IP analyzer](https://github.com/cisagov/icsnpp-hart-ip). HART-IP supports both UDP and TCP ports.
+        + `ZEEK_PORTS_ICCP` - Specify the ports for the [ICSNPP-ICCP analyzer](https://github.com/idaholab/icsnpp-iccp). ICCP only supports TCP ports.
         + `ZEEK_PORTS_MODBUS` - Specify the ports for the [ICSNPP-Modbus analyzer](https://github.com/cisagov/icsnpp-modbus). Modbus only supports TCP ports.
-        + `ZEEK_PORTS_OMRON_FINS` - Specify the ports for the [ICSNPP-Omron-FINS analyzer](https://github.com/cisagov/icsnpp-omron-fins). Omron FINS supports but UDP and TCP ports.
+        + `ZEEK_PORTS_OMRON_FINS` - Specify the ports for the [ICSNPP-Omron-FINS analyzer](https://github.com/cisagov/icsnpp-omron-fins). Omron FINS supports both UDP and TCP ports.
         + `ZEEK_PORTS_OPCUA_BINARY` - Specify the ports for the [ICSNPP-OPCUA-Binary analyzer](https://github.com/cisagov/icsnpp-opcua-binary). OPCUA Binary only supports TCP ports.
         + `ZEEK_PORTS_PROFINET_IO_CM` - Specify the ports for the [ICSNPP-Profinet-IO-CM analyzer](https://github.com/cisagov/icsnpp-profinet-io-cm). Profinet-IO-CM only supports UDP ports.
         + `ZEEK_PORTS_ROC_PLUS` - Specify the ports for the [ICSNPP-ROC+ analyzer](https://github.com/cisagov/icsnpp-roc-plus). ROC+ supports both TCP and UDP ports.
-        + `ZEEK_PORTS_S7COMM` - Specify the ports for the [ICSNPP-S7Comm analyzer](https://github.com/cisagov/icsnpp-roc-plus). S7Comm only supports TCP ports.
-        + `ZEEK_PORTS_SYNCHROPHASOR` - Specify the ports for the [ICSNPP-Synchrophasor analyzer](https://github.com/cisagov/icsnpp-synchrophasor/). ROC+ supports both TCP and UDP ports.
+        + `ZEEK_PORTS_S7COMM` - Specify the ports for the [ICSNPP-S7Comm analyzer](https://github.com/cisagov/icsnpp-s7comm). S7Comm only supports TCP ports.
+        + `ZEEK_PORTS_SLMP` - Specify ports for the [zeek-slmp analyzer](https://github.com/Johnbjoseph-cybersec/zeek-slmp). SLMP supports both TCP and UDP ports. SLMP is detected by content and has no default ports; ports listed here are always assigned to the analyzer, which is needed for capturing unidirectional SLMP traffic.
+        + `ZEEK_PORTS_SYNCHROPHASOR` - Specify the ports for the [ICSNPP-Synchrophasor analyzer](https://github.com/cisagov/icsnpp-synchrophasor/). Synchrophasor supports both TCP and UDP ports.
     - `ZEEK_DISABLE_INTEL_OFFLINE`/`ZEEK_DISABLE_INTEL_LIVE` - if set to `true`, Zeek will not `@load` the files under `./zeek/intel` as described in [**Zeek Intelligence Framework**](zeek-intel.md#ZeekIntel) for historical PCAP processing/live traffic capture, respectively
     - `ZEEK_DISABLE_ICS_ALL` and `ZEEK_DISABLE_ICS_…` - if set to `true`, these variables can be used to disable Zeek's protocol analyzers for Operational Technology/Industrial Control Systems (OT/ICS) protocols
     - `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess)
@@ -297,8 +301,12 @@ Although the configuration script automates many of the following configuration 
 The `./scripts/configure` script can also be run noninteractively which can be useful for scripting Malcolm setup. This behavior can be selected by supplying the `-d` or `--defaults` option on the command line. Running with the `--help` option will list the arguments accepted by the script:
 
 ```
-usage: configure [-h] [--debug [true|false]] [--quiet] [--configure [true|false]] [--dry-run] [--log-to-file [filename]] [--skip-splash] [--tui | --dui | --gui | --non-interactive] [--compose-file <string>] [--environment-dir-input <string>] [--environment-dir-output <string>]
-                 [--export-malcolm-config-file [<path>]] [--import-malcolm-config-file <path> | --load-existing-env [true|false] | --defaults] [--malcolm-file <string>] [--image-file <string>] [--extra [EXTRASETTINGS ...]]
+usage: configure [-h] [--debug [true|false]] [--quiet] [--configure [true|false]] [--dry-run]
+                 [--log-to-file [filename]] [--skip-splash] [--tui | --dui | --gui | --non-interactive]
+                 [--compose-file <string>] [--environment-dir-input <string>]
+                 [--environment-dir-output <string>] [--export-malcolm-config-file [<path>]]
+                 [--import-malcolm-config-file <path> | --load-existing-env [true|false] | --defaults]
+                 [--malcolm-file <string>] [--image-file <string>] [--extra [EXTRASETTINGS ...]]
 
 Malcolm Installer
 
@@ -318,9 +326,10 @@ Installer Options:
 
 Interface Mode (mutually exclusive):
   --tui                 Run in command-line text-based interface mode (default)
-  --dui                 Run in python dialogs text-based user interface mode (if available - requires python dialogs)
-  --gui                 Run in graphical user interface mode (if available - requires customtkinter)
-  --non-interactive     Run in non-interactive mode for unattended installations (suppresses all user prompts)
+  --dui                 Run in python dialogs text-based user interface mode (if available - requires
+                        python dialogs)
+  --non-interactive     Run in non-interactive mode for unattended installations (suppresses all user
+                        prompts)
 
 Configuration File Options:
   --compose-file, --configure-file, --kube-file, -f <string>
@@ -332,12 +341,15 @@ Environment Config Options:
   --environment-dir-output, -e <string>
                         Target directory for writing Malcolm's .env files
   --export-malcolm-config-file, --export-mc-file [<path>]
-                        Export configuration to JSON/YAML settings file (auto-generates filename if not specified)
+                        Export configuration to JSON/YAML settings file (auto-generates filename if not
+                        specified)
   --import-malcolm-config-file, --import-mc-file <path>
                         Import configuration from JSON/YAML settings file
   --load-existing-env, -l [true|false]
-                        Automatically load provided config/ .env files from the input directory when present. Can be used in conjunction with --environment-dir-input
-  --defaults, -d        Use built-in default configuration values and skip loading from the config directory
+                        Automatically load provided config/ .env files from the input directory when
+                        present. Can be used in conjunction with --environment-dir-input
+  --defaults, -d        Use built-in default configuration values and skip loading from the config
+                        directory
 
 Installation Files:
   --malcolm-file, -m <string>
@@ -348,7 +360,6 @@ Installation Files:
 Additional Configuration Options:
   --extra [EXTRASETTINGS ...]
                         Extra environment variables to set (e.g., foobar.env:VARIABLE_NAME=value)
-…
 ```
 
 Once Malcolm is configured correctly, the `--export-malcolm-config-file` option can be used to export the configuration to a file that can be used with `--import-malcolm-config-file` to restore it later or transfer it to another Malcolm instance for import.

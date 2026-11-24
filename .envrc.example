@@ -7,6 +7,8 @@
 export MALCOLM_COMPOSE_FILE=$PWD/docker-compose.yml
 export MALCOLM_CONFIG_DIR=$PWD/config
 export MALCOLM_CONTAINER_RUNTIME=docker
+# container image architecture (amd64 or arm64); blank uses this host's
+export IMAGE_ARCH=
 export MALCOLM_URL=
 
 # main configuration variables
@@ -35,14 +37,26 @@ export OPENSEARCH_SECONDARY_URL=
 export OPENSEARCH_SECONDARY_SSL_VERIFY=false
 export DASHBOARDS_URL=http://dashboards:5601/dashboards
 export LOGSTASH_HOST=
+# the Malcolm instance a Hedgehog sends its data to
+export REMOTE_MALCOLM_HOST=
+# ISO-installed Hedgehog only: comma-separated IP addresses allowed to reach back; blank follows REMOTE_MALCOLM_HOST
+export REACHBACK_REQUEST_ACL=
 export LOGSTASH_MEMORY=3g
 export LOGSTASH_WORKERS=2
 export LOGSTASH_EXPOSE=false
 export OPENSEARCH_EXPOSE=false
 export FILEBEAT_TCP_EXPOSE=false
+export FILEBEAT_TCP_LOG_FORMAT=json
+# blank fields use the installer's defaults for FILEBEAT_TCP_LOG_FORMAT
+export FILEBEAT_TCP_PARSE_SOURCE_FIELD=
+export FILEBEAT_TCP_PARSE_TARGET_FIELD=
+export FILEBEAT_TCP_PARSE_DROP_FIELD=
+export FILEBEAT_TCP_TAG=_malcolm_beats
 export SFTP_EXPOSE=false
 export SYSLOG_PORT_UDP=0
 export SYSLOG_PORT_TCP=0
+# no, yes or customize; blank chooses customize if any service above is exposed, otherwise no
+export OPEN_PORTS=
 export FILESCAN_PATH=
 export OPENSEARCH_PATH=
 export OPENSEARCH_SNAPSHOT_PATH=
@@ -53,11 +67,17 @@ export DELETE_OLD_PCAP=false
 export DELETE_PCAP_THRESHOLD=5%
 export EXTRACTED_FILE_MAX_SIZE_THRESHOLD=25G
 export EXTRACTED_FILE_TOTAL_DISK_USAGE_PERCENT_THRESHOLD=0
+export DELETE_OLD_INDICES=false
+# only applies when DELETE_OLD_INDICES is true
 export DELETE_INDEX_THRESHOLD=500g
+export DELETE_INDEX_BY_NAME=false
+# ISO-installed Malcolm and Hedgehog only: prune the oldest PCAP and logs when disk space runs low
+export PRUNE_OLDEST_PCAP=false
+export PRUNE_OLDEST_LOGS=false
 export INDEX_MANAGEMENT_ENABLE=false
 export INDEX_MANAGEMENT_HOT_WARM_ENABLE=false
-export INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD=
-export INDEX_MANAGEMENT_SPI_DATA_RETENTION=
+export INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD=30d
+export INDEX_MANAGEMENT_SPI_DATA_RETENTION=90d
 export INDEX_MANAGEMENT_REPLICAS=0
 export INDEX_MANAGEMENT_WEEKS_OF_HISTORY=13
 export INDEX_MANAGEMENT_SEGMENTS=1
@@ -75,6 +95,7 @@ export ZEEK_INTEL_ON_STARTUP=true
 export ZEEK_INTEL_LIVE=true
 export ZEEK_INTEL_OFFLINE=true
 export ZEEK_INTEL_FEED_SINCE="24 hours ago"
+export ZEEK_INTEL_FEED_SSL_VERIFY=false
 export ZEEK_INTEL_CRON_EXPRESSION='0 0 * * *'
 export ZEEK_INTEL_ITEM_EXPIRATION="-1min"
 export REVERSE_DNS=false
@@ -92,6 +113,7 @@ export EXTRACTED_FILE_SERVER_PASSWORD=infected
 export FILE_SCAN_RULE_UPDATE=true
 export NETBOX=local
 export NETBOX_URL=
+export NETBOX_SSL_VERIFY=false
 export NETBOX_ENRICH=true
 export NETBOX_AUTOPOPULATE=false
 export NETBOX_AUTO_PREFIXES=false
@@ -111,6 +133,17 @@ export LIVE_CAPTURE_NETSNIFF=true
 export LIVE_CAPTURE_ZEEK=true
 export LIVE_CAPTURE_SURICATA=true
 export EXTRA_TAGS=
+# ISO-installed Malcolm and Hedgehog only: forward the host's own metrics and logs
+export AUX_FW_AIDE=false
+export AUX_FW_AUDITLOG=false
+export AUX_FW_CPU=false
+export AUX_FW_DF=false
+export AUX_FW_DISK=false
+export AUX_FW_KMSG=false
+export AUX_FW_MEM=false
+export AUX_FW_NETWORK=false
+export AUX_FW_SYSTEMD=false
+export AUX_FW_THERMAL=false
 
 # auth configuration variables
 export AUTH_METHOD=basic

@@ -388,7 +388,10 @@ class RedisSubscriber[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
 
         return [*super().get_work_coros(), work()]
 
-    async def get_message(self, timeout: float | None = None) -> Message:
+    # redis-py >= 8 defaults socket_timeout to 5s, so a read with no timeout
+    # raises TimeoutError after 5s of silence; the loop below already retries
+    # on an empty result, so poll with a shorter timeout by default
+    async def get_message(self, timeout: float | None = 2.0) -> Message:
         while True:
             await self.ensure_subscribed()
             msg = await self.pubsub.get_message(timeout=timeout)
@@ -472,7 +475,8 @@ class RedisListWatcher[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
         async def work() -> None:
             logging.debug('starting Redis list watcher: %r', self)
             while True:
-                await self.dispatch_item(*await self.get_item())
+                if (item := await self.get_item()) is not None:
+                    await self.dispatch_item(*item)
 
         return [*super().get_work_coros(), work()]
 
@@ -480,14 +484,21 @@ class RedisListWatcher[OptsT](RedisConnection[OptsT], HandlerMixin[str | None]):
         self,
         lists: Iterable[Alias],
         **kw,
-    ) -> tuple[Alias, str]:
-        key, value = await cast(
-            Awaitable[tuple[Key, str]],
+    ) -> tuple[Alias, str] | None:
+        result = await cast(
+            Awaitable[tuple[Key, str] | None],
             self.redis.blpop(list(self.aliases.unalias_all(lists)), **kw),
         )
+        if result is None:
+            return None
+        key, value = result
         return self.aliases.alias(key), value
 
-    async def get_item(self, **kw) -> tuple[Alias, str]:
+    async def get_item(self, **kw) -> tuple[Alias, str] | None:
+        # redis-py >= 8 defaults socket_timeout to 5s, which kills an
+        # indefinite BLPOP; block for less than that on the server side
+        # and let the caller loop on an empty result instead
+        kw.setdefault('timeout', 2)
         return await self.blpop(self._list_aliases, **kw)
 
     async def dispatch_item(self, list_key: Alias, data: str) -> None:

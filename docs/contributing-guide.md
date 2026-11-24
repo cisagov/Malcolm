@@ -16,6 +16,7 @@ It is recommended before reviewing this guide to read the documentation on [cust
     - [`local.zeek`](contributing-zeek.md#LocalZeek)
     - [Adding a new Zeek package](contributing-zeek.md#ZeekPackage)
     - [Zeek Intelligence Framework](contributing-zeek.md#ContributingZeekIntel)
+* [Adding a new Zeek parser](contributing-zeek-parser.md#ZeekParser)
 * [PCAP processors](contributing-pcap.md#PCAP)
 * [Logstash](contributing-logstash.md#Logstash)
     - [Parsing a new log data source](contributing-logstash.md#LogstashNewSource)

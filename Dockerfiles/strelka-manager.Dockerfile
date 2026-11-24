@@ -1,4 +1,4 @@
-FROM ghcr.io/idaholab/strelka/manager:malcolm@sha256:e5da71d1d59d484e8695df331063887aa3b22a66fc5a10e04da6ded10b8d4e28
+FROM ghcr.io/idaholab/strelka/manager:malcolm@sha256:beb452ec666e53d1ad27632f14de5ebab6dd7e903f0829ac59d0e532e824086a
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -21,14 +21,18 @@ USER root
 
 ENV TERM=xterm
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.3"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apk update --no-cache && \
-    apk --no-cache add bash curl jq psmisc rsync shadow su-exec tini && \
+    apk --no-cache add bash curl psmisc rsync shadow su-exec tini && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistent -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty

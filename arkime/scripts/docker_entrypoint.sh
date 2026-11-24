@@ -188,7 +188,8 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
       sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
       sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-      sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+      # remove the [user-auto-create] section
+      sed -i '/^\[user-auto-create\]/,/^\[/{/^\[user-auto-create\]/d;/^\[/!d}' "${ARKIME_CONFIG_FILE}"
       sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
       sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
       sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
@@ -226,6 +227,9 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       echo "arkimeUser=true" >> "${RBAC_FILE}"
       [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
         echo "arkimeAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
+      # the OpenSearch admin pages need dbAdmin, arkimeAdmin doesn't include it
+      [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
+        echo "dbAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
       # [[ -n "$ROLE_ARKIME_READ_ACCESS" ]]  && \
       #   echo "role:read_access=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_READ_ACCESS')" >> "${RBAC_FILE}"
       # [[ -n "$ROLE_ARKIME_READ_WRITE_ACCESS" ]]  && \

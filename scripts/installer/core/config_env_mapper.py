@@ -88,6 +88,7 @@ _BOOLEAN_VARS = [
     KEY_ENV_NETBOX_AUTO_CREATE_PREFIX,
     KEY_ENV_NETBOX_AUTO_POPULATE,
     KEY_ENV_NETBOX_ENRICHMENT,
+    KEY_ENV_NETBOX_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_NGINX_RESOLVER_IPV4,
     KEY_ENV_NGINX_RESOLVER_IPV6,
     KEY_ENV_NGINX_SSL,
@@ -106,6 +107,7 @@ _BOOLEAN_VARS = [
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP,
     KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP,
+    KEY_ENV_ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION,
 ]
 
 # 2. String transform logic
@@ -560,6 +562,9 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_NETBOX_URL].authoritative_items = [KEY_CONFIG_ITEM_NETBOX_URL]
             self.env_var_by_map_key[KEY_ENV_NETBOX_URL].derived_items = [KEY_CONFIG_ITEM_NETBOX_MODE]
             self.env_var_by_map_key[KEY_ENV_NETBOX_MODE].config_items = [KEY_CONFIG_ITEM_NETBOX_MODE]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_SSL_CERTIFICATE_VERIFICATION].config_items = [
+                KEY_CONFIG_ITEM_NETBOX_SSL_VERIFY
+            ]
 
             # Nginx
             self.env_var_by_map_key[KEY_ENV_NGINX_SSL].config_items = [KEY_CONFIG_ITEM_NGINX_SSL]
@@ -707,6 +712,9 @@ class EnvMapper:
             ]
             self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_FEED_SINCE].config_items = [
                 KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION].config_items = [
+                KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SSL_VERIFY
             ]
             self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION].config_items = [
                 KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION

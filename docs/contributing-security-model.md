@@ -185,6 +185,24 @@ All user authentication happens in the `nginx-proxy` container. Backend services
 
 This means a backend service reached directly, bypassing nginx, applies no user authentication. That is by design and follows from [the internal network being a single trust domain](#InternalNetwork): the only callers that can reach a backend directly are other Malcolm containers.
 
+#### Authentication runs in nginx's access phase
+
+nginx handles each request in a fixed sequence of phases, and the order of directives inside a `location` block does not change it. `rewrite`, `return`, `set`, and `if` run in the rewrite phase. `auth_basic`, `auth_ldap`, `access_by_lua_block` (which carries the Keycloak modes), `allow`/`deny`, and `limit_except` run in the access phase, which comes later. So a location that includes `nginx_auth_rt.conf` and also contains a `return` or a `rewrite ... redirect` answers the request before authentication is evaluated, in every authentication mode.
+
+A location that needs to redirect after authenticating keeps the auth include and hands off from the content phase to a named location that holds the redirect:
+
+```
+location ~* /iddash2ark/(.*) {
+  include /etc/nginx/nginx_auth_rt.conf;
+  content_by_lua_block { return ngx.exec("@iddash2ark_pivot") }
+}
+location @iddash2ark_pivot {
+  rewrite (?i)^.*/iddash2ark/(.*) $scheme://$host/arkime/sessions?expression=($1) redirect;
+}
+```
+
+Named locations can't be requested by a client, so the redirect is reachable only through the gated location. [`shared/tests/test_nginx_auth_phase_order.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/tests/test_nginx_auth_phase_order.py) parses the nginx configuration, including every alternative of the `*_rt.conf` runtime links, and fails on a gated location that finalizes in the rewrite phase or on a location in a user-facing server with no authentication at all. A location that is meant to be public goes on one of that file's allowlists with a reason.
+
 ### <a name="IdentityHeaders"></a>Identity headers
 
 nginx communicates the authenticated user to backends through request headers:
@@ -269,7 +287,7 @@ A report in this area is more likely to describe a vulnerability if it identifie
 
 `arkime/etc/config.ini` is the clearest example: `passwordSecret` in the repository is replaced from `ARKIME_PASSWORD_SECRET` by `docker_entrypoint.sh` at container start. A report treating the repository value as live will not reproduce.
 
-Entrypoint scripts also change behavior by deployment mode. In the Hedgehog live-capture profile, `docker_entrypoint.sh` comments out `userNameHeader`, `userAuthIps`, and `userAutoCreateTmpl` entirely, so the header-trust and auto-provisioning logic visible in the file is not active on a sensor.
+Entrypoint scripts also change behavior by deployment mode. In the Hedgehog live-capture profile, `docker_entrypoint.sh` comments out `userNameHeader` and `userAuthIps` and removes the `[user-auto-create]` section entirely, so the header-trust and auto-provisioning logic visible in the file is not active on a sensor.
 
 Reading the rendered configuration from a running container, rather than the file in the Malcolm source code repository, is the reliable way to check claims in this area.
 
@@ -306,9 +324,9 @@ The following are not treated as vulnerabilities in Malcolm, though specific imp
 
 **Build and distribution practice**, which is documented in detail in [**Malcolm code provenance and software supply chain**](contributing-guide-code-provenance.md). Reports in this area are usually generic observations about building from third-party sources, and they tend to assume Malcolm does less verification than it does. The current state:
 
-* **Third-party release assets are pinned by version and verified by SHA-256.** Expected digests live in [`shared/checksums/binaries.sha256`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/checksums/binaries.sha256), covering both `amd64` and `arm64` artifacts, and are enforced at build time by [`shared/bin/install-verified-binary.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/install-verified-binary.sh), which fifteen [Dockerfiles]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) mount and use. A digest mismatch fails the build.
+* **Third-party release assets are pinned by version and verified by SHA-256.** Expected digests live in [`shared/pins/binaries.sha256`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/pins/binaries.sha256), covering both `amd64` and `arm64` artifacts, and are enforced at build time by [`shared/bin/install-verified-binary.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/install-verified-binary.sh), which fifteen [Dockerfiles]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) mount and use. A digest mismatch fails the build.
 * **Files fetched by URL are verified in the Dockerfile itself.** `nginx.Dockerfile` uses `ADD --checksum=sha256:...` for 28 fetched files. Sources fetched as tarballs carry an explicit digest argument checked with `sha256sum -c`, including the vendored FilePond server (`FILEPOND_SERVER_SHA256`), OpenResty (`OPENRESTY_SHA256`), freq (`FREQ_SOURCE_SHA256`, alongside a pinned `FREQ_SOURCE_COMMIT`), htadmin, and the ECS source.
-* **Externally fetched web assets are verified against a manifest.** `htadmin.Dockerfile` compares the set of downloaded files against [`shared/checksums/htadmin-assets.sha256`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/checksums/htadmin-assets.sha256) with `diff`, so an unexpected *or* missing file fails the build, and then runs `sha256sum -c --strict`.
+* **Externally fetched web assets are verified against a manifest.** `htadmin.Dockerfile` compares the set of downloaded files against [`shared/pins/htadmin-assets.sha256`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/pins/htadmin-assets.sha256) with `diff`, so an unexpected *or* missing file fails the build, and then runs `sha256sum -c --strict`.
 * **Zeek packages are resolved to commits in a lock file.** [`zeek/zeek-packages.lock`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/zeek/zeek-packages.lock) pins every one of the ~70 Zeek plugins to an exact commit, generated from `zeek-packages.list` by `scripts/zeek_packages_lock_refresh.sh`. The build installs only what the lock file names, so a branch moving upstream does not change a build, and a refresh produces a reviewable diff.
 * **Python dependencies are pinned to exact versions** with `==` in each component's `requirements.txt`.
 * **Third-party package repositories are verified by signing key.** The EPEL signing key is shipped in [`shared/keys/`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/shared/keys) and imported with `rpm --import` rather than trusted on fetch.

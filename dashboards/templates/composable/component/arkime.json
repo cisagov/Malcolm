@@ -876,6 +876,40 @@
         "node": {
           "type": "keyword"
         },
+        "ntp" : {
+          "properties" : {
+            "ja4n" : {
+              "type" : "keyword"
+            },
+            "ja4nCnt" : {
+              "type" : "long"
+            },
+            "mode" : {
+              "type" : "keyword"
+            },
+            "modeCnt" : {
+              "type" : "long"
+            },
+            "refId" : {
+              "type" : "keyword"
+            },
+            "refIdCnt" : {
+              "type" : "long"
+            },
+            "stratum" : {
+              "type" : "keyword"
+            },
+            "stratumCnt" : {
+              "type" : "long"
+            },
+            "version" : {
+              "type" : "long"
+            },
+            "versionCnt" : {
+              "type" : "long"
+            }
+          }
+        },
         "opcua": {
           "properties": {
             "endpointUrl": {
