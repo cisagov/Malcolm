@@ -22,14 +22,12 @@ Usually, Hedgehog Linux is configured to [communicate with a Malcolm aggregator]
         - Set *either* **Capture Live Traffic with netsniff-ng** or **Capture Live Traffic with tcpdump** to **Yes** to generate PCAP files of observed network traffic. netsniff-ng performs slightly better than tcpdump for high-performance sniffing on high-speed interfaces; otherwise, it does not matter which is used.
         - Set **Capture Interface(s)** and **Capture Filter** (if needed) as usual.
     * **Save and Continue** to apply the settings.
-3. Edit the `./config/filebeat.env` file and add `FILEBEAT_MAIN_LOGS=false` to the end of that file.
-4. Edit the `./config/opensearch.env` file and set `OPENSEARCH_URL` to empty (e.g., `OPENSEARCH_URL=`).
-5. Run [`./scripts/auth_setup`](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) and select **all**.
+3. Run [`./scripts/auth_setup`](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) and select **all**.
     * Select **Yes** for **Store username/password for OpenSearch/Elasticsearch instance** and provide values for both username and password. The values themselves do not matter and will not be used, but for now, there are certain startup checks that require them to be present.
     * Select **Yes** for **Regenerate internal passwords for Valkey**.
     * Select **No** for **Store password hash secret for Arkime viewer cluster**.
     * Select **No** for **Receive client certificates from Malcolm**.
-6. Open a terminal and run `touch ~/Malcolm/filebeat/certs/{ca.crt,client.crt,client.key}`. The contents of these files do not matter, but for now, they must exist for Malcolm to start.
+    * Select **Yes** for **Prepare startup files for standalone Hedgehog**. This disables main Filebeat log forwarding (`FILEBEAT_MAIN_LOGS=false`), clears `OPENSEARCH_URL` and creates any missing certificate placeholders without overwriting existing certificates. Select **No** to leave these files and settings unchanged. The option is also available separately in the authentication menu.
 
 Hedgehog can now be [started](running.md#Starting), [stopped or restarted](running.md#StopAndRestart) in the usual ways. Artifacts (Zeek logs, Suricata logs, PCAP files, etc.) will be stored as [configured under the **Default Storage Location Settings**](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems) for manual retrieval and analysis later.
 
