@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import errno
 from anyio.from_thread import BlockingPortal
-from typing import Any
+from typing import Any, Final
 from watchdog.events import (
     DirAttribEvent,
     DirCreatedEvent,
     DirDeletedEvent,
     DirModifiedEvent,
     DirMovedEvent,
+    EventsLostEvent,
     FileAttribEvent,
     FileClosedEvent,
     FileClosedNoWriteEvent,
@@ -19,6 +21,13 @@ from watchdog.events import (
     FileSystemEvent,
     FileSystemEventHandler,
 )
+
+# inotify resource limits, by the errno watchdog raises when one is hit: ENOSPC when the user's
+# watch limit is reached, EMFILE when the user's instance limit is
+INOTIFY_LIMIT_SYSCTLS: Final = {
+    errno.ENOSPC: 'fs.inotify.max_user_watches',
+    errno.EMFILE: 'fs.inotify.max_user_instances',
+}
 
 type AttribEvent = DirAttribEvent | FileAttribEvent
 type ClosedEvent = FileClosedEvent
@@ -72,7 +81,12 @@ class AsyncFileSystemEventHandler:
 
     async def dispatch(self, event: FileSystemEvent) -> None:
         await self.on_any_event(event)
-        await getattr(self, f"on_{event.event_type}")(event)
+        # watchdog adds event types over time (attrib in 7.0, events_lost in 7.1.1). An
+        # event type with no on_<type> coroutine here is ignored: raising AttributeError
+        # would propagate through the portal onto the observer's dispatcher thread, which
+        # only catches queue.Empty, so the observer would stop delivering events entirely.
+        if (handler := getattr(self, f"on_{event.event_type}", None)) is not None:
+            await handler(event)
 
     async def on_any_event(self, _: FileSystemEvent, /) -> None:
         pass
@@ -90,6 +104,9 @@ class AsyncFileSystemEventHandler:
         pass
 
     async def on_deleted(self, _: DeletedEvent, /) -> None:
+        pass
+
+    async def on_events_lost(self, _: EventsLostEvent, /) -> None:
         pass
 
     async def on_modified(self, _: ModifiedEvent, /) -> None:

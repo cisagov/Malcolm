@@ -6057,6 +6057,77 @@
                 }
               }
             },
+            "slmp": {
+              "properties": {
+                "frame_type": {
+                  "type": "keyword"
+                },
+                "serial": {
+                  "type": "long"
+                },
+                "network": {
+                  "type": "long"
+                },
+                "station": {
+                  "type": "long"
+                },
+                "module_io": {
+                  "type": "keyword"
+                },
+                "multidrop": {
+                  "type": "long"
+                },
+                "ext_station": {
+                  "type": "long"
+                },
+                "monitoring_timer": {
+                  "type": "long"
+                },
+                "command": {
+                  "type": "keyword"
+                },
+                "command_code": {
+                  "type": "keyword"
+                },
+                "subcommand": {
+                  "type": "keyword"
+                },
+                "device": {
+                  "type": "keyword"
+                },
+                "head_device": {
+                  "type": "long"
+                },
+                "address": {
+                  "type": "keyword"
+                },
+                "points": {
+                  "type": "long"
+                },
+                "run_mode": {
+                  "type": "keyword"
+                },
+                "clear_mode": {
+                  "type": "long"
+                },
+                "model_name": {
+                  "type": "keyword"
+                },
+                "model_code": {
+                  "type": "keyword"
+                },
+                "end_code": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "rtt": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000000
+                }
+              }
+            },
             "iccp_controls": {
               "properties": {
                 "classification": {

@@ -178,6 +178,7 @@
 "s7comm_upload_download": ["ot", "network"]
 "signatures": ["malware", "intrusion_detection", "network"]
 "sip": ["network"]
+"slmp": ["ot", "network"]
 "smb_cmd": ["network"]
 "smb_files": ["file", "network"]
 "smb_mapping": ["file", "network"]

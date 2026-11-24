@@ -365,7 +365,9 @@ class ContextLockedOrderedDict(OrderedDict):
 
     def __exit__(self, type, value, traceback):
         self.lock.release()
-        return self
+        # a truthy return would suppress any exception raised in the with block (whenever the
+        #   dict was non-empty, since this used to return self)
+        return False
 
 
 ###################################################################################################

@@ -226,7 +226,7 @@ source_pins:
     add_checksum: true
   openresty:
     repo: openresty/openresty
-    ref: v1.31.8.1
+    ref: v1.31.9.1
     version_var: OPENRESTY_VERSION
     sha256_var: OPENRESTY_SHA256
     archive: https://openresty.org/download/openresty-{version}.tar.gz
