@@ -185,6 +185,13 @@ class DependencyManager:
                 # a value the user set, in this session or via a load, is left alone unless the rule is forced
                 if value_rule.only_if_unmodified and self.config.is_user_set(item_key):
                     return
+                # Some forced cascades preserve edits made during this session, but retain
+                # their normal behavior for loaded values and in other profiles.
+                if item.is_modified and value_rule.preserve_manual_override:
+                    keys = value_rule.depends_on
+                    values = [self.config.get_value(key) for key in (keys if isinstance(keys, list) else [keys])]
+                    if value_rule.preserve_manual_override(*values):
+                        return
                 new_val = self._compute_rule_value(item_key, value_rule)
                 if new_val is not DEFAULT_VALUE_UNCHANGED:
                     old_val = self.config.get_value(item_key)

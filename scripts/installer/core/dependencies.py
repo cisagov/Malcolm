@@ -84,6 +84,7 @@ class ValueRule:
     default_value: Any  # Value to set when condition is met
     only_if_unmodified: bool = True  # Only set if the user hasn't set it (in this session or via a load)
     kind: Optional[RuleKind] = None  # Required; see RuleKind (checked when rules are registered)
+    preserve_manual_override: Optional[Callable[..., bool]] = None  # Protect edits made in this session
 
 
 @dataclass
@@ -331,6 +332,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 condition=lambda profile, malcolm_host: (profile != PROFILE_MALCOLM) and bool(malcolm_host),
                 default_value=lambda _profile, malcolm_host: f"{malcolm_host}:{SERVICE_PORT_LOGSTASH}",
                 only_if_unmodified=False,
+                preserve_manual_override=lambda profile, *_: profile == PROFILE_HEDGEHOG,
             ),
         ],
     ),
@@ -349,7 +351,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 default_value=[],
                 only_if_unmodified=False,
             ),
-            # on an ISO-installed Hedgehog, changing the remote Malcolm host replaces the ACL with that host
+            # on an ISO-installed Hedgehog, the remote Malcolm host supplies the initial ACL
             ValueRule(
                 kind=RuleKind.CASCADE,
                 depends_on=[
@@ -361,6 +363,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 ),
                 default_value=lambda _profile, malcolm_host: [malcolm_host],
                 only_if_unmodified=False,
+                preserve_manual_override=lambda profile, *_: profile == PROFILE_HEDGEHOG,
             ),
         ],
     ),
@@ -612,6 +615,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 ),
                 default_value=lambda _profile, _mode, malcolm_host: f"https://{malcolm_host}:{SERVICE_PORT_OSMALCOLM}",
                 only_if_unmodified=False,
+                preserve_manual_override=lambda profile, *_: profile == PROFILE_HEDGEHOG,
             ),
         ],
     ),
@@ -1007,6 +1011,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 ),
                 default_value=lambda _profile, malcolm_host, _live_arkime: f"https://{malcolm_host}/wise/",
                 only_if_unmodified=False,
+                preserve_manual_override=lambda profile, *_: profile == PROFILE_HEDGEHOG,
             ),
         ],
     ),
