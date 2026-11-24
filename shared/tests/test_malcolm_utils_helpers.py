@@ -689,3 +689,27 @@ def test_count_until_exception():
     assert counter.increment() is True
     with pytest.raises(ValueError, match='too many'):
         counter.increment()
+
+
+###################################################################################################
+# ContextLockedOrderedDict
+
+
+@pytest.mark.parametrize('contents', [{}, {'queued.pcap': []}], ids=['empty', 'non-empty'])
+def test_context_locked_ordered_dict_propagates_exceptions(contents):
+    # __exit__ used to return the dict itself, which suppressed the exception whenever it was non-empty
+    locked = malcolm_utils.ContextLockedOrderedDict(contents)
+    with pytest.raises(RuntimeError, match='raised inside'):
+        with locked:
+            raise RuntimeError('raised inside the with block')
+    assert locked.lock.acquire(blocking=False), 'lock was not released'
+    locked.lock.release()
+
+
+def test_context_locked_ordered_dict_holds_its_lock_inside_the_block():
+    locked = malcolm_utils.ContextLockedOrderedDict({'queued.pcap': []})
+    with locked as entered:
+        assert entered is locked
+        assert not locked.lock.acquire(blocking=False)
+    assert locked.lock.acquire(blocking=False)
+    locked.lock.release()

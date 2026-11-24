@@ -55,6 +55,7 @@ Malcolm leverages the following excellent open source tools, among others:
     * Numerous packages from [Corelight, Inc.](https://github.com/corelight)
     * FoxIO's [JA4+](https://blog.foxio.io/ja4%2B-network-fingerprinting) network fingerprinting algorithms. JA4+ algorithms (used by the Zeek and Arkime components of Malcolm) have licensing requirements under the [FoxIO License](https://github.com/FoxIO-LLC/ja4/blob/main/LICENSE). See also the [FoxIO license FAQ](https://github.com/FoxIO-LLC/ja4/blob/main/License%20FAQ.md#open-source-combinations).
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
+    * John B Joseph's [zeek-slmp parser](https://github.com/Johnbjoseph-cybersec/zeek-slmp) for SLMP (SeamLess Message Protocol), the message protocol used by Mitsubishi Electric MELSEC controllers and other SLMP-compatible devices.
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/bzar) scripts
     * NCSA's [bro-is-darknet](https://github.com/ncsa/bro-is-darknet) and [bro-simple-scan](https://github.com/ncsa/bro-simple-scan)

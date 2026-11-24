@@ -82,6 +82,7 @@ class TestForwardingOverrides(unittest.TestCase):
             "https://192.0.2.40:9200",
         )
 
+    @patch.dict(SYSTEM_INFO, {"malcolm_iso_install": True})
     def test_manual_reachback_acl_is_not_overwritten(self):
         self.cfg.set_value(KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL, ["198.51.100.7"])
         self.cfg.set_value(KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST, "192.0.2.50")

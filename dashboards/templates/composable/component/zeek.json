@@ -133,7 +133,8 @@
                   "type": "keyword"
                 },
                 "rtt": {
-                  "type": "float"
+                  "type": "scaled_float",
+                  "scaling_factor": 1000000
                 }
               }
             },
@@ -240,7 +241,8 @@
                   "type": "keyword"
                 },
                 "rtt": {
-                  "type": "float"
+                  "type": "scaled_float",
+                  "scaling_factor": 1000000
                 },
                 "TC": {
                   "type": "keyword"
@@ -1113,6 +1115,9 @@
             },
             "ntp": {
               "properties": {
+                "ja4n": {
+                  "type": "keyword"
+                },
                 "mode": {
                   "type": "keyword"
                 },
@@ -1432,7 +1437,8 @@
                   "type": "keyword"
                 },
                 "ttl": {
-                  "type": "float"
+                  "type": "scaled_float",
+                  "scaling_factor": 1000000
                 },
                 "tunnel_client": {
                   "type": "keyword"
@@ -1678,7 +1684,8 @@
                   "type": "keyword"
                 },
                 "rtt": {
-                  "type": "float"
+                  "type": "scaled_float",
+                  "scaling_factor": 1000000
                 },
                 "status": {
                   "type": "keyword"

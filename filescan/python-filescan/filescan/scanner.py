@@ -14,12 +14,21 @@ from filescan.config import BaseConfig
 from filescan.model import ScanRequest, ScanResult, ScanTimeout, ScanEnd, ScanBegin
 from pathlib import Path
 from pydantic import BaseModel
-from redis.asyncio import Redis
+from redis.asyncio import BlockingConnectionPool, Redis
 from typing import Any, AsyncIterator, ClassVar
 
 
 class ScannerOptions(BaseModel, frozen=True):
     timeout: float = 900.0
+
+
+# redis-py >= 8 caps the default connection pool at 100 connections and raises
+# MaxConnectionsError immediately when it's exhausted. handle_request tasks are
+# started without any limit, so a burst of scan requests opens one connection per
+# concurrent publish and blows past that cap. A blocking pool makes publishers wait
+# for a free connection instead (publishes are quick, so the wait is short).
+REDIS_MAX_CONNECTIONS = 64
+REDIS_POOL_TIMEOUT = 60.0
 
 
 @dataclass
@@ -62,9 +71,17 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
                 await self.send_result(result)
             await self.notify(end or begin.get_end())
 
+    async def _publish(self, channel: str, payload: str) -> None:
+        # a failed publish for one request must not propagate out of handle_request,
+        # where it would tear down the task group and every other in-flight scan
+        try:
+            await self.connection.publish(channel, payload)
+        except redis.exceptions.RedisError:
+            log.exception('failed to publish to %s', channel)
+
     async def notify(self, note: ScanBegin | ScanEnd | ScanTimeout) -> None:
         log.debug('sending notification: %r', note)
-        await self.connection.publish(
+        await self._publish(
             self.global_config.redis.keys.notify,
             note.model_dump_json(),
         )
@@ -72,7 +89,7 @@ class Scanner[GC: BaseConfig, SC: ScannerOptions](metaclass=ABCMeta):
     async def send_result(self, result: ScanResult) -> None:
         log.debug('sending result: %r', result)
         log.info('sending result for %s', result.id)
-        await self.connection.publish(
+        await self._publish(
             self.global_config.redis.keys.result,
             result.model_dump_json(),
         )
@@ -152,13 +169,17 @@ def scanner_main(
             await anyio.sleep(0.5)
             try:
                 connection = Redis(
-                    host=options.redis.host,
-                    port=options.redis.port,
-                    db=options.redis.db,
-                    username=options.redis.username,
-                    password=options.redis.password,
-                    decode_responses=True,
-                    client_name=Path(sys.argv[0]).stem,
+                    connection_pool=BlockingConnectionPool(
+                        host=options.redis.host,
+                        port=options.redis.port,
+                        db=options.redis.db,
+                        username=options.redis.username,
+                        password=options.redis.password,
+                        decode_responses=True,
+                        client_name=Path(sys.argv[0]).stem,
+                        max_connections=REDIS_MAX_CONNECTIONS,
+                        timeout=REDIS_POOL_TIMEOUT,
+                    ),
                 )
                 await connection.ping()
             except redis.exceptions.ConnectionError as exc:

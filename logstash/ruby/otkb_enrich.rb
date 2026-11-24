@@ -7,6 +7,11 @@ require 'json'
 require 'tempfile'
 require 'time'
 
+# shared TLS trust store (see malcolm_ca_trust.rb); it sits next to this script both in the
+#   image and in the source tree, with the image path as a fallback in case __dir__ is unset
+_malcolm_ca_trust_rb = [__dir__, '/usr/share/logstash/malcolm-ruby'].compact.map { |d| File.join(d, 'malcolm_ca_trust.rb') }.find { |f| File.file?(f) }
+require(_malcolm_ca_trust_rb || 'malcolm_ca_trust')
+
 ##############################################################################################
 # The fixture and its refresh state are global so every clone of this filter in this Logstash
 # process reads the same immutable snapshot. A different Logstash process has its own snapshot.
@@ -186,8 +191,11 @@ class OtkbConnLazy
 
   def initialize_object
     # Faraday joins relative request paths to this base URL. The API expects the token scheme in
-    # the form "Authorization: Token <token>".
-    @object = Faraday.new(@url, ssl: { verify: @ssl_verify }) do |conn|
+    # the form "Authorization: Token <token>". When verifying, hand Faraday a store that includes
+    # the CAs from PUSER_CA_TRUST rather than relying on jruby-openssl's default paths.
+    ssl_options = { verify: @ssl_verify }
+    ssl_options[:cert_store] = MalcolmCaTrust.cert_store if @ssl_verify
+    @object = Faraday.new(@url, ssl: ssl_options) do |conn|
       unless @token.nil? || @token.to_s.empty?
         conn.request :authorization, 'Token', @token
       end
@@ -413,6 +421,10 @@ def register(
     _ssl_verify_str = ENV[_ssl_verify_env]
   end
   @otkb_ssl_verify = [1, true, '1', 'true', 't', 'on'].include?(_ssl_verify_str.to_s.downcase)
+  if @otkb_enabled && !@otkb_ssl_verify && @otkb_url.to_s.downcase.start_with?('https:')
+    puts "otkb_enrich: TLS certificate verification DISABLED for #{@otkb_url} " \
+         "(via #{_ssl_verify_env || 'ssl_verify script_param'})"
+  end
 
   # Leave the connection nil when no URL is configured. filter can then return immediately without
   # attempting any API or fixture work.

@@ -1543,6 +1543,7 @@ The NTP dashboard covers [Network Time Protocol (NTP)](https://en.wikipedia.org/
 * `zeek.ntp.stratum`
 * `zeek.ntp.version`
 * `zeek.ntp.xmt_time`
+* `zeek.ntp.ja4n`
 
 
 ---

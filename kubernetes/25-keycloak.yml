@@ -39,7 +39,7 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
-        command: ["/usr/bin/tini"]
+        command: ["/usr/local/bin/tini"]
         args: ["--",
                "/usr/local/bin/docker-uid-gid-setup.sh",
                "/usr/local/bin/service_check_passthrough.sh",

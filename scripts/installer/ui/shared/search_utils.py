@@ -5,6 +5,7 @@
 
 """Build and format search results consistently across UIs."""
 
+import re
 from typing import List, Optional
 
 try:
@@ -15,6 +16,63 @@ try:
 except ImportError:  # pragma: no cover - colorama optional in some environments
     Fore = Style = None  # type: ignore
     _HAS_COLORAMA = False
+
+
+_GROUP_LABEL_STRIP_RE = re.compile(r'^(?:Enable |Use )| Mode$')
+
+
+def strip_group_label(label: str) -> str:
+    """Turn an item label into the short group name used for its submenu."""
+    return _GROUP_LABEL_STRIP_RE.sub('', label or '')
+
+
+def group_nav_label(label: str) -> str:
+    """Label of the menu entry that opens an item's child settings (e.g. 'Zeek Analysis Settings')."""
+    return strip_group_label(label) + " Settings"
+
+
+def get_ancestor_keys(malcolm_config, key: str) -> List[str]:
+    """Return the ui_parent chain for key, ordered root first, excluding key itself."""
+    chain: List[str] = []
+    seen = {key}
+    item = malcolm_config.get_item(key)
+    while item and item.ui_parent and item.ui_parent not in seen:
+        parent_key = item.ui_parent
+        seen.add(parent_key)
+        chain.insert(0, parent_key)
+        item = malcolm_config.get_item(parent_key)
+    return chain
+
+
+def format_menu_path(
+    malcolm_config,
+    key: str,
+    separator: str = " › ",
+    root_label: str = "Main",
+) -> str:
+    """Describe where key lives as the sequence of menu entries leading to it.
+
+    Each ancestor appears under the name of the submenu entry the user selects
+    to reach its children, so the path reads the same as the menus themselves.
+    """
+    parts = [root_label]
+    for ancestor_key in get_ancestor_keys(malcolm_config, key):
+        ancestor = malcolm_config.get_item(ancestor_key)
+        parts.append(group_nav_label(ancestor.label if ancestor else ancestor_key))
+    return separator.join(parts)
+
+
+def find_gating_ancestor(malcolm_config, key: str) -> Optional[str]:
+    """Return the nearest visible ancestor of a hidden item.
+
+    That ancestor's value is what keeps the item hidden, so it is the setting
+    the user needs to change to reveal it. Returns None when no ancestor is
+    visible (or the item has no ancestors).
+    """
+    for ancestor_key in reversed(get_ancestor_keys(malcolm_config, key)):
+        if malcolm_config.is_item_visible(ancestor_key):
+            return ancestor_key
+    return None
 
 
 def _dependency_label_string(malcolm_config, keys: List[str]) -> str:

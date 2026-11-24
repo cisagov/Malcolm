@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:9.5.6
+FROM docker.elastic.co/beats/filebeat-oss:9.5.7
 
 # Copyright (c) 2026 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -79,8 +79,11 @@ ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 ENV TINI_VERSION=v0.19.0
 ENV TINI_URL=https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION="4.54.1"
+ENV YQ_VERSION="4.54.3"
 ENV YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
 
 ENV EVTX_VERSION="0.15.1"
 ENV EVTX_URL="https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VERSION}/evtx_dump-v${EVTX_VERSION}-XXX-unknown-linux-gnu"
@@ -90,7 +93,7 @@ USER root
 ADD --chmod=644 filebeat/requirements.txt /usr/local/src/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     --mount=type=bind,source=shared/keys/RPM-GPG-KEY-EPEL-9,target=/usr/local/share/RPM-GPG-KEY-EPEL-9,ro \
     export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
     microdnf -y install curl-minimal && \
@@ -108,7 +111,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         libarchive \
         lzip \
         jo \
-        jq \
         openssl \
         p7zip \
         psmisc \
@@ -121,11 +123,12 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
         unzip \
         util-linux \
         xz && \
-    sh /usr/local/share/install-verified-binary.sh /usr/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/tini "${TINI_URL}-{arch}" "tini_${TINI_VERSION}_linux_{arch}" && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     python3 -m pip install --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/yq "${YQ_URL}{arch}" "yq_${YQ_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" "evtx_dump_${EVTX_VERSION}_linux_{arch}" && \
     microdnf clean all && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -203,7 +206,7 @@ ENV PCAP_NODE_NAME=$PCAP_NODE_NAME
 # see PUSER_CHOWN comment above
 VOLUME ["/usr/share/filebeat-logs/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-syslog-tcp/data", "/usr/share/filebeat-syslog-udp/data", "/usr/share/filebeat-tcp/data", "/usr/share/filebeat-zeek-files-logs/data"]
 
-ENTRYPOINT ["/usr/bin/tini", \
+ENTRYPOINT ["/usr/local/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
