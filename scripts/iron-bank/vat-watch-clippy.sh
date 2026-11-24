@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# vat-watch.sh — watch clipboard; on change, look up the identifier in the
+# vat-watch-clippy.sh — watch clipboard; on change, look up the identifier in the
 # VAT justifications doc, print the full justification to stdout, and put
 # the paste-ready justification back into the clipboard.
 #   - direct table rows / manual entries -> specific per-finding text
 #   - Low CVEs resolved via a family batch -> the grouped J-xx section text
 
-DOC="${1:-Malcolm-26.08.0-VAT-justifications.md}"
+DOC="${1:-Malcolm-26.10.0-VAT-justifications.md}"
 
 if command -v xclip >/dev/null; then
   getclip() { xclip -selection clipboard -o 2>/dev/null; }
@@ -26,7 +26,7 @@ print_group() {
   local jref="$1"
   awk -v j="### ${jref}:" '
     index($0, j) == 1 { hit=1; print; next }
-    hit && /^### /    { exit }
+    hit && /^##?#? /  { exit }
     hit && NF         { print }
   ' "$DOC"
 }
@@ -37,7 +37,7 @@ print_row() {
   local row="$1" clip_mode="${2:-cell}" just jref
   just=$(awk -F'|' '{ gsub(/^[ \t]+|[ \t]+$/, "", $(NF-1)); print $(NF-1) }' <<< "$row")
   echo "$just"
-  jref=$(grep -oE '^J-[0-9]+' <<< "$just")
+  jref=$(grep -oE '^J-[0-9]+[a-z]?' <<< "$just")
   if [[ -n "$jref" ]]; then
     echo
     print_group "$jref"
@@ -56,6 +56,7 @@ lookup() {
   CLIP_TEXT=""
 
   row=$(grep -m1 -F "| ${id} " "$DOC")
+  [[ -z "$row" ]] && row=$(grep -m1 -F "| \`${id}\` " "$DOC")
   if [[ -n "$row" ]]; then print_row "$row"; return; fi
 
   local manual
@@ -77,7 +78,7 @@ lookup() {
   fi
 
   fam=$(awk -v id="$id" '
-    /^- \*\*/ && index($0, id) {
+    /^- \*\*/ && match($0, "(^|[^A-Za-z0-9-])" id "([^A-Za-z0-9-]|$)") {
       sub(/^- \*\*/, ""); sub(/\*\*:.*/, ""); print; exit
     }
   ' "$DOC")

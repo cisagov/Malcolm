@@ -61,6 +61,9 @@ ENV SUPERCRONIC_VERSION="0.2.51"
 ENV SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB="/etc/crontab"
 
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 COPY --from=npmget /usr/local/lib/node_modules/filepond /var/www/upload/filepond
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-validate-size /var/www/upload/filepond-plugin-file-validate-size
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-validate-type /var/www/upload/filepond-plugin-file-validate-type
@@ -70,14 +73,13 @@ COPY --from=npmget /usr/local/lib/node_modules/@jcubic /var/www/upload/@jcubic
 ADD --chmod=644 file-upload/requirements.txt /usr/local/src/requirements.txt
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       ca-certificates \
       curl \
       file \
       git \
-      jq \
       less \
       nginx-light \
       openssh-server \
@@ -92,6 +94,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       vim-tiny && \
     rm -f /etc/ssh/ssh_host_* && \
     sh /usr/local/share/install-verified-binary.sh /usr/local/bin/supercronic "${SUPERCRONIC_URL}{arch}" "supercronic_${SUPERCRONIC_VERSION}_linux_{arch}" && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     mkdir -p /var/www/upload/server/php \
              /tmp/filepond-server && \
     cd /tmp && \

@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 RUN    apt-get update -q \
     && apt-get install -y gcc \
     && python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
-    && python3 -m pip install --break-system-packages --no-cache-dir flake8==7.2.0
+    && python3 -m pip install --break-system-packages --no-cache-dir flake8==7.5.0
 
 ADD ./api /usr/src/app/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/src/app/
@@ -67,8 +67,14 @@ ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/api.sh /usr/local/bin/container_health.sh
 
-RUN    apt-get -q update \
-    && apt-get -y -q --no-install-recommends install curl jq netcat-openbsd rsync tini \
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    apt-get -q update \
+    && apt-get -y -q --no-install-recommends install curl netcat-openbsd rsync tini \
+    && sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
     && groupadd --gid ${DEFAULT_GID} ${PGROUP} \
@@ -77,6 +83,10 @@ RUN    apt-get -q update \
     &&   usermod -a -G tty ${PUSER} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# make certifi use the system store (populated from /var/local/ca-trust on startup)
+RUN CERTIFI_PEM="$(python3 -c 'import certifi; print(certifi.where())')" && \
+    ln -sf /etc/ssl/certs/ca-certificates.crt "$CERTIFI_PEM"
 
 EXPOSE 5000
 

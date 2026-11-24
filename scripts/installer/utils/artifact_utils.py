@@ -140,11 +140,16 @@ def decide_and_handle_artifacts(
     # CLI args are always present; empty string means "not provided"
     cli_m = str(parsed_args.mfile) or ""
     cli_i = str(parsed_args.ifile) or ""
+
+    # special short-circuit during the installer from appliance-packaged Malcolm
     if ignore_cli_m := (
         (len(cli_m) == 64) and all(c in '0123456789abcdefABCDEF' for c in cli_m) and (not os.path.isfile(cli_m))
     ):
-        # special short-circuit during the installer from appliance-packaged Malcolm
         cli_m = ""
+    if ignore_cli_i := (
+        (len(cli_i) == 64) and all(c in '0123456789abcdefABCDEF' for c in cli_i) and (not os.path.isfile(cli_i))
+    ):
+        cli_i = ""
 
     # Kubernetes orchestration fast-exit: when Kubernetes mode is active and the user
     # did not explicitly supply artifact paths via CLI, skip tarball/images handling entirely.
@@ -237,7 +242,13 @@ def _handle_cli_artifacts(
     # validate and handle
     mfile, ifile = _validate_artifacts_or_exit(mfile, ifile, bool(cli_i))
     handled, cfg_override = _perform_artifact_handling(
-        mfile, ifile, install_path, control_flow, malcolm_config, ui_impl, orig_path
+        mfile,
+        ifile,
+        install_path,
+        control_flow,
+        malcolm_config,
+        ui_impl,
+        orig_path,
     )
     return handled, mfile, ifile, install_path, cfg_override
 

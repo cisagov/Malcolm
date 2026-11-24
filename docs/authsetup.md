@@ -396,7 +396,7 @@ These environment variables are divided into two sections:
     * `ROLE_READ_ACCESS` - Read-only access across all Malcolm components
     * `ROLE_READ_WRITE_ACCESS` - Read/write access across all Malcolm components, excluding some administrator functions
 * Fine-grained roles
-    * `ROLE_ARKIME_ADMIN` - Maps to Arkime's [built-in](https://arkime.com/roles) `arkimeAdmin` role
+    * `ROLE_ARKIME_ADMIN` - Maps to Arkime's [built-in](https://arkime.com/roles) `arkimeAdmin` and `dbAdmin` roles
     * `ROLE_ARKIME_READ_ACCESS` - Maps to a [custom Arkime role](https://arkime.com/settings#user-role-mappings) with read-only Viewer access
     * `ROLE_ARKIME_READ_WRITE_ACCESS` - Maps to a custom Arkime role with read/write Viewer access
     * `ROLE_ARKIME_PCAP_ACCESS` - Maps to a custom Arkime role with access to viewing/exporting PCAP payloads in Viewer

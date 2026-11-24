@@ -132,7 +132,10 @@ async def watch_pubsub(
             try:
                 await pubsub.subscribe(*keys)
                 while True:
-                    msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=None)
+                    # redis-py >= 8 defaults socket_timeout to 5s, so a read with no timeout
+                    # raises TimeoutError after 5s of silence; poll with a shorter timeout and
+                    # let the loop handle the empty result instead
+                    msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=2.0)
                     if (
                         not msg
                         or msg.get('type') != 'message'

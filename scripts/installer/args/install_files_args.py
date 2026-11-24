@@ -10,8 +10,8 @@ Installation files arguments for Malcolm installer
 
 def remove_malcolm_file_args(argv):
     """
-    Take an array of arguments (e.g., sys.argv[1:]) and remove --malcolm-file/-m
-    and its corresponding filename, if present
+    Take an array of arguments (e.g., sys.argv[1:]) and remove --malcolm-file/-m,
+    --image-file/-i and their corresponding values, if present
 
     Args:
         parser: ArgumentParser to add arguments to
@@ -22,13 +22,15 @@ def remove_malcolm_file_args(argv):
         if skip_next:
             skip_next = False
             continue
-        if arg == "--malcolm-file":
+        if arg in (
+            "--malcolm-file",
+            "-m",
+            "--image-file",
+            "-i",
+        ):
             skip_next = True
             continue
-        if arg == "-m":
-            skip_next = True
-            continue
-        if arg.startswith("--malcolm-file="):
+        if arg.startswith("--malcolm-file=") or arg.startswith("--image-file="):
             continue
         cleaned_args.append(arg)
     return cleaned_args

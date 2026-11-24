@@ -10,7 +10,7 @@ fi
 ZEEK_DIR=${ZEEK_DIR:-/usr/local/zeek}
 
 # Packages are installed at the commits pinned in zeek-packages.lock (generated from
-#   zeek/zeek-packages.list by scripts/zeek_packages_lock_refresh.sh). git verifies each checkout
+#   zeek/zeek-packages.list by scripts/update_pins.py --zeek-packages). git verifies each checkout
 #   against its commit hash, so the build gets exactly the reviewed code.
 ZEEK_PACKAGES_LOCK=${ZEEK_PACKAGES_LOCK:-/usr/local/share/zeek-packages.lock}
 

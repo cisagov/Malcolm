@@ -52,10 +52,10 @@ RUN --mount=type=secret,id=GITHUB_TOKEN,env=JEKYLL_GITHUB_TOKEN \
 FROM alpine:3.24 AS getresty
 
 # OPENRESTY_VERSION can be like "1.29.2.4" or "318a52b814ef903066002ffa3166b7714b3b9c6f"
-ARG OPENRESTY_VERSION=1.31.8.1
+ARG OPENRESTY_VERSION=1.31.9.1
 ENV OPENRESTY_VERSION=$OPENRESTY_VERSION
 # SHA-256 of openresty-${OPENRESTY_VERSION}.tar.gz; only used for release versions (a commit checkout is verified by git)
-ARG OPENRESTY_SHA256=b569c63b420f80a4ac8466f2deffe73ed93ab760026532e039c3658409a997f4
+ARG OPENRESTY_SHA256=71d49935bdc186dafc1f4b0a8ba44dba1bf4abc8ca52d4621f2039ec8fdcc95f
 
 RUN set -e; \
     apk update --no-cache; \
@@ -137,7 +137,7 @@ ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=$NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 # This module executes inside the authentication reverse proxy. BuildKit must
 # reject changed source archives rather than building an unverified branch HEAD.
 # Update the revision and SHA-256 together when upgrading the LDAP module.
-ARG NGINX_AUTH_LDAP_REVISION=394261b38c77ef692d98e9a05d28843b5a355921
+ARG NGINX_AUTH_LDAP_REVISION=b5e8bce7c102588b033cf69eb349fd34bb9cd43c
 
 # Lua modules for OpenID Connect (Keycloak auth), fetched from GitHub instead of
 # opm. Each is pinned to an immutable commit and verified by BuildKit against
@@ -212,7 +212,7 @@ ARG LUA_RESTY_OPENIDC_REVISION=a4755bffdfe7b122123c972ce5820529c3e83fdc
 
 # NGINX source
 COPY --from=getresty /usr/local/src/openresty/openresty.tar.gz /openresty.tar.gz
-ADD --checksum=sha256:925d2b368db64d4bee6b17bb5b1958c44d20a1b945ac194f1db4fdd551614743 https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_REVISION /nginx-auth-ldap.tar.gz
+ADD --checksum=sha256:521941ceb87a431c99576ae275fb5f92f2bcffd103ed16b3bc11021eba4b574f https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_REVISION /nginx-auth-ldap.tar.gz
 
 # Lua module sources (see revisions above)
 ADD --checksum=sha256:89384290054663289026f7072d49a670ae5be04c8c916537a6df3834bb783a61 https://codeload.github.com/ledgetech/lua-resty-http/tar.gz/$LUA_RESTY_HTTP_REVISION /lua-src/lua-resty-http.tar.gz
@@ -249,7 +249,12 @@ ADD --checksum=sha256:ad6157926c1622ba4e1d03d478f1541368524bfc46f51e42fe0d945f7e
 
 ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
 
-RUN set -eux; \
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
+RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    set -eux; \
     CONFIG="\
     --prefix=/usr/local/openresty \
     --sbin-path=/usr/sbin/nginx \
@@ -362,7 +367,6 @@ RUN set -eux; \
     apache2-utils \
     bash \
     ca-certificates \
-    jq \
     libbsd \
     luajit \
     openldap \
@@ -373,6 +377,7 @@ RUN set -eux; \
     tzdata \
     wget; \
   update-ca-certificates; \
+  sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" ; \
   # install OpenID Connect Lua modules from the pinned GitHub tarballs into the
   # same site/lualib tree opm would have used.
   mkdir -p /usr/local/openresty/site/lualib ; \

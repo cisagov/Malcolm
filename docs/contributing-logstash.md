@@ -39,18 +39,19 @@ This modified `parse_pipelines.yaml` will need to be reflected in the `logstash`
 
 ## <a name="LogstashZeek"></a>Parsing new Zeek logs
 
-The following modifications must be made in order for Malcolm to parse new Zeek log files:
+Zeek logs are parsed by the files in [`logstash/pipelines/zeek`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek), which Logstash runs in name order. A new Zeek log involves these stages:
 
-1. Add a parsing filter file named so that it sorts after [`logstash/pipelines/zeek/1001_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1001_zeek_parse.conf) but before [`logstash/pipelines/zeek/1199_zeek_unknown.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1199_zeek_unknown.conf)
-    * Follow patterns for existing log files as an example
-    * For common Zeek fields such as the `id` four-tuple, timestamp, etc., use the same convention used by existing Zeek logs in that file (e.g., `ts`, `uid`, `orig_h`, `orig_p`, `resp_h`, `resp_p`)
-    * The [`logstash/scripts/logstash-start.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/scripts/logstash-start.sh) Logstash container startup script should automatically fix any issues with parsing the Zeek tab delimiter (e.g., converting spaces in the `dissect` and `split` filters to tabs)
-2. If necessary, perform log normalization in [`logstash/pipelines/zeek/1300_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1300_zeek_normalize.conf) for values such as action (`event.action`), result (`event.result`), application protocol version (`network.protocol_version`), etc.
-3. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/1400_zeek_convert.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1400_zeek_convert.conf)
-4. If necessary, define custom source fields for fingerprinting (to ensure a unique and reproducible hash is created for the new logs) in [`logstash/pipelines/zeek/2000_fingerprint.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/2000_fingerprint.conf). Only use repeatable fields in the fingerprint source (e.g., *not* `uid` or `fuid` fields, as they are randomly generated). See [cisagov/Malcolm#715](https://github.com/cisagov/Malcolm/issues/715) for more information on why this is needed.
-5. Identify the new fields and add them as described in [Adding new log fields](contributing-new-log-fields.md#NewFields)
+| File | Purpose |
+|---|---|
+| [`1001_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1001_zeek_parse.conf) through [`1199_zeek_unknown.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1199_zeek_unknown.conf) | parse each log line into fields. Each parser gets its own file numbered between these two (e.g., `1070_zeek_foo.conf`). |
+| [`1200_zeek_mutate.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1200_zeek_mutate.conf) | rename the common Zeek fields (`ts`, `uid`, the `id` four-tuple, `service`, …) for every log, then run each parser's branch: moving fields shared across its logs into one namespace, cleaning up values, setting `zeek.software`, and similar |
+| [`1300_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1300_zeek_normalize.conf) | fill in ECS fields such as `event.action`, `event.result` and `network.protocol_version` |
+| [`1400_zeek_convert.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1400_zeek_convert.conf) | convert epoch timestamp fields (other than `ts`) to dates |
+| [`2000_fingerprint.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/2000_fingerprint.conf) | compute `event.hash`, which becomes the document ID (see [cisagov/Malcolm#715](https://github.com/cisagov/Malcolm/issues/715)) |
 
-The script [`scripts/zeek_script_to_malcolm_boilerplate.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/zeek_script_to_malcolm_boilerplate.py) may help by autogenerating these filters.
+The maps in [`logstash/maps`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/maps) also have per-log entries (`zeek_log_ecs_categories.yaml`, `zeek_log_transport.yaml` and `service_ports.yaml`).
+
+See [Adding a new Zeek parser](contributing-zeek-parser.md#ZeekParser) for how to add a parser to each of these stages, along with its field definitions, tests and dashboards.
 
 ## <a name="LogstashEnrichments"></a>Enrichments
 

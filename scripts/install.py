@@ -12,7 +12,7 @@ import sys
 import types
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, List, Optional, Tuple
 
 # Dynamically create a module named "scripts" which points to this directory
 if "scripts" not in sys.modules:
@@ -56,7 +56,6 @@ from scripts.malcolm_common import (
     YAMLDynamic,
 )
 from scripts.malcolm_utils import (
-    base64_decode_files_to_dir,
     base64_encode_files_in_dir,
     ChownRecursive,
     get_main_script_dir,
@@ -76,7 +75,7 @@ from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.configs.constants.enums import InstallerResult, ControlFlow, ContainerRuntime
 from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
 
-from scripts.installer.core.malcolm_config import MalcolmConfig
+from scripts.installer.core.malcolm_config import LoadSource, MalcolmConfig
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.core.validation import (
     validate_required,
@@ -90,7 +89,7 @@ from scripts.installer.ui.shared.splash_screen import splash_screen
 from scripts.installer.ui.tui.tui_installer_ui import TUIInstallerUI
 
 from scripts.installer.utils.artifact_utils import decide_and_handle_artifacts
-from scripts.installer.utils.env_file_utils import apply_extra_env_settings
+from scripts.installer.utils.env_file_utils import write_configuration_files
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.utils.host_memory_preflight import (
     host_memory_check_applies,
@@ -98,7 +97,6 @@ from scripts.installer.utils.host_memory_preflight import (
     low_memory_warning,
 )
 from scripts.installer.utils.settings_file_handler import SettingsFileHandler
-
 
 ###################################################################################################
 SCRIPT_NAME = os.path.basename(__file__)
@@ -149,12 +147,15 @@ def create_ui_implementation(presentation_mode: PresentationMode, ui_mode_flag: 
 def handle_artifact_path_preseed_file(malcolm_config):
 
     # special case for the Malcolm ISO-installed environment: if the file .os-disk-config-defaults was created by
-    # the environment (os-disk-config.py) we'll use those as defaults for the artifact storage directories
+    # the environment (os-disk-config.py) we'll use those as defaults for the artifact storage directories.
+    # These are the lowest-precedence source: a path from the compose file, .env files, or an imported
+    # settings file wins over them.
     disk_format_info_file = os.path.join(
         os.path.realpath(os.path.join(get_main_script_dir(), "..")), ".os-disk-config-defaults"
     )
     if malcolm_config and os.path.isfile(disk_format_info_file):
         try:
+            preseed_name = os.path.basename(disk_format_info_file)
             with open(disk_format_info_file) as f:
                 disk_format_info = LoadFileIfJson(f)
 
@@ -178,19 +179,17 @@ def handle_artifact_path_preseed_file(malcolm_config):
                     (MALCOLM_LOGS_DIR, DEFAULT_FILESCAN_LOG_DIR, KEY_CONFIG_ITEM_FILESCAN_LOG_DIR, True),
                 ]
                 default_storage = True
-                for base_key, subdir, config_key, path_must_exist in paths_to_check:
-                    if base_path := disk_format_info.get(base_key):
-                        path = os.path.realpath(os.path.join(base_path, subdir) if subdir else base_path)
-                        if (not path_must_exist) or os.path.isdir(path):
-                            malcolm_config.apply_default(config_key, path, ignore_errors=True)
-                            default_storage = False
-                            InstallerLogger.debug(
-                                f"Set default for {config_key} to {path} from {os.path.basename(disk_format_info_file)}"
-                            )
-                if not default_storage:
-                    malcolm_config.apply_default(
-                        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, default_storage, ignore_errors=True
-                    )
+                with malcolm_config.bulk_load():
+                    for base_key, subdir, config_key, path_must_exist in paths_to_check:
+                        if base_path := disk_format_info.get(base_key):
+                            path = os.path.realpath(os.path.join(base_path, subdir) if subdir else base_path)
+                            if (not path_must_exist) or os.path.isdir(path):
+                                malcolm_config.load_value(config_key, path, LoadSource.PRESEED, preseed_name)
+                                default_storage = False
+                    if not default_storage:
+                        malcolm_config.load_value(
+                            KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, LoadSource.PRESEED, preseed_name
+                        )
 
         except Exception as e:
             InstallerLogger.error(f"Failed to set path defaults from {os.path.basename(disk_format_info_file)}: {e}")
@@ -202,12 +201,14 @@ def handle_config_directories_tui_mode(
     non_interactive,
     use_defaults,
     load_existing_env: Optional[bool],
-    malcolm_orchestration_file: Optional[bool],
     importing_configs: bool,
     dirs: InstallerDirs,
     no_write: bool = False,
-):
+) -> Tuple[bool, Optional[str]]:
     """Handle config directory validation and setup for TUI/DUI/Silent modes.
+
+    This decides (prompting if needed) whether to load existing .env files, but doesn't load
+    them: every configuration source is loaded together afterward by load_configuration_sources.
 
     Args:
         malcolm_config: MalcolmConfig instance
@@ -216,11 +217,11 @@ def handle_config_directories_tui_mode(
         use_defaults: Whether to use default values
 
     Returns:
-        bool: True if successful, False otherwise
+        (success, the directory of .env files to load or None)
     """
     # Note: MalcolmConfig initialization earlier will fail fast if templates are missing.
 
-    orch_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
+    env_dir_to_load = None
 
     # 2. Ensure output config directory exists
     if not os.path.exists(dirs.output_dir):
@@ -229,13 +230,13 @@ def handle_config_directories_tui_mode(
                 InstallerLogger.error(
                     f"Dry run: output config directory not found and cannot prompt in non-interactive mode: {dirs.output_dir}"
                 )
-                return False
+                return False, None
             try:
                 os.makedirs(dirs.output_dir, exist_ok=True)
                 InstallerLogger.info(f"Created output config directory: {dirs.output_dir}") # fmt: skip
             except Exception as e:
                 InstallerLogger.error(f"Failed to create output config directory: {e}")
-                return False
+                return False, None
         else:
             # interactive: prompt, even in dry-run
             prompt = f"Provided output config directory:\n{dirs.output_dir} does not exist\nDo you want to create it?"
@@ -248,10 +249,10 @@ def handle_config_directories_tui_mode(
                         InstallerLogger.info(f"Created output config directory: {dirs.output_dir}") # fmt: skip
                     except Exception as e:
                         InstallerLogger.error(f"Failed to create output config directory: {e}") # fmt: skip
-                        return False
+                        return False, None
             else:
                 InstallerLogger.info("Output directory creation declined by user.") # fmt: skip
-                return False
+                return False, None
 
     # 3. If not using defaults, decide whether to load existing .env files
     if not use_defaults:
@@ -273,22 +274,7 @@ def handle_config_directories_tui_mode(
                         default=True,
                     )
             if decision:
-                try:
-                    malcolm_config.load_from_env_files(dirs.input_dir)
-                    InstallerLogger.info(f"Loaded existing .env files from: {dirs.input_dir}") # fmt: skip
-                except Exception as e:
-                    InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}") # fmt: skip
-                    return False
-                if orch_mode != OrchestrationFramework.KUBERNETES:
-                    try:
-                        loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
-                            dirs.input_dir, malcolm_orchestration_file
-                        )
-                        InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
-                    except Exception as e:
-                        InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
-                        return False
-
+                env_dir_to_load = dirs.input_dir
             else:
                 InstallerLogger.info("Skipping load of existing .env files.") # fmt: skip
         else:
@@ -334,21 +320,7 @@ def handle_config_directories_tui_mode(
                                     default=True,
                                 )
                             if decision:
-                                try:
-                                    malcolm_config.load_from_env_files(dirs.input_dir)
-                                    InstallerLogger.info(f"Loaded existing .env files from: {dirs.input_dir}")
-                                except Exception as e:
-                                    InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}")
-                                    return False
-                                if orch_mode != OrchestrationFramework.KUBERNETES:
-                                    try:
-                                        loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
-                                            dirs.input_dir, malcolm_orchestration_file
-                                        )
-                                        InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
-                                    except Exception as e:
-                                        InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
-                                        return False
+                                env_dir_to_load = dirs.input_dir
                             else:
                                 InstallerLogger.info("Skipping load of existing .env files.")
                         else:
@@ -361,9 +333,77 @@ def handle_config_directories_tui_mode(
                             "No existing .env files found in config directory. Proceeding with fresh configuration."
                         )
 
-    handle_artifact_path_preseed_file(malcolm_config)
+    return True, env_dir_to_load
 
-    return True
+
+def load_configuration_sources(
+    malcolm_config: MalcolmConfig,
+    install_context: InstallContext,
+    orchestration_mode: OrchestrationFramework,
+    settings_file: Optional[str],
+    settings_config_only: bool,
+    env_dir: Optional[str],
+    orchestration_file: Optional[str],
+) -> Optional[Dict[str, List[str]]]:
+    """Load every configuration source as one operation.
+
+    Precedence, highest first (see LoadSource): values determined by the command line, the imported
+    settings file, the .env backup inside that file, existing .env files, the existing compose file,
+    and the ISO storage defaults. A source only fills in what higher-precedence sources didn't
+    supply. Loading them all inside one bulk_load means the dependency rules run once, at the end,
+    and can't overwrite one loaded value because of another.
+
+    Args:
+        malcolm_config: MalcolmConfig instance
+        install_context: InstallContext instance (the settings file can include installation options)
+        orchestration_mode: The orchestration mode the installer is running with
+        settings_file: --import-malcolm-config-file, if given
+        settings_config_only: Only import the configuration section of the settings file
+        env_dir: Directory of existing .env files to load, if any
+        orchestration_file: -f/--configure-file, if given
+
+    Returns:
+        The settings file's missing-item report (None if no settings file). Exits on load failure.
+    """
+    missing_items = None
+    with malcolm_config.bulk_load():
+        # the platform installer was already chosen for this mode, so nothing may override it
+        malcolm_config.load_value(
+            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, orchestration_mode, LoadSource.COMMAND_LINE
+        )
+        if orchestration_mode == OrchestrationFramework.KUBERNETES:
+            malcolm_config.load_value(
+                KEY_CONFIG_ITEM_RUNTIME_BIN, ContainerRuntime.KUBERNETES.value, LoadSource.COMMAND_LINE
+            )
+
+        if settings_file:
+            try:
+                missing_items = SettingsFileHandler(malcolm_config, install_context).load_from_file(
+                    settings_file, config_only=settings_config_only
+                )
+                InstallerLogger.info(f"Successfully loaded settings from: {settings_file}") # fmt: skip
+            except Exception as e:
+                InstallerLogger.error(f"Failed to load settings from {settings_file}: {e}") # fmt: skip
+                sys.exit(1)
+
+        if env_dir:
+            try:
+                malcolm_config.load_from_env_files(env_dir)
+                InstallerLogger.info(f"Loaded existing .env files from: {env_dir}") # fmt: skip
+            except Exception as e:
+                InstallerLogger.error(f"Failed to load .env files from {env_dir}: {e}") # fmt: skip
+                sys.exit(1)
+            if orchestration_mode != OrchestrationFramework.KUBERNETES:
+                try:
+                    loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(env_dir, orchestration_file)
+                    InstallerLogger.info(f"Loaded config from: {loaded_from_orch_filename}") # fmt: skip
+                except Exception as e:
+                    InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
+                    sys.exit(1)
+
+        handle_artifact_path_preseed_file(malcolm_config)
+
+    return missing_items
 
 
 def handle_config_directories_gui_mode(malcolm_config):
@@ -741,8 +781,9 @@ def main():
             if os.path.isfile(new_installer_py):
                 # exec the new installer and abandon this one (replace the process)
                 cleaned_argv = remove_malcolm_file_args(sys.argv[1:])
-                # send something bogus that doesn't exist for --malcolm-file so we don't loop
+                # send something bogus that doesn't exist for --malcolm-file/--image-file so we don't loop
                 cleaned_argv.extend(["--malcolm-file", secrets.token_hex(32)])
+                cleaned_argv.extend(["--image-file", secrets.token_hex(32)])
                 os.execv(sys.executable, [sys.executable, new_installer_py, *cleaned_argv])
         return
 
@@ -753,34 +794,8 @@ def main():
 
     # Artifact handling delegated to decide_and_handle_artifacts above; continue setup.
 
-    # handle settings file import if specified
     if parsed_args.importMalcolmConfigFile:
-        try:
-            settings_handler = SettingsFileHandler(malcolm_config, install_context)
-            missing_items = settings_handler.load_from_file(
-                parsed_args.importMalcolmConfigFile, config_only=parsed_args.configOnly or install_context.config_only
-            )
-            imported_config_file = parsed_args.importMalcolmConfigFile
-            InstallerLogger.info(f"Successfully loaded settings from: {parsed_args.importMalcolmConfigFile}") # fmt: skip
-
-            # report missing configuration items that used defaults
-            if missing_items["missing_configuration"]:
-                InstallerLogger.warning(f"Found {len(missing_items['missing_configuration'])} configuration items missing from settings file, using defaults") # fmt: skip
-                if parsed_args.debug:
-                    for item_key in missing_items["missing_configuration"]:
-                        item = malcolm_config.get_item(item_key)
-                        InstallerLogger.debug(f'  {item_key}: using default "{str(item.get_value())}"')
-
-            # report missing installation items that used defaults
-            if missing_items["missing_installation"]:
-                InstallerLogger.warning(f"Found {len(missing_items['missing_installation'])} installation items missing from settings file, using defaults") # fmt: skip
-                if parsed_args.debug:
-                    for item_key in missing_items["missing_installation"]:
-                        InstallerLogger.debug(f'  {item_key}: using default "{str(item.get_value())}"')
-
-        except Exception as e:
-            InstallerLogger.error(f"Failed to load settings from {parsed_args.importMalcolmConfigFile}: {e}") # fmt: skip
-            sys.exit(1)
+        imported_config_file = parsed_args.importMalcolmConfigFile
 
     # check if input environment directory was specified via --environment-dir-input
     if parsed_args.configDirInput:
@@ -795,6 +810,7 @@ def main():
         dirs.output_dir = get_default_config_dir()
 
     # Handle config directory setup based on presentation mode
+    env_dir_to_load = None
     if presentation_mode == PresentationMode.MODE_GUI:
         # GUI mode: config directory handling will be done during GUI flow
         try:
@@ -809,19 +825,43 @@ def main():
             sys.exit(1)
     else:
         # TUI/DUI/Silent modes: use traditional flow
-        if not handle_config_directories_tui_mode(
+        success, env_dir_to_load = handle_config_directories_tui_mode(
             malcolm_config,
             ui_impl,
             parsed_args.non_interactive,
             parsed_args.use_defaults,
             parsed_args.loadExistingEnv,
-            parsed_args.malcolmOrchestrationFile,
             parsed_args.importMalcolmConfigFile is not None,
             dirs,
             no_write=control_flow.is_dry_run(),
-        ):
+        )
+        if not success:
             InstallerLogger.error("Failed to setup configuration directories.")
             sys.exit(1)
+
+    # load the imported settings file, existing .env and compose files, and ISO defaults together
+    missing_items = load_configuration_sources(
+        malcolm_config,
+        install_context,
+        orchestration_mode,
+        imported_config_file,
+        bool(parsed_args.configOnly or install_context.config_only),
+        env_dir_to_load,
+        parsed_args.malcolmOrchestrationFile,
+    )
+    if missing_items:
+        # report settings file items that weren't in the file
+        if missing_items["missing_configuration"]:
+            InstallerLogger.warning(f"Found {len(missing_items['missing_configuration'])} configuration items missing from settings file, using other sources or defaults") # fmt: skip
+            if parsed_args.debug:
+                for item_key in missing_items["missing_configuration"]:
+                    item = malcolm_config.get_item(item_key)
+                    InstallerLogger.debug(f'  {item_key}: using "{str(item.get_value())}"')
+        if missing_items["missing_installation"]:
+            InstallerLogger.warning(f"Found {len(missing_items['missing_installation'])} installation items missing from settings file, using defaults") # fmt: skip
+            if parsed_args.debug:
+                for item_key in missing_items["missing_installation"]:
+                    InstallerLogger.debug(f"  {item_key}: using default")
 
     # Configuration gathering user input (conditional on presentation mode)
     config_success = True
@@ -940,31 +980,27 @@ def main():
     )
     if control_flow.should_write_files():
 
-        # if we imported a configuration from a .json/.yaml file earlier, before we write out
-        # the final .env files here we want to write the contents of the "raw" file stored in
-        # that import file to the output directory. this way we also preserve the user's other
-        # settings/comments that are in the .env files but are not known by MalcolmConfig
+        # if we imported a configuration from a .json/.yaml file earlier, its "raw" section holds the
+        # .env files it was exported from. restoring them preserves the user's other settings/comments
+        # that are in the .env files but are not known by MalcolmConfig
+        raw_envs = None
         if os.path.isfile(str(imported_config_file)):
             imported_config_data, imported_config_format = LoadYamlOrJson(imported_config_file)
-            if isinstance(imported_config_data, dict) and ("raw" in imported_config_data):
-                if (raw_envs := imported_config_data.get("raw", {})) and isinstance(raw_envs, dict):
-                    restored_count = base64_decode_files_to_dir(raw_envs, dirs.output_dir, "*.env")
-                    InstallerLogger.info(
-                        f"Raw configuration from {imported_config_file} ({restored_count} of {len(raw_envs)} files) restored to {dirs.output_dir}"
-                    )
+            if isinstance(imported_config_data, dict) and isinstance(imported_config_data.get("raw"), dict):
+                raw_envs = imported_config_data["raw"]
 
-        malcolm_config.generate_env_files(dirs.output_dir)
-
-        # Apply any arbitrary extra .env settings requested via CLI (handle after file generation)
+        # write the raw restore, the configuration, and any --extra settings all or nothing
         try:
-            if getattr(parsed_args, "extraSettings", None):
-                apply_extra_env_settings(
-                    dirs.output_dir,
-                    parsed_args.extraSettings,
-                    malcolm_config.get_env_mapper(),
-                )
+            write_configuration_files(
+                malcolm_config,
+                dirs.output_dir,
+                raw_envs=raw_envs,
+                extras=getattr(parsed_args, "extraSettings", None),
+            )
         except Exception as e:
-            InstallerLogger.warning(f"Failed to apply --extra settings: {e}")
+            InstallerLogger.error(f"Failed to save configuration to {dirs.output_dir}, no files were changed: {e}")
+            InstallerLogger.end("INSTALLER", InstallerResult.FAILURE, "Configuration could not be saved.")
+            sys.exit(1)
 
         # Adjust ownership if running as root
         puid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID) or SYSTEM_INFO.get(

@@ -28,5 +28,17 @@ if [[ -z ${ZEEK_DISABLE_INTEL} ]]; then
 fi
 [[ -n ${ZEEK_DISABLE_INTEL} ]] && export ZEEK_DISABLE_INTEL
 
+# warn (once, at container startup) if threat intelligence feeds will be pulled without TLS certificate verification
+case "${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION,,}" in
+  true|t|yes|y|1) ;;
+  *)
+    echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: TLS certificate verification is disabled for threat intelligence feed retrieval" \
+         "(ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION=${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION:-false})." \
+         "Credentials and indicators for any configured remote feeds (MISP, TAXII, Google Threat Intelligence) are not protected" \
+         "against interception or tampering. Set ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION=true in zeek.env to require" \
+         "certificate verification." >&2
+    ;;
+esac
+
 # start supervisor (which will spawn pcap-zeek, cron, etc.) or whatever the default command is
 exec "$@"
