@@ -71,3 +71,13 @@ Add every field name to the `allFields` array in [`arkime/wise/source.zeeklogs.j
       "zeek.foo.request_id",
       "zeek.foo_detail.item_index",
 ```
+
+## Canonical user-agent fields
+
+Zeek HTTP, GQUIC, SIP, SMTP and WebSocket user-agent values are stored in `user_agent.original`. Their original `zeek.<protocol>.user_agent` fields are removed after normalization. Required Arkime-specific fields (`http.useragent`, `quic.useragent` and `email.useragent`) are retained. An existing ECS value is preserved and combined with the incoming value instead of being overwritten.
+
+Use `user_agent.original` in new searches, visualizations and custom rules. For a protocol-specific query, also restrict the provider and dataset, for example `event.provider:zeek AND event.dataset:http`. The five removed field names are `zeek.gquic.user_agent`, `zeek.http.user_agent`, `zeek.sip.user_agent`, `zeek.smtp.user_agent` and `zeek.websocket.user_agent`.
+
+This change affects newly ingested documents. Existing documents and index mappings are not rewritten. Earlier Malcolm normalization already populated `user_agent.original`, so that field is the common search path for those older documents and newly ingested documents. Update custom queries that refer to the removed names or their `.text` subfields. The bundled Arkime session views use the canonical field; the removed fields are no longer registered as separate WISE fields or mapped in new Zeek index templates.
+
+This migration covers user-agent fields only. Other Zeek-to-ECS mappings are tracked in [issue #388](https://github.com/cisagov/Malcolm/issues/388).

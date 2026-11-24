@@ -386,15 +386,6 @@
                 "tag_count": {
                   "type": "integer"
                 },
-                "user_agent": {
-                  "type": "keyword",
-                  "ignore_above": 256,
-                  "fields": {
-                    "text": {
-                      "type": "text"
-                    }
-                  }
-                },
                 "version": {
                   "type": "keyword"
                 }
@@ -508,15 +499,6 @@
                 "uri": {
                   "type": "keyword",
                   "ignore_above": 16384,
-                  "fields": {
-                    "text": {
-                      "type": "text"
-                    }
-                  }
-                },
-                "user_agent": {
-                  "type": "keyword",
-                  "ignore_above": 256,
                   "fields": {
                     "text": {
                       "type": "text"
@@ -1658,15 +1640,6 @@
                     }
                   }
                 },
-                "user_agent": {
-                  "type": "keyword",
-                  "ignore_above": 256,
-                  "fields": {
-                    "text": {
-                      "type": "text"
-                    }
-                  }
-                },
                 "version": {
                   "type": "keyword"
                 },
@@ -1881,15 +1854,6 @@
                 },
                 "trans_depth": {
                   "type": "integer"
-                },
-                "user_agent": {
-                  "type": "keyword",
-                  "ignore_above": 256,
-                  "fields": {
-                    "text": {
-                      "type": "text"
-                    }
-                  }
                 },
                 "x_originating_ip": {
                   "type": "ip"
@@ -2530,15 +2494,6 @@
                 "uri": {
                   "type": "keyword",
                   "ignore_above": 16384,
-                  "fields": {
-                    "text": {
-                      "type": "text"
-                    }
-                  }
-                },
-                "user_agent": {
-                  "type": "keyword",
-                  "ignore_above": 256,
                   "fields": {
                     "text": {
                       "type": "text"
