@@ -122,6 +122,8 @@ from malcolm_utils import (
     which,
 )
 
+from control_reingest import find_processed_pcaps, publish_processed_pcaps
+
 from malcolm_kubernetes import (
     CheckPersistentStorageDefs,
     get_node_hostnames_and_ips,
@@ -3177,6 +3179,27 @@ def main():
         help="Stop Malcolm and delete all data",
     )
 
+    operationsGroup.add_argument(
+        '--reingest-pcaps',
+        dest='cmdReingestPcaps',
+        action='store_true',
+        help='Preview up to 10 previously processed PCAPs for replay (read-only unless --reingest-apply is given)',
+    )
+    operationsGroup.add_argument(
+        '--reingest-apply',
+        dest='reingestApply',
+        action='store_true',
+        help='With --reingest-pcaps, publish new copies for processing (never erase the originals)',
+    )
+    operationsGroup.add_argument(
+        '--reingest-limit',
+        dest='reingestLimit',
+        type=int,
+        default=10,
+        metavar='<1-100>',
+        help='Maximum number of original captures to replay in one invocation (default: 10)',
+    )
+
     kubernetesGroup = parser.add_argument_group('Kubernetes')
     kubernetesGroup.add_argument(
         '-n',
@@ -3631,6 +3654,50 @@ def main():
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")
     logging.info(f"Malcolm path: {GetMalcolmPath()}")
+
+    # This preview-first operation must not stop/wipe containers or run the
+    # normal initialization path (which may update env files). Do not require
+    # Docker to be running to inspect previously processed captures.
+    if args.reingestApply and not args.cmdReingestPcaps:
+        parser.error('--reingest-apply requires --reingest-pcaps')
+    if args.cmdReingestPcaps:
+        if ScriptName != 'control.py' or any(
+            (
+                args.cmdWipe, args.cmdStop, args.cmdStart, args.cmdRestart,
+                args.cmdLogs, args.cmdStatus, args.cmdAuthSetup, args.cmdAuthSetupNonInteractive,
+                args.cmdPrintURLs, args.netboxBackupFile is not None, args.netboxRestoreFile is not None,
+            )
+        ):
+            parser.error('--reingest-pcaps cannot be combined with other control operations or aliases')
+        if pyPlatform != PLATFORM_WINDOWS and (os.getuid() == 0 or os.geteuid() == 0 or getpass.getuser() == 'root'):
+            parser.error('--reingest-pcaps must not run as root')
+        if DetermineYamlFileFormat(args.composeFile) is not OrchestrationFramework.DOCKER_COMPOSE:
+            parser.error('--reingest-pcaps requires a readable Docker Compose YAML file')
+        yaml_reader = YAMLDynamic()
+        with open(args.composeFile, 'r') as compose_stream:
+            compose_config = yaml_reader.YAML(typ='safe', pure=True).load(compose_stream)
+        pcap_root = LocalPathForContainerBindMount(
+            'pcap-monitor', compose_config, '/pcap', GetMalcolmPath()
+        )
+        if not pcap_root:
+            parser.error('Cannot resolve pcap-monitor /pcap bind mount from Compose')
+        processed_dir = Path(pcap_root) / 'processed'
+        upload_dir = Path(pcap_root) / 'upload'
+        try:
+            originals = find_processed_pcaps(processed_dir, upload_dir, args.reingestLimit)
+            print(f"{'Apply' if args.reingestApply else 'Dry run'}: {len(originals)} PCAP(s) selected from {processed_dir}")
+            for file_path in originals:
+                print(f'  {file_path.name} ({file_path.stat().st_size} bytes)')
+            if args.reingestApply:
+                published = publish_processed_pcaps(originals, upload_dir)
+                for new_path in published:
+                    print(f'  queued: {new_path.name}')
+                print(f'Queued {len(published)} copies. Original processed PCAPs remain untouched.')
+            elif originals:
+                print('No files changed. Add --reingest-apply to publish copies for processing.')
+        except (OSError, ValueError) as error:
+            parser.error(f'PCAP re-ingestion failed: {error}')
+        return
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
