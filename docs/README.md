@@ -14,6 +14,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
 
 <a name="TableOfContents"></a>
 
+* [Learning Tree training videos and configuration errata](learning-tree-errata.md#LearningTreeErrata)
 * [Quick start](quickstart.md#QuickStart)
     - [Getting Malcolm](quickstart.md#GetMalcolm)
         + [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
