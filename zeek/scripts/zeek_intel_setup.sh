@@ -108,7 +108,7 @@ EOF
         # process STIX/MISP/Mandiant/Google inputs by converting them to Zeek intel format
         if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/taxii.yaml ]] || [[ -r ./MISP/.misp_input.txt ]] || [[ -r ./MISP/misp.yaml ]] || [[ -r ./Google/google.yaml ]] || [[ -r ./Mandiant/mandiant.yaml ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
-                --ssl-verify ${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION} \
+                --ssl-verify "${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION}" \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
                 --threads ${ZEEK_INTEL_REFRESH_THREADS} \
                 --output ./.threat_autogen.zeek."${INSTANCE_UID}" \

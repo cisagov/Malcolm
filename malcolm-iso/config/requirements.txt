@@ -1,8 +1,8 @@
 certifi==2026.10.23
-click==8.3.0
-gunicorn==23.0.0
-idna==3.15
-MarkupSafe==3.0.3
-psutil==7.1.3
-python-dotenv==1.2.2
+click==8.5.1
+gunicorn==27.0.0
+idna==3.20
+MarkupSafe==3.0.4
+psutil==7.2.2
+python-dotenv==1.2.4
 urllib3==2.8.0

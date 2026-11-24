@@ -10,12 +10,20 @@
 # The scripts are parsed into their constituent records and &log fields.
 #
 # Each record is then printed out in the formats used by Malcolm for parsing and defining Zeek logs:
-# - Logstash (https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/1001_zeek_parse.conf
-# - Arkime (https://idaholab.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./arkime/etc/config.ini
-# - OpenSearch tndex templates (https://idaholab.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./dashboards/templates/composable/component/zeek*.json
+# - Logstash parse filters, for a new ./logstash/pipelines/zeek/10xx_zeek_<parser>.conf file
+#   (the output also lists any `time` fields to add to ./logstash/pipelines/zeek/1400_zeek_convert.conf)
+# - Arkime field definitions and session views, for ./arkime/etc/config.ini
+# - OpenSearch index template mappings, for ./dashboards/templates/composable/component/zeek.json or zeek_ot.json
+# - Arkime WISE value-action field names, for the allFields array in ./arkime/wise/source.zeeklogs.js
+#
+# The output is boilerplate: a starting point to be reviewed and adjusted, not a finished integration.
+#   See https://idaholab.github.io/Malcolm/docs/contributing-zeek-parser.html for the whole process.
 #
 # The logstash/scripts/logstash-start.sh container startup script should automatically fix any issues
 #   with parsing the Zeek tab delimiter (e.g., converting spaces in the `dissect` and `split` filters to tabs)
+#
+# Requirements: the zeekscript and python-slugify Python packages, and malcolm_utils.py (found alongside
+#   this script in Malcolm's ./scripts directory)
 #
 
 import argparse
@@ -66,7 +74,10 @@ for fType in ('count', 'int', 'port'):
     ZEEK_TO_ARKIME_TYPES[fType] = 'integer'
 
 ZEEK_TO_INDEX_TEMPLATE_TYPES = defaultdict(lambda: "keyword")
-ZEEK_TO_INDEX_TEMPLATE_TYPES['int'] = 'integer'
+# Zeek's int and count are both 64-bit, so map both to long: an integer (32-bit) mapping rejects
+#   any document whose value doesn't fit, rather than just that field. Narrow a mapping by hand
+#   only when the field's values are known to fit.
+ZEEK_TO_INDEX_TEMPLATE_TYPES['int'] = 'long'
 ZEEK_TO_INDEX_TEMPLATE_TYPES['count'] = 'long'
 ZEEK_TO_INDEX_TEMPLATE_TYPES['time'] = 'date'
 ZEEK_TO_INDEX_TEMPLATE_TYPES['double'] = 'float'
@@ -158,6 +169,29 @@ def IsLoggedFieldNode(Node):
     return False
 
 
+def ModuleDeclarations(script):
+    """Return the active module names and source offsets in a parsed script."""
+    modules = [(0, 'GLOBAL')]
+    for node, _ in script.root.traverse(include_cst=False):
+        if node.name() == 'module_decl':
+            identifier = next((child for child in node.nonerr_children if child.name() == 'id'), None)
+            if identifier is not None:
+                modules.append((node.script_range()[0], script.get_content(*identifier.script_range()).decode('utf-8')))
+    return sorted(modules, key=lambda entry: entry[0])
+
+
+def QualifiedRecordName(name, modules, offset):
+    """Resolve an unqualified record name in its lexical Zeek module."""
+    if '::' in name:
+        return name
+    module = 'GLOBAL'
+    for start, candidate in modules:
+        if start > offset:
+            break
+        module = candidate
+    return f'{module}::{name}'
+
+
 def NestProperties(FlatProps):
     nested = {}
     for dotted_key, value in FlatProps.items():
@@ -169,15 +203,19 @@ def NestProperties(FlatProps):
     return nested
 
 
+###################################################################################################
+# main
+def main():
+    global args
+    global current_script
 
-def _parse_arguments(argv=None):
     nowTimeStr = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     parser = argparse.ArgumentParser(
         description='\n'.join(
             [
-                'Parse Zeek .script files and generate boilerplate for a Malcolm boilerplate for parsing and defining those Zeek logs.',
-                'see https://idaholab.github.io/Malcolm/docs/contributing-guide.html',
+                'Parse Zeek .zeek scripts and generate Malcolm boilerplate for parsing and defining the logs they write.',
+                'see https://idaholab.github.io/Malcolm/docs/contributing-zeek-parser.html',
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
@@ -293,6 +331,24 @@ def _parse_arguments(argv=None):
         help="Filename to which the OpenSearch index template boilerplate will be written",
     )
     parser.add_argument(
+        '-w',
+        '--wise',
+        dest='wiseOutFile',
+        type=str,
+        default=f"{nowTimeStr}.wise.txt",
+        required=False,
+        help="Filename to which the Arkime WISE allFields boilerplate will be written",
+    )
+    parser.add_argument(
+        '-g',
+        '--arkime-group',
+        dest='arkimeGroup',
+        type=str,
+        default="",
+        required=False,
+        help="Arkime field group for all generated fields (e.g., zeek_iccp); default is one group per log (zeek_<log>)",
+    )
+    parser.add_argument(
         '-j',
         '--json',
         dest='jsonOutFile',
@@ -302,278 +358,331 @@ def _parse_arguments(argv=None):
         help="Filename to which the intermediate structures' JSON be written",
     )
     try:
-        args = parser.parse_args(argv)
+        args = parser.parse_args()
     except SystemExit as e:
         if e.code == 2:
             parser.print_help()
         sys.exit(e.code)
 
-    return args
-
-
-def _slug_script_content(node):
-    """Slugify one parsed Zeek syntax node without changing input case rules."""
-    return slugify(current_script.get_content(*node.script_range()).decode('utf-8')).replace('-', '_')
-
-
-def _stream_column_or_path(expr_list, predicate, include_cst):
-    for node, _ in expr_list.traverse(include_cst=include_cst, predicate=predicate):
-        sibling = node
-        while (sibling := sibling.next_sibling):
-            if sibling.name() == 'expr':
-                return _slug_script_content(sibling)
-    return None
-
-
-def _discover_stream_paths(include_cst):
-    """Find explicit Log::create_stream column-to-log-path mappings."""
-    paths = {}
-    for stream, _ in current_script.root.traverse(
-        include_cst=include_cst, predicate=IsCreateStreamExprNode,
-    ):
-        for args_node, _ in stream.traverse(
-            include_cst=include_cst, predicate=IsCreateStreamExprStreamListNode,
-        ):
-            column = _stream_column_or_path(args_node, IsColumnsExprNode, include_cst)
-            path = _stream_column_or_path(args_node, IsPathExprNode, include_cst)
-            if column and path:
-                paths[column] = path
-    return paths
-
-
-def _first_script_node(node, name, include_cst):
-    return next((item for item, _ in node.traverse(include_cst=include_cst) if item.name() == name), None)
-
-
-def _record_name(type_declaration, include_cst):
-    identifier = _first_script_node(type_declaration, 'id', include_cst)
-    return _slug_script_content(identifier) if identifier is not None else None
-
-
-def _logged_field(type_info, include_cst):
-    """Convert an &log declaration to its Zeek field name and type."""
-    identifier = _first_script_node(type_info, 'id', include_cst)
-    field_type = _first_script_node(type_info, 'type', include_cst)
-    if identifier is None or field_type is None:
-        return None
-    # Preserve the original Zeek type normalization: `conn_id` maps to
-    # `conn-id` in the intermediate JSON, while field names use underscores.
-    return {
-        'name': _slug_script_content(identifier),
-        'type': slugify(current_script.get_content(*field_type.script_range()).decode('utf-8').lower()),
-    }
-
-
-def _record_logged_fields(type_decl, include_cst, expand_id):
-    fields = []
-    for field, _ in type_decl.traverse(include_cst=include_cst, predicate=IsLoggedFieldNode):
-        info = _logged_field(field, include_cst)
-        if not info:
-            continue
-        if expand_id and info['type'] == 'conn-id':
-            fields.extend([
-                {'name': 'orig_h', 'type': 'addr'}, {'name': 'orig_p', 'type': 'port'},
-                {'name': 'resp_h', 'type': 'addr'}, {'name': 'resp_p', 'type': 'port'},
-            ])
-        else:
-            fields.append(info)
-    return fields
-
-
-def _script_namespace(raw_source):
-    """Find a simple file-level Zeek module declaration (if one exists)."""
-    import re
-
-    matched = re.search(rb'(?m)^\s*module\s+([A-Za-z_][\w:]*)\s*;', raw_source)
-    return slugify(matched.group(1).decode('utf-8')).replace('-', '_') if matched else None
-
-
-def _resolve_stream_path(name, namespace, local_paths, global_paths):
-    """Prefer a module-qualified stream, then file-local and global matches."""
-    qualified = f'{namespace}_{name}' if namespace else name
-    # A module-qualified mapping is unambiguous across files. File-local
-    # unqualified mappings take priority over unrelated streams elsewhere.
-    return (
-        local_paths.get(qualified) or local_paths.get(name)
-        or global_paths.get(qualified) or global_paths.get(name)
-    )
-
-
-def _parse_sources(sources, include_cst, expand_id):
-    """Parse each script once; resolve streams by module and source file."""
-    global current_script
-    parsed = []
-    global_paths = {}
-    for source in sources or ():
-        with open(source, 'rb') as stream:
-            content = stream.read()
-        current_script = zeekscript.Script(io.BytesIO(content))
-        if not current_script.parse() or current_script.has_error():
-            logging.critical(f'Parsing {os.path.basename(source)}: "{current_script.get_error()}"')
-            continue
-        logging.debug(f'Parsed {os.path.basename(source)}')
-        local_paths = _discover_stream_paths(include_cst)
-        namespace = _script_namespace(content)
-        parsed.append((source, current_script, namespace, local_paths))
-        for key, value in local_paths.items():
-            global_paths.setdefault(key, value)
-
-    records = []
-    for source, script, namespace, paths in parsed:
-        current_script = script
-        for type_decl, _ in script.root.traverse(include_cst=include_cst, predicate=IsRecordNode):
-            type_name = _record_name(type_decl, include_cst)
-            if type_name:
-                path = _resolve_stream_path(type_name, namespace, paths, global_paths)
-                logging.debug(f'Found record {type_name} ({path or ""})')
-                fields = _record_logged_fields(type_decl, include_cst, expand_id)
-                for field in fields:
-                    logging.debug(f"Found field {type_name}.{field['name']} ({field['type']})")
-                records.append({
-                    'name': type_name, 'path': path, 'fields': fields,
-                    '_source': os.path.basename(source),
-                })
-    records.sort(key=operator.itemgetter('name'))
-    return records
-
-
-def _write_records_json(records, args):
-    # write output file(s)
-
-    if args.jsonOutFile:
-        with open(args.jsonOutFile, "w") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "records": [{k: v for k, v in record.items() if not k.startswith('_')} for record in records],
-                    },
-                    indent=2,
-                )
-            )
-
-
-
-def _write_logstash(records, args):
-    # output boilerplate Logstash filter for use in Malcolm
-    with open(args.logstashOutFile, "w") as f:
-        print('filter {', file=f)
-        for record in [r for r in records if len(r["fields"]) > 0]:
-            # default to the record's log path, fall back to the slugified record name
-            rName = record['path'] if ('path' in record) and record['path'] else record['name']
-            rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
-            rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
-            tags = ', '.join(['"' + x + '"' for x in args.tags])
-            print(
-                '\n'.join(
-                    (
-                        '',
-                        f'  if ([log_source] == "{rName}") {{',
-                        '    #############################################################################################################################',
-                        f'    # {rName}.log',
-                        f'    # {record.get('_source', 'unknown')} ({args.url})',
-                        '',
-                        '    if ("_jsonparsesuccess" not in [tags]) {',
-                        '      dissect {',
-                        f'        id => "dissect_zeek_{rName}"',
-                        '        mapping => {',
-                        f'          "[message]" => "{rFieldsDissect}"',
-                        '        }',
-                        '      }',
-                        '',
-                        '      if ("_dissectfailure" in [tags]) {',
-                        '        mutate {',
-                        f'          id => "mutate_split_zeek_{rName}"',
-                        f'          split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
-                        '        }',
-                        '        ruby {',
-                        f'          id => "ruby_zip_zeek_{rName}"',
-                        f'          init => "@zeek_{rName}_field_names = [ {rFieldsZip} ]"',
-                        f"          code => \"event.set('[zeek_cols]', @zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
-                        '        }',
-                        '      }',
-                        '    }',
-                        '',
-                        '    mutate {',
-                        f'      id => "mutate_add_fields_zeek_{rName}"',
-                        '      add_field => {',
-                        f'        "[zeek_cols][proto]" => "{args.protocol}"',
-                        f'        "[zeek_cols][service]" => "{args.service}"',
-                        '      }',
-                        f'      add_tag => [ {tags} ]' if tags else '',
-                        '    }',
-                        '  }',
-                        '',
-                    )
-                ),
-                file=f,
-            )
-        print('\n'.join(('}', '')), file=f)
-
-
-
-def _write_arkime(records, args):
-    # output boilerplate Arkime definitions for use in Malcolm
-    with open(args.arkimeOutFile, "w") as f:
-        for record in [r for r in records if len(r["fields"]) > 0]:
-            # default to the record's log path, fall back to the slugified record name
-            rName = record['path'] if ('path' in record) and record['path'] else record['name']
-            print(f"# {rName}.log", file=f)
-            print(f"# {args.url}", file=f)
-            # https://github.com/cisagov/ICSNPP
-            for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
-                print(
-                    f"zeek.{rName}.{field['name']}=db:zeek.{rName}.{field['name']};group:zeek_{rName};kind:{ZEEK_TO_ARKIME_TYPES[field['type']]};viewerOnly:true;friendly:{field['name']};help:{field['name']}",
-                    file=f,
-                )
-            print("", file=f)
-
-        print("[custom-views]", file=f)
-        for record in [r for r in records if len(r["fields"]) > 0]:
-            rName = record['path'] if ('path' in record) and record['path'] else record['name']
-            rFields = ','.join(
-                [f"zeek.{rName}.{f['name']}" for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]
-            )
-            print(
-                f"zeek_{rName}=require:zeek.{rName};title:Zeek {rName}.log;fields:{rFields}",
-                file=f,
-            )
-
-
-
-def _write_index_template(records, args):
-    # output boilerplate OpenSearch index template fields for use in Malcolm
-    flatFields = {}
-    with open(args.indexOutFile, "w") as f:
-        for record in [r for r in records if len(r["fields"]) > 0]:
-            # default to the record's log path, fall back to the slugified record name
-            rName = record['path'] if ('path' in record) and record['path'] else record['name']
-            for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
-                flatFields[f"zeek.{rName}.{field['name']}"] = {"type": ZEEK_TO_INDEX_TEMPLATE_TYPES[field['type']]}
-        f.write(
-            json.dumps(
-                {"template": {"mappings": {"properties": NestProperties(flatFields)}}},
-                indent=2,
-            )
-        )
-
-
-def main(argv=None):
-    global args
-    args = _parse_arguments(argv)
     # set up logging
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
+    if not args.input:
+        parser.print_help()
+        sys.exit(2)
+    if not args.service:
+        logging.warning(
+            'No --service given: the Logstash boilerplate won\'t set [zeek_cols][service], which Malcolm uses for network.protocol'
+        )
     logging.debug(os.path.join(script_path, script_name))
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")
 
-    records = _parse_sources(args.input, args.includeCst, args.expandId)
+    # this array will hold all of the different log types until the end when we print them out
+    records = []
+    recordsPathMap = {}
+
+    # Parse all of the .zeek scripts TWICE: once to find the mapping of record names to .log paths,
+    # and a second time to get the fields for those records. Yeah, it's inefficient, but this
+    # is something you do once in a blue moon so I don't care.
+    for parseLoop in (0, 1):
+        for val in args.input if args.input else ():
+            contents = None
+            with open(val, 'rb') as f:
+                contents = f.read()
+            current_script = zeekscript.Script(io.BytesIO(contents))
+            if current_script.parse() and not current_script.has_error():
+                logging.debug(f'Parsed {os.path.basename(val)}')
+                modules = ModuleDeclarations(current_script)
+
+                if parseLoop == 0:
+                    # find create_stream expression list nodes to map record names to .log paths
+                    #   e.g.:           Log::create_stream(ICSNPP_OPCUA_Binary::LOG, [$columns=OPCUA_Binary::Info, $path="opcua-binary"]);
+                    #   would yield:    "opcua_binary_info": "opcua-binary"
+                    for createStreamNode, indent in current_script.root.traverse(
+                        include_cst=args.includeCst,
+                        predicate=IsCreateStreamExprNode,
+                    ):
+                        # within that list of expressions for that statement find the
+                        # expression which itself is the list of $columns and $path
+                        for childNode, indentToo in createStreamNode.traverse(
+                            include_cst=args.includeCst,
+                            predicate=IsCreateStreamExprStreamListNode,
+                        ):
+                            # now, within this list, get the slugified version of the record name
+                            # (from $columns) and the log filename (from $path)
+                            columnName = None
+                            logPath = None
+
+                            for argNode, indentThree in childNode.traverse(
+                                include_cst=args.includeCst,
+                                predicate=IsColumnsExprNode,
+                            ):
+                                sib = argNode
+                                while (sib := sib.next_sibling) and (not columnName):
+                                    if sib.name() == "expr":
+                                        columnName = current_script.get_content(*sib.script_range()).decode('utf-8')
+
+                            for argNode, indentThree in childNode.traverse(
+                                include_cst=args.includeCst,
+                                predicate=IsPathExprNode,
+                            ):
+                                sib = argNode
+                                while (sib := sib.next_sibling) and (not logPath):
+                                    if sib.name() == "expr":
+                                        logPath = slugify(
+                                            current_script.get_content(*sib.script_range()).decode('utf-8')
+                                        ).replace('-', '_')
+
+                            if columnName and logPath:
+                                # Keep the actual qualified identifier, rather than the slugified short name:
+                                # different modules can each declare Info, even in the same file.
+                                qualified = QualifiedRecordName(columnName, modules, createStreamNode.script_range()[0])
+                                recordsPathMap[qualified] = logPath
+
+                if parseLoop == 1:
+                    # find each "record" node
+                    for typeDeclNode, _ in current_script.root.traverse(
+                        include_cst=args.includeCst,
+                        predicate=IsRecordNode,
+                    ):
+                        # determine the name of the record node
+                        # this isn't *exactly* going to match the actual filename
+                        # of the .log file, but it'll be close enough for a good start
+                        typeName = None
+                        qualifiedTypeName = None
+                        try:
+                            typeId = current_script.get_content(
+                                *[
+                                    n
+                                    for n, _ in typeDeclNode.traverse(
+                                        include_cst=args.includeCst,
+                                    )
+                                    if n.name() == 'id'
+                                ][0].script_range()
+                            ).decode('utf-8')
+                            typeName = slugify(typeId).replace('-', '_')
+                            qualifiedTypeName = QualifiedRecordName(typeId, modules, typeDeclNode.script_range()[0])
+                        except (AttributeError, IndexError):
+                            pass
+
+                        # process the fields belonging to this record
+                        if typeName:
+                            logging.debug(f'Found record {typeName} ({recordsPathMap.get(qualifiedTypeName, "")})')
+                            record = {}
+                            record["name"] = typeName
+                            record["path"] = recordsPathMap.get(qualifiedTypeName)
+                            record["script"] = os.path.basename(val)
+                            record["fields"] = []
+
+                            # find each "logged field" inside this record
+                            for typeInfoNode, indent in typeDeclNode.traverse(
+                                include_cst=args.includeCst,
+                                predicate=IsLoggedFieldNode,
+                            ):
+                                # determine the field's name and type
+                                fieldName = None
+                                fieldType = None
+                                try:
+                                    fieldName = slugify(
+                                        current_script.get_content(
+                                            *[
+                                                n
+                                                for n, _ in typeInfoNode.traverse(
+                                                    include_cst=args.includeCst,
+                                                )
+                                                if n.name() == 'id'
+                                            ][0].script_range()
+                                        ).decode('utf-8')
+                                    ).replace('-', '_')
+                                    fieldType = slugify(
+                                        current_script.get_content(
+                                            *[
+                                                n
+                                                for n, _ in typeInfoNode.traverse(
+                                                    include_cst=args.includeCst,
+                                                )
+                                                if n.name() == 'type'
+                                            ][0].script_range()
+                                        )
+                                        .decode('utf-8')
+                                        .lower()
+                                    )
+                                except (AttributeError, IndexError):
+                                    pass
+
+                                # if we found the name and type, add it to the record
+                                if fieldName and fieldType:
+                                    logging.debug(f'Found field {typeName}.{fieldName} ({fieldType})')
+                                    if args.expandId and (fieldType == "conn-id"):
+                                        # conn-id actually is a 4-tuple
+                                        record["fields"] = record["fields"] + [
+                                            {"name": "orig_h", "type": "addr"},
+                                            {"name": "orig_p", "type": "port"},
+                                            {"name": "resp_h", "type": "addr"},
+                                            {"name": "resp_p", "type": "port"},
+                                        ]
+                                    else:
+                                        record["fields"].append({"name": fieldName, "type": fieldType})
+
+                            # this record has been parsed, add it to the final list
+                            if record["fields"] and not record["path"]:
+                                logging.warning(
+                                    f'No Log::create_stream $path found for record {typeName} ({record["script"]}); '
+                                    f'using "{typeName}" as its log name. Check the generated log_source, field '
+                                    f'prefixes and plugin IDs, or ignore this record if it isn\'t written to a log.'
+                                )
+                            records.append(record)
+
+            else:
+                logging.critical(f'Parsing {os.path.basename(val)}: "{current_script.get_error()}"')
+
+    # only records with &log fields are logs; sort them by the name of the log they write
+    records = [r for r in records if len(r["fields"]) > 0]
+    for record in records:
+        # default to the record's log path, fall back to the slugified record name
+        record["log"] = record["path"] if record.get("path") else record["name"]
+    records.sort(key=operator.itemgetter('log'))
+
+    # write output file(s)
     if args.jsonOutFile:
-        _write_records_json(records, args)
-    _write_logstash(records, args)
-    _write_arkime(records, args)
-    _write_index_template(records, args)
+        with open(args.jsonOutFile, "w") as f:
+            f.write(json.dumps({"records": records}, indent=2))
+    with open(args.logstashOutFile, "w") as f:
+        WriteLogstash(records, f)
+    with open(args.arkimeOutFile, "w") as f:
+        WriteArkime(records, f)
+    with open(args.indexOutFile, "w") as f:
+        WriteIndexTemplate(records, f)
+    with open(args.wiseOutFile, "w") as f:
+        WriteWise(records, f)
+
+    for outFile in (args.logstashOutFile, args.arkimeOutFile, args.indexOutFile, args.wiseOutFile):
+        logging.info(f'Wrote {outFile}')
 
 
+###################################################################################################
+# fields that Malcolm normalizes in common for every Zeek log, so they don't need per-log definitions
+def LoggedFields(record):
+    return [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]
+
+
+###################################################################################################
+# boilerplate Logstash parse filters, for ./logstash/pipelines/zeek/10xx_zeek_<parser>.conf
+def WriteLogstash(records, f):
+    tags = ', '.join(['"' + x + '"' for x in args.tags])
+    addFields = [(k, v) for k, v in (('proto', args.protocol), ('service', args.service)) if v]
+    print('filter {', file=f)
+    for record in records:
+        rName = record['log']
+        rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
+        rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
+        lines = [
+            '',
+            f'  if ([log_source] == "{rName}") {{',
+            f'    #############################################################################################################################',
+            f'    # {rName}.log',
+            f'    # {record["script"]} ({args.url})' if args.url else f'    # {record["script"]}',
+            '',
+            f'    if ("_jsonparsesuccess" not in [tags]) {{',
+            f'      dissect {{',
+            f'        id => "dissect_zeek_{rName}"',
+            f'        mapping => {{',
+            f'          "[message]" => "{rFieldsDissect}"',
+            f'        }}',
+            f'      }}',
+            '',
+            f'      if ("_dissectfailure" in [tags]) {{',
+            f'        mutate {{',
+            f'          id => "mutate_split_zeek_{rName}"',
+            f'          split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
+            f'        }}',
+            f'        ruby {{',
+            f'          id => "ruby_zip_zeek_{rName}"',
+            f'          init => "@zeek_{rName}_field_names = [ {rFieldsZip} ]"',
+            f"          code => \"event.set('[zeek_cols]', @zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
+            f'        }}',
+            f'      }}',
+            f'    }}',
+        ]
+        if addFields or tags:
+            lines += [
+                '',
+                f'    mutate {{',
+                f'      id => "mutate_add_fields_zeek_{rName}"',
+            ]
+            if addFields:
+                lines += (
+                    [f'      add_field => {{']
+                    + [f'        "[zeek_cols][{k}]" => "{v}"' for k, v in addFields]
+                    + [f'      }}']
+                )
+            if tags:
+                lines += [f'      add_tag => [ {tags} ]']
+            lines += [f'    }}']
+        lines += [f'  }}']
+        print('\n'.join(lines), file=f)
+    print('\n}', file=f)
+
+    # time fields (other than ts) need to be converted from epoch seconds in 1400_zeek_convert.conf
+    timeFields = [
+        f'"[zeek][{r["log"]}][{x["name"]}]"' for r in records for x in LoggedFields(r) if x['type'] == 'time'
+    ]
+    if timeFields:
+        print('', file=f)
+        print('# time fields to add to @zeek_time_fields in ./logstash/pipelines/zeek/1400_zeek_convert.conf', file=f)
+        print('#   (use the final field names if any of these are renamed during normalization)', file=f)
+        for timeField in timeFields:
+            print(f'#   {timeField},', file=f)
+
+
+###################################################################################################
+# boilerplate Arkime field definitions and session views, for ./arkime/etc/config.ini
+def WriteArkime(records, f):
+    print('# for the [custom-fields] section', file=f)
+    for record in records:
+        rName = record['log']
+        group = args.arkimeGroup if args.arkimeGroup else f'zeek_{rName}'
+        print(f"# {rName}.log", file=f)
+        if args.url:
+            print(f"# {args.url}", file=f)
+        for field in LoggedFields(record):
+            print(
+                f"zeek.{rName}.{field['name']}=db:zeek.{rName}.{field['name']};group:{group};kind:{ZEEK_TO_ARKIME_TYPES[field['type']]};viewerOnly:true;friendly:{field['name']};help:{field['name']}",
+                file=f,
+            )
+        print("", file=f)
+
+    print("# for the [custom-views] section", file=f)
+    for record in records:
+        rName = record['log']
+        rFields = ','.join([f"zeek.{rName}.{x['name']}" for x in LoggedFields(record)])
+        print(
+            f"o_zeek_{rName}=require:zeek.{rName};title:Zeek {rName}.log;fields:{rFields}",
+            file=f,
+        )
+
+
+###################################################################################################
+# boilerplate OpenSearch index template mappings, for ./dashboards/templates/composable/component/zeek*.json
+def WriteIndexTemplate(records, f):
+    flatFields = {}
+    for record in records:
+        for field in LoggedFields(record):
+            flatFields[f"zeek.{record['log']}.{field['name']}"] = {"type": ZEEK_TO_INDEX_TEMPLATE_TYPES[field['type']]}
+    f.write(
+        json.dumps(
+            {"template": {"mappings": {"properties": NestProperties(flatFields)}}},
+            indent=2,
+        )
+    )
+    f.write('\n')
+
+
+###################################################################################################
+# boilerplate WISE value-action field names, for the allFields array in ./arkime/wise/source.zeeklogs.js
+def WriteWise(records, f):
+    for fieldName in sorted(set(f"zeek.{r['log']}.{x['name']}" for r in records for x in LoggedFields(r))):
+        print(f'      "{fieldName}",', file=f)
 
 
 ###################################################################################################

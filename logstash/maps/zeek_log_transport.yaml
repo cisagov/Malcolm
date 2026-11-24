@@ -35,6 +35,11 @@ websocket: tcp
 
 # ICS/OT
 cotp: tcp
+iccp: tcp
+iccp_controls: tcp
+iccp_errors: tcp
+iccp_objects: tcp
+iccp_transfers: tcp
 iec104_ctrl: tcp
 iec104_file: tcp
 iec104_param: tcp
@@ -143,5 +148,5 @@ profinet_dce_rpc: udp
 #
 # Already have a proto column (no mapping needed):
 #   bestguess, c1222*, conn, conn_long, diagnostic analyzer, dns, ge_srtp,
-#   genisys, hart_ip*, notice, omron_fins, profinet_io_cm, roc_plus, stun,
-#   stun_nat, synchrophasor*, syslog
+#   genisys, hart_ip*, notice, omron_fins, profinet_io_cm, roc_plus, slmp,
+#   stun, stun_nat, synchrophasor*, syslog

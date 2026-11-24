@@ -218,6 +218,14 @@ copied_environment_variables:
         ZEEK_ENIP_PORTS
       ZEEK_PORTS_SYNCHROPHASOR:
         ZEEK_SYNCHROPHASOR_PORTS
+  zeek_live:
+    zeek_live:
+      ZEEK_ZAM_ENABLED:
+        ZEEK_ZAM
+  zeek_offline:
+    zeek_offline:
+      ZEEK_ZAM_ENABLED:
+        ZEEK_ZAM
 removed_environment_variables:
   # env_file:
   #   - key1
@@ -322,8 +330,11 @@ removed_environment_variables:
     - ZEEK_ENIP_PORTS
     - ZEEK_GENISYS_PORTS
     - ZEEK_SYNCHROPHASOR_PORTS
+  zeek_live:
+    - ZEEK_ZAM
   zeek_offline:
     - ZEEK_PCAP_PROCESSOR
+    - ZEEK_ZAM
   zeek_secret:
     - VTOT_API2_KEY
 relocated_files:

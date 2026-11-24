@@ -34,9 +34,13 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 ENV ARKIME_DIR="/opt/arkime"
-ENV ARKIME_VERSION="6.9.1"
+ENV ARKIME_VERSION="6.9.2"
 ENV ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
+
+ENV JQ_VERSION="1.8.2"
+ENV JQ_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-"
+
 ENV ARKIME_LOCALELASTICSEARCH=no
 ENV ARKIME_INET=yes
 
@@ -98,7 +102,7 @@ ENV PCAP_PROCESSED_DIRECTORY=$PCAP_PROCESSED_DIRECTORY
 ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 
 RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/local/share/install-verified-binary.sh,ro \
-    --mount=type=bind,source=shared/checksums/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
+    --mount=type=bind,source=shared/pins/binaries.sha256,target=/usr/local/share/binaries.sha256,ro \
     export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
@@ -111,7 +115,6 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       geoipupdate \
       inotify-tools \
       iproute2 \
-      jq \
       libcap2-bin \
       libglib2.0-0 \
       libjson-perl \
@@ -141,6 +144,7 @@ RUN --mount=type=bind,source=shared/bin/install-verified-binary.sh,target=/usr/l
       tini \
       wget \
       zlib1g && \
+    sh /usr/local/share/install-verified-binary.sh /usr/local/bin/jq "${JQ_URL}{arch}" "jq_${JQ_VERSION}_linux_{arch}" && \
     cd /tmp && \
       sh /usr/local/share/install-verified-binary.sh ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/{arch}/g")" "arkime_${ARKIME_VERSION}-1.debian13_{arch}.deb" && \
       dpkg -i /tmp/arkime.deb && \

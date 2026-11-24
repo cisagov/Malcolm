@@ -14,6 +14,7 @@ from unittest.mock import Mock
 
 import pytest
 from watchdog.events import (
+    FileAttribEvent,
     FileClosedEvent,
     FileClosedNoWriteEvent,
     FileCreatedEvent,
@@ -219,3 +220,35 @@ def test_overlapping_readers_leave_nothing_behind(handler, clock, capture):
     for _ in range(3):
         handler.on_any_event(FileClosedNoWriteEvent(capture))
     assert tracked(handler) == set()
+
+
+def test_attribute_change_after_close_does_not_block_processing(handler, clock, tmp_path):
+    """A chmod/chown/utime after the close-write (scp -p, rsync -a, sftp put -p) must not hold the file back."""
+    path = tmp_path / 'uploaded.pcap'
+    path.write_bytes(b'')
+    capture = str(path)
+    processed = []
+
+    handler.on_any_event(FileCreatedEvent(capture))
+    handler.on_any_event(FileOpenedEvent(capture))
+    path.write_bytes(b'\0' * 100)
+    handler.on_any_event(FileModifiedEvent(capture))
+    handler.on_any_event(FileClosedEvent(capture))
+    handler.on_any_event(FileAttribEvent(capture))
+
+    run_worker(handler, clock, lambda path, **kwargs: processed.append(path), sleeps=2)
+    assert processed == [capture]
+    assert tracked(handler) == set()
+
+
+@pytest.mark.parametrize('polling', [False, True], ids=['native-events', 'polling'])
+def test_attribute_change_alone_does_not_queue_file(clock, capture, polling):
+    """A metadata-only change to a file nobody is writing must not queue it for processing."""
+    handler = watch_common.FileOperationEventHandler(logger=logging.getLogger(__name__), polling=polling)
+    processed = []
+
+    handler.on_any_event(FileAttribEvent(capture))
+    assert tracked(handler) == set()
+
+    run_worker(handler, clock, lambda path, **kwargs: processed.append(path))
+    assert processed == []

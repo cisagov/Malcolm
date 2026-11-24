@@ -231,8 +231,8 @@ fi
 
 # Enable ZAM
 # https://docs.zeek.org/en/master/advanced/scripting/optimization.html
-ZEEK_ZAM="${ZEEK_ZAM:-false}"
-if [[ "$ZEEK_ZAM" = "true" ]]; then
+ZEEK_ZAM_ENABLED="${ZEEK_ZAM_ENABLED:-false}"
+if [[ "$ZEEK_ZAM_ENABLED" = "true" ]]; then
   if grep --quiet ^ZeekArgs ./zeekctl.cfg; then
     grep --quiet -- '-O ZAM' ./zeekctl.cfg || sed -i '/^ZeekArgs/ s/$/ -O ZAM/' ./zeekctl.cfg
   else

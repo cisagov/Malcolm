@@ -42,7 +42,7 @@ event zeek_init() {{
 
 
 def generate(tmp_path, sources, *extra):
-    files = [str(tmp_path / name) for name in ('out.conf', 'out.ini', 'out.json', 'records.json')]
+    files = [str(tmp_path / name) for name in ('out.conf', 'out.ini', 'out.json', 'records.json', 'wise.txt')]
     cmd = [
         sys.executable,
         str(SCRIPT),
@@ -56,6 +56,8 @@ def generate(tmp_path, sources, *extra):
         files[2],
         '--json',
         files[3],
+        '--wise',
+        files[4],
         '--proto',
         'tcp',
         '--service',
@@ -78,7 +80,7 @@ def test_single_script_resolves_stream_and_logged_fields(tmp_path):
     assert '[log_source] == "foo"' in logstash
     assert '[zeek_cols][payload]' in logstash
     assert '[zeek_cols][secret]' not in logstash
-    assert '# foo.zeek ' in logstash
+    assert '# foo.zeek\n' in logstash
     assert '"[zeek_cols][proto]" => "tcp"' in logstash
     assert 'zeek.foo.payload=' in arkime
     assert index['template']['mappings']['properties']['zeek']['properties']['foo']['properties']['payload'] == {'type': 'keyword'}
@@ -94,8 +96,8 @@ def test_two_modules_with_same_info_record_are_distinct(tmp_path):
     logstash, arkime, index, data = generate(tmp_path, [first, second])
     assert logstash.count('if ([log_source] == "alpha_log")') == 1
     assert logstash.count('if ([log_source] == "beta_log")') == 1
-    assert '# alpha.zeek ' in logstash
-    assert '# beta.zeek ' in logstash
+    assert '# alpha.zeek\n' in logstash
+    assert '# beta.zeek\n' in logstash
     assert {record['path'] for record in data['records']} == {'alpha_log', 'beta_log'}
     assert 'zeek.alpha_log.payload=' in arkime
     assert 'zeek.beta_log.payload=' in arkime
@@ -108,8 +110,8 @@ def test_input_order_does_not_relabel_sources(tmp_path):
     logstash, _, _, _ = generate(tmp_path, [second, first])
     alpha = logstash.index('if ([log_source] == "alpha_log")')
     beta = logstash.index('if ([log_source] == "beta_log")')
-    assert '# alpha.zeek ' in logstash[alpha:alpha + 250]
-    assert '# beta.zeek ' in logstash[beta:beta + 250]
+    assert '# alpha.zeek\n' in logstash[alpha:alpha + 250]
+    assert '# beta.zeek\n' in logstash[beta:beta + 250]
 
 
 def test_no_expand_id_preserves_conn_id_column(tmp_path):
@@ -120,12 +122,12 @@ def test_no_expand_id_preserves_conn_id_column(tmp_path):
     assert 'id' in [field['name'] for field in data['records'][0]['fields']]
 
 
-def test_no_input_generates_empty_outputs_without_crashing(tmp_path):
-    logstash, arkime, index, data = generate(tmp_path, [])
-    assert logstash.startswith('filter {')
-    assert not data['records']
-    assert index['template']['mappings']['properties'] == {}
-    assert '[custom-views]' in arkime
+def test_no_input_is_rejected(tmp_path):
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), '--input'], cwd=tmp_path, capture_output=True, text=True, timeout=35
+    )
+    assert proc.returncode == 2
+    assert not list(tmp_path.iterdir())
 
 
 def test_real_bundled_zeek_scripts_keep_separate_log_paths(tmp_path):
@@ -155,4 +157,43 @@ def test_stream_mapping_declared_in_another_script(tmp_path):
 def test_record_json_has_no_internal_source_metadata(tmp_path):
     zeek = zeek_file(tmp_path, 'Alpha', 'alpha')
     _, _, _, data = generate(tmp_path, [zeek])
-    assert set(data['records'][0]) == {'name', 'path', 'fields'}
+    assert set(data['records'][0]) == {'name', 'path', 'fields', 'script', 'log'}
+    assert data['records'][0]['script'] == 'alpha.zeek'
+    assert data['records'][0]['log'] == 'alpha'
+
+
+def test_unqualified_streams_follow_active_module_even_in_same_file(tmp_path):
+    source = tmp_path / 'multiple.zeek'
+    source.write_text(
+        """module Alpha;
+export { type Info: record { alpha: string &log; }; }
+event zeek_init() { Log::create_stream(Alpha::LOG, [$columns=Info, $path="alpha"]); }
+module Beta;
+export { type Info: record { beta: count &log; }; }
+event zeek_init() { Log::create_stream(Beta::LOG, [$columns=Info, $path="beta"]); }
+"""
+    )
+    logstash, arkime, index, data = generate(tmp_path, [source])
+    assert {(record['path'], record['fields'][0]['name']) for record in data['records']} == {
+        ('alpha', 'alpha'),
+        ('beta', 'beta'),
+    }
+    assert logstash.count('if ([log_source] == "alpha")') == 1
+    assert logstash.count('if ([log_source] == "beta")') == 1
+    assert 'zeek.alpha.alpha=' in arkime
+    assert 'zeek.beta.beta=' in arkime
+
+
+def test_qualified_cross_module_stream_does_not_steal_unrelated_short_name(tmp_path):
+    first = tmp_path / 'alpha.zeek'
+    first.write_text('module Alpha;\nexport { type Info: record { x: count &log; }; }\n')
+    second = tmp_path / 'beta.zeek'
+    second.write_text(
+        'module Beta;\nexport { type Info: record { y: string &log; }; }\n'
+        'event zeek_init() { Log::create_stream(Beta::LOG, [$columns=Alpha::Info, $path="alpha-log"]); }\n'
+    )
+    _, _, _, data = generate(tmp_path, [first, second])
+    assert {record['script']: record['path'] for record in data['records']} == {
+        'alpha.zeek': 'alpha_log',
+        'beta.zeek': None,
+    }

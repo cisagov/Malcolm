@@ -5,6 +5,7 @@
 # invented for this suite; no production OTKB fixture content is required or included.
 
 require 'json'
+require 'tmpdir'
 
 begin
   require 'concurrent'
@@ -374,6 +375,77 @@ class OtkbEnrichTestSuite
     ensure
       Faraday.singleton_class.send(:define_method, :new, original_faraday_new)
     end
+  end
+
+  test 'lazy connection adds the shared CA trust store only when verifying' do
+    original_faraday_new = Faraday.method(:new)
+    captured = []
+
+    Faraday.singleton_class.send(:define_method, :new) do |_url, **options, &block|
+      fake_faraday = FakeFaradayConnection.new(FakeResponse.new(body: {}))
+      block.call(fake_faraday)
+      captured << options
+      fake_faraday
+    end
+
+    begin
+      [true, true, false].each do |verify|
+        OtkbConnLazy.new('https://otkb.invalid/api/v1/', 'synthetic-token', verify, false)
+          .get('sync/json-fixture/')
+      end
+
+      assert_equal(true, captured[0][:ssl][:verify])
+      assert(captured[0][:ssl][:cert_store].is_a?(OpenSSL::X509::Store))
+      assert_same(captured[0][:ssl][:cert_store], captured[1][:ssl][:cert_store],
+                  'the store should be built once per process')
+      assert_equal({ ssl: { verify: false } }, captured[2])
+    ensure
+      Faraday.singleton_class.send(:define_method, :new, original_faraday_new)
+    end
+  end
+
+  test 'CA trust store trusts certificates from the trust directory and skips junk' do
+    digest = OpenSSL::Digest.new('SHA256')
+    make_cert = lambda do |subject, issuer, key, signing_key, serial, ca|
+      cert = OpenSSL::X509::Certificate.new
+      cert.version = 2
+      cert.serial = serial
+      cert.subject = OpenSSL::X509::Name.parse(subject)
+      cert.issuer = issuer || cert.subject
+      cert.public_key = key.public_key
+      cert.not_before = Time.now - 60
+      cert.not_after = Time.now + 3600
+      extensions = OpenSSL::X509::ExtensionFactory.new
+      extensions.subject_certificate = cert
+      extensions.issuer_certificate = ca || cert
+      cert.add_extension(extensions.create_extension('basicConstraints', ca ? 'CA:FALSE' : 'CA:TRUE', true))
+      cert.add_extension(extensions.create_extension('keyUsage', ca ? 'digitalSignature' : 'keyCertSign,cRLSign', true))
+      cert.sign(signing_key, digest)
+      cert
+    end
+
+    ca_key = OpenSSL::PKey::RSA.new(2048)
+    ca_cert = make_cert.call('/CN=Synthetic Test Root CA', nil, ca_key, ca_key, 1, nil)
+    leaf_key = OpenSSL::PKey::RSA.new(2048)
+    leaf_cert = make_cert.call('/CN=otkb.invalid', ca_cert.subject, leaf_key, ca_key, 2, ca_cert)
+
+    Dir.mktmpdir do |trust_dir|
+      File.write(File.join(trust_dir, 'synthetic_root.crt'), ca_cert.to_pem)
+      File.write(File.join(trust_dir, 'synthetic_root_copy.pem'), ca_cert.to_pem)
+      File.write(File.join(trust_dir, 'README.txt'), 'this file is not a certificate at all, ' * 3)
+      File.write(File.join(trust_dir, 'empty.crt'), '')
+      Dir.mkdir(File.join(trust_dir, 'nested'))
+      File.write(File.join(trust_dir, 'nested', 'also_root.crt'), ca_cert.to_pem)
+
+      trusting_store = MalcolmCaTrust.build(trust_dir, log: false)
+      assert(trusting_store.verify(leaf_cert), 'leaf signed by the trusted CA should verify')
+
+      single_file_store = MalcolmCaTrust.build(File.join(trust_dir, 'synthetic_root.crt'), log: false)
+      assert(single_file_store.verify(leaf_cert), 'a single CA file should also be accepted')
+    end
+
+    default_store = MalcolmCaTrust.build('/nonexistent/synthetic/ca-trust', log: false)
+    refute(default_store.verify(leaf_cert), 'without the CA, the leaf should not verify')
   end
 
   test 'disabled or unconfigured filters pass events through without fixture work' do
