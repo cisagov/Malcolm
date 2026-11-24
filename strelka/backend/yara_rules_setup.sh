@@ -207,6 +207,11 @@ if (( ${#YARAC_ARGS[@]} > 0 )); then
   YARAC_RESULT=$?
   if [[ ${YARAC_RESULT} == 0 ]]; then
     mv -f -b -S .prev "${YARA_COMPILED_RULES_FILE}.new" "${YARA_COMPILED_RULES_FILE}"
+    YARAC_RESULT=$?
+    if [[ ${YARAC_RESULT} != 0 ]]; then
+      echo "Failed to publish compiled YARA rules" >&2
+      exit "${YARAC_RESULT}"
+    fi
     touch /tmp/dummy
     RULE_COUNT="$(yara -q -S -C "${YARA_COMPILED_RULES_FILE}" /tmp/dummy 2>/dev/null | grep "number of rules" | head -n 1 | tr -d '[:space:]' | cut -d: -f2)"
     rm -f /tmp/dummy
