@@ -183,6 +183,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Configuring Hedgehog for Standalone Use](hedgehog-standalone.md)
     - [Running Hedgehog Linux on Raspberry Pi](hedgehog-raspi.md)
 * [End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)
+* [Using an external PostgreSQL server](external-postgresql.md)
 * [Upgrading Malcolm](malcolm-upgrade.md#UpgradePlan)
 * [Modifying or Contributing to Malcolm](contributing-guide.md)
     - [Local modifications](contributing-local-modifications.md#LocalMods)

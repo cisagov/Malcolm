@@ -867,16 +867,10 @@ def netboxBackup(backupFileName=None):
     global args
     global dockerComposeBin
     global orchMode
-    global dotenvImported
 
-    backupFileName, backupMediaFileName = None, None
+    backupMediaFileName = None
 
     uidGidDict = GetUidGidFromEnv(args.configDir)
-
-    postgresEnvFile = os.path.join(args.configDir, 'postgres.env')
-    postgresEnvs = dict()
-    if os.path.isfile(postgresEnvFile):
-        postgresEnvs.update(dotenvImported.dotenv_values(postgresEnvFile))
 
     if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
         # docker-compose use local temporary path
@@ -896,12 +890,8 @@ def netboxBackup(backupFileName=None):
             # execute as UID:GID in docker-compose.yml file
             '-u',
             f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-            'postgres',
-            'pg_dump',
-            '--username',
-            postgresEnvs.get('POSTGRES_NETBOX_USER', 'netbox'),
-            '-d',
-            postgresEnvs.get('POSTGRES_NETBOX_DB', 'netbox'),
+            'netbox',
+            '/usr/local/bin/netbox-backup.sh',
         ]
 
         err, results = run_process(
@@ -923,16 +913,10 @@ def netboxBackup(backupFileName=None):
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if podsResults := PodExec(
-            service='postgres',
-            container='postgres-container',
+            service='netbox',
+            container='netbox-container',
             namespace=args.namespace,
-            command=[
-                'pg_dump',
-                '--username',
-                postgresEnvs.get('POSTGRES_NETBOX_USER', 'netbox'),
-                '-d',
-                postgresEnvs.get('POSTGRES_NETBOX_DB', 'netbox'),
-            ],
+            command=['/usr/local/bin/netbox-backup.sh'],
             maxPodsToExec=1,
         ):
             podName = next(iter(podsResults))

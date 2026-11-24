@@ -324,6 +324,8 @@ def execute_restore_commands(args, database_file):
 
     os_env = os.environ.copy()
     os_env['PGPASSWORD'] = args.postgres_password
+    if ssl_mode := os.environ.get('DB_SSLMODE'):
+        os_env['PGSSLMODE'] = ssl_mode
 
     # drop the existing netbox database
     cmd = [
@@ -359,6 +361,11 @@ def execute_restore_commands(args, database_file):
     # load the backed-up psql dump
     cmd = [
         'psql',
+        '--no-password',
+        '--set',
+        'ON_ERROR_STOP=1',
+        '-d',
+        args.postgres_db,
         '-h',
         args.postgres_host,
         '-p',
@@ -381,6 +388,11 @@ def execute_restore_commands(args, database_file):
     # this will migrate ipam_vrf.name to ipam_prefix.description if we're coming from an older backup
     cmd = [
         'psql',
+        '--no-password',
+        '--set',
+        'ON_ERROR_STOP=1',
+        '-d',
+        args.postgres_db,
         '-h',
         args.postgres_host,
         '-p',
@@ -397,6 +409,11 @@ def execute_restore_commands(args, database_file):
     # don't restore users_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
     cmd = [
         'psql',
+        '--no-password',
+        '--set',
+        'ON_ERROR_STOP=1',
+        '-d',
+        args.postgres_db,
         '-h',
         args.postgres_host,
         '-p',
