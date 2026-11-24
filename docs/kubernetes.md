@@ -15,10 +15,13 @@
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
 * [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#AWSEKSAuto)
+* [Deploying Malcolm on Azure Kubernetes Service (AKS)](azure-aks.md)
 
 This document assumes good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
 
 This document describes deploying Malcolm on Kubernetes using the standard [Kubernetes manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/). The official [Malcolm Helm chart](https://github.com/idaholab/Malcolm-Helm/) is now stable and may be preferable for production deployments, as it better leverages Kubernetes scalability features. Review the Malcolm-Helm documentation to choose the deployment method that best fits your environment.
+
+For an Azure-specific manifest walkthrough, including AKS CSI storage, see [Deploying Malcolm on AKS](azure-aks.md).
 
 ## <a name="System"></a> System
 
