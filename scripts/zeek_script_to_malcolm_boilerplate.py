@@ -169,6 +169,29 @@ def IsLoggedFieldNode(Node):
     return False
 
 
+def ModuleDeclarations(script):
+    """Return the active module names and source offsets in a parsed script."""
+    modules = [(0, 'GLOBAL')]
+    for node, _ in script.root.traverse(include_cst=False):
+        if node.name() == 'module_decl':
+            identifier = next((child for child in node.nonerr_children if child.name() == 'id'), None)
+            if identifier is not None:
+                modules.append((node.script_range()[0], script.get_content(*identifier.script_range()).decode('utf-8')))
+    return sorted(modules, key=lambda entry: entry[0])
+
+
+def QualifiedRecordName(name, modules, offset):
+    """Resolve an unqualified record name in its lexical Zeek module."""
+    if '::' in name:
+        return name
+    module = 'GLOBAL'
+    for start, candidate in modules:
+        if start > offset:
+            break
+        module = candidate
+    return f'{module}::{name}'
+
+
 def NestProperties(FlatProps):
     nested = {}
     for dotted_key, value in FlatProps.items():
@@ -369,6 +392,7 @@ def main():
             current_script = zeekscript.Script(io.BytesIO(contents))
             if current_script.parse() and not current_script.has_error():
                 logging.debug(f'Parsed {os.path.basename(val)}')
+                modules = ModuleDeclarations(current_script)
 
                 if parseLoop == 0:
                     # find create_stream expression list nodes to map record names to .log paths
@@ -410,11 +434,10 @@ def main():
                                         ).replace('-', '_')
 
                             if columnName and logPath:
-                                # I cannot believe it. We did it.
-                                # $columns may or may not be module-qualified (ICCP::Info vs. Info), independently
-                                #   of how the record itself is declared, so index both forms
-                                for colName in (columnName, columnName.split('::')[-1]):
-                                    recordsPathMap[slugify(colName).replace('-', '_')] = logPath
+                                # Keep the actual qualified identifier, rather than the slugified short name:
+                                # different modules can each declare Info, even in the same file.
+                                qualified = QualifiedRecordName(columnName, modules, createStreamNode.script_range()[0])
+                                recordsPathMap[qualified] = logPath
 
                 if parseLoop == 1:
                     # find each "record" node
@@ -426,7 +449,7 @@ def main():
                         # this isn't *exactly* going to match the actual filename
                         # of the .log file, but it'll be close enough for a good start
                         typeName = None
-                        shortTypeName = None
+                        qualifiedTypeName = None
                         try:
                             typeId = current_script.get_content(
                                 *[
@@ -438,16 +461,16 @@ def main():
                                 ][0].script_range()
                             ).decode('utf-8')
                             typeName = slugify(typeId).replace('-', '_')
-                            shortTypeName = slugify(typeId.split('::')[-1]).replace('-', '_')
+                            qualifiedTypeName = QualifiedRecordName(typeId, modules, typeDeclNode.script_range()[0])
                         except (AttributeError, IndexError):
                             pass
 
                         # process the fields belonging to this record
                         if typeName:
-                            logging.debug(f'Found record {typeName} ({recordsPathMap.get(typeName, "")})')
+                            logging.debug(f'Found record {typeName} ({recordsPathMap.get(qualifiedTypeName, "")})')
                             record = {}
                             record["name"] = typeName
-                            record["path"] = recordsPathMap.get(typeName, recordsPathMap.get(shortTypeName, None))
+                            record["path"] = recordsPathMap.get(qualifiedTypeName)
                             record["script"] = os.path.basename(val)
                             record["fields"] = []
 
