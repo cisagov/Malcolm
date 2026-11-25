@@ -87,20 +87,23 @@ def _extract_lzip(archive, dest):
     outname = _strip_compression_ext(archive)
     outpath = os.path.join(dest, outname)
     total_bytes = 0
-    proc = subprocess.Popen(['lzip', '-d', '-c', archive], stdout=subprocess.PIPE)
-    with open(outpath, 'wb') as dst:
-        while chunk := proc.stdout.read(65536):
-            total_bytes += len(chunk)
-            if total_bytes > ARCHIVE_EXTRACT_MAX_TOTAL_BYTES:
+    with subprocess.Popen(['lzip', '-d', '-c', archive], stdout=subprocess.PIPE) as proc:
+        try:
+            with open(outpath, 'wb') as dst:
+                while chunk := proc.stdout.read(65536):
+                    total_bytes += len(chunk)
+                    if total_bytes > ARCHIVE_EXTRACT_MAX_TOTAL_BYTES:
+                        raise ArchiveBombError(
+                            f"archive exceeds size limit ({ARCHIVE_EXTRACT_MAX_TOTAL_BYTES} bytes) "
+                            f"during decompression of {os.path.basename(archive)!r}"
+                        )
+                    dst.write(chunk)
+            if proc.wait() != 0:
+                raise subprocess.CalledProcessError(proc.returncode, 'lzip')
+        except BaseException:
+            if proc.poll() is None:
                 proc.kill()
-                raise ArchiveBombError(
-                    f"archive exceeds size limit ({ARCHIVE_EXTRACT_MAX_TOTAL_BYTES} bytes) "
-                    f"during decompression of {os.path.basename(archive)!r}"
-                )
-            dst.write(chunk)
-    proc.wait()
-    if proc.returncode != 0:
-        raise subprocess.CalledProcessError(proc.returncode, 'lzip')
+            raise
 
 
 def _extract_libarchive(archive, dest):
@@ -171,8 +174,9 @@ def safe_extract(archive, dest):
         raise
 
 
-if len(sys.argv) != 3:
-    print(f"Usage: {sys.argv[0]} <archive> <destdir>", file=sys.stderr)
-    sys.exit(1)
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} <archive> <destdir>", file=sys.stderr)
+        sys.exit(1)
 
-safe_extract(os.path.realpath(sys.argv[1]), os.path.realpath(sys.argv[2]))
+    safe_extract(os.path.realpath(sys.argv[1]), os.path.realpath(sys.argv[2]))
