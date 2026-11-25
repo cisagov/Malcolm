@@ -19,10 +19,8 @@ def filter(event)
   _vals = event.get("#{@field}")
   if !_vals.nil? then
     _vals = [_vals] unless _vals.is_a?(Array)
-    #                            v dedupe
-    #                            |    v prune unwanted values       v translate values when applicable
-    #                            |    |                             |                           v keep if not in translate hash
-    event.set("#{@field}", _vals.uniq.reject{|x| @prune.include? x}.map{|y| @translate.fetch(y, y) })
+    # Translation can map different input values to the same output value.
+    event.set("#{@field}", _vals.reject{|x| @prune.include? x}.map{|y| @translate.fetch(y, y) }.uniq)
   end
   [event]
 end
@@ -64,6 +62,19 @@ test "translate" do
 
   expect("result to be equal") do |events|
     Array(events.first.get("sourcefield")).to_set == ["alpha", "b", "charlie"].to_set
+  end
+end
+
+test "translation can create duplicates" do
+  parameters do
+    { "field" => "sourcefield", "prune" => "failed",
+      "translate" => { "ftp-data" => "ftp", "dcerpc" => "dce_rpc" } }
+  end
+
+  in_event { { "sourcefield" => [ "ftp-data", "failed", "ftp", "dcerpc", "dce_rpc", "dns" ] } }
+
+  expect("translated values remain unique in first occurrence order") do |events|
+    events.first.get("sourcefield") == ["ftp", "dce_rpc", "dns"]
   end
 end
 
