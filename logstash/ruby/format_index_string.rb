@@ -10,7 +10,7 @@ def register(params)
   if @prefix.nil? && !_prefix_env.nil?
     @prefix = ENV[_prefix_env]
   end
-  if !@prefix.nil? && @prefix.empty?
+  if @prefix.nil? || @prefix.empty?
     @prefix = params["prefix_default"]
   end
 
@@ -19,7 +19,7 @@ def register(params)
   if @suffix.nil? && !_suffix_env.nil?
     @suffix = ENV[_suffix_env]
   end
-  if !@suffix.nil? && @suffix.empty?
+  if @suffix.nil? || @suffix.empty?
     @suffix = params["suffix_default"]
   end
 
